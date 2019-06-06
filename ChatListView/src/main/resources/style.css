@@ -1,0 +1,120 @@
+
+@font-face {
+    font-family: "FontAwesome";
+    src: url('fontawesome-webfont.ttf');
+}
+
+.chat-list-cell > .main > .box {
+    -fx-alignment: CENTER;
+    -fx-background-color: transparent;
+}
+
+.chat-list-cell:left > .main > .box {
+    -fx-alignment: CENTER_LEFT;
+}
+
+.chat-list-cell:right > .main > .box {
+    -fx-alignment: CENTER_RIGHT;
+}
+
+.chat-list-cell > .main > .box > .bubble {
+    -fx-background-color: transparent;
+    -fx-background-radius: 16;
+    -fx-spacing: 2;
+    -fx-padding: 10 10 5 10;
+}
+
+.chat-list-cell:left > .main > .box > .bubble {
+    -fx-background-color: #757575;
+}
+
+.chat-list-cell:right > .main > .box > .bubble {
+    -fx-background-color: #eeefef;
+}
+
+.chat-list-cell > .main > .box > .bubble > .message {
+    -fx-text-fill: black;
+    -fx-font-size: 1.1em;
+}
+
+.chat-list-cell > .main > .box > .bubble > HBox > .time {
+    -fx-text-fill: darkgray;
+    -fx-font-size: 0.9em;
+}
+
+.font-icon {
+    -fx-font-family: "FontAwesome";
+    -fx-font-size: 16px;
+    -fx-font-weight: normal;
+    -fx-font-style: normal;
+}
+
+.outter-box {
+    -fx-padding: 2 10 2 10;
+    -fx-alignment: CENTER;
+    -fx-max-height: 40;
+}
+
+.outter-box > .unread-box {
+    -fx-background-color: #2090eacc;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, #00000050, 2, 0, 0, 2);
+    -fx-max-height: 40;
+    -fx-padding: 2 20 2 20;
+    -fx-spacing: 10;
+    -fx-alignment: CENTER;
+}
+
+.outter-box > .unread-box > .label.unread {
+    -fx-font-size: 1.2em;
+    -fx-text-fill: white;
+}
+
+.outter-box > .unread-box > .label.go-bottom {
+    -fx-font-family: "FontAwesome";
+    -fx-font-size: 1.5em;
+    -fx-text-fill: white;
+}
+
+.outter-box > .unread-box:hover {
+    -fx-background-color: #1472bdcc;
+}
+
+.chat-list-cell > .main > .unread-box {
+    -fx-border-color: #2090ea transparent transparent transparent;
+    -fx-alignment: TOP_CENTER;
+    -fx-translate-y: -4;
+    visibility: hidden;
+}
+
+.chat-list-cell > .main > .unread-box > .label {
+    -fx-border-color: transparent #2090ea #2090ea #2090ea;
+    -fx-text-fill: #2090ea;
+    -fx-font-size: 0.8em;
+    -fx-padding: 4;
+}
+
+.chat-list-cell:unread > .main > .unread-box {
+    visibility: visible;
+}
+
+.chat-list-cell:left > .main > .box > .bubble > .message {
+    -fx-text-fill: white;
+}
+
+.chat-list-cell:left > .main > .box > .bubble > HBox > .font-icon {
+    visibility: hidden;
+}
+
+.chat-list-cell:left > .main > .box > .bubble > HBox >  .time {
+    -fx-text-fill: #d6d6d6;
+}
+
+.chat-list-cell:right > .main > .box > .bubble > .message {
+    -fx-text-fill: #070c14;
+}
+
+.chat-list-cell:right > .main > .box > .bubble > HBox > .font-icon,
+.chat-list-cell:right > .main > .box > .bubble > HBox > .time {
+    -fx-text-fill: #62656a;
+}

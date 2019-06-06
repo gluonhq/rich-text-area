@@ -1,0 +1,106 @@
+plugins {
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.7'
+    id 'com.gluonhq.client-gradle-plugin' version '0.0.3'
+}
+
+mainClassName = "$moduleName/com.gluonhq.chat.GluonChat"
+
+repositories {
+    mavenCentral()
+    maven  {
+        url 'https://oss.sonatype.org/content/repositories/snapshots'
+    }
+    maven {
+        url 'https://nexus.gluonhq.com/nexus/content/repositories/public-snapshots/'
+    }
+    maven {
+        url 'https://nexus.gluonhq.com/nexus/content/repositories/releases/'
+    }
+}
+
+dependencies {
+    implementation project(":ChatListView")
+//    implementation project(":EmojiData")
+//    implementation project(":EmojiPopOver")
+//    implementation project(":EmojiTextArea")
+    implementation 'com.gluonhq:glisten-afterburner:2.0.0'
+    implementation 'javax.annotation:javax.annotation-api:1.3.2'
+    implementation 'com.airhacks:afterburner.mfx:1.6.3'
+    implementation 'com.gluonhq:charm-glisten:6.0.0'
+    implementation 'com.gluonhq:charm-cloudlink-client:6.0.0'
+    implementation 'com.github.javafaker:javafaker:0.16'
+    implementation "com.gluonhq.attach:display:$attachVersion:desktop"
+    implementation "com.gluonhq.attach:lifecycle:$attachVersion:desktop"
+    implementation "com.gluonhq.attach:storage:$attachVersion:desktop"
+    implementation "com.gluonhq.attach:cache:$attachVersion:desktop"
+    implementation "com.gluonhq.attach:settings:$attachVersion:desktop"
+    implementation "com.gluonhq.attach:device:$attachVersion"
+    implementation "com.gluonhq.attach:in-app-billing:$attachVersion"
+    implementation "com.gluonhq.attach:push-notifications:$attachVersion"
+    implementation "com.gluonhq.attach:statusbar:$attachVersion"
+    implementation "com.gluonhq.attach:util:$attachVersion"
+    implementation project(':orientation')
+    implementation project(':position')
+    runtimeOnly 'org.glassfish:jakarta.json:1.1.5:module'
+    implementation 'com.gluonhq:maps:2.0.0-ea+1'
+}
+
+def formFactor = hasProperty('charm.desktop.factor') ? getProperty('charm.desktop.factor') : "mobile"
+
+run {
+    moduleOptions {
+        addModules = [ 'com.gluonhq.cloudlink.client' ]
+    }
+    doFirst {
+        jvmArgs = ['--add-opens',   'javafx.graphics/javafx.scene.text=richtextfx',
+                   '--add-opens',   'javafx.graphics/com.sun.javafx.text=richtextfx',
+                   '--add-opens',   'javafx.graphics/com.sun.javafx.scene.text=richtextfx',
+                   '--add-opens',   'javafx.graphics/com.sun.javafx.geom=richtextfx',
+                   '--add-opens',   'javafx.graphics/com.sun.javafx.css=org.controlsfx.controls',
+                   "-Dcharm-desktop-form=${formFactor}"]
+    }
+}
+
+gluonClient {
+    javaStaticSdkVersion = "11-ea+2"
+    backend = "lir"
+
+    bundlesList = ["com.gluonhq.chat.views.chat",
+                   "com.gluonhq.chat.views.landscape",
+                   "com.gluonhq.chat.views.maps",
+                   "com.gluonhq.chat.views.portrait",
+                   "com.gluonhq.chat.views.users",
+//                   "com.gluonhq.emoji.popup.emoji-popover",
+//                   "controlsfx"
+                    ]
+
+    def attachList = ["com.gluonhq.attach.cache.impl.DesktopCacheService",
+             "com.gluonhq.attach.display.impl.DesktopDisplayService",
+             "com.gluonhq.attach.lifecycle.impl.DesktopLifecycleService",
+             "com.gluonhq.attach.orientation.impl.DesktopOrientationService",
+             "com.gluonhq.attach.storage.impl.DesktopStorageService"]
+
+    reflectionList = attachList
+    reflectionList += ["com.gluonhq.chat.service.Service",
+                       "com.gluonhq.chat.model.ChatMessage",
+                       "com.gluonhq.chat.model.ChatImage",
+//                       "com.gluonhq.emoji.Emoji",
+                       "com.gluonhq.attach.position.impl.DesktopPositionService",
+                       "com.gluonhq.impl.charm.glisten.control.skin.GlistenButtonSkin",
+                       "com.gluonhq.impl.charm.glisten.control.skin.GlistenToggleButtonSkin",
+//                       "impl.org.controlsfx.skin.PopOverSkin",
+//                       "javafx.css.converter.SizeConverter\$SequenceConverter"
+    ]
+    jniList = attachList
+
+//    delayInitList = ["org.reactfx.Guardian",
+//                     "org.fxmisc.wellbehaved.event.InputMap",
+//                     "org.reactfx.Subscription\$1"
+//    ]
+}
+
+javafx {
+    version = javafxVersion
+    modules = ["javafx.controls"]
+}

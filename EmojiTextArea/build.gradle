@@ -1,0 +1,35 @@
+plugins {
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.7'
+}
+
+mainClassName = "$moduleName/com.gluonhq.emoji.test.EmojiTextAreaTest"
+
+dependencies {
+    implementation project(':EmojiData')
+    implementation project(':EmojiPopOver')
+    implementation ('org.controlsfx:controlsfx:11.0.0')  {
+        exclude group:'org.openjfx'
+    }
+    implementation ('org.fxmisc.richtext:richtextfx:1.0.2-gluon') {
+        exclude group:'org.openjfx'
+    }
+    implementation 'jakarta.json:jakarta.json-api:1.1.5'
+    implementation 'org.glassfish:jakarta.json:1.1.5:module'
+}
+
+javafx {
+    version = javafxVersion
+    modules = [ 'javafx.web', 'javafx.fxml', 'javafx.media' ]
+}
+
+run {
+    doFirst {
+        jvmArgs += ['--add-opens',   'javafx.graphics/javafx.scene.text=richtextfx',
+                '--add-opens',   'javafx.graphics/com.sun.javafx.text=richtextfx',
+                '--add-opens',   'javafx.graphics/com.sun.javafx.scene.text=richtextfx',
+                '--add-opens',   'javafx.graphics/com.sun.javafx.geom=richtextfx',
+                '--add-opens',   'javafx.graphics/com.sun.javafx.css=org.controlsfx.controls'
+        ]
+    }
+}

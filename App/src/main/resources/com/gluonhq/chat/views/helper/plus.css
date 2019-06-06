@@ -1,0 +1,13 @@
+.popup-view > .root-node .content-box {
+    -fx-padding: 10px;
+    -fx-spacing: 10px;
+}
+
+.popup-view > .root-node .content-box > .item-box {
+    -fx-spacing: 10px;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.popup-view > .root-node .content-box > .item-box > .label {
+    -fx-text-fill: -chart-dark-text-fill;
+}

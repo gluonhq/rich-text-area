@@ -1,0 +1,13 @@
+.marker-container > .marker {
+    -fx-text-fill: -chart-light-text-fill;
+    -fx-background-color: -chat-dark-color;
+    -fx-border-color: -chat-light-color;
+    -fx-shape: "M172.268 501.67C26.97 291.031 0 269.413 0 192 0 85.961 85.961 0 192 0s192 85.961 192 192c0 77.413-26.97 99.031-172.268 309.67-9.535 13.774-29.93 13.773-39.464 0z";
+    -fx-pref-width: 3.2em;
+    -fx-pref-height: 4em;
+    -fx-alignment: top_center;
+    -fx-padding: 4 0 0 0;
+    -fx-font-size: 1.2em;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 10, 0, 0, 5);
+}

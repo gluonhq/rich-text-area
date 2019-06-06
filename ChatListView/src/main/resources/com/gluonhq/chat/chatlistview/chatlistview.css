@@ -1,0 +1,56 @@
+/*******************************************************************************
+ *                                                                             *
+ * ChatListView, ChatListCell and ScrollBar                                    *
+ *                                                                             *
+ ******************************************************************************/
+
+.chat-list-view {
+    -fx-background-color: -fx-box-border, -fx-control-inner-background;
+    -fx-background-insets: 0, 1;
+    -fx-padding: 1;
+}
+
+.chat-list-view:focused {
+    -fx-background-color: -fx-control-inner-background;
+    -fx-background-radius: 0;
+}
+
+.chat-list-view > .virtual-flow > .chat-scroll-bar:vertical {
+    -fx-background-insets: 0, 0 0 0 1;
+    -fx-padding: -1 -1 -1 0;
+}
+.chat-list-view > .virtual-flow > .chat-scroll-bar:horizontal {
+    -fx-background-insets: 0, 1 0 0 0;
+    -fx-padding: 0 -1 -1 -1;
+}
+.chat-list-view > .virtual-flow > .corner {
+    -fx-background-color: derive(-fx-base,-1%);
+}
+
+.chat-list-cell,
+.chat-list-cell:odd {
+    -fx-background: -fx-control-inner-background;
+    -fx-background-color: -fx-background;
+    -fx-text-fill: -fx-text-background-color;
+    -fx-padding: 0.25em 0.583em 0.25em 0.583em; /* 3 7 3 7 */
+}
+
+.chat-list-view:disabled,
+.chat-list-cell:filled:selected:focused:disabled,
+.chat-list-cell:filled:selected:disabled {
+    -fx-opacity: 0.4;
+}
+
+.chat-list-view:focused > .virtual-flow > .clipped-container > .sheet > .chat-list-cell:filled:selected {
+    -fx-background: -fx-control-inner-background;
+    -fx-table-cell-border-color: derive(-fx-selection-bar, 20%);
+}
+/* Selected when control is not focused */
+.chat-list-cell:filled:selected {
+    -fx-background: -fx-control-inner-background;
+    -fx-table-cell-border-color: derive(-fx-selection-bar-non-focused, 20%);
+}
+/* focused cell (keyboard navigation) */
+.chat-list-view:focused > .virtual-flow > .clipped-container > .sheet > .chat-list-cell:focused {
+    -fx-background-color: -fx-background;
+}

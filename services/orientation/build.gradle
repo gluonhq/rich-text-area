@@ -1,0 +1,30 @@
+plugins {
+    id 'java-library'
+    id 'org.openjfx.javafxplugin' version '0.0.7'
+}
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://nexus.gluonhq.com/nexus/content/repositories/public-snapshots/'
+    }
+}
+
+javafx {
+    version = javafxVersion
+    modules = ['javafx.controls']
+}
+
+dependencies {
+    implementation "com.gluonhq.attach:util:$attachVersion"
+}
+
+jar {
+    archiveBaseName   = 'orientation'
+    archiveClassifier = 'desktop'
+}
+
+ext.description = 'API to access orientation features for the desktop platform'

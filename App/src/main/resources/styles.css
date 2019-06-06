@@ -1,0 +1,40 @@
+@import "fancy-scroll-bars.css";
+
+@font-face {
+    font-family: "FontAwesome";
+    src: url('fontawesome-webfont.ttf');
+}
+
+.root {
+    /* background color palette */
+    -chat-accent      : #ff6565;
+    -chat-light-color : white;
+    -chat-medium-color: #677585;
+    -chat-dark-color  : #4f5c71;
+
+    -primary-swatch-500: -chat-accent;
+
+    /* text color palette */
+    -chart-dark-text-fill : #818181;
+    -chart-light-text-fill: #f4fdff;
+
+    -fx-font-size: 1.15em;
+
+    -unread-label: #f17835;
+    -unread-color: #f17835cc;
+    -unread-color-hover: #df502dcc;
+}
+
+.app-bar,
+.app-bar > .title-box > .label {
+    -fx-icon-fill: -chart-light-text-fill;
+}
+
+.font-icon {
+    -fx-font-family: "FontAwesome";
+    -fx-font-size: 1.8em;
+    -fx-font-weight: normal;
+    -fx-font-style: normal;
+    -fx-pref-width: 3em;
+    -fx-alignment: CENTER;
+}

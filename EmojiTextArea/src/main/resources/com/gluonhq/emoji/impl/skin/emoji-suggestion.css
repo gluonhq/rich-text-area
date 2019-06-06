@@ -1,0 +1,37 @@
+.search-popup {
+    -fx-background-color: darkgray, white;
+    -fx-background-insets: 0, 0.25;
+    -fx-background-radius: 0.25em;
+}
+
+/** Top Panel **/
+.top-panel {
+    -fx-spacing: 1em;
+    -fx-padding: 0.75em;
+    -fx-background-color: darkgray, derive(lightgray, 10%);;
+    -fx-background-insets: 0, 0.25;
+    -fx-background-radius: 0.25em 0.25em 0 0;
+}
+
+.top-panel > .label {
+    -fx-font-size: 0.8em;
+}
+
+/** Content **/
+.content {
+    -fx-padding: 0.5em 0.75em 0.5em 0.75em;
+    -fx-vgap: 0.2em;
+    -fx-hgap: 0.4em;
+}
+
+.content > .emoji-label {
+    -fx-padding: 0.2em 0.4em 0.2em 0.4em;
+    -fx-text-alignment: center;
+    -fx-graphic-text-gap: 2;
+}
+
+.content > .emoji-label:selected {
+    -fx-text-fill: white;
+    -fx-background-color: #039ED3;
+    -fx-background-radius: 2em;
+}

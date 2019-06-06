@@ -1,0 +1,24 @@
+apply plugin: 'base'
+
+ext.javafxVersion = "12.0.1"
+ext.attachVersion = "4.0.1.1"
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven'
+    group = 'com.gluonhq.chat'
+    version = '1.1.0-SNAPSHOT'
+
+    sourceCompatibility = '1.11'
+    [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://nexus.gluonhq.com/nexus/content/repositories/releases/"
+        }
+        maven {
+            url "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
+    }
+}
