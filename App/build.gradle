@@ -1,7 +1,7 @@
 plugins {
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.7'
-    id 'com.gluonhq.client-gradle-plugin' version '0.0.3'
+    id 'com.gluonhq.client-gradle-plugin' version '0.0.7'
 }
 
 mainClassName = "$moduleName/com.gluonhq.chat.GluonChat"
@@ -19,6 +19,10 @@ repositories {
     }
 }
 
+// TODO: Select the correct platform:
+def platform = "desktop"
+//def platform = "ios"
+
 dependencies {
     implementation project(":ChatListView")
 //    implementation project(":EmojiData")
@@ -30,11 +34,11 @@ dependencies {
     implementation 'com.gluonhq:charm-glisten:6.0.0'
     implementation 'com.gluonhq:charm-cloudlink-client:6.0.0'
     implementation 'com.github.javafaker:javafaker:0.16'
-    implementation "com.gluonhq.attach:display:$attachVersion:desktop"
-    implementation "com.gluonhq.attach:lifecycle:$attachVersion:desktop"
-    implementation "com.gluonhq.attach:storage:$attachVersion:desktop"
-    implementation "com.gluonhq.attach:cache:$attachVersion:desktop"
-    implementation "com.gluonhq.attach:settings:$attachVersion:desktop"
+    implementation "com.gluonhq.attach:display:$attachVersion:$platform"
+    implementation "com.gluonhq.attach:lifecycle:$attachVersion:$platform"
+    implementation "com.gluonhq.attach:storage:$attachVersion:$platform"
+    implementation "com.gluonhq.attach:cache:$attachVersion:$platform"
+    implementation "com.gluonhq.attach:settings:$attachVersion:$platform"
     implementation "com.gluonhq.attach:device:$attachVersion"
     implementation "com.gluonhq.attach:in-app-billing:$attachVersion"
     implementation "com.gluonhq.attach:push-notifications:$attachVersion"
@@ -63,8 +67,7 @@ run {
 }
 
 gluonClient {
-    javaStaticSdkVersion = "11-ea+2"
-    backend = "lir"
+    target = platform == "desktop" ? "host" : "ios"
 
     bundlesList = ["com.gluonhq.chat.views.chat",
                    "com.gluonhq.chat.views.landscape",
@@ -75,11 +78,16 @@ gluonClient {
 //                   "controlsfx"
                     ]
 
-    def attachList = ["com.gluonhq.attach.cache.impl.DesktopCacheService",
+    def attachList = platform == "desktop" ?
+            ["com.gluonhq.attach.cache.impl.DesktopCacheService",
              "com.gluonhq.attach.display.impl.DesktopDisplayService",
              "com.gluonhq.attach.lifecycle.impl.DesktopLifecycleService",
              "com.gluonhq.attach.orientation.impl.DesktopOrientationService",
-             "com.gluonhq.attach.storage.impl.DesktopStorageService"]
+             "com.gluonhq.attach.storage.impl.DesktopStorageService"] :
+            ["com.gluonhq.attach.cache.impl.IOSCacheService",
+             "com.gluonhq.attach.display.impl.IOSDisplayService",
+             "com.gluonhq.attach.lifecycle.impl.IOSLifecycleService",
+             "com.gluonhq.attach.storage.impl.IOSStorageService"]
 
     reflectionList = attachList
     reflectionList += ["com.gluonhq.chat.service.Service",

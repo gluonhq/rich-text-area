@@ -27,3 +27,6 @@ App/build
 ChatListView/build
 services/orientation/build
 services/position/build
+EmojiData/build
+EmojiPopOver/build
+EmojiTextArea/build

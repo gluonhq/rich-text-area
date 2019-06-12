@@ -18,6 +18,8 @@
     -fx-background-color: -chat-light-color;
     -fx-text-fill: -chart-dark-text-fill;
     -fx-prompt-text-fill: derive( -chart-dark-text-fill, 50%);
+    -fx-pref-height: 60;
+    -fx-max-height: 60;
 }
 
 .chat-toolbar {
