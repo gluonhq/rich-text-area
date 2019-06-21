@@ -1,6 +1,7 @@
 package com.gluonhq.chat.views;
 
 import com.airhacks.afterburner.injection.Injector;
+import com.gluonhq.attach.util.Platform;
 import com.gluonhq.charm.glisten.mvc.View;
 import com.gluonhq.chat.chatlistview.ChatListView;
 import com.gluonhq.chat.model.ChatMessage;
@@ -96,6 +97,21 @@ public class ChatView extends View {
         setBottom(bottomPane);
 
         setupAddButton();
+
+        if (Platform.isIOS()) {
+            // allow dismissing the soft keyboard when tapping outside textArea
+            chatList.mouseTransparentProperty().bind(messageEditor.focusedProperty());
+            setOnMouseClicked(e -> {
+                if (messageEditor.isFocused()) {
+                    // Try to hide keyboard
+                    addButton.requestFocus();
+                }
+            });
+
+            // process button "click" when the keyboard was still showing
+            sendButton.setOnMousePressed(e -> sendButton.fire());
+        }
+
     }
 
     private void createSortList(GluonObservableList<ChatMessage> messages) {
