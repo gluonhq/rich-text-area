@@ -81,9 +81,11 @@ public class PlusPopupView extends PopupView {
         Label shareLocation = new Label(resources.getString("popup.location.text"));
         shareLocation.setOnMouseClicked(e -> {
             hide();
-            PositionService.create().ifPresent(positionService ->
+            PositionService.create().ifPresent(positionService -> {
                     positionService.positionProperty().addListener((obs, ov, nv) ->
-                            sendLocation(nv)));
+                            sendLocation(nv));
+                    positionService.start();
+            });
         });
         HBox locationBox = new HBox(location, shareLocation);
         locationBox.getStyleClass().add("item-box");
