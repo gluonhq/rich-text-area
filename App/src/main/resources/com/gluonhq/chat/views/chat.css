@@ -87,6 +87,8 @@
 }
 
 .chat-message-status {
+    -fx-font-family: "FontAwesome";
+    -fx-font-size: 0.8em;
     -fx-text-fill: -chart-light-text-fill;
 }
 

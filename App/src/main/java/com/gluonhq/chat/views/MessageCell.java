@@ -60,11 +60,13 @@ class MessageCell extends CharmListCell<ChatMessage> {
     private double imageOffset = -1;
     private final double imageSize = 20;
     private final Service service;
+    private final ResourceBundle resources;
 
     public MessageCell(String name) {
         super();
         this.name = name;
         service = Injector.instantiateModelOrService(Service.class);
+        resources = ResourceBundle.getBundle("com.gluonhq.chat.views.chat");
 
         getStyleClass().addAll("chat-list-cell");
 
@@ -114,7 +116,8 @@ class MessageCell extends CharmListCell<ChatMessage> {
             BorderPane.setMargin(message, isMe ? meInsets : notMeInsets);
 
             if (item.getTime() != null) {
-                status.setText(/*item.getTime().format(formatter) + */"  ✓"); // check mark if read
+//                status.setText(/*item.getTime().format(formatter) + */"  ✓"); // check mark if read
+                status.setText(resources.getString("label.status.check")); // check mark if read
             }
             BorderPane.setAlignment(status, isMe ? Pos.CENTER_LEFT : Pos.CENTER_RIGHT);
 
