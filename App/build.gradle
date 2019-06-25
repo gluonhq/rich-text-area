@@ -84,11 +84,13 @@ gluonClient {
              "com.gluonhq.attach.lifecycle.impl.DesktopLifecycleService",
              "com.gluonhq.attach.orientation.impl.DesktopOrientationService",
              "com.gluonhq.attach.position.impl.DesktopPositionService",
+             "com.gluonhq.attach.statusbar.impl.DesktopStatusBarService",
              "com.gluonhq.attach.storage.impl.DesktopStorageService"] :
             ["com.gluonhq.attach.cache.impl.IOSCacheService",
              "com.gluonhq.attach.display.impl.IOSDisplayService",
              "com.gluonhq.attach.orientation.impl.IOSOrientationService",
              "com.gluonhq.attach.position.impl.IOSPositionService",
+             "com.gluonhq.attach.statusbar.impl.IOSStatusBarService",
              "com.gluonhq.attach.lifecycle.impl.IOSLifecycleService",
              "com.gluonhq.attach.storage.impl.IOSStorageService"]
 
