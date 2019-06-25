@@ -8,6 +8,7 @@ module com.gluonhq.chat {
     requires com.gluonhq.attach.orientation;
     requires com.gluonhq.attach.position;
     requires com.gluonhq.attach.cache;
+    requires com.gluonhq.attach.util;
 
     requires com.gluonhq.maps;
 
