@@ -37,15 +37,17 @@ dependencies {
     implementation "com.gluonhq.attach:display:$attachVersion:$platform"
     implementation "com.gluonhq.attach:lifecycle:$attachVersion:$platform"
     implementation "com.gluonhq.attach:storage:$attachVersion:$platform"
-    implementation "com.gluonhq.attach:statusbar:$attachVersion"
     implementation "com.gluonhq.attach:cache:$attachVersion:$platform"
     implementation "com.gluonhq.attach:util:$attachVersion"
     if (platform == "desktop") {
         implementation project(':orientation')
         implementation project(':position')
+        implementation "com.gluonhq.attach:statusbar:$attachVersion"
     } else {
         implementation "com.gluonhq.attach:orientation:$attachVersion:$platform"
+        implementation "com.gluonhq.attach:orientation:$attachVersion:$platform"
         implementation "com.gluonhq.attach:position:$attachVersion:$platform"
+        implementation "com.gluonhq.attach:statusbar:$attachVersion:$platform"
     }
     runtimeOnly 'org.glassfish:jakarta.json:1.1.5:module'
     implementation 'com.gluonhq:maps:2.0.0-ea+2'
