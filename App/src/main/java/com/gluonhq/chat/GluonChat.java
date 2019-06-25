@@ -34,11 +34,6 @@ public class GluonChat extends MobileApplication {
     }
 
     public static void main(String[] args) {
-        // TODO: Uncomment to run on iOS:
-//        System.setProperty("os.target", "ios");
-//        System.setProperty("os.name", "iOS");
-//        System.setProperty("targetos.name", "iOS");
-//        System.setProperty("glass.platform", "ios");
         launch(args);
     }
 

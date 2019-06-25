@@ -23,7 +23,7 @@ javafx {
 
 dependencies {
     implementation "com.gluonhq.attach:util:$attachVersion"
-    implementation 'com.gluonhq:maps:2.0.0-ea+1'
+    implementation 'com.gluonhq:maps:2.0.0-ea+2'
 }
 
 jar {
