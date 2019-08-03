@@ -13,7 +13,7 @@
 	<key>CFBundleIconName</key>
 	<string>AppIcon</string>
 	<key>CFBundleName</key>
-	<string>App</string>
+	<string>The ChatApp</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>LSRequiresIPhoneOS</key>

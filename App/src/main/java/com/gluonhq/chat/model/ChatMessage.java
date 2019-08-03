@@ -59,4 +59,9 @@ public class ChatMessage {
                 ", author=" + author +
                 '}';
     }
+
+    public String getFormattedTime() {
+        return getTime().toLocalDate().toString() + " " +
+                String.format("%02d:%02d", getTime().getHour(),getTime().getMinute());
+    }
 }

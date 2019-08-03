@@ -52,6 +52,7 @@ class MessageCell extends CharmListCell<ChatMessage> {
     private final Label msgHandle = new Label("", null);
 
     private final BorderPane messageBubble;
+    private final Label date  = new Label();
     private final Label status  = new Label();
     private final Label icon = new Label("ICON");
     private final Label unread;
@@ -81,10 +82,11 @@ class MessageCell extends CharmListCell<ChatMessage> {
         messageBubble = new BorderPane(message);
 
         pane = new BorderPane(messageBubble);
-        pane.setBottom(status);
+        pane.setBottom(new HBox(10, date, status));
         pane.getStyleClass().add("chat-message");
         pane.prefWidthProperty().bind(widthProperty());
 
+        date.getStyleClass().add("chat-message-date");
         status.setGraphic(new ImageView(clockImage));
         status.getStyleClass().add("chat-message-status");
 
@@ -117,6 +119,7 @@ class MessageCell extends CharmListCell<ChatMessage> {
 
             if (item.getTime() != null) {
 //                status.setText(/*item.getTime().format(formatter) + */"  ✓"); // check mark if read
+                date.setText(item.getFormattedTime());
                 status.setText(resources.getString("label.status.check")); // check mark if read
             }
             BorderPane.setAlignment(status, isMe ? Pos.CENTER_LEFT : Pos.CENTER_RIGHT);

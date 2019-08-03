@@ -1,7 +1,7 @@
 plugins {
     id 'application'
-    id 'org.openjfx.javafxplugin' version '0.0.7'
-    id 'com.gluonhq.client-gradle-plugin' version '0.0.10'
+    id 'org.openjfx.javafxplugin' version '0.0.8'
+    id 'com.gluonhq.client-gradle-plugin' version '0.0.11'
 }
 
 mainClassName = "$moduleName/com.gluonhq.chat.GluonChat"
@@ -33,21 +33,9 @@ dependencies {
     implementation 'com.airhacks:afterburner.mfx:1.6.3'
     implementation 'com.gluonhq:charm-glisten:6.0.1'
     implementation 'com.gluonhq:charm-cloudlink-client:6.0.1'
-    implementation 'com.github.javafaker:javafaker:0.16'
-    implementation "com.gluonhq.attach:display:$attachVersion:$platform"
-    implementation "com.gluonhq.attach:lifecycle:$attachVersion:$platform"
-    implementation "com.gluonhq.attach:storage:$attachVersion:$platform"
-    implementation "com.gluonhq.attach:cache:$attachVersion:$platform"
-    implementation "com.gluonhq.attach:util:$attachVersion"
     if (platform == "desktop") {
         implementation project(':orientation')
         implementation project(':position')
-        implementation "com.gluonhq.attach:statusbar:$attachVersion"
-    } else {
-        implementation "com.gluonhq.attach:orientation:$attachVersion:$platform"
-        implementation "com.gluonhq.attach:orientation:$attachVersion:$platform"
-        implementation "com.gluonhq.attach:position:$attachVersion:$platform"
-        implementation "com.gluonhq.attach:statusbar:$attachVersion:$platform"
     }
     runtimeOnly 'org.glassfish:jakarta.json:1.1.5:module'
     implementation 'com.gluonhq:maps:2.0.0-ea+2'
@@ -72,6 +60,14 @@ run {
 
 gluonClient {
     target = platform == "desktop" ? "host" : "ios"
+
+    attachConfig {
+        if (platform == "desktop") {
+            services 'cache', 'display', 'lifecycle', 'statusbar', 'storage'
+        } else {
+            services 'cache', 'display', 'lifecycle', 'orientation', 'position', 'statusbar', 'storage'
+        }
+    }
     bundlesList = ["com.gluonhq.chat.views.chat",
                    "com.gluonhq.chat.views.landscape",
                    "com.gluonhq.chat.views.maps",
@@ -82,19 +78,9 @@ gluonClient {
                     ]
 
     def attachList = platform == "desktop" ?
-            ["com.gluonhq.attach.cache.impl.DesktopCacheService",
-             "com.gluonhq.attach.display.impl.DesktopDisplayService",
-             "com.gluonhq.attach.lifecycle.impl.DesktopLifecycleService",
-             "com.gluonhq.attach.orientation.impl.DesktopOrientationService",
-             "com.gluonhq.attach.position.impl.DesktopPositionService",
-             "com.gluonhq.attach.storage.impl.DesktopStorageService"] :
-            ["com.gluonhq.attach.cache.impl.IOSCacheService",
-             "com.gluonhq.attach.display.impl.IOSDisplayService",
-             "com.gluonhq.attach.orientation.impl.IOSOrientationService",
-             "com.gluonhq.attach.position.impl.IOSPositionService",
-             "com.gluonhq.attach.statusbar.impl.IOSStatusBarService",
-             "com.gluonhq.attach.lifecycle.impl.IOSLifecycleService",
-             "com.gluonhq.attach.storage.impl.IOSStorageService"]
+            ["com.gluonhq.attach.orientation.impl.DesktopOrientationService",
+             "com.gluonhq.attach.position.impl.DesktopPositionService"] :
+            []
 
     reflectionList = attachList
     reflectionList += ["com.gluonhq.chat.service.Service",
@@ -113,7 +99,7 @@ gluonClient {
 //                     "org.reactfx.Subscription\$1"
 //    ]
 
-    if (platform == "ios") {
+    if (platform.startsWith("ios")) {
         releaseSymbolsList = ["_Java_com_sun_glass_ui_ios_IosWindow__1updateBounds",
                               "_Java_com_sun_glass_ui_ios_IosWindow__1updateInput"]
     }

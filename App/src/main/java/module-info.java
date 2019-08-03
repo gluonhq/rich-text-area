@@ -16,7 +16,6 @@ module com.gluonhq.chat {
 //    requires com.gluonhq.emoji;
 //    requires com.gluonhq.emoji.popup;
 //    requires com.gluonhq.emoji.control;
-    requires javafaker;
     requires java.sql;
 
     requires com.gluonhq.glisten.afterburner;
