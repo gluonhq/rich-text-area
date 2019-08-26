@@ -197,7 +197,7 @@ class MessageCell extends CharmListCell<ChatMessage> {
             if (value.startsWith(IMAGE_PREFIX) && value.endsWith(IMAGE_PREFIX)) {
                 formatImage(value).ifPresentOrElse(imageView -> {
                         list.add(imageView);
-                        addPressAndHoldHandler(imageView, Duration.seconds(1), e -> flyTo(value));
+                        addPressAndHoldHandler(imageView, Duration.seconds(0.5), e -> flyTo(value));
                     },
                     () -> list.add(new Text(value)));
             } else {
@@ -253,9 +253,9 @@ class MessageCell extends CharmListCell<ChatMessage> {
             Position position = new Position(Double.parseDouble(coordinates[1]),
                     Double.parseDouble(coordinates[2]));
 
-            String userName = coordinates[0].substring((IMAGE_PREFIX + LATLON).length());
+            String initials = coordinates[0].substring((IMAGE_PREFIX + LATLON).length());
             MobileApplication.getInstance().switchView(MAPS_VIEW).ifPresent(p ->
-                    ((MapsView) p).flyTo(position, userName));
+                    ((MapsView) p).flyTo(position, null, initials, null));
         } catch (NumberFormatException nfe) {}
     }
 

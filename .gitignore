@@ -30,3 +30,7 @@ services/position/build
 EmojiData/build
 EmojiPopOver/build
 EmojiTextArea/build
+App/src/mac
+images
+messages
+name

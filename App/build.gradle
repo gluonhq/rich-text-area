@@ -1,7 +1,7 @@
 plugins {
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.8'
-    id 'com.gluonhq.client-gradle-plugin' version '0.0.11'
+    id 'com.gluonhq.client-gradle-plugin' version '0.0.12'
 }
 
 mainClassName = "$moduleName/com.gluonhq.chat.GluonChat"
@@ -35,7 +35,7 @@ dependencies {
     implementation 'com.gluonhq:charm-cloudlink-client:6.0.1'
     if (platform == "desktop") {
         implementation project(':orientation')
-        implementation project(':position')
+//        implementation project(':position')
     }
     runtimeOnly 'org.glassfish:jakarta.json:1.1.5:module'
     implementation 'com.gluonhq:maps:2.0.0-ea+2'
@@ -60,12 +60,11 @@ run {
 
 gluonClient {
     target = platform == "desktop" ? "host" : "ios"
-
     attachConfig {
         if (platform == "desktop") {
-            services 'cache', 'display', 'lifecycle', 'statusbar', 'storage'
+            services 'cache', 'display', 'lifecycle', 'pictures', 'position', 'statusbar', 'storage'
         } else {
-            services 'cache', 'display', 'lifecycle', 'orientation', 'position', 'statusbar', 'storage'
+            services 'cache', 'display', 'lifecycle', 'orientation', 'pictures', 'position', 'statusbar', 'storage'
         }
     }
     bundlesList = ["com.gluonhq.chat.views.chat",

@@ -1,34 +1,32 @@
 package com.gluonhq.chat.views.helper;
 
 import com.airhacks.afterburner.injection.Injector;
+import com.gluonhq.attach.pictures.PicturesService;
 import com.gluonhq.attach.position.Position;
 import com.gluonhq.attach.position.PositionService;
+import com.gluonhq.attach.util.Platform;
+import com.gluonhq.charm.glisten.application.MobileApplication;
 import com.gluonhq.charm.glisten.layout.layer.PopupView;
 import com.gluonhq.chat.model.ChatMessage;
-import com.gluonhq.chat.service.ImageUtils;
 import com.gluonhq.chat.service.Service;
-import com.gluonhq.chat.views.ChatView;
+import com.gluonhq.chat.views.MapsView;
 import com.gluonhq.connect.GluonObservableList;
-import com.gluonhq.maps.MapPoint;
-import com.gluonhq.maps.MapView;
-import javafx.animation.PauseTransition;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-import javafx.util.Duration;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ResourceBundle;
 
-import static com.gluonhq.chat.service.ImageUtils.*;
-import static com.gluonhq.chat.service.ImageUtils.LATLON_SEP;
+import static com.gluonhq.chat.GluonChat.MAPS_VIEW;
+import static com.gluonhq.chat.service.ImageUtils.DEFAULT_POSITION;
+import static com.gluonhq.chat.service.ImageUtils.IMAGE_PREFIX;
+import static com.gluonhq.chat.service.ImageUtils.LATLON;
 
 public class PlusPopupView extends PopupView {
 
@@ -56,21 +54,33 @@ public class PlusPopupView extends PopupView {
         upload.setOnMouseClicked(e -> {
             hide();
 
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.getExtensionFilters().addAll(
-                    new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif"));
-            File file = fileChooser.showOpenDialog(ownerNode.getScene().getWindow());
-            if (file != null) {
-                try {
-                    Image image = new Image(new FileInputStream(file));
-                    String id = service.addImage(file.getName() + "-" + System.currentTimeMillis(), image);
-                    if (id != null) {
-                        var message = new ChatMessage(id, service.getName().get());
-                        messages.add(message);
+            if (Platform.isDesktop()) {
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.getExtensionFilters().addAll(
+                        new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif"));
+                File file = fileChooser.showOpenDialog(ownerNode.getScene().getWindow());
+                if (file != null) {
+                    try {
+                        Image image = new Image(new FileInputStream(file));
+                        String id = service.addImage(file.getName() + "-" + System.currentTimeMillis(), image);
+                        if (id != null) {
+                            var message = new ChatMessage(id, service.getName().get());
+                            messages.add(message);
+                        }
+                    } catch (FileNotFoundException e1) {
+                        e1.printStackTrace();
                     }
-                } catch (FileNotFoundException e1) {
-                    e1.printStackTrace();
                 }
+            } else {
+                PicturesService.create().ifPresent(pictures ->
+                        pictures.takePhoto(false)
+                                .ifPresent(image -> {
+                                    String id = service.addImage("photo" + "-" + System.currentTimeMillis(), image);
+                                    if (id != null) {
+                                        var message = new ChatMessage(id, service.getName().get());
+                                        messages.add(message);
+                                    }
+                                }));
             }
         });
         HBox imageBox = new HBox(icon, upload);
@@ -81,11 +91,21 @@ public class PlusPopupView extends PopupView {
         Label shareLocation = new Label(resources.getString("popup.location.text"));
         shareLocation.setOnMouseClicked(e -> {
             hide();
-            PositionService.create().ifPresent(positionService -> {
-                    positionService.positionProperty().addListener((obs, ov, nv) ->
-                            sendLocation(nv));
-                    positionService.start();
-            });
+            PositionService.create().ifPresentOrElse(positionService -> {
+                positionService.start();
+                Position position = positionService.getPosition();
+                if (position != null) {
+                    sendLocation(position);
+                    positionService.stop();
+                } else {
+                    positionService.positionProperty().addListener((obs, ov, nv) -> {
+                        if (nv != null) {
+                            sendLocation(nv);
+                            positionService.stop();
+                        }
+                    });
+                }
+            }, () -> sendLocation(DEFAULT_POSITION));
         });
         HBox locationBox = new HBox(location, shareLocation);
         locationBox.getStyleClass().add("item-box");
@@ -95,45 +115,18 @@ public class PlusPopupView extends PopupView {
         setContent(content);
     }
 
-    private void sendLocation(Position position) {
+    private void sendLocation(Position newPosition) {
+        Position position = newPosition == null ? DEFAULT_POSITION : newPosition;
 
-        MapView mapView = new MapView();
-        Scene scene = new Scene(mapView, 400, 400);
-        scene.getStylesheets().addAll(ChatView.class.getResource("chat.css").toExternalForm(),
-                ChatView.class.getResource("/styles.css").toExternalForm());
-        Stage stage = new Stage();
-        stage.setScene(scene);
-        stage.show();
-        stage.toBack();
-
-        if (position == null) {
-            position = DEFAULT_POSITION;
-        }
         String name = service.getName().get();
+        String initials = Service.getInitials(name);
 
-        MapPoint mapPoint = new MapPoint(position.getLatitude(), position.getLongitude());
-
-        PoiLayer poiLayer = new PoiLayer();
-        poiLayer.addPoint(mapPoint, PoiLayer.createUserPointer(Service.getInitials(name)));
-        mapView.addLayer(poiLayer);
-        mapView.setZoom(15);
-        mapView.setCenter(mapPoint);
-
-        messages.removeIf(m -> m.getMessage().startsWith(IMAGE_PREFIX + LATLON + name));
-        service.getImages().removeIf(m -> m.getId().startsWith(LATLON + name));
-
-        PauseTransition pause = new PauseTransition(Duration.seconds(1));
-        pause.setOnFinished(f -> {
-            Image snapshot = ImageUtils.getSnapshot(mapView, false);
-
-            String id = service.addImage(LATLON + name + LATLON_SEP + mapPoint.getLatitude() + LATLON_SEP + mapPoint.getLongitude() + LATLON_SEP + System.currentTimeMillis(), snapshot);
-            if (id != null) {
-                var message = new ChatMessage(id, name);
-                messages.add(message);
-            }
-        });
-        pause.play();
+        MobileApplication.getInstance().switchView(MAPS_VIEW).ifPresent(p ->
+                ((MapsView) p).flyTo(position, name, initials, e -> {
+                    messages.removeIf(m -> m.getMessage().startsWith(IMAGE_PREFIX + LATLON + initials));
+                    service.getImages().removeIf(m -> m.getId().startsWith(LATLON + initials));
+                    messages.add(e);
+            }));
     }
-
 
 }

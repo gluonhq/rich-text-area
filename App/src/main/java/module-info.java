@@ -6,6 +6,7 @@ module com.gluonhq.chat {
     requires com.gluonhq.attach.display;
     requires com.gluonhq.attach.lifecycle;
     requires com.gluonhq.attach.orientation;
+    requires com.gluonhq.attach.pictures;
     requires com.gluonhq.attach.position;
     requires com.gluonhq.attach.cache;
     requires com.gluonhq.attach.util;

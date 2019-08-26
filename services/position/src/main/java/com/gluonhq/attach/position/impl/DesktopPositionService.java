@@ -48,8 +48,8 @@ public class DesktopPositionService implements PositionService {
         send.setOnAction(e ->
                 position.set(new Position(mapPoint.getLatitude(), mapPoint.getLongitude())));
 
-        lat.textProperty().addListener(o -> setPosition(lat, lon));
-        lon.textProperty().addListener(o -> setPosition(lat, lon));
+        lat.textProperty().addListener(o -> setPosition(lat.getText(), lon.getText()));
+        lon.textProperty().addListener(o -> setPosition(lat.getText(), lon.getText()));
         HBox latBox = new HBox(10, new Label("Lat: "), lat);
         latBox.setAlignment(Pos.CENTER_LEFT);
         HBox lonBox = new HBox(10, new Label("Lon: "), lon);
@@ -72,19 +72,21 @@ public class DesktopPositionService implements PositionService {
         stage.show();
 
         stage.setX(Screen.getPrimary().getBounds().getMaxX() - 400);
+
+        setPosition("50", "4");
     }
 
-    private void setPosition(TextField lat, TextField lon) {
-        if (lat.getText() == null || lat.getText().isEmpty()) {
+    private void setPosition(String lat, String lon) {
+        if (lat == null || lat.isEmpty()) {
             return;
         }
-        if (lon.getText() == null || lon.getText().isEmpty()) {
+        if (lon == null || lon.isEmpty()) {
             return;
         }
 
         try {
-            mapPoint = new MapPoint(Double.parseDouble(lat.getText()),
-                    Double.parseDouble(lon.getText()));
+            mapPoint = new MapPoint(Double.parseDouble(lat),
+                    Double.parseDouble(lon));
             poiLayer.setPoint(mapPoint, new Circle(7, Color.RED));
             mapView.setCenter(mapPoint);
         } catch (NumberFormatException nfe) {}
