@@ -12,19 +12,26 @@ import com.gluonhq.chat.service.Service;
 import com.gluonhq.connect.GluonObservableList;
 //import com.gluonhq.emoji.EmojiData;
 //import com.gluonhq.emoji.popup.util.EmojiImageUtils;
+import javafx.animation.PauseTransition;
 import javafx.css.PseudoClass;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.util.Duration;
 
 //import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -190,7 +197,7 @@ class MessageCell extends CharmListCell<ChatMessage> {
             if (value.startsWith(IMAGE_PREFIX) && value.endsWith(IMAGE_PREFIX)) {
                 formatImage(value).ifPresentOrElse(imageView -> {
                         list.add(imageView);
-                        setOnMouseClicked(e -> flyTo(value));
+                        addPressAndHoldHandler(imageView, Duration.seconds(1), e -> flyTo(value));
                     },
                     () -> list.add(new Text(value)));
             } else {
@@ -252,4 +259,21 @@ class MessageCell extends CharmListCell<ChatMessage> {
         } catch (NumberFormatException nfe) {}
     }
 
+    private void addPressAndHoldHandler(Node node, Duration holdTime, EventHandler<MouseEvent> handler) {
+        class Wrapper<T> {
+            T content;
+        }
+
+        Wrapper<MouseEvent> eventWrapper = new Wrapper<>();
+
+        PauseTransition holdTimer = new PauseTransition(holdTime);
+        holdTimer.setOnFinished(event -> handler.handle(eventWrapper.content));
+
+        node.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
+            eventWrapper.content = event;
+            holdTimer.playFromStart();
+        });
+        node.addEventHandler(MouseEvent.MOUSE_RELEASED, event -> holdTimer.stop());
+        node.addEventHandler(MouseEvent.DRAG_DETECTED, event -> holdTimer.stop());
+    }
 }
