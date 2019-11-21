@@ -12,7 +12,15 @@
 
     <properties>
         <mainClassName>com.gluonhq.chat.GluonChat</mainClassName>
+        <form.factor>phone</form.factor>
     </properties>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>Gluon Releases</id>
+            <url>https://nexus.gluonhq.com/nexus/content/repositories/releases/</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <build>
         <plugins>
@@ -55,18 +63,19 @@
                         <list>com.gluonhq.chat.service.Service</list>
                         <list>com.gluonhq.chat.model.ChatMessage</list>
                         <list>com.gluonhq.chat.model.ChatImage</list>
+                        <list>org.glassfish.json.JsonProviderImpl</list>
                         <!--<list>com.gluonhq.emoji.Emoji</list>-->
                         <list>com.gluonhq.impl.charm.glisten.control.skin.GlistenButtonSkin</list>
                         <list>com.gluonhq.impl.charm.glisten.control.skin.GlistenToggleButtonSkin</list>
                         <!--<list>impl.org.controlsfx.skin.PopOverSkin</list>-->
                         <!--<list>javafx.css.converter.SizeConverter\$SequenceConverter</list>-->
-                        <list>com.gluonhq.attach.orientation.impl.DesktopOrientationService</list>
-                        <list>com.gluonhq.attach.position.impl.DesktopPositionService</list>
+                        <!--<list>com.gluonhq.attach.orientation.impl.DesktopOrientationService</list>
+                        <list>com.gluonhq.attach.position.impl.DesktopPositionService</list>-->
                     </reflectionList>
-                    <jniList>
+                    <!--<jniList>
                         <list>com.gluonhq.attach.orientation.impl.DesktopOrientationService</list>
                         <list>com.gluonhq.attach.position.impl.DesktopPositionService</list>
-                    </jniList>
+                    </jniList>-->
                     <mainClass>${mainClassName}</mainClass>
                 </configuration>
             </plugin>
@@ -113,7 +122,7 @@
             <groupId>org.glassfish</groupId>
             <artifactId>jakarta.json</artifactId>
             <version>1.1.5</version>
-            <scope>runtime</scope>
+            <!--<scope>runtime</scope>-->
             <classifier>module</classifier>
         </dependency>
         
