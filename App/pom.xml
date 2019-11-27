@@ -136,6 +136,7 @@
             <groupId>com.gluonhq.attach</groupId>
             <artifactId>display</artifactId>
             <version>${attachVersion}</version>
+            <classifier>desktop</classifier>
         </dependency>
         <dependency>
             <groupId>com.gluonhq.attach</groupId>
@@ -166,6 +167,7 @@
             <groupId>com.gluonhq.attach</groupId>
             <artifactId>storage</artifactId>
             <version>${attachVersion}</version>
+            <classifier>desktop</classifier>
         </dependency>
         <dependency>
             <groupId>com.gluonhq.attach</groupId>
