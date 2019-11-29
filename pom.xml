@@ -1,0 +1,98 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.gluonhq</groupId>
+    <artifactId>ChatApp</artifactId>
+    <version>1.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>ChatApp</name>
+    <description>An application for peer-to-peer messaging.</description>
+    <url>https://gluonhq.com/</url>
+
+    <modules>
+        <module>App</module>
+        <module>ChatListView</module>
+        <module>EmojiData</module>
+        <module>EmojiPopOver</module>
+        <module>EmojiTextArea</module>
+        <module>services/orientation</module>
+        <module>services/position</module>
+    </modules>
+    
+    <properties>
+        <attachVersion>4.0.2</attachVersion>
+        <javafxVersion>13.0.1</javafxVersion>
+        <client-maven-plugin-version>0.1.5</client-maven-plugin-version>
+        <javafx-maven-plugin-version>0.0.3</javafx-maven-plugin-version>
+    </properties>
+    
+    <repositories>
+        <repository>
+            <id>Gluon Releases</id>
+            <url>https://nexus.gluonhq.com/nexus/content/repositories/releases/</url>
+        </repository>
+    </repositories>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <release>11</release>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <organization>
+        <name>Gluon</name>
+        <url>https://www.gluonhq.com</url>
+    </organization>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/gluonhq/ChatApp/issues</url>
+    </issueManagement>
+
+    <licenses>
+        <license>
+            <name>BSD 3-Clause</name>
+            <url>https://opensource.org/licenses/BSD-3-Clause</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Abhinay Agarwal</name>
+            <email>abhinay.agarwal@gluonhq.com</email>
+            <organization>Gluon</organization>
+            <organizationUrl>https://www.gluonhq.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>José Pereda</name>
+            <email>jose.pereda@gluonhq.com</email>
+            <organization>Gluon</organization>
+            <organizationUrl>https://www.gluonhq.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://github.com/gluonhq/ChatApp</url>
+        <connection>scm:git:git://github.com/gluonhq/ChatApp.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:gluonhq/ChatApp.git</developerConnection>
+    </scm>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+</project>
