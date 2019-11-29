@@ -117,6 +117,7 @@
             <artifactId>jakarta.json</artifactId>
             <version>1.1.5</version>
             <scope>runtime</scope>
+            <classifier>module</classifier>
         </dependency>
         
         <!-- Attach -->
