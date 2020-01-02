@@ -22,7 +22,7 @@
     <properties>
         <attachVersion>4.0.2</attachVersion>
         <javafxVersion>13.0.1</javafxVersion>
-        <client-maven-plugin-version>0.1.5</client-maven-plugin-version>
+        <client-maven-plugin-version>0.1.10</client-maven-plugin-version>
         <javafx-maven-plugin-version>0.0.3</javafx-maven-plugin-version>
     </properties>
     
