@@ -13,13 +13,23 @@ import javafx.scene.image.Image;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.Random;
+import java.util.logging.LogManager;
 
 public class GluonChat extends MobileApplication {
 
     public static final String LANDSCAPE_VIEW = "LandscapeView";
     public static final String PORTRAIT_VIEW = "PortraitView";
     public static final String MAPS_VIEW = "MapsView";
+
+    static {
+        try {
+            LogManager.getLogManager().readConfiguration(GluonChat.class.getResourceAsStream("/logging.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void init() {
