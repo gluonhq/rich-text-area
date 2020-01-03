@@ -60,6 +60,9 @@
                         <!--<list>com.gluonhq.emoji.popup.emoji-popover</list>-->
                         <!--<list>controlsfx</list>-->
                     </bundlesList>
+                    <resourcesList>
+                        <item>logging.properties</item>
+                    </resourcesList>
                     <reflectionList>
                         <list>com.gluonhq.chat.service.Service</list>
                         <list>com.gluonhq.chat.model.ChatMessage</list>
