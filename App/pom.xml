@@ -37,13 +37,12 @@
                 <artifactId>client-maven-plugin</artifactId>
                 <version>${client-maven-plugin-version}</version>
                 <configuration>
-                    <!-- Uncomment to run on iOS: -->
-                    <!-- <target>ios</target>-->
+                     <target>${clientTarget}</target>
                     <attachList>
                         <list>cache</list>
+                        <list>device</list>
                         <list>display</list>
                         <list>lifecycle</list>
-                        <!--TODO: This seems to be required ?-->
                         <list>orientation</list>
                         <list>pictures</list>
                         <list>position</list>
@@ -68,11 +67,11 @@
                         <list>com.gluonhq.chat.model.ChatMessage</list>
                         <list>com.gluonhq.chat.model.ChatImage</list>
                         <list>org.glassfish.json.JsonProviderImpl</list>
+                        <!-- for desktop only -->
+<!--                        <list>com.gluonhq.attach.orientation.impl.DesktopOrientationService</list>-->
+<!--                        <list>com.gluonhq.attach.position.impl.DesktopPositionService</list>-->
                     </reflectionList>
-                    <!--<jniList>
-                        <list>com.gluonhq.attach.orientation.impl.DesktopOrientationService</list>
-                        <list>com.gluonhq.attach.position.impl.DesktopPositionService</list>
-                    </jniList>-->
+                    <verbose>true</verbose>
                     <mainClass>${mainClassName}</mainClass>
                 </configuration>
             </plugin>
@@ -128,13 +127,16 @@
             <groupId>com.gluonhq.attach</groupId>
             <artifactId>cache</artifactId>
             <version>${attachVersion}</version>
-            <classifier>desktop</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.gluonhq.attach</groupId>
+            <artifactId>device</artifactId>
+            <version>${attachVersion}</version>
         </dependency>
         <dependency>
             <groupId>com.gluonhq.attach</groupId>
             <artifactId>display</artifactId>
             <version>${attachVersion}</version>
-            <classifier>desktop</classifier>
         </dependency>
         <dependency>
             <groupId>com.gluonhq.attach</groupId>
@@ -143,17 +145,7 @@
         </dependency>
         <dependency>
             <groupId>com.gluonhq.attach</groupId>
-            <artifactId>orientation</artifactId>
-            <version>${attachVersion}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.gluonhq.attach</groupId>
             <artifactId>pictures</artifactId>
-            <version>${attachVersion}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.gluonhq.attach</groupId>
-            <artifactId>position</artifactId>
             <version>${attachVersion}</version>
         </dependency>
         <dependency>
@@ -165,7 +157,6 @@
             <groupId>com.gluonhq.attach</groupId>
             <artifactId>storage</artifactId>
             <version>${attachVersion}</version>
-            <classifier>desktop</classifier>
         </dependency>
         <dependency>
             <groupId>com.gluonhq.attach</groupId>
@@ -180,4 +171,76 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>desktop</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <clientTarget>host</clientTarget>
+                <orientationService>com.gluonhq.attach.orientation.impl.DesktopOrientationService</orientationService>
+                <positionService>com.gluonhq.attach.position.impl.DesktopPositionService</positionService>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>com.gluonhq</groupId>
+                    <artifactId>orientation</artifactId>
+                    <version>1.1.0-SNAPSHOT</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.gluonhq</groupId>
+                    <artifactId>position</artifactId>
+                    <version>1.1.0-SNAPSHOT</version>
+                </dependency>
+
+                <!-- Attach for javafx:run -->
+                <dependency>
+                    <groupId>com.gluonhq.attach</groupId>
+                    <artifactId>cache</artifactId>
+                    <version>${attachVersion}</version>
+                    <classifier>desktop</classifier>
+                </dependency>
+                <dependency>
+                    <groupId>com.gluonhq.attach</groupId>
+                    <artifactId>display</artifactId>
+                    <version>${attachVersion}</version>
+                    <classifier>desktop</classifier>
+                </dependency>
+                <dependency>
+                    <groupId>com.gluonhq.attach</groupId>
+                    <artifactId>lifecycle</artifactId>
+                    <version>${attachVersion}</version>
+                    <classifier>desktop</classifier>
+                </dependency>
+                <dependency>
+                    <groupId>com.gluonhq.attach</groupId>
+                    <artifactId>storage</artifactId>
+                    <version>${attachVersion}</version>
+                    <classifier>desktop</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>ios</id>
+            <properties>
+                <clientTarget>ios</clientTarget>
+            </properties>
+            <dependencies>
+                <!-- Attach -->
+                <dependency>
+                    <groupId>com.gluonhq.attach</groupId>
+                    <artifactId>orientation</artifactId>
+                    <version>${attachVersion}</version>
+                    <classifier>ios</classifier>
+                </dependency>
+                <dependency>
+                    <groupId>com.gluonhq.attach</groupId>
+                    <artifactId>position</artifactId>
+                    <version>${attachVersion}</version>
+                    <classifier>ios</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>
