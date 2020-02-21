@@ -20,10 +20,19 @@
     </modules>
     
     <properties>
-        <attachVersion>4.0.3</attachVersion>
-        <javafxVersion>13.0.1</javafxVersion>
-        <client-maven-plugin-version>0.1.10</client-maven-plugin-version>
-        <javafx-maven-plugin-version>0.0.3</javafx-maven-plugin-version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+
+        <glistenVersion>6.0.2</glistenVersion>
+        <glistenAfterburnerVersion>2.0.2</glistenAfterburnerVersion>
+        <attachVersion>4.0.5</attachVersion>
+        <mapsVersion>2.0.0-ea+2</mapsVersion>
+        <connectVersion>2.0.1</connectVersion>
+        <javafxVersion>13.0.2</javafxVersion>
+        <controlsfxVersion>11.0.1</controlsfxVersion>
+        <javafx-maven-plugin-version>0.0.4</javafx-maven-plugin-version>
+        <client-maven-plugin-version>0.1.16-SNAPSHOT</client-maven-plugin-version>
     </properties>
     
     <repositories>

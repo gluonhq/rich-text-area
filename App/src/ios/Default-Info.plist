@@ -5,9 +5,9 @@
 	<key>CFBundleIdentifier</key>
 	<string>com.gluonhq.chat.GluonChatApp</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.3</string>
+	<string>1.0.5</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.3</string>
+	<string>1.0.5</string>
 	<key>CFBundleExecutable</key>
 	<string>App</string>
 	<key>CFBundleIconName</key>
@@ -69,5 +69,7 @@
     <string>The ChatApp requires access to the Photo Library to share pictures</string>
     <key>NSPhotoLibraryAddUsageDescription</key>
     <string>The ChatApp requires access to the Photo Library to share pictures</string>
+    <key>NSBluetoothAlwaysUsageDescription</key>
+    <string>The ChatApp requires doesn't use Bluetooth</string>
 </dict>
 </plist>
