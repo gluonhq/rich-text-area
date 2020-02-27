@@ -1,0 +1,37 @@
+language: java
+sudo: false
+
+os: linux
+dist: bionic
+jdk: openjdk11
+
+cache:
+  directories:
+    - $HOME/.m2
+
+services:
+  - xvfb
+
+addons:
+  apt:
+    packages:
+      - at-spi2-core
+      - build-essential
+      - libgtk-3-dev
+      - libxtst-dev
+      - libavcodec-dev
+      - libavformat-dev
+      - libasound2-dev
+
+before_script:
+  - mkdir -p $HOME/graalvm && cd $HOME/graalvm
+  - wget https://download2.gluonhq.com/substrate/graalvm/graalvm-svm-linux-20.1.0-ea+24.zip
+  - unzip graalvm-svm-linux-20.1.0-ea+24.zip && cd $TRAVIS_BUILD_DIR
+  - export GRAALVM_HOME=$HOME/graalvm/graalvm-svm-linux-20.1.0-ea+24
+  - echo $JAVA_OPTS
+
+install: true
+
+script:
+  - mvn clean install
+  - mvn client:build -pl App
