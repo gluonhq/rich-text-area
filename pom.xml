@@ -32,7 +32,7 @@
         <javafxVersion>13.0.2</javafxVersion>
         <controlsfxVersion>11.0.1</controlsfxVersion>
         <javafx-maven-plugin-version>0.0.4</javafx-maven-plugin-version>
-        <client-maven-plugin-version>0.1.16-SNAPSHOT</client-maven-plugin-version>
+        <client-maven-plugin-version>0.1.17-SNAPSHOT</client-maven-plugin-version>
     </properties>
     
     <repositories>
@@ -40,7 +40,21 @@
             <id>Gluon Releases</id>
             <url>https://nexus.gluonhq.com/nexus/content/repositories/releases/</url>
         </repository>
+        <repository>
+            <id>Gluon Snapshots</id>
+            <url>https://nexus.gluonhq.com/nexus/content/repositories/public-snapshots</url>
+        </repository>
     </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>Gluon Releases</id>
+            <url>https://nexus.gluonhq.com/nexus/content/repositories/releases/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>Gluon Snapshots</id>
+            <url>https://nexus.gluonhq.com/nexus/content/repositories/public-snapshots</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <build>
         <plugins>
