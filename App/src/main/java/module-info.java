@@ -1,5 +1,6 @@
 module com.gluonhq.chat {
     requires javafx.controls;
+    requires javafx.fxml;
 
     requires com.gluonhq.charm.glisten;
     requires com.gluonhq.cloudlink.client;
@@ -24,6 +25,8 @@ module com.gluonhq.chat {
     requires afterburner.mfx;
 
     opens com.gluonhq.chat.service to afterburner.mfx;
+    opens com.gluonhq.chat.views to com.gluonhq.glisten.afterburner,
+            afterburner.mfx, javafx.fxml;
 
     opens com.gluonhq.chat.model to com.gluonhq.cloudlink.client;
 

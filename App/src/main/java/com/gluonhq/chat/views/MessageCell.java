@@ -2,7 +2,6 @@ package com.gluonhq.chat.views;
 
 import com.airhacks.afterburner.injection.Injector;
 import com.gluonhq.attach.position.Position;
-import com.gluonhq.charm.glisten.application.MobileApplication;
 import com.gluonhq.charm.glisten.control.CharmListCell;
 import com.gluonhq.chat.chatlistview.ChatListView;
 import com.gluonhq.chat.model.ChatImage;
@@ -36,7 +35,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.gluonhq.chat.GluonChat.MAPS_VIEW;
 import static com.gluonhq.chat.service.ImageUtils.*;
 
 class MessageCell extends CharmListCell<ChatMessage> {
@@ -254,8 +252,8 @@ class MessageCell extends CharmListCell<ChatMessage> {
                     Double.parseDouble(coordinates[2]));
 
             String initials = coordinates[0].substring((IMAGE_PREFIX + LATLON).length());
-            MobileApplication.getInstance().switchView(MAPS_VIEW).ifPresent(p ->
-                    ((MapsView) p).flyTo(position, null, initials, null));
+            AppViewManager.MAPS_VIEW.switchView().ifPresent(p ->
+                    ((MapsPresenter) p).flyTo(position, null, initials, null));
         } catch (NumberFormatException nfe) {}
     }
 

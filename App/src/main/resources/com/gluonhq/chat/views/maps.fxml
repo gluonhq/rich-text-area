@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.gluonhq.charm.glisten.mvc.View?>
+<?import com.gluonhq.maps.MapView?>
+<?import javafx.scene.layout.BorderPane?>
+
+
+<View fx:id="mapsView" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gluonhq.chat.views.MapsPresenter">
+    <center>
+        <MapView fx:id="mapView" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+    </center>
+</View>

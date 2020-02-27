@@ -16,7 +16,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
 
-//import javax.annotation.PostConstruct;
+import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -40,9 +40,8 @@ public class Service {
     private DataClient localDataClient;
     private GluonObservableObject<String> name;
 
-//    @PostConstruct
-//    public void postConstruct() {
-    public Service() {
+    @PostConstruct
+    public void postConstruct() {
         this.dataClient = DataClientBuilder.create()
                 .operationMode(OperationMode.CLOUD_FIRST)
                 .build();

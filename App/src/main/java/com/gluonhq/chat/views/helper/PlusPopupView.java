@@ -5,11 +5,11 @@ import com.gluonhq.attach.pictures.PicturesService;
 import com.gluonhq.attach.position.Position;
 import com.gluonhq.attach.position.PositionService;
 import com.gluonhq.attach.util.Platform;
-import com.gluonhq.charm.glisten.application.MobileApplication;
 import com.gluonhq.charm.glisten.layout.layer.PopupView;
 import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.service.Service;
-import com.gluonhq.chat.views.MapsView;
+import com.gluonhq.chat.views.AppViewManager;
+import com.gluonhq.chat.views.MapsPresenter;
 import com.gluonhq.connect.GluonObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -23,7 +23,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ResourceBundle;
 
-import static com.gluonhq.chat.GluonChat.MAPS_VIEW;
 import static com.gluonhq.chat.service.ImageUtils.DEFAULT_POSITION;
 import static com.gluonhq.chat.service.ImageUtils.IMAGE_PREFIX;
 import static com.gluonhq.chat.service.ImageUtils.LATLON;
@@ -121,8 +120,8 @@ public class PlusPopupView extends PopupView {
         String name = service.getName().get();
         String initials = Service.getInitials(name);
 
-        MobileApplication.getInstance().switchView(MAPS_VIEW).ifPresent(p ->
-                ((MapsView) p).flyTo(position, name, initials, e -> {
+        AppViewManager.MAPS_VIEW.switchView().ifPresent(p ->
+                ((MapsPresenter) p).flyTo(position, name, initials, e -> {
                     messages.removeIf(m -> m.getMessage().startsWith(IMAGE_PREFIX + LATLON + initials));
                     service.getImages().removeIf(m -> m.getId().startsWith(LATLON + initials));
                     messages.add(e);

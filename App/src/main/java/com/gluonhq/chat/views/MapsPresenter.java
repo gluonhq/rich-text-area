@@ -3,7 +3,7 @@ package com.gluonhq.chat.views;
 import com.airhacks.afterburner.injection.Injector;
 import com.gluonhq.attach.position.Position;
 import com.gluonhq.charm.glisten.animation.BounceInRightTransition;
-import com.gluonhq.charm.glisten.application.MobileApplication;
+import com.gluonhq.charm.glisten.afterburner.GluonPresenter;
 import com.gluonhq.charm.glisten.control.AppBar;
 import com.gluonhq.charm.glisten.control.FloatingActionButton;
 import com.gluonhq.charm.glisten.mvc.View;
@@ -12,9 +12,11 @@ import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.service.ImageUtils;
 import com.gluonhq.chat.service.Service;
 import com.gluonhq.chat.views.helper.PoiLayer;
+import com.gluonhq.chat.GluonChat;
 import com.gluonhq.maps.MapPoint;
 import com.gluonhq.maps.MapView;
 import javafx.scene.image.Image;
+import javafx.fxml.FXML;
 
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
@@ -23,37 +25,37 @@ import static com.gluonhq.chat.service.ImageUtils.DEFAULT_POSITION;
 import static com.gluonhq.chat.service.ImageUtils.LATLON;
 import static com.gluonhq.chat.service.ImageUtils.LATLON_SEP;
 
-public class MapsView extends View {
+public class MapsPresenter extends GluonPresenter<GluonChat> {
 
-    private final MapView mapView;
-    private final ResourceBundle resources;
+    @FXML private View mapsView;
+
+    @FXML private MapView mapView;
+
+    @FXML private ResourceBundle resources;
+
     private PoiLayer poiLayer;
-    private final FloatingActionButton floatingActionButton;
+    private FloatingActionButton floatingActionButton;
 
-    public MapsView() {
+    public void initialize() {
+        mapsView.setShowTransitionFactory(BounceInRightTransition::new);
+
         floatingActionButton = new FloatingActionButton(MaterialDesignIcon.SEND.text, e -> {});
 
-        setShowTransitionFactory(BounceInRightTransition::new);
-        resources = ResourceBundle.getBundle("com.gluonhq.chat.views.maps");
-        getStylesheets().add(UsersView.class.getResource("users.css").toExternalForm());
-
-        showingProperty().addListener((obs, ov, nv) -> {
-            AppBar appBar = MobileApplication.getInstance().getAppBar();
+        mapsView.showingProperty().addListener((obs, ov, nv) -> {
+            AppBar appBar = getApp().getAppBar();
             if (nv) {
                 appBar.setNavIcon(MaterialDesignIcon.CHEVRON_LEFT.button(e -> {
                         floatingActionButton.hide();
-                        MobileApplication.getInstance().goHome();
-                    }));
+                        getApp().goHome();
+                }));
                 appBar.setTitleText(resources.getString("maps.view.title"));
             }
         });
 
-        mapView = new MapView();
         mapView.setZoom(12);
         mapView.setCenter(new MapPoint(DEFAULT_POSITION.getLatitude(), DEFAULT_POSITION.getLongitude()));
         poiLayer = new PoiLayer();
         mapView.addLayer(poiLayer);
-        setCenter(mapView);
     }
 
     public void flyTo(Position position, String name, String initials, Consumer<ChatMessage> consumer) {
@@ -70,7 +72,7 @@ public class MapsView extends View {
                     var message = new ChatMessage(id, name);
                     consumer.accept(message);
                 }
-                MobileApplication.getInstance().switchToPreviousView();
+                getApp().switchToPreviousView();
             });
             floatingActionButton.show();
         }

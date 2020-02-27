@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.gluonhq.charm.glisten.control.CharmListView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import com.gluonhq.charm.glisten.mvc.View?>
+
+<View fx:id="users" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gluonhq.chat.views.UsersPresenter">
+    <center>
+        <CharmListView fx:id="usersList" BorderPane.alignment="CENTER" />
+    </center>
+</View>

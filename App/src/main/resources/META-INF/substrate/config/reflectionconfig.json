@@ -1,0 +1,16 @@
+[
+  {
+    "name":"com.gluonhq.charm.glisten.control.CharmListView",
+    "methods":[
+      {"name":"<init>","parameterTypes":[] },
+      {"name":"<init>","parameterTypes":["javafx.collections.ObservableList"] }
+    ]
+  }
+,
+  {
+    "name":"com.gluonhq.maps.MapView",
+    "methods":[
+      {"name":"<init>","parameterTypes":[] }
+    ]
+  }
+]

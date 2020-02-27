@@ -2,16 +2,17 @@ package com.gluonhq.chat.views;
 
 import com.gluonhq.attach.display.DisplayService;
 import com.gluonhq.attach.orientation.OrientationService;
-import com.gluonhq.charm.glisten.application.MobileApplication;
+import com.gluonhq.charm.glisten.afterburner.GluonPresenter;
 import com.gluonhq.charm.glisten.mvc.View;
 import javafx.geometry.Orientation;
+import com.gluonhq.chat.GluonChat;
+import javafx.fxml.FXML;
 
-import static com.gluonhq.chat.GluonChat.LANDSCAPE_VIEW;
-import static com.gluonhq.chat.GluonChat.PORTRAIT_VIEW;
+public class HomePresenter extends GluonPresenter<GluonChat> {
 
-public class HomeView extends View {
+    @FXML private View homeView;
 
-    public HomeView() {
+    public void initialize() {
         boolean tablet = DisplayService.create()
                 .map(DisplayService::isTablet)
                 .orElse(false);
@@ -24,7 +25,7 @@ public class HomeView extends View {
                 .flatMap(OrientationService::getOrientation)
                 .orElse(Orientation.HORIZONTAL);
 
-        showingProperty().addListener((obs, ov, nv) -> {
+        homeView.showingProperty().addListener((obs, ov, nv) -> {
             if (nv) {
                 configView(tablet, orientation);
             }
@@ -33,10 +34,11 @@ public class HomeView extends View {
 
     private void configView(boolean tablet, Orientation orientation) {
         if (tablet && orientation == Orientation.HORIZONTAL) {
-            MobileApplication.getInstance().switchView(LANDSCAPE_VIEW);
+            AppViewManager.LANDSCAPE_VIEW.switchView()
+                    .ifPresent(p -> ((LandscapePresenter) p).loadLandscapeView());
         } else {
-            MobileApplication.getInstance().switchView(PORTRAIT_VIEW)
-                    .ifPresent(p -> ((PortraitView) p).loadChat());
+            AppViewManager.PORTRAIT_VIEW.switchView()
+                    .ifPresent(p -> ((PortraitPresenter) p).loadChat());
         }
     }
 }

@@ -13,6 +13,7 @@
     <properties>
         <mainClassName>com.gluonhq.chat.GluonChat</mainClassName>
         <form.factor>phone</form.factor>
+<!--        <form.factor>tablet</form.factor>-->
     </properties>
 
     <pluginRepositories>
@@ -29,6 +30,9 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>${javafx-maven-plugin-version}</version>
                 <configuration>
+                    <options>
+                        <option>-Dcharm-desktop-form=${form.factor}</option>
+                    </options>
                     <mainClass>${mainClassName}</mainClass>
                 </configuration>
             </plugin>
@@ -66,7 +70,14 @@
                         <list>com.gluonhq.chat.service.Service</list>
                         <list>com.gluonhq.chat.model.ChatMessage</list>
                         <list>com.gluonhq.chat.model.ChatImage</list>
+                        <list>com.gluonhq.chat.views.ChatPresenter</list>
+                        <list>com.gluonhq.chat.views.HomePresenter</list>
+                        <list>com.gluonhq.chat.views.LandscapePresenter</list>
+                        <list>com.gluonhq.chat.views.MapsPresenter</list>
+                        <list>com.gluonhq.chat.views.PortraitPresenter</list>
+                        <list>com.gluonhq.chat.views.UsersPresenter</list>
                         <list>org.glassfish.json.JsonProviderImpl</list>
+                        <list>javafx.fxml.FXMLLoader</list>
                         <!-- for desktop only -->
 <!--                        <list>com.gluonhq.attach.orientation.impl.DesktopOrientationService</list>-->
 <!--                        <list>com.gluonhq.attach.position.impl.DesktopPositionService</list>-->
@@ -82,6 +93,11 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
+            <version>${javafxVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
             <version>${javafxVersion}</version>
         </dependency>
         <dependency>
@@ -224,24 +240,28 @@
                     <artifactId>cache</artifactId>
                     <version>${attachVersion}</version>
                     <classifier>desktop</classifier>
+                    <scope>runtime</scope>
                 </dependency>
                 <dependency>
                     <groupId>com.gluonhq.attach</groupId>
                     <artifactId>display</artifactId>
                     <version>${attachVersion}</version>
                     <classifier>desktop</classifier>
+                    <scope>runtime</scope>
                 </dependency>
                 <dependency>
                     <groupId>com.gluonhq.attach</groupId>
                     <artifactId>lifecycle</artifactId>
                     <version>${attachVersion}</version>
                     <classifier>desktop</classifier>
+                    <scope>runtime</scope>
                 </dependency>
                 <dependency>
                     <groupId>com.gluonhq.attach</groupId>
                     <artifactId>storage</artifactId>
                     <version>${attachVersion}</version>
                     <classifier>desktop</classifier>
+                    <scope>runtime</scope>
                 </dependency>
             </dependencies>
         </profile>
