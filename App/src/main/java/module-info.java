@@ -4,12 +4,13 @@ module com.gluonhq.chat {
 
     requires com.gluonhq.charm.glisten;
     requires com.gluonhq.cloudlink.client;
+    requires com.gluonhq.attach.cache;
     requires com.gluonhq.attach.display;
     requires com.gluonhq.attach.lifecycle;
     requires com.gluonhq.attach.orientation;
     requires com.gluonhq.attach.pictures;
     requires com.gluonhq.attach.position;
-    requires com.gluonhq.attach.cache;
+    requires com.gluonhq.attach.storage;
     requires com.gluonhq.attach.util;
 
     requires com.gluonhq.maps;

@@ -1,5 +1,23 @@
 [
   {
+    "name":"com.gluonhq.charm.glisten.visual.MaterialDesignIcon",
+    "methods":[
+      {"name":"valueOf","parameterTypes":["java.lang.String"] }
+    ]
+  }
+,
+  {
+    "name":"com.gluonhq.charm.glisten.control.Icon",
+    "methods":[
+      {"name":"<init>","parameterTypes":[] },
+      {"name":"<init>","parameterTypes":["com.gluonhq.charm.glisten.visual.MaterialDesignIcon"] },
+      {"name":"contentProperty","parameterTypes":[] },
+      {"name":"getContent","parameterTypes":[] },
+      {"name":"setContent","parameterTypes":["com.gluonhq.charm.glisten.visual.MaterialDesignIcon"] }
+    ]
+  }
+,
+  {
     "name":"com.gluonhq.charm.glisten.control.CharmListView",
     "methods":[
       {"name":"<init>","parameterTypes":[] },

@@ -29,7 +29,7 @@
         <attachVersion>4.0.5</attachVersion>
         <mapsVersion>2.0.0-ea+2</mapsVersion>
         <connectVersion>2.0.1</connectVersion>
-        <javafxVersion>13.0.2</javafxVersion>
+        <javafxVersion>15-ea+1</javafxVersion>
         <controlsfxVersion>11.0.1</controlsfxVersion>
         <javafx-maven-plugin-version>0.0.4</javafx-maven-plugin-version>
         <client-maven-plugin-version>0.1.17-SNAPSHOT</client-maven-plugin-version>

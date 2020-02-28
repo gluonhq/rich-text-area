@@ -55,6 +55,7 @@
                     </attachList>
                     <bundlesList>
                         <list>com.gluonhq.chat.views.chat</list>
+                        <list>com.gluonhq.chat.views.login</list>
                         <list>com.gluonhq.chat.views.landscape</list>
                         <list>com.gluonhq.chat.views.maps</list>
                         <list>com.gluonhq.chat.views.portrait</list>
@@ -64,6 +65,10 @@
                         <!--<list>controlsfx</list>-->
                     </bundlesList>
                     <resourcesList>
+                        <item>.*\\.policy$</item>
+                        <item>.*\\.certs$</item>
+                        <item>.*\\.dat$</item>
+                        <item>.*\\.remove$</item>
                         <item>logging.properties</item>
                     </resourcesList>
                     <reflectionList>
@@ -73,6 +78,7 @@
                         <list>com.gluonhq.chat.views.ChatPresenter</list>
                         <list>com.gluonhq.chat.views.HomePresenter</list>
                         <list>com.gluonhq.chat.views.LandscapePresenter</list>
+                        <list>com.gluonhq.chat.views.LoginPresenter</list>
                         <list>com.gluonhq.chat.views.MapsPresenter</list>
                         <list>com.gluonhq.chat.views.PortraitPresenter</list>
                         <list>com.gluonhq.chat.views.UsersPresenter</list>
@@ -82,7 +88,7 @@
 <!--                        <list>com.gluonhq.attach.orientation.impl.DesktopOrientationService</list>-->
 <!--                        <list>com.gluonhq.attach.position.impl.DesktopPositionService</list>-->
                     </reflectionList>
-                    <verbose>true</verbose>
+<!--                    <verbose>true</verbose>-->
                     <mainClass>${mainClassName}</mainClass>
                 </configuration>
             </plugin>

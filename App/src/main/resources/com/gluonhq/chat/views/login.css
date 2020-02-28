@@ -1,0 +1,29 @@
+.box {
+    -fx-padding: 20;
+    -fx-spacing: 20;
+    -fx-alignment: TOP_CENTER;
+}
+
+.label {
+    -fx-font-size: 1.3em;
+}
+
+.text-field {
+    -fx-font-size: 1.4em;
+}
+
+.button {
+    -fx-font-size: 1.25em;
+}
+
+.top {
+    -fx-pref-height: 3mm;
+}
+
+.top.ios {
+    -fx-pref-height: 5.6mm;
+}
+
+.top.ios.notch {
+    -fx-pref-height: 11.52mm;
+}

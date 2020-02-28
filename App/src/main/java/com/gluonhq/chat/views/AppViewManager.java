@@ -20,6 +20,7 @@ public class AppViewManager {
     public static final AppViewRegistry REGISTRY = new AppViewRegistry();
 
     public static final AppView FIRST_VIEW  = view("Home View", HomePresenter.class, MaterialDesignIcon.HOME, HOME_VIEW, SKIP_VIEW_STACK);
+    public static final AppView LOGIN_VIEW  = view("Login View", LoginPresenter.class, MaterialDesignIcon.HOME, SKIP_VIEW_STACK);
     public static final AppView PORTRAIT_VIEW  = view("Chat View", PortraitPresenter.class, MaterialDesignIcon.CHAT, SHOW_IN_DRAWER, SKIP_VIEW_STACK);
     public static final AppView LANDSCAPE_VIEW  = view("Chat View", LandscapePresenter.class, MaterialDesignIcon.CHAT, SHOW_IN_DRAWER, SKIP_VIEW_STACK);
     public static final AppView CHAT_VIEW  = view("Chat View", ChatPresenter.class, MaterialDesignIcon.CHAT, SHOW_IN_DRAWER);
