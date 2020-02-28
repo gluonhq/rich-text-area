@@ -12,7 +12,7 @@
     <center>
         <StackPane fx:id="stackPane" prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER">
             <children>
-                <HBox alignment="CENTER" styleClass="outter-box" StackPane.alignment="TOP_CENTER">
+                <HBox alignment="CENTER" styleClass="outer-box" StackPane.alignment="TOP_CENTER">
                     <children>
                         <HBox fx:id="unreadBox" alignment="CENTER" styleClass="unread-box" visible="false">
                             <children>

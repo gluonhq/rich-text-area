@@ -17,6 +17,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -67,6 +68,7 @@ class MessageCell extends CharmListCell<ChatMessage> {
     private final double imageSize = 20;
     private final Service service;
     private final ResourceBundle resources;
+    private final HBox bottomBox;
 
     public MessageCell(String name) {
         super();
@@ -81,13 +83,17 @@ class MessageCell extends CharmListCell<ChatMessage> {
 
         setWrapText(true);
         this.message = new TextFlow();
-        message.setMinSize(200, 20);
         message.getStyleClass().add("chat-message-text");
 
         messageBubble = new BorderPane(message);
+        messageBubble.setMaxWidth(Region.USE_PREF_SIZE);
+        messageBubble.getStyleClass().add("chat-message-bubble");
+
+        bottomBox = new HBox(10, date, status);
+        bottomBox.setMaxWidth(Region.USE_PREF_SIZE);
 
         pane = new BorderPane(messageBubble);
-        pane.setBottom(new HBox(10, date, status));
+        pane.setBottom(bottomBox);
         pane.getStyleClass().add("chat-message");
         pane.prefWidthProperty().bind(widthProperty());
 
@@ -123,9 +129,11 @@ class MessageCell extends CharmListCell<ChatMessage> {
             BorderPane.setMargin(message, isMe ? meInsets : notMeInsets);
 
             if (item.getTime() != null) {
-//                status.setText(/*item.getTime().format(formatter) + */"  ✓"); // check mark if read
                 date.setText(item.getFormattedTime());
+                status.setContentDisplay(ContentDisplay.TEXT_ONLY);
                 status.setText(resources.getString("label.status.check")); // check mark if read
+            } else {
+                status.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             }
             BorderPane.setAlignment(status, isMe ? Pos.CENTER_LEFT : Pos.CENTER_RIGHT);
 
@@ -133,18 +141,24 @@ class MessageCell extends CharmListCell<ChatMessage> {
 
             if (isMe) {
                 msgHandle.setGraphic(rightImageView);
-                msgHandle.pseudoClassStateChanged(SIDE_RIGHT, true);
+                messageBubble.pseudoClassStateChanged(SIDE_RIGHT, true);
                 messageBubble.setLeft(null);
                 messageBubble.setRight(msgHandle);
                 pane.setLeft(null);
                 pane.setRight(icon);
+                BorderPane.setAlignment(message, Pos.TOP_RIGHT);
+                BorderPane.setAlignment(messageBubble, Pos.TOP_RIGHT);
+                BorderPane.setAlignment(bottomBox, Pos.BOTTOM_RIGHT);
             } else {
                 msgHandle.setGraphic(leftImageView);
-                msgHandle.pseudoClassStateChanged(SIDE_RIGHT, false);
+                messageBubble.pseudoClassStateChanged(SIDE_RIGHT, false);
                 messageBubble.setRight(null);
                 messageBubble.setLeft(msgHandle);
                 pane.setRight(null);
                 pane.setLeft(icon);
+                BorderPane.setAlignment(message, Pos.TOP_LEFT);
+                BorderPane.setAlignment(messageBubble, Pos.TOP_LEFT);
+                BorderPane.setAlignment(bottomBox, Pos.BOTTOM_LEFT);
             }
             pseudoClassStateChanged(UNREAD, getIndex() == getUnreadIndex());
 
