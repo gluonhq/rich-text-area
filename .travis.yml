@@ -25,9 +25,9 @@ addons:
 
 before_script:
   - mkdir -p $HOME/graalvm && cd $HOME/graalvm
-  - wget https://download2.gluonhq.com/substrate/graalvm/graalvm-svm-linux-20.1.0-ea+24.zip
-  - unzip graalvm-svm-linux-20.1.0-ea+24.zip && cd $TRAVIS_BUILD_DIR
-  - export GRAALVM_HOME=$HOME/graalvm/graalvm-svm-linux-20.1.0-ea+24
+  - wget https://download2.gluonhq.com/substrate/graalvm/graalvm-svm-linux-20.1.0-ea+28.zip
+  - unzip graalvm-svm-linux-20.1.0-ea+28.zip && cd $TRAVIS_BUILD_DIR
+  - export GRAALVM_HOME=$HOME/graalvm/graalvm-svm-linux-20.1.0-ea+28
   - echo $JAVA_OPTS
 
 install: true
