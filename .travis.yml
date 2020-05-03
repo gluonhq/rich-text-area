@@ -22,6 +22,7 @@ addons:
       - libavcodec-dev
       - libavformat-dev
       - libasound2-dev
+      - libgl-dev
 
 before_script:
   - mkdir -p $HOME/graalvm && cd $HOME/graalvm
