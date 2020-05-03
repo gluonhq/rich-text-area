@@ -16,13 +16,6 @@
 <!--        <form.factor>tablet</form.factor>-->
     </properties>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>Gluon Releases</id>
-            <url>https://nexus.gluonhq.com/nexus/content/repositories/releases/</url>
-        </pluginRepository>
-    </pluginRepositories>
-
     <build>
         <plugins>
             <plugin>
@@ -46,6 +39,7 @@
                         <list>cache</list>
                         <list>device</list>
                         <list>display</list>
+                        <list>keyboard</list>
                         <list>lifecycle</list>
                         <list>orientation</list>
                         <list>pictures</list>
@@ -65,10 +59,6 @@
                         <!--<list>controlsfx</list>-->
                     </bundlesList>
                     <resourcesList>
-                        <item>.*\\.policy$</item>
-                        <item>.*\\.certs$</item>
-                        <item>.*\\.dat$</item>
-                        <item>.*\\.remove$</item>
                         <item>logging.properties</item>
                     </resourcesList>
                     <reflectionList>
@@ -83,7 +73,6 @@
                         <list>com.gluonhq.chat.views.PortraitPresenter</list>
                         <list>com.gluonhq.chat.views.UsersPresenter</list>
                         <list>org.glassfish.json.JsonProviderImpl</list>
-                        <list>javafx.fxml.FXMLLoader</list>
                         <!-- for desktop only -->
 <!--                        <list>com.gluonhq.attach.orientation.impl.DesktopOrientationService</list>-->
 <!--                        <list>com.gluonhq.attach.position.impl.DesktopPositionService</list>-->
@@ -186,6 +175,11 @@
         </dependency>
         <dependency>
             <groupId>com.gluonhq.attach</groupId>
+            <artifactId>keyboard</artifactId>
+            <version>${attachVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.gluonhq.attach</groupId>
             <artifactId>lifecycle</artifactId>
             <version>${attachVersion}</version>
         </dependency>
@@ -282,13 +276,30 @@
                     <groupId>com.gluonhq.attach</groupId>
                     <artifactId>orientation</artifactId>
                     <version>${attachVersion}</version>
-                    <classifier>ios</classifier>
                 </dependency>
                 <dependency>
                     <groupId>com.gluonhq.attach</groupId>
                     <artifactId>position</artifactId>
                     <version>${attachVersion}</version>
-                    <classifier>ios</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>android</id>
+            <properties>
+                <clientTarget>android</clientTarget>
+            </properties>
+            <dependencies>
+                <!-- Attach -->
+                <dependency>
+                    <groupId>com.gluonhq.attach</groupId>
+                    <artifactId>orientation</artifactId>
+                    <version>${attachVersion}</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.gluonhq.attach</groupId>
+                    <artifactId>position</artifactId>
+                    <version>${attachVersion}</version>
                 </dependency>
             </dependencies>
         </profile>

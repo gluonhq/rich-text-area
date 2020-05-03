@@ -1,5 +1,7 @@
 package com.gluonhq.chat.views;
 
+import com.gluonhq.attach.display.DisplayService;
+import com.gluonhq.attach.keyboard.KeyboardService;
 import com.gluonhq.attach.util.Platform;
 import com.gluonhq.charm.glisten.afterburner.GluonPresenter;
 import com.gluonhq.charm.glisten.mvc.View;
@@ -12,6 +14,7 @@ import com.gluonhq.connect.GluonObservableList;
 import com.gluonhq.connect.GluonObservableObject;
 //import com.gluonhq.emoji.control.EmojiTextArea;
 import javafx.animation.PauseTransition;
+import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
@@ -66,33 +69,58 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
         messageEditor.getStyleClass().add("chat-text-editor");
         HBox.setHgrow(messageEditor, Priority.ALWAYS);
         bottomPane.setCenter(messageEditor);
+        KeyboardService.create().ifPresent(k -> k.keepVisibilityForNode(messageEditor, chatView));
 
         sendButton.prefHeightProperty().bind(addButton.heightProperty());
 
         sendButton.disableProperty().bind(messageEditor.textProperty().isEmpty());
         sendButton.setOnAction(e -> {
             String text = messageEditor.getText().trim();
-            if (! text.isEmpty()) {
+            if (!text.isEmpty()) {
                 var message = new ChatMessage(text, service.getName().get());
                 messages.add(message);
-                messageEditor.setText("");
+                messageEditor.clear();
+                addButton.requestFocus();
             }
         });
 
         setupAddButton();
 
-        if (Platform.isIOS()) {
+        if (Platform.isIOS() || Platform.isAndroid()) {
+
+            if (Platform.isIOS()) {
+                // style classes
+                messageEditor.getStyleClass().add("ios");
+                chatList.getStyleClass().add("ios");
+                if (DisplayService.create().map(DisplayService::hasNotch).orElse(false)) {
+                    bottomPane.getStyleClass().add("notch");
+                }
+            }
+
             // allow dismissing the soft keyboard when tapping outside textArea
             chatList.mouseTransparentProperty().bind(messageEditor.focusedProperty());
             chatView.setOnMouseClicked(e -> {
                 if (messageEditor.isFocused()) {
-                    // Try to hide keyboard
+                    // Hide keyboard
                     addButton.requestFocus();
                 }
             });
 
             // process button "click" when the keyboard was still showing
             sendButton.setOnMousePressed(e -> sendButton.fire());
+
+            // scroll to last element
+            chatList.sceneProperty().addListener(new InvalidationListener() {
+                @Override
+                public void invalidated(Observable observable) {
+                    if (chatList.getScene() != null) {
+                        PauseTransition pause = new PauseTransition(Duration.millis(100));
+                        pause.setOnFinished(f -> chatList.scrollTo(chatList.getItems().size() - 1));
+                        pause.playFromStart();
+                        chatList.sceneProperty().removeListener(this);
+                    }
+                }
+            });
         }
 
     }

@@ -16,10 +16,18 @@
 .chat-text-editor {
     -fx-background-radius: .5em;
     -fx-background-color: -chat-light-color;
+    -fx-font-size: 1.1em;
     -fx-text-fill: -chart-dark-text-fill;
     -fx-prompt-text-fill: derive( -chart-dark-text-fill, 50%);
     -fx-pref-height: 60;
     -fx-max-height: 60;
+}
+.chat-text-editor .content {
+    -fx-background-color: white;
+}
+
+.chat-text-editor.ios {
+    -fx-font-size: 1.3em;
 }
 
 .chat-toolbar {
@@ -36,10 +44,14 @@
 
 .chat-bottom-bar {
     -fx-background-color: -chat-dark-color;
-    -fx-padding: 10;
+    -fx-padding: 2.24mm 2.56mm 2.24mm 2.56mm;
     -fx-alignment: center-left;
     -fx-spacing: 10;
     -fx-focus-traversable: false;
+}
+
+.chat-bottom-bar.notch {
+    -fx-padding: 2.24mm 2.56mm 5.44mm 2.56mm;
 }
 
 .chat-list {
@@ -57,6 +69,10 @@
 
 .chat-list > .scroll-bar:horizontal {
     -fx-padding: 0px;
+}
+
+.chat-list-view.chat-list.ios > .virtual-flow > .scroll-bar:vertical {
+    -fx-translate-x: 8;
 }
 
 .chat-message,
@@ -110,7 +126,7 @@
     -fx-background-radius: 35;
     -fx-alignment: top-right;
     -fx-padding: 15;
-    -fx-font-size: 0.8em;
+    -fx-font-size: 1.1em;
     -fx-font-weight: bold;
 }
 
