@@ -31,10 +31,10 @@
             </plugin>
             <plugin>
                 <groupId>com.gluonhq</groupId>
-                <artifactId>client-maven-plugin</artifactId>
-                <version>${client-maven-plugin-version}</version>
+                <artifactId>gluonfx-maven-plugin</artifactId>
+                <version>${gluonfx-maven-plugin-version}</version>
                 <configuration>
-                    <target>${clientTarget}</target>
+                    <target>${gluonfxTarget}</target>
                     <attachList>
                         <list>cache</list>
                         <list>device</list>
@@ -218,7 +218,7 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <clientTarget>host</clientTarget>
+                <gluonfxTarget>host</gluonfxTarget>
                 <orientationService>com.gluonhq.attach.orientation.impl.DesktopOrientationService</orientationService>
                 <positionService>com.gluonhq.attach.position.impl.DesktopPositionService</positionService>
             </properties>
@@ -268,7 +268,7 @@
         <profile>
             <id>ios</id>
             <properties>
-                <clientTarget>ios</clientTarget>
+                <gluonfxTarget>ios</gluonfxTarget>
             </properties>
             <dependencies>
                 <!-- Attach -->
@@ -287,7 +287,7 @@
         <profile>
             <id>android</id>
             <properties>
-                <clientTarget>android</clientTarget>
+                <gluonfxTarget>android</gluonfxTarget>
             </properties>
             <dependencies>
                 <!-- Attach -->
