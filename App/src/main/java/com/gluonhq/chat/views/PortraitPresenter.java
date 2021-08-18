@@ -5,9 +5,11 @@ import com.gluonhq.charm.glisten.application.MobileApplication;
 import com.gluonhq.charm.glisten.control.AppBar;
 import com.gluonhq.charm.glisten.mvc.View;
 import com.gluonhq.charm.glisten.visual.MaterialDesignIcon;
-import javafx.scene.control.Button;
 import com.gluonhq.chat.GluonChat;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.ToggleButton;
 
 import java.util.ResourceBundle;
 
@@ -29,7 +31,22 @@ public class PortraitPresenter extends GluonPresenter<GluonChat> {
             Button chat = MaterialDesignIcon.CHAT.button(e -> loadChat());
             chat.visibleProperty().bind(users.visibleProperty().not());
             chat.managedProperty().bind(chat.visibleProperty());
-            appBar.getActionItems().addAll(users, chat);
+
+            ToggleButton theme = new ToggleButton();
+            theme.getStyleClass().addAll("icon-toggle", "chat-button");
+            theme.setGraphic(MaterialDesignIcon.LIGHTBULB_OUTLINE.graphic());
+            theme.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+
+            theme.selectedProperty().addListener((observable, oldValue, newValue) -> {
+                final String darkStyleSheet = PortraitPresenter.class.getResource("/styles_dark.css").toExternalForm();
+                if (newValue) {
+                    portraitView.getScene().getStylesheets().add(darkStyleSheet);
+                } else {
+                    portraitView.getScene().getStylesheets().remove(darkStyleSheet);
+                }
+            });
+
+            appBar.getActionItems().addAll(users, chat, theme);
         });
     }
 

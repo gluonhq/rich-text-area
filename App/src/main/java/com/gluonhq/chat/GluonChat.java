@@ -1,8 +1,12 @@
 package com.gluonhq.chat;
 
+import com.airhacks.afterburner.injection.Injector;
 import com.gluonhq.attach.lifecycle.LifecycleService;
+import com.gluonhq.charm.glisten.afterburner.GluonInstanceProvider;
 import com.gluonhq.charm.glisten.application.MobileApplication;
 import com.gluonhq.charm.glisten.visual.Swatch;
+import com.gluonhq.chat.service.DummyService;
+import com.gluonhq.chat.service.Service;
 import com.gluonhq.chat.views.AppViewManager;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -25,6 +29,13 @@ public class GluonChat extends MobileApplication {
         }
     }
 
+    private static final GluonInstanceProvider instanceSupplier = new GluonInstanceProvider() {{
+        // bindProvider(Service.class, CloudlinkService::new);
+        bindProvider(Service.class, DummyService::new);
+
+        Injector.setInstanceSupplier(this);
+    }};
+
     @Override
     public void init() {
         AppViewManager.registerViewsAndDrawer(this);
@@ -39,6 +50,9 @@ public class GluonChat extends MobileApplication {
 
         scene.getWindow().setOnCloseRequest(e ->
                 LifecycleService.create().ifPresent(LifecycleService::shutdown));
+
+        // TODO: Remove
+        //ScenicView.show(scene);
     }
 
     public static void main(String[] args) {

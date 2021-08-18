@@ -11,6 +11,7 @@ import com.gluonhq.chat.service.Service;
 import com.gluonhq.chat.views.AppViewManager;
 import com.gluonhq.chat.views.MapsPresenter;
 import com.gluonhq.connect.GluonObservableList;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -32,7 +33,7 @@ public class PlusPopupView extends PopupView {
     private Node ownerNode;
     private ResourceBundle resources;
     private Service service;
-    private GluonObservableList<ChatMessage> messages;
+    private ObservableList<ChatMessage> messages;
 
     public PlusPopupView(Node ownerNode, ResourceBundle resources) {
         super(ownerNode);
@@ -63,7 +64,7 @@ public class PlusPopupView extends PopupView {
                         Image image = new Image(new FileInputStream(file));
                         String id = service.addImage(file.getName() + "-" + System.currentTimeMillis(), image);
                         if (id != null) {
-                            var message = new ChatMessage(id, service.getName().get());
+                            var message = new ChatMessage(id, service.getName());
                             messages.add(message);
                         }
                     } catch (FileNotFoundException e1) {
@@ -76,7 +77,7 @@ public class PlusPopupView extends PopupView {
                                 .ifPresent(image -> {
                                     String id = service.addImage("photo" + "-" + System.currentTimeMillis(), image);
                                     if (id != null) {
-                                        var message = new ChatMessage(id, service.getName().get());
+                                        var message = new ChatMessage(id, service.getName());
                                         messages.add(message);
                                     }
                                 }));
@@ -117,7 +118,7 @@ public class PlusPopupView extends PopupView {
     private void sendLocation(Position newPosition) {
         Position position = newPosition == null ? DEFAULT_POSITION : newPosition;
 
-        String name = service.getName().get();
+        String name = service.getName();
         String initials = Service.getInitials(name);
 
         AppViewManager.MAPS_VIEW.switchView().ifPresent(p ->

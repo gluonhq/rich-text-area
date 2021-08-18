@@ -12,6 +12,7 @@ import com.gluonhq.connect.GluonObservableList;
 //import com.gluonhq.emoji.EmojiData;
 //import com.gluonhq.emoji.popup.util.EmojiImageUtils;
 import javafx.animation.PauseTransition;
+import javafx.collections.ObservableList;
 import javafx.css.PseudoClass;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -234,23 +235,25 @@ class MessageCell extends CharmListCell<ChatMessage> {
             return Optional.of(ImageUtils.getImageView(cache.get()));
         }
 
-        GluonObservableList<ChatImage> images = service.getImages();
-        if (! images.isInitialized()) {
-            ImageView imageView = ImageUtils.getImageView(loading);
-            images.setOnSucceeded(e ->
+        final ObservableList<ChatImage> images = service.getImages();
+        if (images instanceof GluonObservableList) {
+            GluonObservableList<ChatImage> chatImages = (GluonObservableList<ChatImage>) images;
+            if (!chatImages.isInitialized()) {
+                ImageView imageView = ImageUtils.getImageView(loading);
+                chatImages.setOnSucceeded(e ->
                         formatImage(value).ifPresent(iv -> {
                             imageView.setImage(iv.getImage());
                             getListView().refresh();
                         }));
-            return Optional.of(imageView);
+                return Optional.of(imageView);
+            }
         }
 
-        return Optional.ofNullable(images.stream()
+        return images.stream()
                 .filter(chatImage -> chatImage != null && chatImage.getId() != null)
                 .filter(chatImage -> chatImage.getId().equals(imageId))
                 .findFirst()
-                .map(ImageUtils::getImageView)
-                .orElse(null));
+                .map(ImageUtils::getImageView);
     }
 
     private void flyTo(String value) {
@@ -268,7 +271,9 @@ class MessageCell extends CharmListCell<ChatMessage> {
             String initials = coordinates[0].substring((IMAGE_PREFIX + LATLON).length());
             AppViewManager.MAPS_VIEW.switchView().ifPresent(p ->
                     ((MapsPresenter) p).flyTo(position, null, initials, null));
-        } catch (NumberFormatException nfe) {}
+        } catch (NumberFormatException nfe) {
+            nfe.printStackTrace();
+        }
     }
 
     private void addPressAndHoldHandler(Node node, Duration holdTime, EventHandler<MouseEvent> handler) {
