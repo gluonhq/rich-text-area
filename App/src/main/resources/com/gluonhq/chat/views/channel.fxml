@@ -6,10 +6,8 @@
 
 <?import com.gluonhq.charm.glisten.control.TextField?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.image.Image?>
 <?import com.gluonhq.charm.glisten.control.Icon?>
-<View fx:id="users" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gluonhq.chat.views.UsersPresenter">
+<View fx:id="channels" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gluonhq.chat.views.ChannelPresenter">
     <top>
         <HBox fx:id="searchBox" styleClass="search-box">
             <Icon content="SEARCH" />
@@ -18,6 +16,6 @@
         
     </top>
     <center>
-        <CharmListView fx:id="usersList" BorderPane.alignment="CENTER" />
+        <CharmListView fx:id="channelList" styleClass="channel-list" BorderPane.alignment="CENTER" />
     </center>
 </View>

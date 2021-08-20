@@ -58,7 +58,7 @@ public class PortraitPresenter extends GluonPresenter<GluonChat> {
     }
 
     void loadUsers() {
-        MobileApplication.getInstance().retrieveView(AppViewManager.USERS_VIEW.getId())
+        MobileApplication.getInstance().retrieveView(AppViewManager.CHANNEL_VIEW.getId())
                 .ifPresentOrElse(portraitView::setCenter,
                         () -> System.out.println("Error finding USERS_VIEW"));
         users.setVisible(false);

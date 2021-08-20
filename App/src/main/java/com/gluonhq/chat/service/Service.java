@@ -1,5 +1,6 @@
 package com.gluonhq.chat.service;
 
+import com.gluonhq.chat.model.Channel;
 import com.gluonhq.chat.model.ChatImage;
 import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.model.User;
@@ -9,7 +10,6 @@ import javafx.scene.image.Image;
 
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.gluonhq.chat.service.ImageUtils.IMAGE_PREFIX;
@@ -21,6 +21,12 @@ public interface Service {
     boolean login(String userName);
 
     ObservableList<User> getUsers();
+
+    /**
+     * Returns a list of channels for the logged user
+     * @return List of Channel
+     */
+    ObservableList<Channel> getChannels();
 
     /**
      * Returns the currently logged-in user
@@ -61,5 +67,10 @@ public interface Service {
         }
     }
 
-    ObservableList<ChatMessage> getMessages(User user);
+    /**
+     * Fetches all messages in a channel
+     * @param channel The channel for which messages are to be fetched
+     * @return List of messages in a channel
+     */
+    ObservableList<ChatMessage> getMessages(Channel channel);
 }

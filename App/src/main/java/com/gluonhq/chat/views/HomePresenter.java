@@ -11,6 +11,8 @@ import javafx.fxml.FXML;
 
 import javax.inject.Inject;
 
+import static com.gluonhq.chat.GluonChat.VIEW_CHANGE_WIDTH;
+
 public class HomePresenter extends GluonPresenter<GluonChat> {
 
     @FXML private View homeView;
@@ -41,7 +43,7 @@ public class HomePresenter extends GluonPresenter<GluonChat> {
     }
 
     private void changeOrientation(double width) {
-        if (width > 600) {
+        if (width > VIEW_CHANGE_WIDTH) {
             AppViewManager.LANDSCAPE_VIEW.switchView()
                     .ifPresent(p -> ((LandscapePresenter) p).loadLandscapeView());
         } else {

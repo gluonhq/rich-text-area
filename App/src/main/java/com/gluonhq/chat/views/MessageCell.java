@@ -136,7 +136,7 @@ class MessageCell extends CharmListCell<ChatMessage> {
             }
             BorderPane.setAlignment(status, isMe ? Pos.CENTER_LEFT : Pos.CENTER_RIGHT);
 
-            icon.setText(isMe ? "ME" : Service.getInitials(item.getUser().toString()));
+            icon.setText(isMe ? "ME" : Service.getInitials(item.getUser().displayName()));
 
             if (isMe) {
                 msgHandle.setGraphic(rightImageView);

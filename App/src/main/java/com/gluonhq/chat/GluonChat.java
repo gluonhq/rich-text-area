@@ -2,6 +2,7 @@ package com.gluonhq.chat;
 
 import com.airhacks.afterburner.injection.Injector;
 import com.gluonhq.attach.lifecycle.LifecycleService;
+import com.gluonhq.attach.util.Platform;
 import com.gluonhq.charm.glisten.afterburner.GluonInstanceProvider;
 import com.gluonhq.charm.glisten.application.MobileApplication;
 import com.gluonhq.charm.glisten.visual.Swatch;
@@ -20,6 +21,11 @@ import java.util.logging.Logger;
 public class GluonChat extends MobileApplication {
 
     private static final Logger LOG = Logger.getLogger(GluonChat.class.getName());
+    private static final int DESKTOP_DEFAULT_WIDTH = 800;
+    private static final int DESKTOP_DEFAULT_HEIGHT = 600;
+    
+    public static final int VIEW_CHANGE_WIDTH = 600;
+    
     static {
         try {
             LogManager.getLogManager().readConfiguration(GluonChat.class.getResourceAsStream("/logging.properties"));
@@ -50,6 +56,12 @@ public class GluonChat extends MobileApplication {
 
         scene.getWindow().setOnCloseRequest(e ->
                 LifecycleService.create().ifPresent(LifecycleService::shutdown));
+
+        // Default size for desktop
+        if (Platform.isDesktop()) {
+            scene.getWindow().setWidth(DESKTOP_DEFAULT_WIDTH);
+            scene.getWindow().setHeight(DESKTOP_DEFAULT_HEIGHT);
+        }
 
         // TODO: Remove
         //ScenicView.show(scene);

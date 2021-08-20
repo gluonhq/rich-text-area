@@ -90,7 +90,7 @@
                         <list>com.gluonhq.chat.views.LoginPresenter</list>
                         <list>com.gluonhq.chat.views.MapsPresenter</list>
                         <list>com.gluonhq.chat.views.PortraitPresenter</list>
-                        <list>com.gluonhq.chat.views.UsersPresenter</list>
+                        <list>com.gluonhq.chat.views.ChannelPresenter</list>
                         <list>org.glassfish.json.JsonProviderImpl</list>
                         <!-- for desktop only -->
 <!--                        <list>com.gluonhq.attach.orientation.impl.DesktopOrientationService</list>-->

@@ -7,14 +7,13 @@ import com.gluonhq.charm.glisten.afterburner.GluonPresenter;
 import com.gluonhq.charm.glisten.mvc.View;
 import com.gluonhq.chat.GluonChat;
 import com.gluonhq.chat.chatlistview.ChatListView;
+import com.gluonhq.chat.model.Channel;
 import com.gluonhq.chat.model.ChatMessage;
-import com.gluonhq.chat.model.User;
 import com.gluonhq.chat.service.Service;
 import com.gluonhq.chat.views.helper.PlusPopupView;
 import javafx.animation.PauseTransition;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
@@ -54,7 +53,7 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
 
     public void initialize() {
         chatList = new ChatListView<>();
-        chatList.setPlaceholder(new Label(resources.getString("no.messages.yet")));
+        chatList.setPlaceholder(new Label(resources.getString("select.channel")));
         chatList.getStyleClass().add("chat-list");
         chatList.setCellFactory(listView -> new MessageCell());
 
@@ -125,8 +124,9 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
         }
     }
 
-    void updateMessages(User user) {
-        createSortList(service.getMessages(user));
+    void updateMessages(Channel channel) {
+        createSortList(service.getMessages(channel));
+        bottomPane.setDisable(false);
     }
 
     private void createSortList(ObservableList<ChatMessage> messages) {

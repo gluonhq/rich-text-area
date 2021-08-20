@@ -7,9 +7,6 @@ public class ChatImage {
     int width;
     int height;
 
-    public ChatImage() {
-    }
-
     public ChatImage(String id, String content, int width, int height) {
         this.id = id;
         this.content = content;

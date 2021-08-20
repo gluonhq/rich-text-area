@@ -2,22 +2,22 @@ package com.gluonhq.chat.views;
 
 import com.gluonhq.charm.glisten.control.CharmListCell;
 import com.gluonhq.charm.glisten.control.ListTile;
-import com.gluonhq.chat.model.User;
+import com.gluonhq.chat.model.Channel;
 
-public class UserCell extends CharmListCell<User> {
+public class ChannelCell extends CharmListCell<Channel> {
 
     private final ListTile tile;
 
-    public UserCell() {
+    public ChannelCell() {
         tile = new ListTile();
         setGraphic(tile);
         setText(null);
-        getStyleClass().add("speaker-cell");
+        getStyleClass().add("channel-cell");
     }
 
     @Override
-    public void updateItem(User user, boolean empty) {
-        super.updateItem(user, empty);
+    public void updateItem(Channel channel, boolean empty) {
+        super.updateItem(channel, empty);
 
         /* TODO: Add User Image
         final Avatar avatar = new Avatar;
@@ -25,10 +25,10 @@ public class UserCell extends CharmListCell<User> {
         tile.setPrimaryGraphic(avatar);
         */
 
-        tile.setTextLine(0, user.toString());
+        tile.setTextLine(0, channel.displayName());
 
         tile.setOnMouseReleased(event -> {
-            AppViewManager.CHAT_VIEW.getPresenter().ifPresent(presenter -> ((ChatPresenter) presenter).updateMessages(user));
+            AppViewManager.CHAT_VIEW.getPresenter().ifPresent(presenter -> ((ChatPresenter) presenter).updateMessages(channel));
             // TODO: We want a better way to switch views if the screen size is <= 600
             if (tile.getScene().getWidth() <= 600) {
                 AppViewManager.PORTRAIT_VIEW.switchView().ifPresent(p -> ((PortraitPresenter) p).loadChat());

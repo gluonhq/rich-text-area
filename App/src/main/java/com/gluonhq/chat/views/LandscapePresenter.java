@@ -32,7 +32,7 @@ public class LandscapePresenter extends GluonPresenter<GluonChat> {
                 .ifPresentOrElse(landscapeView::setCenter,
                         () -> System.out.println("Error finding CHAT_VIEW"));
 
-        MobileApplication.getInstance().retrieveView(AppViewManager.USERS_VIEW.getId())
+        MobileApplication.getInstance().retrieveView(AppViewManager.CHANNEL_VIEW.getId())
                 .ifPresentOrElse(landscapeView::setLeft,
                         () -> System.out.println("Error finding USERS_VIEW"));
     }

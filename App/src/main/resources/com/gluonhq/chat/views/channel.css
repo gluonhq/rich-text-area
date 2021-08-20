@@ -1,0 +1,16 @@
+.search-box {
+    -fx-background-radius: 1em;
+    -fx-border-radius: 2em;
+    -fx-padding: 10;
+    -fx-spacing: 10;
+}
+
+.channel-list .channel-cell:selected {
+    -fx-background-color: -chat-medium-color;
+}
+
+/** Setting HeadersFunction to CharmListView
+leads it to covering the entire width **/
+.landscape-view .channel-list {
+    -fx-max-width: 250px;
+}

@@ -24,7 +24,7 @@ public class AppViewManager {
     public static final AppView PORTRAIT_VIEW  = view("Chat View", PortraitPresenter.class, MaterialDesignIcon.CHAT, SHOW_IN_DRAWER, SKIP_VIEW_STACK);
     public static final AppView LANDSCAPE_VIEW  = view("Chat View", LandscapePresenter.class, MaterialDesignIcon.CHAT, SHOW_IN_DRAWER, SKIP_VIEW_STACK);
     public static final AppView CHAT_VIEW  = view("Chat View", ChatPresenter.class, MaterialDesignIcon.CHAT, SHOW_IN_DRAWER);
-    public static final AppView USERS_VIEW  = view("Users View", UsersPresenter.class, MaterialDesignIcon.PEOPLE, SHOW_IN_DRAWER);
+    public static final AppView CHANNEL_VIEW = view("Channel View", ChannelPresenter.class, MaterialDesignIcon.PEOPLE, SHOW_IN_DRAWER);
     public static final AppView MAPS_VIEW  = view("Maps View", MapsPresenter.class, MaterialDesignIcon.MAP, SHOW_IN_DRAWER);
 
     private static AppView view(String title, Class<? extends GluonPresenter<?>> presenterClass, MaterialDesignIcon menuIcon, AppView.Flag... flags ) {

@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
-public class ChatMessage {
+public class ChatMessage extends Searchable {
 
     String id;
     String message;
@@ -58,6 +58,11 @@ public class ChatMessage {
                 ", time=" + time +
                 ", user=" + user.toString() +
                 '}';
+    }
+
+    @Override
+    public boolean contains(String keyword) {
+        return containsKeyword(getMessage(), keyword);
     }
 
     public String getFormattedTime() {

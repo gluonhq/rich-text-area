@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.gluonhq.charm.glisten.mvc.View?>
-<View fx:id="landscapeView" xmlns="http://javafx.com/javafx"
+<View fx:id="landscapeView" styleClass="landscape-view" xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.gluonhq.chat.views.LandscapePresenter">
 </View>

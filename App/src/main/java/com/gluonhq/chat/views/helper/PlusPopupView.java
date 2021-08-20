@@ -10,7 +10,7 @@ import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.service.Service;
 import com.gluonhq.chat.views.AppViewManager;
 import com.gluonhq.chat.views.MapsPresenter;
-import com.gluonhq.connect.GluonObservableList;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -24,9 +24,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ResourceBundle;
 
-import static com.gluonhq.chat.service.ImageUtils.DEFAULT_POSITION;
-import static com.gluonhq.chat.service.ImageUtils.IMAGE_PREFIX;
-import static com.gluonhq.chat.service.ImageUtils.LATLON;
+import static com.gluonhq.chat.service.ImageUtils.*;
 
 public class PlusPopupView extends PopupView {
 
@@ -43,7 +41,10 @@ public class PlusPopupView extends PopupView {
         getStylesheets().add(PlusPopupView.class.getResource("plus.css").toExternalForm());
 
         service = Injector.instantiateModelOrService(Service.class);
-        messages = service.getMessages(service.loggedUser());
+        
+        //TODO: FixME
+        // messages = service.getMessages(service.loggedUser());
+        messages = FXCollections.observableArrayList();
         initialize();
     }
 

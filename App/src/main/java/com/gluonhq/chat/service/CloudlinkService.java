@@ -1,5 +1,6 @@
 package com.gluonhq.chat.service;
 
+import com.gluonhq.chat.model.Channel;
 import com.gluonhq.chat.model.ChatImage;
 import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.model.User;
@@ -58,10 +59,6 @@ public class CloudlinkService implements Service {
         getRemoteUsers();
     }
 
-    public ObservableList<ChatMessage> getMessages() {
-        return FXCollections.observableArrayList();
-    }
-
     public GluonObservableList<ChatMessage> getMessages(Consumer<ObservableList<ChatMessage>> consumer) {
         if (messages == null) {
             messages = DataProvider
@@ -94,6 +91,12 @@ public class CloudlinkService implements Service {
     }
 
     @Override
+    public ObservableList<Channel> getChannels() {
+        // TODO: implement
+        return null;
+    }
+
+    @Override
     public User loggedUser() {
         // TODO: implement
         return null;
@@ -109,7 +112,8 @@ public class CloudlinkService implements Service {
     }
 
     @Override
-    public ObservableList<ChatMessage> getMessages(User user) {
+    public ObservableList<ChatMessage> getMessages(Channel channel) {
+        // TODO: implement
         return FXCollections.observableArrayList();
     }
 

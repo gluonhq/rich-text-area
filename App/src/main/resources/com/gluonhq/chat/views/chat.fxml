@@ -26,7 +26,7 @@
         </StackPane>
     </center>
     <bottom>
-        <BorderPane fx:id="bottomPane" prefWidth="200.0" styleClass="chat-bottom-bar" BorderPane.alignment="CENTER">
+        <BorderPane fx:id="bottomPane" prefWidth="200.0" styleClass="chat-bottom-bar" disable="true" BorderPane.alignment="CENTER">
             <left>
                 <Button fx:id="addButton" mnemonicParsing="false" styleClass="chat-button" text="%button.plus.text" BorderPane.alignment="CENTER">
                     <BorderPane.margin>
