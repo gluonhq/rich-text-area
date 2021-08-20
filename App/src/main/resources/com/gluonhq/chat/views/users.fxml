@@ -4,7 +4,19 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import com.gluonhq.charm.glisten.mvc.View?>
 
+<?import com.gluonhq.charm.glisten.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import com.gluonhq.charm.glisten.control.Icon?>
 <View fx:id="users" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gluonhq.chat.views.UsersPresenter">
+    <top>
+        <HBox fx:id="searchBox" styleClass="search-box">
+            <Icon content="SEARCH" />
+            <TextField fx:id="search"/>
+        </HBox>
+        
+    </top>
     <center>
         <CharmListView fx:id="usersList" BorderPane.alignment="CENTER" />
     </center>

@@ -1,0 +1,6 @@
+.search-box {
+    -fx-background-radius: 1em;
+    -fx-border-radius: 2em;
+    -fx-padding: 10;
+    -fx-spacing: 10;
+}

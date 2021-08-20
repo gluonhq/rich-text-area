@@ -2,8 +2,7 @@ package com.gluonhq.chat.service;
 
 import com.gluonhq.chat.model.ChatImage;
 import com.gluonhq.chat.model.ChatMessage;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import com.gluonhq.chat.model.User;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
@@ -12,20 +11,7 @@ import java.util.function.Consumer;
 
 public class DummyService implements Service {
 
-    @Override
-    public ObservableList<ChatMessage> getMessages() {
-        return FXCollections.observableArrayList(
-                new ChatMessage("Message 1", "Author 1"),
-                new ChatMessage("Message 2", "Author 2"),
-                new ChatMessage("Message 3", "Author 3")
-        );
-    }
-
-    @Override
-    public ObservableList<ChatMessage> getMessages(Consumer<ObservableList<ChatMessage>> consumer) {
-        consumer.accept(getMessages());
-        return getMessages();
-    }
+    private User loggedUser;
 
     @Override
     public ObservableList<ChatImage> getImages() {
@@ -43,18 +29,39 @@ public class DummyService implements Service {
     }
 
     @Override
-    public boolean saveUser(String userName) {
-        return false;
+    public ObservableList<ChatMessage> getMessages(User user) {
+        return FXCollections.observableArrayList(
+                new ChatMessage("Message 1 with " + user, loggedUser),
+                new ChatMessage("Message 2 with " + user, user),
+                new ChatMessage("Message 3 with " + user, user)
+        );
     }
 
     @Override
-    public String getName() {
-        return "Dummy Name";
+    public boolean login(String username) {
+        this.loggedUser = new User(username, "First Name", "Last Name");
+        return true;
     }
 
     @Override
+    public ObservableList<User> getUsers() {
+        return FXCollections.observableArrayList(
+                new User("aa", "Abhinay", "Agarwal"),
+                new User("em", "Erwin", "Morrhey"),
+                new User("jv", "Johan", "Vos"),
+                new User("js", "Joeri", "Sykora"),
+                new User("jp", "José", "Pereda")
+        );
+    }
+
+    @Override
+    public User loggedUser() {
+        return loggedUser;
+    }
+
+    /*@Override
     public String getName(Consumer<ObjectProperty<String>> consumer) {
         consumer.accept(new SimpleObjectProperty<>("name"));
         return getName();
-    }
+    }*/
 }

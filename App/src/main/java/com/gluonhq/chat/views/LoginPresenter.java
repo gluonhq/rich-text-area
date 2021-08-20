@@ -21,8 +21,7 @@ public class LoginPresenter extends GluonPresenter<GluonChat> {
 
     @FXML private View loginView;
 
-    @FXML private TextField firstName;
-    @FXML private TextField lastName;
+    @FXML private TextField username;
     @FXML private Button button;
     @FXML private Pane top;
 
@@ -36,43 +35,35 @@ public class LoginPresenter extends GluonPresenter<GluonChat> {
             top.getStyleClass().add("ios");
         }
         boolean notch = DisplayService.create().map(DisplayService::hasNotch).orElse(false);
-        if (notch && ! top.getStyleClass().contains("notch")) {
+        if (notch && !top.getStyleClass().contains("notch")) {
             top.getStyleClass().add("notch");
         }
 
         loginView.showingProperty().addListener((obs, oldValue, newValue) -> {
             if (newValue) {
                 getApp().getAppBar().setVisible(false);
-                firstName.setDisable(true);
-                lastName.setDisable(true);
-                service.getName(n -> {
-                    if (n != null && n.get() != null && !n.get().isEmpty()) {
-                        AppViewManager.FIRST_VIEW.switchView(ViewStackPolicy.SKIP);
-                    }
-                });
+                username.setDisable(true);
             }
         });
 
         loginView.setOnShown(e -> {
             top.requestFocus();
-            firstName.setDisable(false);
-            lastName.setDisable(false);
+            username.setDisable(false);
         });
+
         if (Platform.isAndroid()) {
-            firstName.setOnMouseClicked(e -> {
+            username.setOnMouseClicked(e -> {
                 top.requestFocus();
-                firstName.requestFocus();
+                username.requestFocus();
             });
         }
-        firstName.setOnAction(e -> lastName.requestFocus());
-        lastName.setOnAction(e -> button.requestFocus());
+        username.setOnAction(e -> button.requestFocus());
 
         button.disableProperty().bind(Bindings.createBooleanBinding(() ->
-                        firstName.getText().isEmpty() || firstName.getText().length() < 2 ||
-                        lastName.getText().isEmpty() || lastName.getText().length() < 2,
-                firstName.textProperty(), lastName.textProperty()));
+                        username.getText().isEmpty() || username.getText().length() < 2,
+                        username.textProperty()));
         button.setOnAction(e -> {
-            if (service.saveUser(firstName.getText() + " " + lastName.getText())) {
+            if (service.login(username.getText())) {
                 AppViewManager.FIRST_VIEW.switchView(ViewStackPolicy.SKIP);
             } else {
                 Alert alert = new Alert(javafx.scene.control.Alert.AlertType.ERROR);

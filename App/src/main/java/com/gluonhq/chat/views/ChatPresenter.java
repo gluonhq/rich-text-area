@@ -8,6 +8,7 @@ import com.gluonhq.charm.glisten.mvc.View;
 import com.gluonhq.chat.GluonChat;
 import com.gluonhq.chat.chatlistview.ChatListView;
 import com.gluonhq.chat.model.ChatMessage;
+import com.gluonhq.chat.model.User;
 import com.gluonhq.chat.service.Service;
 import com.gluonhq.chat.views.helper.PlusPopupView;
 import javafx.animation.PauseTransition;
@@ -55,8 +56,7 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
         chatList = new ChatListView<>();
         chatList.setPlaceholder(new Label(resources.getString("no.messages.yet")));
         chatList.getStyleClass().add("chat-list");
-        service.getMessages(this::createSortList);
-        service.getName(this::setCellFactory);
+        chatList.setCellFactory(listView -> new MessageCell());
 
         chatList.unreadIndexProperty().addListener((Observable o) -> updateUnreadLabel());
         chatList.unreadMessagesProperty().addListener((Observable o) -> updateUnreadLabel());
@@ -78,7 +78,7 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
         sendButton.setOnAction(e -> {
             String text = messageEditor.getText().trim();
             if (!text.isEmpty()) {
-                var message = new ChatMessage(text, service.getName());
+                var message = new ChatMessage(text, service.loggedUser());
                 messages.add(message);
                 messageEditor.clear();
                 addButton.requestFocus();
@@ -125,15 +125,15 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
         }
     }
 
+    void updateMessages(User user) {
+        createSortList(service.getMessages(user));
+    }
+
     private void createSortList(ObservableList<ChatMessage> messages) {
         this.messages = messages;
         SortedList<ChatMessage> sortedList = new SortedList<>(messages);
         sortedList.setComparator(Comparator.comparing(ChatMessage::getTime));
         chatList.setItems(sortedList);
-    }
-
-    private void setCellFactory(ObjectProperty<String> name) {
-        chatList.setCellFactory(listView -> new MessageCell(name.get()));
     }
 
     private void updateUnreadLabel() {

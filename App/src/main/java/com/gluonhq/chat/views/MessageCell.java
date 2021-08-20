@@ -53,7 +53,6 @@ class MessageCell extends CharmListCell<ChatMessage> {
     private final ImageView rightImageView = new ImageView(rightPointerImage);
     private static final Image loading = new Image(MessageCell.class.getResourceAsStream("/InternetSlowdown_Day.gif"), 150, 150, true, true);
     private ChatListView<ChatMessage> chatList;
-    private final String name;
 
     private final TextFlow message;
     private final Label msgHandle = new Label("", null);
@@ -71,9 +70,8 @@ class MessageCell extends CharmListCell<ChatMessage> {
     private final ResourceBundle resources;
     private final HBox bottomBox;
 
-    public MessageCell(String name) {
+    public MessageCell() {
         super();
-        this.name = name;
         service = Injector.instantiateModelOrService(Service.class);
         resources = ResourceBundle.getBundle("com.gluonhq.chat.views.chat");
 
@@ -123,8 +121,8 @@ class MessageCell extends CharmListCell<ChatMessage> {
         if (empty || item == null) {
             setGraphic(null);
         } else {
-            boolean isMe = item.getAuthor() != null &&
-                    item.getAuthor().equals(name);
+            boolean isMe = item.getUser() != null &&
+                    item.getUser().equals(service.loggedUser());
 
             message.getChildren().setAll(formatText(item.getMessage()));
             BorderPane.setMargin(message, isMe ? meInsets : notMeInsets);
@@ -138,7 +136,7 @@ class MessageCell extends CharmListCell<ChatMessage> {
             }
             BorderPane.setAlignment(status, isMe ? Pos.CENTER_LEFT : Pos.CENTER_RIGHT);
 
-            icon.setText(isMe ? "ME" : Service.getInitials(item.getAuthor()));
+            icon.setText(isMe ? "ME" : Service.getInitials(item.getUser().toString()));
 
             if (isMe) {
                 msgHandle.setGraphic(rightImageView);

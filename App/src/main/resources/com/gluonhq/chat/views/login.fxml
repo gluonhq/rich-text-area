@@ -15,8 +15,7 @@
         <VBox alignment="TOP_CENTER" spacing="20.0" styleClass="box" BorderPane.alignment="CENTER">
             <children>
                 <Label fx:id="label" text="%label.text.1" textAlignment="CENTER" />
-                <TextField fx:id="firstName" styleClass="text-field" promptText="First Name"/>
-                <TextField fx:id="lastName" styleClass="text-field"  promptText="Last Name"/>
+                <TextField fx:id="username" styleClass="text-field" promptText="Username"/>
                 <Button fx:id="button" mnemonicParsing="false" text="%button.text">
                     <graphic>
                         <Icon content="LANGUAGE" />

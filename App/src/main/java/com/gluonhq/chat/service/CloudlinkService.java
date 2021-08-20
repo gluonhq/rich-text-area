@@ -2,6 +2,7 @@ package com.gluonhq.chat.service;
 
 import com.gluonhq.chat.model.ChatImage;
 import com.gluonhq.chat.model.ChatMessage;
+import com.gluonhq.chat.model.User;
 import com.gluonhq.cloudlink.client.data.DataClient;
 import com.gluonhq.cloudlink.client.data.DataClientBuilder;
 import com.gluonhq.cloudlink.client.data.OperationMode;
@@ -13,6 +14,7 @@ import com.gluonhq.connect.provider.DataProvider;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import javax.annotation.PostConstruct;
@@ -56,8 +58,8 @@ public class CloudlinkService implements Service {
         getRemoteUsers();
     }
 
-    public GluonObservableList<ChatMessage> getMessages() {
-        return getMessages(null);
+    public ObservableList<ChatMessage> getMessages() {
+        return FXCollections.observableArrayList();
     }
 
     public GluonObservableList<ChatMessage> getMessages(Consumer<ObservableList<ChatMessage>> consumer) {
@@ -74,7 +76,7 @@ public class CloudlinkService implements Service {
         return images;
     }
 
-    public boolean saveUser(String userName) {
+    public boolean login(String userName) {
         if (names.contains(userName)) {
             return false;
         } else {
@@ -85,6 +87,18 @@ public class CloudlinkService implements Service {
         }
     }
 
+    @Override
+    public ObservableList<User> getUsers() {
+        // TODO: implement
+        return null;
+    }
+
+    @Override
+    public User loggedUser() {
+        // TODO: implement
+        return null;
+    }
+
     public String getName() {
         return getName(null);
     }
@@ -92,6 +106,11 @@ public class CloudlinkService implements Service {
     public String getName(Consumer<ObjectProperty<String>> consumer) {
         processConsumer(name, consumer);
         return name.getValue();
+    }
+
+    @Override
+    public ObservableList<ChatMessage> getMessages(User user) {
+        return FXCollections.observableArrayList();
     }
 
     @SuppressWarnings("unchecked")

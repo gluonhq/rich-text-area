@@ -9,6 +9,7 @@ import com.gluonhq.charm.glisten.control.FloatingActionButton;
 import com.gluonhq.charm.glisten.mvc.View;
 import com.gluonhq.charm.glisten.visual.MaterialDesignIcon;
 import com.gluonhq.chat.model.ChatMessage;
+import com.gluonhq.chat.model.User;
 import com.gluonhq.chat.service.ImageUtils;
 import com.gluonhq.chat.service.Service;
 import com.gluonhq.chat.views.helper.PoiLayer;
@@ -58,7 +59,7 @@ public class MapsPresenter extends GluonPresenter<GluonChat> {
         mapView.addLayer(poiLayer);
     }
 
-    public void flyTo(Position position, String name, String initials, Consumer<ChatMessage> consumer) {
+    public void flyTo(Position position, User name, String initials, Consumer<ChatMessage> consumer) {
         MapPoint mapPoint = new MapPoint(position.getLatitude(), position.getLongitude());
         poiLayer.addPoint(mapPoint, PoiLayer.createUserPointer(initials));
         mapView.setCenter(mapPoint);

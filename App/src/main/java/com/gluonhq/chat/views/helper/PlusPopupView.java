@@ -43,7 +43,7 @@ public class PlusPopupView extends PopupView {
         getStylesheets().add(PlusPopupView.class.getResource("plus.css").toExternalForm());
 
         service = Injector.instantiateModelOrService(Service.class);
-        messages = service.getMessages();
+        messages = service.getMessages(service.loggedUser());
         initialize();
     }
 
@@ -64,7 +64,7 @@ public class PlusPopupView extends PopupView {
                         Image image = new Image(new FileInputStream(file));
                         String id = service.addImage(file.getName() + "-" + System.currentTimeMillis(), image);
                         if (id != null) {
-                            var message = new ChatMessage(id, service.getName());
+                            var message = new ChatMessage(id, service.loggedUser());
                             messages.add(message);
                         }
                     } catch (FileNotFoundException e1) {
@@ -77,7 +77,7 @@ public class PlusPopupView extends PopupView {
                                 .ifPresent(image -> {
                                     String id = service.addImage("photo" + "-" + System.currentTimeMillis(), image);
                                     if (id != null) {
-                                        var message = new ChatMessage(id, service.getName());
+                                        var message = new ChatMessage(id, service.loggedUser());
                                         messages.add(message);
                                     }
                                 }));
@@ -118,11 +118,11 @@ public class PlusPopupView extends PopupView {
     private void sendLocation(Position newPosition) {
         Position position = newPosition == null ? DEFAULT_POSITION : newPosition;
 
-        String name = service.getName();
+        String name = service.loggedUser().toString();
         String initials = Service.getInitials(name);
 
         AppViewManager.MAPS_VIEW.switchView().ifPresent(p ->
-                ((MapsPresenter) p).flyTo(position, name, initials, e -> {
+                ((MapsPresenter) p).flyTo(position, service.loggedUser(), initials, e -> {
                     messages.removeIf(m -> m.getMessage().startsWith(IMAGE_PREFIX + LATLON + initials));
                     service.getImages().removeIf(m -> m.getId().startsWith(LATLON + initials));
                     messages.add(e);
