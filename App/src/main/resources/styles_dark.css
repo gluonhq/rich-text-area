@@ -19,3 +19,7 @@
     -unread-color: rgba(119, 45, 4, 0.8);
     -unread-color-hover: rgba(147, 32, 4, 0.8);
 }
+
+.label {
+    -fx-text-fill: -chart-light-text-fill;
+}

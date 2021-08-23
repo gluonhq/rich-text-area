@@ -33,7 +33,7 @@ public class PortraitPresenter extends GluonPresenter<GluonChat> {
             chat.managedProperty().bind(chat.visibleProperty());
 
             ToggleButton theme = new ToggleButton();
-            theme.getStyleClass().addAll("icon-toggle", "chat-button");
+            theme.getStyleClass().addAll("icon-toggle");
             theme.setGraphic(MaterialDesignIcon.LIGHTBULB_OUTLINE.graphic());
             theme.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 
