@@ -47,16 +47,9 @@ public class LoginPresenter extends GluonPresenter<GluonChat> {
         });
 
         loginView.setOnShown(e -> {
-            top.requestFocus();
             username.setDisable(false);
         });
 
-        if (Platform.isAndroid()) {
-            username.setOnMouseClicked(e -> {
-                top.requestFocus();
-                username.requestFocus();
-            });
-        }
         username.setOnAction(e -> button.requestFocus());
 
         button.disableProperty().bind(Bindings.createBooleanBinding(() ->

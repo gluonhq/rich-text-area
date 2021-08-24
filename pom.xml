@@ -23,15 +23,15 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>11</maven.compiler.release>
 
-        <glistenVersion>6.0.4</glistenVersion>
-        <glistenAfterburnerVersion>2.0.4</glistenAfterburnerVersion>
-        <attachVersion>4.0.11</attachVersion>
+        <glistenVersion>6.0.6</glistenVersion>
+        <glistenAfterburnerVersion>2.0.5</glistenAfterburnerVersion>
+        <attachVersion>4.0.12</attachVersion>
         <mapsVersion>2.0.0-ea+5</mapsVersion>
         <connectVersion>2.0.1</connectVersion>
         <javafxVersion>16</javafxVersion>
         <controlsfxVersion>11.1.0</controlsfxVersion>
         <javafx-maven-plugin-version>0.0.6</javafx-maven-plugin-version>
-        <gluonfx-maven-plugin-version>1.0.3</gluonfx-maven-plugin-version>
+        <gluonfx-maven-plugin-version>1.0.4</gluonfx-maven-plugin-version>
     </properties>
     
     <repositories>
