@@ -17,8 +17,7 @@
 }
 
 .chat-text-editor {
-    -fx-background-radius: 1em;
-    -fx-background-color: -chat-editor-background ;
+    -fx-background-color: -chat-editor-background;
     -fx-font-size: 1em;
     -fx-text-fill: -chart-dark-text-fill;
     -fx-prompt-text-fill: derive(-chart-dark-text-fill, 50%);
@@ -40,6 +39,10 @@
 
 .chat-text-editor.ios {
     -fx-font-size: 1.3em;
+}
+
+.chat-text-editor > .emoji-button {
+    -fx-background-color: transparent;
 }
 
 .chat-toolbar {

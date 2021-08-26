@@ -25,7 +25,7 @@ public class EmojiData {
     /**
      * Stores emojis with key's as their short name.
      */
-    private static Map<String, Emoji> mapOfEmoji = new HashMap<>();
+    private static final Map<String, Emoji> EMOJI_MAP = new HashMap<>();
 
     static  {
         try (final InputStream emojiStream = EmojiData.class.getResourceAsStream("emoji.json")) {
@@ -35,7 +35,7 @@ public class EmojiData {
             for (Iterator<Emoji> it = listDataReader.iterator(); it.hasNext();) {
                 Emoji e = it.next();
                 if (e.getShort_name().isPresent()) {
-                    mapOfEmoji.put(e.getShort_name().get(), e);
+                    EMOJI_MAP.put(e.getShort_name().get(), e);
                 }
             }
         } catch (IOException e) {
@@ -45,7 +45,7 @@ public class EmojiData {
     }
     
     public static Optional<Emoji> emojiFromShortName(String shortName) {
-        return Optional.ofNullable(mapOfEmoji.get(shortName));        
+        return Optional.ofNullable(EMOJI_MAP.get(shortName));        
     }
 
     public static Optional<Emoji> emojiFromCodeName(String text) {
@@ -56,7 +56,7 @@ public class EmojiData {
     }
 
     public static List<Emoji> emojiFromCategory(String category) {
-        return mapOfEmoji.values().stream()
+        return EMOJI_MAP.values().stream()
                 .filter(emoji -> emoji.getCategory().isPresent())
                 .filter(emoji -> emoji.getCategory().get().equalsIgnoreCase(category))
                 .sorted(Comparator.comparingInt(Emoji::getSort_order))
@@ -66,7 +66,7 @@ public class EmojiData {
     public static List<Emoji> search(String text) {
         List<Emoji> emojis = new ArrayList<>();
         for (String s : text.split(" ")) {
-            emojis.addAll(mapOfEmoji.entrySet().stream()
+            emojis.addAll(EMOJI_MAP.entrySet().stream()
                     .filter(es -> es.getKey().contains(s))
                     .map(Map.Entry::getValue)
                     .sorted(Comparator.comparingInt(Emoji::getSort_order))
@@ -76,11 +76,11 @@ public class EmojiData {
     }
     
     public static Set<String> shortNames() {
-        return mapOfEmoji.keySet();
+        return EMOJI_MAP.keySet();
     }
     
     public static Set<String> categories() {
-        return mapOfEmoji.values().stream()
+        return EMOJI_MAP.values().stream()
                 .filter(emoji -> emoji.getCategory().isPresent())
                 .map(emoji -> emoji.getCategory().get())
                 .collect(Collectors.toSet());
@@ -91,7 +91,7 @@ public class EmojiData {
     }
 
     public static String emojiForText(String shortName, boolean strip) {
-        final Emoji emoji = mapOfEmoji.get(shortName);
+        final Emoji emoji = EMOJI_MAP.get(shortName);
         if (emoji == null) {
             return strip ? "" : shortName;
         }

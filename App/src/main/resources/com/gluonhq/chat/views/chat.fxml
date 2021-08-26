@@ -31,16 +31,15 @@
                 <Button fx:id="addButton" mnemonicParsing="false" styleClass="chat-button" text="%button.plus.text" BorderPane.alignment="CENTER">
                     <BorderPane.margin>
                         <Insets right="10.0" />
-                    </BorderPane.margin></Button>
+                    </BorderPane.margin>
+                </Button>
             </left>
             <right>
-                <HBox>
-                    <Button fx:id="emojiButton" mnemonicParsing="false" styleClass="chat-button" text="%button.emoji.text" BorderPane.alignment="CENTER"/>
-                    <Button fx:id="sendButton" mnemonicParsing="false" styleClass="chat-button" text="%button.send.text" BorderPane.alignment="CENTER"/>
+                <Button fx:id="sendButton" mnemonicParsing="false" styleClass="chat-button" text="%button.send.text" BorderPane.alignment="CENTER">
                     <BorderPane.margin>
                         <Insets left="10.0" />
                     </BorderPane.margin>
-                </HBox>
+                </Button>
             </right>
         </BorderPane>
     </bottom>

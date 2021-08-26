@@ -25,6 +25,16 @@
                 <configuration>
                     <options>
                         <option>-Dcharm-desktop-form=${form.factor}</option>
+                        <option>--add-opens</option>
+                        <option>javafx.graphics/javafx.scene.text=richtextfx</option>
+                        <option>--add-opens</option>
+                        <option>javafx.graphics/com.sun.javafx.text=richtextfx</option>
+                        <option>--add-opens</option>
+                        <option>javafx.graphics/com.sun.javafx.scene.text=richtextfx</option>
+                        <option>--add-opens</option>
+                        <option>javafx.graphics/com.sun.javafx.geom=richtextfx</option>
+                        <option>--add-opens</option>
+                        <option>javafx.graphics/com.sun.javafx.css=org.controlsfx.controls</option>
                     </options>
                     <mainClass>${mainClassName}</mainClass>
                 </configuration>
@@ -42,6 +52,17 @@
                         <configuration>
                             <options>
                                 <option>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:8000</option>
+                                <option>-Dcharm-desktop-form=${form.factor}</option>
+                                <option>--add-opens</option>
+                                <option>javafx.graphics/javafx.scene.text=richtextfx</option>
+                                <option>--add-opens</option>
+                                <option>javafx.graphics/com.sun.javafx.text=richtextfx</option>
+                                <option>--add-opens</option>
+                                <option>javafx.graphics/com.sun.javafx.scene.text=richtextfx</option>
+                                <option>--add-opens</option>
+                                <option>javafx.graphics/com.sun.javafx.geom=richtextfx</option>
+                                <option>--add-opens</option>
+                                <option>javafx.graphics/com.sun.javafx.css=org.controlsfx.controls</option>
                             </options>
                             <mainClass>${mainClassName}</mainClass>
                         </configuration>
@@ -255,6 +276,18 @@
             <groupId>com.gluonhq.chatapp</groupId>
             <artifactId>ChatListView</artifactId>
             <version>1.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.gluonhq.chatapp</groupId>
+            <artifactId>EmojiData</artifactId>
+            <version>1.1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.gluonhq.chatapp</groupId>
+            <artifactId>EmojiTextArea</artifactId>
+            <version>1.1.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
         <!--<dependency>
             <groupId>org.scenic-view</groupId>

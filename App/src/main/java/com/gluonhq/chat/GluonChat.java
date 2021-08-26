@@ -9,6 +9,7 @@ import com.gluonhq.charm.glisten.visual.Swatch;
 import com.gluonhq.chat.service.DummyService;
 import com.gluonhq.chat.service.Service;
 import com.gluonhq.chat.views.AppViewManager;
+import com.gluonhq.emoji.EmojiData;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
@@ -33,12 +34,14 @@ public class GluonChat extends MobileApplication {
         } catch (IOException e) {
             LOG.log(Level.SEVERE, "Storage Service Error", e);
         }
+        // Quick fix to load emojis before Application is shown
+        // The following statement is just used to load the emojis during startup.
+        EmojiData.shortNames();
     }
 
     private static final GluonInstanceProvider instanceSupplier = new GluonInstanceProvider() {{
         // bindProvider(Service.class, CloudlinkService::new);
         bindProvider(Service.class, DummyService::new);
-
         Injector.setInstanceSupplier(this);
     }};
 

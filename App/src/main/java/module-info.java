@@ -21,9 +21,9 @@ module com.gluonhq.chat {
     requires com.gluonhq.maps;
 
     requires com.gluonhq.chat.ChatListView;
-//    requires com.gluonhq.emoji;
-//    requires com.gluonhq.emoji.popup;
-//    requires com.gluonhq.emoji.control;
+    requires com.gluonhq.emoji;
+    requires com.gluonhq.emoji.popup;
+    requires com.gluonhq.emoji.control;
     requires java.sql;
     // TODO: Remove
     // requires org.scenicview.scenicview;

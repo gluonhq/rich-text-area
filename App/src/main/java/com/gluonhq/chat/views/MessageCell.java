@@ -9,8 +9,8 @@ import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.service.ImageUtils;
 import com.gluonhq.chat.service.Service;
 import com.gluonhq.connect.GluonObservableList;
-//import com.gluonhq.emoji.EmojiData;
-//import com.gluonhq.emoji.popup.util.EmojiImageUtils;
+import com.gluonhq.emoji.EmojiData;
+import com.gluonhq.emoji.popup.util.EmojiImageUtils;
 import javafx.animation.PauseTransition;
 import javafx.collections.ObservableList;
 import javafx.css.PseudoClass;
@@ -23,12 +23,14 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
-//import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +39,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.gluonhq.chat.service.ImageUtils.*;
+import static com.gluonhq.chat.service.ImageUtils.IMAGE_PREFIX;
+import static com.gluonhq.chat.service.ImageUtils.LATLON;
 
 class MessageCell extends CharmListCell<ChatMessage> {
 
@@ -199,9 +202,9 @@ class MessageCell extends CharmListCell<ChatMessage> {
                 list.add(text);
                 diff.addAndGet(matcher.start() - diff.get());
             }
-//            list.add(EmojiData.emojiFromCodeName(matcher.group())
-//                    .map(emoji -> (Node) EmojiImageUtils.emojiView(emoji, imageSize, getImageOffset(imageSize)))
-//                    .orElse(getTextNode(matcher.group())));
+            list.add(EmojiData.emojiFromCodeName(matcher.group())
+                    .map(emoji -> (Node) EmojiImageUtils.emojiView(emoji, imageSize, getImageOffset(imageSize)))
+                    .orElse(getTextNode(matcher.group())));
             diff.addAndGet(matcher.group().length());
         }
         if (diff.get() < value.length()) {

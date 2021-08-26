@@ -42,6 +42,12 @@ public class EmojiTextArea extends Control {
         onAction.set(value);
     }
 
+    public void clear() {
+        if (!text.isBound()) {
+            setText("");
+        }
+    }
+
     @Override
     protected Skin<?> createDefaultSkin() {
         return new EmojiTextAreaSkin(this);
