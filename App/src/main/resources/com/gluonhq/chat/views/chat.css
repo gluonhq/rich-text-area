@@ -2,49 +2,6 @@
     -fx-text-fill: -fx-icon-fill;
 }
 
-.chat-button {
-    -fx-font-family: "FontAwesome";
-    -fx-font-size: 1.5em;
-    -fx-background-color: -chat-accent;
-    -fx-text-fill: -chart-light-text-fill;
-    -fx-background-radius: .5em;
-    -fx-border-radius: .5em;
-    -fx-padding: 10;
-}
-
-.chat-button:hover {
-    -fx-background-color: derive( -chat-accent, -25%);
-}
-
-.chat-text-editor {
-    -fx-background-color: -chat-editor-background;
-    -fx-font-size: 1em;
-    -fx-text-fill: -chart-dark-text-fill;
-    -fx-prompt-text-fill: derive(-chart-dark-text-fill, 50%);
-    -fx-pref-height: 30;
-    -fx-wrap-text: true;
-    -fx-border-width: 0;
-}
-.chat-text-editor:focused {
-    -fx-border-width: 0;
-}
-.chat-text-editor > .scroll-pane {
-    -fx-hbar-policy: never;
-    -fx-vbar-policy: never;
-}
-
-.chat-text-editor .content {
-    -fx-background-color: white;
-}
-
-.chat-text-editor.ios {
-    -fx-font-size: 1.3em;
-}
-
-.chat-text-editor > .emoji-button {
-    -fx-background-color: transparent;
-}
-
 .chat-toolbar {
     -fx-background-color: -chat-accent;
     -fx-padding: 10;
@@ -54,12 +11,17 @@
 }
 
 .chat-toolbar .label {
-    -fx-text-fill: -chart-light-text-fill;
+    -fx-text-fill: -chat-text-fill-light;
 }
 
 .chat-bottom-bar {
-    -fx-background-color: -chat-dark-color;
-    -fx-padding: 2.24mm 2.56mm 2.24mm 2.56mm;
+    -fx-background-color: -chat-background;
+    -fx-background-radius: 3em;
+    /* Margin fix start */
+    -fx-padding: 0.75em 1.25em 0.75em 1.25em;
+    -fx-border-insets: 0.5em 1em 0.5em 1em;
+    -fx-background-insets: 0.5em 1em 0.5em 1em;
+    /* Margin fix end */
     -fx-alignment: center-left;
     -fx-spacing: 10;
     -fx-focus-traversable: false;
@@ -69,17 +31,84 @@
     -fx-padding: 2.24mm 2.56mm 5.44mm 2.56mm;
 }
 
-.chat-list {
-    -fx-control-inner-background: -chat-medium-color;
-    -fx-control-inner-background-alt: -chat-medium-color;
+.chat-bottom-bar .chat-text-editor {
+    -fx-background-color: transparent;
+    -fx-font-size: 1em;
+    -fx-text-fill: -chat-text-fill;
+    -fx-prompt-text-fill: derive(-chat-text-fill, 50%);
+    -fx-pref-height: 30;
+    -fx-wrap-text: true;
     -fx-border-width: 0;
-    -fx-background-insets: 0;
-    -fx-focus-traversable: false;
+}
+.chat-bottom-bar .chat-text-editor:focused {
+    -fx-border-width: 0;
+}
+.chat-bottom-bar .chat-text-editor > .scroll-pane {
+    -fx-hbar-policy: never;
+    -fx-vbar-policy: never;
+}
+.chat-bottom-bar .chat-text-editor.ios {
+    -fx-font-size: 1.3em;
 }
 
-.chat-list .list-cell {
+.chat-bottom-bar .chat-text-editor .paragraph-text .text {
+    -fx-fill: -chat-text-fill;
+}
+
+/** Emoji Button inside Text Editor **/
+.chat-bottom-bar .chat-text-editor > .emoji-button {
+    -fx-background-color: transparent;
+    -fx-effect: null;
+}
+
+.chat-bottom-bar .chat-text-editor > .emoji-button > .icon {
+    -fx-background-color: -chat-text-fill;
+}
+
+.chat-bottom-bar .chat-text-editor > .emoji-button:hover > .icon {
+    -fx-background-color: -chat-text-fill-dark;
+}
+
+/** Text Area inside Text Editor **/
+.chat-bottom-bar .chat-text-editor .styled-text-area {
+    -fx-background-color: inherit;
+}
+
+.chat-bottom-bar .chat-text-editor .styled-text-area .text {
+    -fx-text-fill: -chat-text-fill;
+}
+
+.chat-bottom-bar .chat-text-editor > .virtualized-scroll-pane {
+    -fx-background-color: inherit;
+    -fx-background-insets: -1;
+}
+
+/** Buttons inside bottom bar **/
+.chat-bottom-bar .chat-button {
+    -fx-font-family: "FontAwesome";
+    -fx-font-size: 1.5em;
+    -fx-text-fill: -chat-text-fill;
+    -fx-background-color: transparent;
+    -fx-effect: null;
+}
+
+.chat-bottom-bar .chat-button:hover {
+    -fx-text-fill: -chat-text-fill-dark;
+    -fx-background-color: transparent;
+}
+
+/** Chat List View **/
+.chat-list,
+.chat-list > .list-view,
+.chat-list .list-cell  {
     -fx-padding: 0px;
     -fx-border-width: 0;
+    -fx-background-insets: 0;
+    -fx-background-color: transparent;
+}
+
+.chat-list {
+    -fx-focus-traversable: false;
 }
 
 .chat-list > .scroll-bar:horizontal {
@@ -94,12 +123,11 @@
 .chat-message:empty,
 .chat-message:selected:even,
 .chat-message:selected:odd {
-    -fx-background-color: -chat-medium-color;
     -fx-padding: 10;
 }
 
 .chat-message-text {
-    -fx-background-color: -chat-light-color;
+    -fx-background-color: -chat-bubble-background;
     -fx-padding: 10;
     -fx-background-radius: 0 .7em .7em .7em;
 }
@@ -109,7 +137,7 @@
 }
 
 .chat-message-text > .text {
-    -fx-fill: -chart-dark-text-fill;
+    -fx-fill: -chat-text-fill;
 }
 
 .chat-message-bubble .chat-message-text-handle {
@@ -123,19 +151,18 @@
 
 .chat-message-date {
     -fx-font-size: 0.8em;
-    -fx-text-fill: -chart-light-text-fill;
+    -fx-text-fill: -chat-text-fill-light;
 }
 
 .chat-message-status {
     -fx-font-family: "FontAwesome";
     -fx-font-size: 0.8em;
-    -fx-text-fill: -chart-light-text-fill;
+    -fx-text-fill: -chat-text-fill-light;
 }
 
-.chat-message-icon {
-    -fx-text-fill: -chart-light-text-fill;
-    -fx-background-color: -chat-dark-color;
-    -fx-border-color: -chat-light-color;
+.user-icon {
+    -fx-text-fill: -chat-text-fill-light;
+    -fx-background-color: -chat-background;
     -fx-border-width: 2.5;
     -fx-border-radius: 35;
     -fx-background-radius: 35;
@@ -193,13 +220,4 @@
 
 .list-cell:unread > .stack-pane > .unread-box {
     visibility: visible;
-}
-
-.emoji-text-area {
-    -fx-background-color: white;
-}
-
-.emoji-text-area > .virtualized-scroll-pane {
-    -fx-background-color: #cccccc;
-    -fx-background-insets: -1;
 }

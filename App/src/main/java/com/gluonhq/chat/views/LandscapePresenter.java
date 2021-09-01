@@ -7,6 +7,8 @@ import com.gluonhq.charm.glisten.mvc.View;
 import com.gluonhq.charm.glisten.visual.MaterialDesignIcon;
 import com.gluonhq.chat.GluonChat;
 import javafx.fxml.FXML;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.ToggleButton;
 
 import java.util.ResourceBundle;
 
@@ -23,6 +25,21 @@ public class LandscapePresenter extends GluonPresenter<GluonChat> {
                 appBar.setNavIcon(MaterialDesignIcon.MENU.button(/*e ->
                         getApp().getDrawer().open()*/));
                 appBar.setTitleText(resources.getString("landscape.view.title"));
+                // TODO: Duplicate code
+                ToggleButton theme = new ToggleButton();
+                theme.getStyleClass().addAll("icon-toggle");
+                theme.setGraphic(MaterialDesignIcon.LIGHTBULB_OUTLINE.graphic());
+                theme.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+
+                theme.selectedProperty().addListener((observable, oldValue, newValue) -> {
+                    final String darkStyleSheet = LandscapePresenter.class.getResource("/styles_dark.css").toExternalForm();
+                    if (newValue) {
+                        landscapeView.getScene().getStylesheets().add(darkStyleSheet);
+                    } else {
+                        landscapeView.getScene().getStylesheets().remove(darkStyleSheet);
+                    }
+                });
+                appBar.getActionItems().add(theme);
             }
         });
     }

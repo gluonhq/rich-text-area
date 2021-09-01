@@ -5,8 +5,37 @@
     -fx-spacing: 10;
 }
 
+.search-box > .icon > .icon-text {
+    -fx-text-fill: -chat-text-fill;
+}
+
+.search-box > .charm-text-field > .text-field {
+    -fx-text-fill: -chat-text-fill;
+    -fx-prompt-text-fill: derive(-fx-text-fill, 10%);
+}
+
+.channel-list,
+.channel-list > .list-view,
+.channel-list .list-cell  {
+    -fx-border-width: 0;
+    -fx-background-color: transparent;
+}
+
+.channel-list .header-cell,
+.channel-list .list-cell .primary-text {
+    -fx-text-fill: -chat-text-fill;
+}
+
+.channel-list .channel-cell:hover {
+    -fx-background-color: -chat-background;
+}
+
 .channel-list .channel-cell:selected {
-    -fx-background-color: -chat-medium-color;
+    -fx-background-color: -chat-accent-selected;
+}
+
+.channel-list .channel-cell:selected .primary-text {
+    -fx-background-color: -chat-accent-selected;
 }
 
 /** Setting HeadersFunction to CharmListView

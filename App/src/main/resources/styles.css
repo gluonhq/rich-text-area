@@ -6,34 +6,56 @@
 }
 
 .root {
-    /* background color palette */
-    -chat-accent      : #4aadda;
-    -chat-light-color : white;
-    -chat-medium-color: #d3e4eb;
-    -chat-dark-color  : #12a0e3;
-    -chat-editor-background : white;
+    -fx-font-size: 12pt;
+    
+    /* accent color palette */
+    -chat-accent       : #4aadda;
+    -chat-accent-light : derive( -chat-accent, 100% );
+    -chat-accent-dark  : derive( -chat-accent, -20% );
 
-    -primary-swatch-500: -chat-accent;
+    /* background color palette */
+    -chat-background       : #EBEDEF;
+    -chat-background-light : white;
+    -chat-background-dark  : derive( -chat-background, -20% );
 
     /* text color palette */
-    -chart-dark-text-fill : #818181;
-    -chart-light-text-fill: #f4fdff;
-
-    -fx-font-size: 12pt;
+    -chat-text-fill       : #818181;
+    -chat-text-fill-light : derive( -chat-text-fill,  50% );
+    -chat-text-fill-dark  : derive( -chat-text-fill, -20% );
+    
+    /** Views related vars */
+    -chat-accent-selected: -chat-accent-light;
+    -chat-bubble-background: -chat-accent-light;
 
     -unread-label: #f17835;
     -unread-color: #f17835cc;
     -unread-color-hover: #df502dcc;
+
+    /** Glisten swatch */
+    -primary-swatch-500: -chat-accent;
+}
+
+.view {
+    -fx-background-color: -chat-background-light;
+}
+
+.app-bar {
+    -fx-background-color: -chat-background-light;
 }
 
 .app-bar,
 .app-bar > .title-box > .label {
-    -fx-icon-fill: -chart-light-text-fill;
+    -fx-icon-fill: -chat-text-fill;
 }
 
-.app-bar  > * > .toggle-button.icon-toggle {
-    -fx-text-fill: -fx-icon-fill;
+.app-bar  > .action-items > .icon-toggle {
+    -fx-text-fill: -chat-text-fill;
     -fx-label-padding: 0 0 0 0;
+}
+
+.app-bar  > .action-items > .icon-toggle:hover {
+    -fx-text-fill: -chat-text-fill-dark;
+    -fx-background-color: -chat-background-dark;
 }
 
 .font-icon {

@@ -46,7 +46,7 @@ public class EmojiPopOver extends PopOver {
         getRoot().getStyleClass().add(DEFAULT_STYLE_CLASS);
         getRoot().getStylesheets().add(EmojiPopOver.class.getResource("emoji-popover.css").toExternalForm());
         
-        setArrowLocation(ArrowLocation.BOTTOM_RIGHT);
+        setArrowLocation(ArrowLocation.BOTTOM_LEFT);
         setCloseButtonEnabled(false);
         setDetachable(false);
         setContentNode(createContent());

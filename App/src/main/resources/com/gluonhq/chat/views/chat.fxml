@@ -8,6 +8,9 @@
 <?import javafx.scene.layout.StackPane?>
 
 <?import com.gluonhq.charm.glisten.mvc.View?>
+<?import com.gluonhq.charm.glisten.control.Icon?>
+<?import com.gluonhq.charm.glisten.visual.MaterialDesignIcon?>
+<?import javafx.scene.Group?>
 <View fx:id="chatView" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gluonhq.chat.views.ChatPresenter">
     <center>
         <StackPane fx:id="stackPane" prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER">
@@ -27,19 +30,15 @@
     </center>
     <bottom>
         <BorderPane fx:id="bottomPane" prefWidth="200.0" styleClass="chat-bottom-bar" disable="true" BorderPane.alignment="CENTER">
-            <left>
-                <Button fx:id="addButton" mnemonicParsing="false" styleClass="chat-button" text="%button.plus.text" BorderPane.alignment="CENTER">
-                    <BorderPane.margin>
-                        <Insets right="10.0" />
-                    </BorderPane.margin>
-                </Button>
-            </left>
             <right>
-                <Button fx:id="sendButton" mnemonicParsing="false" styleClass="chat-button" text="%button.send.text" BorderPane.alignment="CENTER">
-                    <BorderPane.margin>
-                        <Insets left="10.0" />
-                    </BorderPane.margin>
-                </Button>
+                <Group>
+                    <Button fx:id="addButton" mnemonicParsing="false" styleClass="chat-button" text="%button.plus.text" BorderPane.alignment="CENTER"/>
+                    <Button fx:id="sendButton" mnemonicParsing="false" styleClass="chat-button" BorderPane.alignment="CENTER" managed="false" visible="false">
+                        <graphic>
+                            <Icon content="SEND"/>
+                        </graphic>
+                    </Button>
+                </Group>
             </right>
         </BorderPane>
     </bottom>

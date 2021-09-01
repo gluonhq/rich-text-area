@@ -9,5 +9,5 @@
 }
 
 .popup-view > .root-node .content-box > .item-box > .label {
-    -fx-text-fill: -chart-dark-text-fill;
+    -fx-text-fill: -chat-text-fill;
 }

@@ -48,12 +48,8 @@ class MessageCell extends CharmListCell<ChatMessage> {
     private static final Insets meInsets = new Insets(10, 0, 10, 0);
     private static final Insets notMeInsets = new Insets(10, 0, 10, 0);
     private static final Image clockImage = new Image( "/clock.png");
-    private static final Image leftPointerImage = new Image( "/lpointer.png");
-    private static final Image rightPointerImage = new Image( "/rpointer.png");
     private static final PseudoClass SIDE_RIGHT = PseudoClass.getPseudoClass("right");
     private static final PseudoClass UNREAD = PseudoClass.getPseudoClass("unread");
-    private final ImageView leftImageView = new ImageView(leftPointerImage);
-    private final ImageView rightImageView = new ImageView(rightPointerImage);
     private static final Image loading = new Image(MessageCell.class.getResourceAsStream("/InternetSlowdown_Day.gif"), 150, 150, true, true);
     private ChatListView<ChatMessage> chatList;
 
@@ -80,7 +76,7 @@ class MessageCell extends CharmListCell<ChatMessage> {
 
         getStyleClass().addAll("chat-list-cell");
 
-        icon.getStyleClass().add("chat-message-icon");
+        icon.getStyleClass().add("user-icon");
         BorderPane.setAlignment(icon, Pos.TOP_CENTER);
 
         setWrapText(true);
@@ -142,7 +138,6 @@ class MessageCell extends CharmListCell<ChatMessage> {
             icon.setText(isMe ? "ME" : Service.getInitials(item.getUser().displayName()));
 
             if (isMe) {
-                msgHandle.setGraphic(rightImageView);
                 messageBubble.pseudoClassStateChanged(SIDE_RIGHT, true);
                 messageBubble.setLeft(null);
                 messageBubble.setRight(msgHandle);
@@ -152,7 +147,6 @@ class MessageCell extends CharmListCell<ChatMessage> {
                 BorderPane.setAlignment(messageBubble, Pos.TOP_RIGHT);
                 BorderPane.setAlignment(bottomBox, Pos.BOTTOM_RIGHT);
             } else {
-                msgHandle.setGraphic(leftImageView);
                 messageBubble.pseudoClassStateChanged(SIDE_RIGHT, false);
                 messageBubble.setRight(null);
                 messageBubble.setLeft(msgHandle);

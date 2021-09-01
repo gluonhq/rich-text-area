@@ -14,10 +14,9 @@ import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
+import org.controlsfx.control.PopOver;
 import org.fxmisc.flowless.VirtualFlow;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.GenericStyledArea;
@@ -43,6 +42,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.gluonhq.emoji.control.EmojiTextArea.Side.LEFT;
 
 public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
 
@@ -87,8 +88,6 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
             }
         };
 
-        popOver = new EmojiPopOver();
-        popOver.skinProperty().addListener((obs, ov, nv) -> System.out.println("obs = " + nv));
         emojiSuggestion = new EmojiSuggestion();
         emojiSuggestion.setOnAction(emojiEvent -> {
             final Emoji emoji = emojiEvent.getEmoji();
@@ -99,6 +98,7 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
             }
         });
 
+        popOver = new EmojiPopOver();
         // TODO: Find a way to perform this elegantly
         popOver.setOnAction(e -> {
             final Emoji emoji = (Emoji) e.getSource();
@@ -111,9 +111,10 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
                             textarea.getSegOps()
                     );
             textarea.replaceSelection(ros);
-            popOver.hide(javafx.util.Duration.ZERO);
             textarea.requestFocus();
         });
+        updateSide();
+        getSkinnable().emojiSideProperty().addListener(o -> updateSide());
 
         emojiButton = new Button(EmojiData.emojiForText("smile"));
         emojiButton.getStyleClass().add("emoji-button");
@@ -171,6 +172,14 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
 
     }
 
+    private void updateSide() {
+        if (getSkinnable().getEmojiSide() == LEFT) {
+            popOver.setArrowLocation(PopOver.ArrowLocation.BOTTOM_LEFT);
+        } else {
+            popOver.setArrowLocation(PopOver.ArrowLocation.BOTTOM_RIGHT);
+        }
+    }
+
     @Override
     protected void layoutChildren(double contentX, double contentY, double contentWidth, double contentHeight) {
 
@@ -178,14 +187,14 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
         final double buttonWidth = emojiButton.prefWidth(buttonHeight);
 
         emojiButton.resizeRelocate(
-                contentWidth + snappedLeftInset() - buttonWidth,
+                getSkinnable().getEmojiSide() == LEFT ? contentX : contentX + contentWidth - buttonWidth,
                 contentHeight + snappedTopInset() - buttonHeight, 
                 buttonWidth,
                 buttonHeight
         );
 
         virtualizedScrollPane.resizeRelocate(
-                contentX,
+                getSkinnable().getEmojiSide() == LEFT ? contentX + buttonWidth + spacing.get() : contentX,
                 contentY,
                 contentWidth - buttonWidth - spacing.get(),
                 contentHeight
@@ -193,7 +202,12 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
 
         final double emojiSuggestionWidth = contentWidth - buttonWidth - spacing.get();
         final double emojiSuggestionHeight = emojiSuggestion.prefHeight(emojiSuggestionWidth);
-        emojiSuggestion.resizeRelocate(snappedLeftInset(), contentY - emojiSuggestionHeight, emojiSuggestionWidth, emojiSuggestionHeight);
+        emojiSuggestion.resizeRelocate(
+                getSkinnable().getEmojiSide() == LEFT ? contentX + buttonWidth + spacing.get() : contentX, 
+                contentY - emojiSuggestionHeight, 
+                emojiSuggestionWidth, 
+                emojiSuggestionHeight
+        );
     }
 
     @Override

@@ -37,6 +37,7 @@ public class PlusPopupView extends PopupView {
         super(ownerNode);
         this.ownerNode = ownerNode;
         this.resources = resources;
+        setSide(PopupSide.RIGHT);
 
         getStylesheets().add(PlusPopupView.class.getResource("plus.css").toExternalForm());
 
@@ -73,15 +74,13 @@ public class PlusPopupView extends PopupView {
                     }
                 }
             } else {
-                PicturesService.create().ifPresent(pictures ->
-                        pictures.takePhoto(false)
-                                .ifPresent(image -> {
-                                    String id = service.addImage("photo" + "-" + System.currentTimeMillis(), image);
-                                    if (id != null) {
-                                        var message = new ChatMessage(id, service.loggedUser());
-                                        messages.add(message);
-                                    }
-                                }));
+                PicturesService.create().ifPresent(pictures -> pictures.takePhoto(false).ifPresent(image -> {
+                    String id = service.addImage("photo" + "-" + System.currentTimeMillis(), image);
+                    if (id != null) {
+                        var message = new ChatMessage(id, service.loggedUser());
+                        messages.add(message);
+                    }
+                }));
             }
         });
         HBox imageBox = new HBox(icon, upload);
@@ -123,11 +122,12 @@ public class PlusPopupView extends PopupView {
         String initials = Service.getInitials(name);
 
         AppViewManager.MAPS_VIEW.switchView().ifPresent(p ->
-                ((MapsPresenter) p).flyTo(position, service.loggedUser(), initials, e -> {
-                    messages.removeIf(m -> m.getMessage().startsWith(IMAGE_PREFIX + LATLON + initials));
-                    service.getImages().removeIf(m -> m.getId().startsWith(LATLON + initials));
-                    messages.add(e);
-            }));
+            ((MapsPresenter) p).flyTo(position, service.loggedUser(), initials, e -> {
+                messages.removeIf(m -> m.getMessage().startsWith(IMAGE_PREFIX + LATLON + initials));
+                service.getImages().removeIf(m -> m.getId().startsWith(LATLON + initials));
+                messages.add(e);
+            })
+        );
     }
 
 }

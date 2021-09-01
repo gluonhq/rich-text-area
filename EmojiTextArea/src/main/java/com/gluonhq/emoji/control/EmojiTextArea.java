@@ -28,6 +28,18 @@ public class EmojiTextArea extends Control {
         text.set(value);
     }
 
+    // Puts the emoji button on the left or right side of the editor
+    private final ObjectProperty<Side> emojiSide = new SimpleObjectProperty<>(this, "side", Side.LEFT);
+    public final ObjectProperty<Side> emojiSideProperty() {
+        return emojiSide;
+    }
+    public final Side getEmojiSide() {
+        return emojiSide.get();
+    }
+    public final void setEmojiSide(Side value) {
+        emojiSide.set(value);
+    }
+
     /**
      * Defines the action to be performed when an enter is pressed
      */
@@ -56,6 +68,11 @@ public class EmojiTextArea extends Control {
     @Override
     public String getUserAgentStylesheet() {
         return getClass().getResource("emoji-text-area.css").toExternalForm();
+    }
+
+    public enum Side {
+        LEFT,
+        RIGHT;
     }
 
     // treat private

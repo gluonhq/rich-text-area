@@ -23,10 +23,15 @@ public class ChannelPresenter extends GluonPresenter<GluonChat> {
     private FilteredList<Channel> channelFilteredList;
 
     public void initialize() {
-        search.textProperty().addListener((o, ov, nv) -> channelFilteredList.setPredicate(channel -> channel.contains(nv)));
+        search.textProperty().addListener((o, ov, nv) -> channelFilteredList.setPredicate(channel -> {
+            if (nv == null || nv.isEmpty()) {
+                return true;
+            }
+            return channel.contains(nv);
+        }));
         channelFilteredList = new FilteredList<>(service.getChannels());
         channelList.setItems(channelFilteredList);
         channelList.setCellFactory(param -> new ChannelCell());
-        channelList.setHeadersFunction(param -> param.isDirect() ? "Direct" : "Channels");
+        channelList.setHeadersFunction(param -> param.isDirect() ? "DIRECT" : "CHANNELS");
     }
  }

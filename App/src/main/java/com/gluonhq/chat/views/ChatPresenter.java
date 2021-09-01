@@ -40,8 +40,8 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
     @FXML private StackPane stackPane;
     @FXML private HBox unreadBox;
     @FXML private Label unread;
-    @FXML private Button addButton;
     @FXML private BorderPane bottomPane;
+    @FXML private Button addButton;
     @FXML private Button sendButton;
 
     @Inject private Service service;
@@ -72,7 +72,10 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
 
         sendButton.prefHeightProperty().bind(addButton.heightProperty());
 
-        sendButton.disableProperty().bind(messageEditor.textProperty().isEmpty());
+        addButton.managedProperty().bind(messageEditor.textProperty().isEmpty());
+        addButton.visibleProperty().bind(messageEditor.textProperty().isEmpty());
+        sendButton.managedProperty().bind(messageEditor.textProperty().isNotEmpty());
+        sendButton.visibleProperty().bind(messageEditor.textProperty().isNotEmpty());
         sendButton.setOnAction(e -> sendMessage(messageEditor));
         messageEditor.setOnAction(e -> sendMessage(messageEditor));
 

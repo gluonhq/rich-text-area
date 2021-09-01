@@ -11,7 +11,7 @@
     <top>
         <HBox fx:id="searchBox" styleClass="search-box">
             <Icon content="SEARCH" />
-            <TextField fx:id="search"/>
+            <TextField fx:id="search" promptText="%search.placeholder.text"/>
         </HBox>
         
     </top>

@@ -1,25 +1,25 @@
 @import "styles.css";
 
-/** TODO: Needs better naming **/
 .root {
-    -chat-accent      : #607387;
-    -chat-light-color : #ece9e9;
-    -chat-medium-color: #677585;
-    -chat-dark-color  : #4f5c71;
+    /* accent color pallete */
+    -chat-accent       : #4aadda;
+    -chat-accent-light : derive( -chat-accent, 100% );
+    -chat-accent-dark  : derive( -chat-accent, -20% );
 
-    -primary-swatch-500: -chat-accent;
+    /* background color palette */
+    -chat-background       : #677585;
+    -chat-background-light : derive( -chat-background, -20% );
+    -chat-background-dark  : derive( -chat-background,  20% );
 
     /* text color palette */
-    -chart-dark-text-fill : #818181;
-    -chart-light-text-fill: #f4fdff;
+    -chat-text-fill       : #e7e4e4;
+    -chat-text-fill-light : derive( -chat-text-fill,  50% );
+    -chat-text-fill-dark  : derive( -chat-text-fill, -20% );
 
-    -fx-font-size: 12pt;
+    /** Views related vars */
+    -chat-accent-selected: -chat-background-dark;
+    -chat-bubble-background: -chat-background-dark;
 
-    -unread-label: #4d2007;
-    -unread-color: rgba(119, 45, 4, 0.8);
-    -unread-color-hover: rgba(147, 32, 4, 0.8);
-}
-
-.label {
-    -fx-text-fill: -chart-light-text-fill;
+    /** Glisten swatch */
+    -primary-swatch-500: -chat-accent;
 }
