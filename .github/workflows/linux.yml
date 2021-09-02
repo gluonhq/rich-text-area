@@ -1,0 +1,44 @@
+name: Linux
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Gluon's GraalVM
+        uses: gluonhq/setup-graalvm@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install libraries
+        run: |
+          sudo apt update
+          sudo apt install libasound2-dev libavcodec-dev libavformat-dev libavutil-dev libgl-dev libgtk-3-dev libpango1.0-dev libxtst-dev
+
+      - name: Make staging directory
+        run: mkdir staging
+
+      - name: Gluon License
+        uses: gluonhq/gluon-build-license@master
+        with:
+          gluon-license: ${{ secrets.GLUON_LICENSE }}
+          dir: App
+
+      - name: Gluon Build
+        run: |
+          ls App/src/main/resources
+          mvn install && mvn -Pdesktop gluonfx:build gluonfx:package -f App
+
+      - name: Copy native image to staging
+        run: cp -r App/target/gluonfx/x86_64-linux/ChatApp* staging
+
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: Package
+          path: staging

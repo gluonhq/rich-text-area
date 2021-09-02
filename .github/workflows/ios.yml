@@ -1,0 +1,46 @@
+name: iOS
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Gluon's GraalVM
+        uses: gluonhq/setup-graalvm@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+#      - uses: Apple-Actions/import-codesign-certs@v1
+#        with:
+#          p12-file-base64: ${{ secrets.GLUON_IOS_CERTIFICATES_FILE_BASE64 }}
+#          p12-password: ${{ secrets.GLUON_IOS_CERTIFICATES_PASSWORD }}
+
+#      - uses: Apple-Actions/download-provisioning-profiles@v1
+#        with:
+#          bundle-id: com.gluonhq.hello.HelloGluonApp
+#          issuer-id: ${{ secrets.GLUON_IOS_APPSTORE_ISSUER_ID }}
+#          api-key-id: ${{ secrets.GLUON_IOS_APPSTORE_KEY_ID }}
+#          api-private-key: ${{ secrets.GLUON_IOS_APPSTORE_PRIVATE_KEY }}
+
+      - name: Gluon License
+        uses: gluonhq/gluon-build-license@master
+        with:
+          gluon-license: ${{ secrets.GLUON_LICENSE }}
+          dir: App
+
+      - name: Gluon Build
+        run: mvn install && mvn -Pios gluonfx:build -f App
+#
+#      - name: Copy native image to staging
+#        run: cp -r App/target/gluonfx/arm64-ios/*.app staging
+#
+#      - name: Upload
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: Package
+#          path: staging

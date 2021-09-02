@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>App</artifactId>
-    <name>App</name>
+    <name>ChatApp</name>
 
     <parent>
         <groupId>com.gluonhq.chatapp</groupId>
@@ -133,6 +133,7 @@
                         <bundleShortVersion>1.0.6</bundleShortVersion>
                         <providedSigningIdentity>iPhone Distribution: Gluon Software BVBA (S7ZR395D8U)</providedSigningIdentity>
                         <providedProvisioningProfile>ChatApp</providedProvisioningProfile>
+                        <skipSigning>true</skipSigning>
                     </releaseConfiguration>
                 </configuration>
             </plugin>

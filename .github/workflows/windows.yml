@@ -1,0 +1,43 @@
+name: Windows
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      - name: Visual Studio shell
+        uses: egor-tensin/vs-shell@v1
+
+      - name: Setup Gluon's GraalVM
+        uses: gluonhq/setup-graalvm@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Make staging directory
+        run: mkdir staging
+
+      - name: Gluon License
+        uses: gluonhq/gluon-build-license@master
+        with:
+          gluon-license: ${{ secrets.GLUON_LICENSE }}
+          dir: App
+
+      - name: Gluon Build
+        run: mvn install && mvn -Pdesktop gluonfx:build gluonfx:package -f App
+
+      - name: Copy native gluonfx to staging
+        run: cp -r App/target/gluonfx/x86_64-windows/ChatApp.exe staging
+
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: Package
+          path: staging

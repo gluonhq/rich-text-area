@@ -1,0 +1,54 @@
+name: Android
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Gluon's GraalVM
+        uses: gluonhq/setup-graalvm@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install libraries
+        run: |
+          sudo apt update
+          sudo apt install libasound2-dev libavcodec-dev libavformat-dev libavutil-dev libgl-dev libgtk-3-dev libpango1.0-dev libxtst-dev
+
+#      - name: Setup Android Keystore
+#        id: android_keystore_file
+#        uses: timheuer/base64-to-file@v1
+#        with:
+#          fileName: 'my.keystore'
+#          encodedString: ${{ secrets.GLUON_ANDROID_KEYSTORE_BASE64 }}
+
+      - name: Gluon License
+        uses: gluonhq/gluon-build-license@master
+        with:
+          gluon-license: ${{ secrets.GLUON_LICENSE }}
+          dir: App
+
+      - name: Gluon Build
+        run: mvn install && mvn -Pandroid gluonfx:build gluonfx:package -f App
+#        env:
+#          GLUON_ANDROID_KEYSTOREPATH: ${{ steps.android_keystore_file.outputs.filePath }}
+#          GLUON_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.GLUON_ANDROID_KEYSTORE_PASSWORD }}
+#          GLUON_ANDROID_KEYALIAS: ${{ secrets.GLUON_ANDROID_KEYALIAS }}
+#          GLUON_ANDROID_KEYALIAS_PASSWORD: ${{ secrets.GLUON_ANDROID_KEYALIAS_PASSWORD }}
+
+      - name: Make staging directory
+        run: mkdir staging
+
+      - name: Copy native image to staging
+        run: cp -r App/target/gluonfx/aarch64-android/gvm/*.apk staging
+
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: Package
+          path: staging
