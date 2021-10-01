@@ -15,7 +15,6 @@ import com.gluonhq.connect.provider.DataProvider;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import javax.annotation.PostConstruct;
@@ -109,12 +108,6 @@ public class CloudlinkService implements Service {
     public String getName(Consumer<ObjectProperty<String>> consumer) {
         processConsumer(name, consumer);
         return name.getValue();
-    }
-
-    @Override
-    public ObservableList<ChatMessage> getMessages(Channel channel) {
-        // TODO: implement
-        return FXCollections.observableArrayList();
     }
 
     @SuppressWarnings("unchecked")

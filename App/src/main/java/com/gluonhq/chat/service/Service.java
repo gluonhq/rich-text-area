@@ -66,11 +66,4 @@ public interface Service {
             return "";
         }
     }
-
-    /**
-     * Fetches all messages in a channel
-     * @param channel The channel for which messages are to be fetched
-     * @return List of messages in a channel
-     */
-    ObservableList<ChatMessage> getMessages(Channel channel);
 }

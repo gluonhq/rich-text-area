@@ -6,8 +6,13 @@ import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.model.User;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.scene.image.Image;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Arrays;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 public class DummyService implements Service {
@@ -30,13 +35,6 @@ public class DummyService implements Service {
     }
 
     @Override
-    public ObservableList<ChatMessage> getMessages(Channel channel) {
-        return channel.getMembers().stream()
-                .map(user -> new ChatMessage("Message from " + user.displayName(), user))
-                .collect(Collectors.toCollection(FXCollections::observableArrayList));
-    }
-
-    @Override
     public boolean login(String username) {
         this.loggedUser = new User(username, "First Name", "Last Name");
         return true;
@@ -55,14 +53,17 @@ public class DummyService implements Service {
 
     @Override
     public ObservableList<Channel> getChannels() {
+        final ObservableList<User> generalUsers = getUsers();
+        final FilteredList<User> notificationUsers = getUsers().filtered(u -> u.getUsername().startsWith("j"));
+        final FilteredList<User> trackUsers = getUsers().filtered(u -> !u.getUsername().startsWith("j"));
         return FXCollections.observableArrayList(
-                new Channel("general", getUsers()),
-                new Channel("notification", getUsers().filtered(u -> u.getUsername().startsWith("j"))),
-                new Channel("track", getUsers().filtered(u -> !u.getUsername().startsWith("j"))),
+                new Channel("general", generalUsers, createDummyMessages(generalUsers.toArray(new User[0]))),
+                new Channel("notification", notificationUsers, createDummyMessages(notificationUsers.toArray(new User[0]))),
+                new Channel("track", trackUsers, createDummyMessages(trackUsers.toArray(new User[0]))),
                 // Directs
-                new Channel(getUsers().get(1)),
-                new Channel(getUsers().get(2)),
-                new Channel(getUsers().get(3))
+                new Channel(getUsers().get(1), createDummyMessages(getUsers().get(1))),
+                new Channel(getUsers().get(2), createDummyMessages(getUsers().get(2))),
+                new Channel(getUsers().get(3), createDummyMessages(getUsers().get(3)))
         );
     }
 
@@ -70,10 +71,17 @@ public class DummyService implements Service {
     public User loggedUser() {
         return loggedUser;
     }
+    
+    private ObservableList<ChatMessage> createDummyMessages(User... members) {
+        return Arrays.stream(members)
+                .map(user -> new ChatMessage("Message from " + user.displayName(), user, randomDateTime()))
+                .collect(Collectors.toCollection(FXCollections::observableArrayList));
+    }
 
-    /*@Override
-    public String getName(Consumer<ObjectProperty<String>> consumer) {
-        consumer.accept(new SimpleObjectProperty<>("name"));
-        return getName();
-    }*/
+    private LocalDateTime randomDateTime() {
+        long minDay = LocalDateTime.of(1970, 1, 1, 0, 0).toEpochSecond(ZoneOffset.UTC);
+        long maxDay = LocalDateTime.of(2021, 1, 1, 0, 0).toEpochSecond(ZoneOffset.UTC);
+        long randomTime = ThreadLocalRandom.current().nextLong(minDay, maxDay);
+        return LocalDateTime.ofEpochSecond(randomTime, 0, ZoneOffset.UTC);
+    }
 }

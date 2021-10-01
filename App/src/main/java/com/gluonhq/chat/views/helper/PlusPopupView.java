@@ -22,6 +22,7 @@ import javafx.stage.FileChooser;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.time.LocalDateTime;
 import java.util.ResourceBundle;
 
 import static com.gluonhq.chat.service.ImageUtils.*;
@@ -66,7 +67,7 @@ public class PlusPopupView extends PopupView {
                         Image image = new Image(new FileInputStream(file));
                         String id = service.addImage(file.getName() + "-" + System.currentTimeMillis(), image);
                         if (id != null) {
-                            var message = new ChatMessage(id, service.loggedUser());
+                            var message = new ChatMessage(id, service.loggedUser(), LocalDateTime.now());
                             messages.add(message);
                         }
                     } catch (FileNotFoundException e1) {
@@ -77,7 +78,7 @@ public class PlusPopupView extends PopupView {
                 PicturesService.create().ifPresent(pictures -> pictures.takePhoto(false).ifPresent(image -> {
                     String id = service.addImage("photo" + "-" + System.currentTimeMillis(), image);
                     if (id != null) {
-                        var message = new ChatMessage(id, service.loggedUser());
+                        var message = new ChatMessage(id, service.loggedUser(), LocalDateTime.now());
                         messages.add(message);
                     }
                 }));

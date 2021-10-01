@@ -11,14 +11,11 @@ public class ChatMessage extends Searchable {
     LocalDateTime time;
     User user;
 
-    public ChatMessage() {
-    }
-
-    public ChatMessage(String message, User user) {
+    public ChatMessage(String message, User user, LocalDateTime time) {
         this.id = UUID.randomUUID().toString();
         this.message = message;
-        this.time = LocalDateTime.now();
         this.user = user;
+        this.time = time;
     }
 
     public String getMessage() {

@@ -27,6 +27,7 @@ import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
 import javax.inject.Inject;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.ResourceBundle;
 
@@ -120,14 +121,14 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
     }
 
     void updateMessages(Channel channel) {
-        createSortList(service.getMessages(channel));
+        createSortList(channel.getMessages());
         bottomPane.setDisable(false);
     }
 
     private void sendMessage(EmojiTextArea messageEditor) {
         String text = messageEditor.getText().trim();
         if (!text.isEmpty()) {
-            var message = new ChatMessage(text, service.loggedUser());
+            var message = new ChatMessage(text, service.loggedUser(), LocalDateTime.now());
             messages.add(message);
             messageEditor.clear();
             messageEditor.requestFocus();

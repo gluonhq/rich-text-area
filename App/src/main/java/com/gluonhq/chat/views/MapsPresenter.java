@@ -19,6 +19,7 @@ import com.gluonhq.maps.MapView;
 import javafx.scene.image.Image;
 import javafx.fxml.FXML;
 
+import java.time.LocalDateTime;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
@@ -70,7 +71,7 @@ public class MapsPresenter extends GluonPresenter<GluonChat> {
                 Service service = Injector.instantiateModelOrService(Service.class);
                 String id = service.addImage(LATLON + initials + LATLON_SEP + mapPoint.getLatitude() + LATLON_SEP + mapPoint.getLongitude() + LATLON_SEP + System.currentTimeMillis(), snapshot);
                 if (id != null) {
-                    var message = new ChatMessage(id, name);
+                    var message = new ChatMessage(id, name, LocalDateTime.now());
                     consumer.accept(message);
                 }
                 getApp().switchToPreviousView();
