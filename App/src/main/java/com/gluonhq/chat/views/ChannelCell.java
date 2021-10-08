@@ -12,13 +12,18 @@ public class ChannelCell extends CharmListCell<Channel> {
         tile = new ListTile();
         setGraphic(tile);
         setText(null);
+        getStyleClass().add("focus-cell");
         getStyleClass().add("channel-cell");
     }
 
     @Override
     public void updateItem(Channel channel, boolean empty) {
         super.updateItem(channel, empty);
-
+        if ((channel!= null) && (channel.isUnread())){
+            getStyleClass().add("focus-cell");
+        } else {
+            getStyleClass().remove("focus-cell");
+        }
         /* TODO: Add User Image
         final Avatar avatar = new Avatar;
         avatar.setMouseTransparent(true);
