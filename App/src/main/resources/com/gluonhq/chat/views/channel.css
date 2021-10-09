@@ -38,7 +38,7 @@
     -fx-background-color: -chat-accent-selected;
 }
 
-.channel-list .focus-cell .primary-text {
+.channel-list .channel-cell:unread .primary-text {
     -fx-font-weight: bold;
 }
 
