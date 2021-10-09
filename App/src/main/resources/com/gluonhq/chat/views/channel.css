@@ -38,6 +38,10 @@
     -fx-background-color: -chat-accent-selected;
 }
 
+.channel-list .channel-cell:unread .primary-text {
+    -fx-font-weight: bold;
+}
+
 /** Setting HeadersFunction to CharmListView
 leads it to covering the entire width **/
 .landscape-view .channel-list {

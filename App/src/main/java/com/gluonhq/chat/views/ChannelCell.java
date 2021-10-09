@@ -4,9 +4,12 @@ import com.gluonhq.charm.glisten.control.CharmListCell;
 import com.gluonhq.charm.glisten.control.ListTile;
 import com.gluonhq.chat.model.Channel;
 
+import javafx.css.PseudoClass;
+
 public class ChannelCell extends CharmListCell<Channel> {
 
     private final ListTile tile;
+    private static final PseudoClass PSEUDO_CLASS_UNREAD = PseudoClass.getPseudoClass("unread");
 
     public ChannelCell() {
         tile = new ListTile();
@@ -18,7 +21,7 @@ public class ChannelCell extends CharmListCell<Channel> {
     @Override
     public void updateItem(Channel channel, boolean empty) {
         super.updateItem(channel, empty);
-
+        pseudoClassStateChanged(PSEUDO_CLASS_UNREAD, channel!= null && channel.isUnread());
         /* TODO: Add User Image
         final Avatar avatar = new Avatar;
         avatar.setMouseTransparent(true);

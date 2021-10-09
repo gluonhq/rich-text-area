@@ -19,6 +19,10 @@ public class DummyService implements Service {
 
     private User loggedUser;
 
+    public DummyService() {
+        login("Alice");
+    }
+
     @Override
     public ObservableList<ChatImage> getImages() {
         return FXCollections.observableArrayList(
@@ -56,15 +60,21 @@ public class DummyService implements Service {
         final ObservableList<User> generalUsers = getUsers();
         final FilteredList<User> notificationUsers = getUsers().filtered(u -> u.getUsername().startsWith("j"));
         final FilteredList<User> trackUsers = getUsers().filtered(u -> !u.getUsername().startsWith("j"));
-        return FXCollections.observableArrayList(
+        ObservableList<Channel> answer = FXCollections.observableArrayList(
                 new Channel("general", generalUsers, createDummyMessages(generalUsers.toArray(new User[0]))),
                 new Channel("notification", notificationUsers, createDummyMessages(notificationUsers.toArray(new User[0]))),
                 new Channel("track", trackUsers, createDummyMessages(trackUsers.toArray(new User[0]))),
                 // Directs
+                new Channel(getUsers().get(0), createDummyMessages(getUsers().get(1))),
                 new Channel(getUsers().get(1), createDummyMessages(getUsers().get(1))),
-                new Channel(getUsers().get(2), createDummyMessages(getUsers().get(2))),
-                new Channel(getUsers().get(3), createDummyMessages(getUsers().get(3)))
+                new Channel(getUsers().get(2), createDummyMessages(getUsers().get(1))),
+                new Channel(getUsers().get(3), createDummyMessages(getUsers().get(2))),
+                new Channel(getUsers().get(4), createDummyMessages(getUsers().get(3)))
         );
+        answer.stream().forEach(c -> {
+            if (Math.random() > .5) c.setUnread(true);
+        });
+        return answer;
     }
 
     @Override
