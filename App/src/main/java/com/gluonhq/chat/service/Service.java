@@ -54,6 +54,20 @@ public interface Service {
         return null;
     }
 
+    /**
+     * Start the bootstrap procedure in case this client registers for
+     * the first time.
+     * @param bc the BootstrapClient that will be invoked with callbacks.
+     */
+    default void bootstrap(BootstrapClient bc) {}
+
+    /**
+     * Start the regular working of the service. This requires the bootstrap
+     * to be completed successfully once (but not during this run)
+     */
+    default void initializeService() {}
+
+
     static String getInitials(String name) {
         if (name != null) {
             return Arrays.stream(name.split(" "))
