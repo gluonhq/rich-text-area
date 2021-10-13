@@ -128,7 +128,7 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
     private void sendMessage(EmojiTextArea messageEditor) {
         String text = messageEditor.getText().trim();
         if (!text.isEmpty()) {
-            var message = new ChatMessage(text, service.loggedUser(), LocalDateTime.now());
+            var message = new ChatMessage(text, service.loggedUser(), LocalDateTime.now(), true);
             messages.add(message);
             messageEditor.clear();
             messageEditor.requestFocus();
