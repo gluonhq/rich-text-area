@@ -5,13 +5,32 @@ import java.util.UUID;
 
 public class User extends Searchable {
 
+    /**
+     * @return the avatarPath
+     */
+    public String getAvatarPath() {
+        return avatarPath;
+    }
+
+    /**
+     * @param avatarPath the avatarPath to set
+     */
+    public void setAvatarPath(String avatarPath) {
+        this.avatarPath = avatarPath;
+    }
+
     private final String id;
     private String username;
     private String firstname;
     private String lastname;
+    private String avatarPath;
 
     public User(String username, String firstname, String lastname) {
-        this.id = UUID.randomUUID().toString();
+        this(username, firstname, lastname, UUID.randomUUID().toString());
+    }
+
+    public User(String username, String firstname, String lastname, String uuid) {
+        this.id = uuid;
         this.username = username;
         this.firstname = firstname;
         this.lastname = lastname;
@@ -44,7 +63,7 @@ public class User extends Searchable {
     public void setLastname(String lastname) {
         this.lastname = lastname;
     }
-    
+
     public String displayName() {
         return firstname + " " + lastname;
     }

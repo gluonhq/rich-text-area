@@ -10,12 +10,18 @@ public class ChatMessage extends Searchable {
     String message;
     LocalDateTime time;
     User user;
+    private boolean localOriginated;
 
     public ChatMessage(String message, User user, LocalDateTime time) {
+        this (message, user, time, false);
+    }
+
+    public ChatMessage(String message, User user, LocalDateTime time, boolean localOriginated) {
         this.id = UUID.randomUUID().toString();
         this.message = message;
         this.user = user;
         this.time = time;
+        this.localOriginated = localOriginated;
     }
 
     public String getMessage() {
@@ -32,6 +38,13 @@ public class ChatMessage extends Searchable {
 
     public String getId() {
         return id;
+    }
+
+   /**
+    * Returns true when this message originates from the current device
+    */
+    public boolean getLocalOriginated() {
+        return this.localOriginated;
     }
 
     @Override
@@ -54,6 +67,7 @@ public class ChatMessage extends Searchable {
                 ", message='" + message + '\'' +
                 ", time=" + time +
                 ", user=" + user.toString() +
+                ", localoriginated = " + localOriginated + 
                 '}';
     }
 
