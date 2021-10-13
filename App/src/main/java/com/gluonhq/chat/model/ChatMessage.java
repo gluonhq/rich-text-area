@@ -6,10 +6,10 @@ import java.util.UUID;
 
 public class ChatMessage extends Searchable {
 
-    String id;
-    String message;
-    LocalDateTime time;
-    User user;
+    private String id;
+    private String message;
+    private LocalDateTime time;
+    private User user;
     private boolean localOriginated;
 
     public ChatMessage(String message, User user, LocalDateTime time) {
