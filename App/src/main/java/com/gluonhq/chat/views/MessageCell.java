@@ -8,7 +8,6 @@ import com.gluonhq.chat.model.ChatImage;
 import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.service.ImageUtils;
 import com.gluonhq.chat.service.Service;
-import com.gluonhq.connect.GluonObservableList;
 import com.gluonhq.emoji.EmojiData;
 import com.gluonhq.emoji.popup.util.EmojiImageUtils;
 import javafx.animation.PauseTransition;
@@ -41,6 +40,7 @@ import java.util.regex.Pattern;
 
 import static com.gluonhq.chat.service.ImageUtils.IMAGE_PREFIX;
 import static com.gluonhq.chat.service.ImageUtils.LATLON;
+import com.gluonhq.connect.GluonObservableList;
 
 class MessageCell extends CharmListCell<ChatMessage> {
 

@@ -7,6 +7,7 @@ import com.gluonhq.charm.glisten.afterburner.GluonInstanceProvider;
 import com.gluonhq.charm.glisten.application.MobileApplication;
 import com.gluonhq.charm.glisten.visual.Swatch;
 import com.gluonhq.chat.service.DummyService;
+import com.gluonhq.chat.service.WaveService;
 import com.gluonhq.chat.service.Service;
 import com.gluonhq.chat.views.AppViewManager;
 import com.gluonhq.emoji.EmojiData;
@@ -41,7 +42,8 @@ public class GluonChat extends MobileApplication {
 
     private static final GluonInstanceProvider instanceSupplier = new GluonInstanceProvider() {{
         // bindProvider(Service.class, CloudlinkService::new);
-        bindProvider(Service.class, DummyService::new);
+        // bindProvider(Service.class, DummyService::new);
+        bindProvider(Service.class, WaveService::new);
         Injector.setInstanceSupplier(this);
     }};
 
@@ -71,7 +73,6 @@ public class GluonChat extends MobileApplication {
     }
 
     public static void main(String[] args) {
-//        System.setProperty("charm-desktop-form", "tablet");
         launch(args);
     }
 }

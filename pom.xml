@@ -31,7 +31,7 @@
         <javafxVersion>16</javafxVersion>
         <controlsfxVersion>11.1.0</controlsfxVersion>
         <javafx-maven-plugin-version>0.0.6</javafx-maven-plugin-version>
-        <gluonfx-maven-plugin-version>1.0.4</gluonfx-maven-plugin-version>
+        <gluonfx-maven-plugin-version>1.0.7</gluonfx-maven-plugin-version>
     </properties>
     
     <repositories>

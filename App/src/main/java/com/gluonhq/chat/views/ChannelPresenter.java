@@ -38,6 +38,7 @@ public class ChannelPresenter extends GluonPresenter<GluonChat> {
         channelList.setItems(channelFilteredList);
         channelList.setCellFactory(param -> new ChannelCell());
         channelList.setHeadersFunction(param -> param.isDirect() ? "DIRECT" : "CHANNELS");
+        service.initializeService();
     }
 
     private FilteredList<Channel> createChannelList() {

@@ -10,7 +10,7 @@
 <View fx:id="loginView" styleClass="login-view" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gluonhq.chat.views.LoginPresenter">
     <VBox fx:id="box" styleClass="box">
         <Label fx:id="header" styleClass="header" text="Link your phone to Signal Desktop" />
-        <ImageView>
+        <ImageView fx:id="qrImageView">
             <Image url="@/qr.png" />
         </ImageView>
         <GridPane styleClass="text-box" hgap="2.0" vgap="2.0">

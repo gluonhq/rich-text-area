@@ -31,6 +31,7 @@ module com.gluonhq.chat {
     requires com.gluonhq.glisten.afterburner;
     requires java.annotation;
     requires afterburner.mfx;
+    requires com.gluonhq.wave;
 
     opens com.gluonhq.chat.service to afterburner.mfx;
     opens com.gluonhq.chat.views to com.gluonhq.glisten.afterburner,
