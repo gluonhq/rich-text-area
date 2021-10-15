@@ -25,12 +25,12 @@
 
         <glistenVersion>6.0.6</glistenVersion>
         <glistenAfterburnerVersion>2.0.5</glistenAfterburnerVersion>
-        <attachVersion>4.0.12</attachVersion>
+        <attachVersion>4.0.13</attachVersion>
         <mapsVersion>2.0.0-ea+5</mapsVersion>
         <connectVersion>2.0.1</connectVersion>
-        <javafxVersion>16</javafxVersion>
+        <javafxVersion>17.0.0.1</javafxVersion>
         <controlsfxVersion>11.1.0</controlsfxVersion>
-        <javafx-maven-plugin-version>0.0.6</javafx-maven-plugin-version>
+        <javafx-maven-plugin-version>0.0.8</javafx-maven-plugin-version>
         <gluonfx-maven-plugin-version>1.0.7</gluonfx-maven-plugin-version>
     </properties>
     

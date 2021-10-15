@@ -4,10 +4,13 @@ import com.gluonhq.charm.glisten.control.CharmListCell;
 import com.gluonhq.charm.glisten.control.ListTile;
 import com.gluonhq.chat.model.Channel;
 import com.gluonhq.chat.model.User;
+import com.gluonhq.chat.service.Service;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
@@ -44,6 +47,11 @@ public class ChannelCell extends CharmListCell<Channel> {
                 } catch (IOException ie) {
                     ie.printStackTrace();
                 }
+            } else {
+                String initials = Service.getInitials(author.displayName());
+                Label icon = new Label(initials.substring(0, Math.min(initials.length(), 2)));
+                icon.getStyleClass().add("channel-icon");
+                tile.setPrimaryGraphic(icon);
             }
         }
         pseudoClassStateChanged(PSEUDO_CLASS_UNREAD, channel!= null && channel.isUnread());
