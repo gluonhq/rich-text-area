@@ -2,6 +2,40 @@
     -fx-text-fill: -fx-icon-fill;
 }
 
+.chat-channel-box {
+    -fx-alignment: center;
+    -fx-background-color: -chat-background-light;
+    -fx-border-color: -chat-accent-light;
+    -fx-border-width: 0 0 2 0;
+    -fx-spacing: 10;
+    -fx-padding: 2 5 2 25;
+}
+
+.chat-channel-box .label.chat-channel-avatar {
+    -fx-text-fill: -chat-text-fill-light;
+    -fx-background-color: -chat-background;
+    -fx-border-radius: 50;
+    -fx-background-radius: 50;
+    -fx-alignment: center;
+    -fx-padding: 5;
+    -fx-font-size: 1em;
+    -fx-pref-width: 8mm;
+    -fx-pref-height: 8mm;
+}
+
+.chat-channel-box .label.chat-channel-name {
+    -fx-text-fill: -chat-text-fill;
+    -fx-font-size: 1.2em;
+}
+
+.chat-channel-box .chat-channel-button {
+    -fx-font-family: "FontAwesome";
+    -fx-font-size: 1.5em;
+    -fx-text-fill: -chat-text-fill;
+    -fx-background-color: transparent;
+    -fx-effect: null;
+}
+
 .chat-toolbar {
     -fx-background-color: -chat-accent;
     -fx-padding: 10;
@@ -220,4 +254,12 @@
 
 .list-cell:unread > .stack-pane > .unread-box {
     visibility: visible;
+}
+
+.channel-box {
+    -fx-padding: 2 10 2 10;
+    -fx-alignment: CENTER;
+    -fx-min-height: 40;
+    -fx-pref-height: 40;
+    -fx-max-height: 40;
 }

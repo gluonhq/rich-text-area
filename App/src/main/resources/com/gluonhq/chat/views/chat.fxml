@@ -11,7 +11,20 @@
 <?import com.gluonhq.charm.glisten.control.Icon?>
 <?import com.gluonhq.charm.glisten.visual.MaterialDesignIcon?>
 <?import javafx.scene.Group?>
+<?import javafx.scene.layout.Pane?>
 <View fx:id="chatView" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gluonhq.chat.views.ChatPresenter">
+    <top>
+        <HBox fx:id="channelBox" styleClass="chat-channel-box">
+            <Label fx:id="channelAvatar" styleClass="chat-channel-avatar"/>
+            <Label fx:id="channelName" styleClass="chat-channel-name"/>
+            <Pane HBox.hgrow="ALWAYS" prefHeight="0" />
+            <Button fx:id="closeChannel" mnemonicParsing="false" styleClass="chat-channel-button" BorderPane.alignment="CENTER">
+                <graphic>
+                    <Icon content="CLOSE"/>
+                </graphic>
+            </Button>
+        </HBox>
+    </top>
     <center>
         <StackPane fx:id="stackPane" prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER">
             <children>

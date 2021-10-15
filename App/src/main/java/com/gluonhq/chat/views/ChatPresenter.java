@@ -15,6 +15,7 @@ import com.gluonhq.emoji.control.EmojiTextArea;
 import javafx.animation.PauseTransition;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
@@ -38,6 +39,12 @@ import java.util.ResourceBundle;
 public class ChatPresenter extends GluonPresenter<GluonChat> {
 
     @FXML private View chatView;
+
+    @FXML private HBox channelBox;
+    @FXML private Label channelAvatar;
+    @FXML private Label channelName;
+    @FXML private Button closeChannel;
+
     @FXML private StackPane stackPane;
     @FXML private HBox unreadBox;
     @FXML private Label unread;
@@ -53,8 +60,17 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
     private PauseTransition pause;
 
     public void initialize() {
+        closeChannel.setOnAction(e -> updateMessages(null));
+        channelBox.visibleProperty().bind(channelName.textProperty().isNotEmpty());
         chatList = new ChatListView<>();
-        chatList.setPlaceholder(new Label(resources.getString("select.channel")));
+        Label placeholder = new Label();
+        placeholder.textProperty().bind(Bindings.createStringBinding(() -> {
+            if (channelName.getText() == null || channelName.getText().isEmpty()) {
+                return resources.getString("select.channel");
+            }
+            return resources.getString("empty.channel");
+        }, channelName.textProperty()));
+        chatList.setPlaceholder(placeholder);
         chatList.getStyleClass().add("chat-list");
         chatList.setCellFactory(listView -> new MessageCell());
 
@@ -121,7 +137,16 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
     }
 
     void updateMessages(Channel channel) {
-        createSortList(channel.getMessages());
+        if (channel != null) {
+            createSortList(channel.getMessages());
+            channelName.setText(channel.displayName());
+            String initials = Service.getInitials(channel.displayName());
+            channelAvatar.setText(initials.substring(0, Math.min(initials.length(), 2)));
+        } else {
+            chatList.setItems(null);
+            channelAvatar.setText(null);
+            channelName.setText(null);
+        }
         bottomPane.setDisable(false);
     }
 
