@@ -1,6 +1,6 @@
 package com.gluonhq.chat.views;
 
-import com.gluonhq.attach.orientation.OrientationService;
+//import com.gluonhq.attach.orientation.OrientationService;
 import com.gluonhq.charm.glisten.afterburner.GluonPresenter;
 import com.gluonhq.charm.glisten.application.ViewStackPolicy;
 import com.gluonhq.charm.glisten.mvc.View;
@@ -22,7 +22,7 @@ public class HomePresenter extends GluonPresenter<GluonChat> {
 
     public void initialize() {
 
-        OrientationService.create().ifPresent(o -> o.orientationProperty().addListener(obs -> setupView()));
+//        OrientationService.create().ifPresent(o -> o.orientationProperty().addListener(obs -> setupView()));
 
         homeView.showingProperty().addListener((obs, ov, nv) -> {
             if (nv) {
