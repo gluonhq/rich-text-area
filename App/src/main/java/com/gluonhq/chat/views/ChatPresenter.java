@@ -160,6 +160,9 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
             channelName.setText(null);
         }
         bottomPane.setDisable(false);
+
+        AppViewManager.CHANNEL_VIEW.getPresenter()
+                .ifPresent(presenter -> ((ChannelPresenter) presenter).updateChannels(channel == null));
     }
 
     private void sendMessage(EmojiTextArea messageEditor) {

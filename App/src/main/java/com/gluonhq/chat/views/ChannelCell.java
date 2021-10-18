@@ -25,7 +25,6 @@ public class ChannelCell extends CharmListCell<Channel> {
         tile.setOnMouseReleased(event -> {
             if (channel != null) {
                 channel.setUnread(false);
-                pseudoClassStateChanged(PSEUDO_CLASS_UNREAD, false);
                 AppViewManager.CHAT_VIEW.getPresenter()
                         .ifPresent(presenter -> ((ChatPresenter) presenter).updateMessages(channel));
                 // TODO: We want a better way to switch views if the screen size is <= 600
@@ -67,6 +66,7 @@ public class ChannelCell extends CharmListCell<Channel> {
         } else {
             tile.setTextLine(0, null);
             tile.setPrimaryGraphic(null);
+            pseudoClassStateChanged(PSEUDO_CLASS_UNREAD, false);
         }
     }
 }

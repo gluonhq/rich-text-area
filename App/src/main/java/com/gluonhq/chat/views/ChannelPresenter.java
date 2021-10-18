@@ -41,6 +41,13 @@ public class ChannelPresenter extends GluonPresenter<GluonChat> {
         service.initializeService();
     }
 
+    public void updateChannels(boolean removeSelection) {
+        if (removeSelection) {
+            channelList.setSelectedItem(null);
+        }
+        channelList.refresh();
+    }
+
     private FilteredList<Channel> createChannelList() {
         SortedList<Channel> sortedList = new SortedList<>(service.getChannels());
         sortedList.setComparator(Comparator.comparing(this::latestMessageTime).reversed());
