@@ -72,6 +72,11 @@ public class GluonChat extends MobileApplication {
         //ScenicView.show(scene);
     }
 
+    @Override
+    public void stop() throws Exception {
+        System.exit(0);
+    }
+
     public static void main(String[] args) {
         launch(args);
     }
