@@ -12,6 +12,9 @@ import com.gluonhq.wave.util.QRGenerator;
 import java.io.File;
 import java.io.IOException;
 import java.lang.System.Logger.Level;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -147,7 +150,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             int cnt = lines.size();
             for (int i = 0; i < cnt; i = i + 3) {
                 String senderuuid = lines.get(i);
-                String content = lines.get(i + 1);
+                String content = URLDecoder.decode(lines.get(i + 1),StandardCharsets.UTF_8);
                 long timestamp = Long.parseLong(lines.get(i + 2));
                 Instant instant = Instant.ofEpochMilli(timestamp);
                 LocalDateTime ldt = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
@@ -190,6 +193,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             Path contactPath = contactsDir.toPath().resolve(userUuid);
             Path messagelog = contactPath.resolve("chatlog");
             Files.createDirectories(contactPath);
+            content = URLEncoder.encode(content, StandardCharsets.UTF_8);
             List<String> ct = new LinkedList();
             ct.add(senderUuid);
             ct.add(content);
