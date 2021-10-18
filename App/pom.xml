@@ -102,24 +102,7 @@
                         <item>logging.properties</item>
                         <item>whisper.store</item>
                     </resourcesList>
-                    <reflectionList>
-                        <list>com.gluonhq.charm.glisten.control.TextField</list>
-                        <list>com.gluonhq.chat.service.CloudlinkService</list>
-                        <list>com.gluonhq.chat.model.ChatMessage</list>
-                        <list>com.gluonhq.chat.model.ChatImage</list>
-                        <list>com.gluonhq.chat.views.ChannelPresenter</list>
-                        <list>com.gluonhq.chat.views.ChatPresenter</list>
-                        <list>com.gluonhq.chat.views.HomePresenter</list>
-                        <list>com.gluonhq.chat.views.LandscapePresenter</list>
-                        <list>com.gluonhq.chat.views.LoginPresenter</list>
-                        <list>com.gluonhq.chat.views.MapsPresenter</list>
-                        <list>com.gluonhq.chat.views.PortraitPresenter</list>
-                        <list>org.glassfish.json.JsonProviderImpl</list>
-                        <!-- for desktop only -->
-<!--                        <list>com.gluonhq.attach.orientation.impl.DesktopOrientationService</list>-->
-<!--                        <list>com.gluonhq.attach.position.impl.DesktopPositionService</list>-->
-                    </reflectionList>
-                        <verbose>false</verbose>
+                    <verbose>false</verbose>
                     <mainClass>${mainClassName}</mainClass>
                     <releaseConfiguration>
                         <appLabel>ChatApp</appLabel>

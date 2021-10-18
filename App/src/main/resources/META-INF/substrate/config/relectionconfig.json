@@ -1,8 +1,1308 @@
 [
   {
     "name":"com.gluonhq.maps.MapView",
+    "methods":[ {"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.gluonhq.charm.glisten.control.TextField",
+    "allDeclaredMethods":true,
+    "allPublicConstructors":true,
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.gluonhq.charm.glisten.control.TextInput",
+    "allDeclaredMethods":true
+  },
+  {
+    "name":"com.gluonhq.chat.service.WaveService",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true
+  },
+  {
+    "name":"com.gluonhq.chat.views.ChannelPresenter",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.gluonhq.chat.views.ChatPresenter",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.gluonhq.chat.views.HomePresenter",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.gluonhq.chat.views.LandscapePresenter",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.gluonhq.chat.views.LoginPresenter",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.gluonhq.chat.views.PortraitPresenter",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.gluonhq.emoji.Emoji",
+    "allPublicMethods":true,
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.glassfish.json.JsonProviderImpl",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true
+  },
+  {
+    "name":"com.fasterxml.jackson.databind.ext.Java7HandlersImpl",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.fasterxml.jackson.databind.ext.Java7SupportImpl",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.google.protobuf.ExtensionRegistry",
+    "methods":[{"name":"getEmptyRegistry","parameterTypes":[] }]
+  },
+  {
+    "name":"com.sun.crypto.provider.AESCipher$General",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.sun.crypto.provider.DHParameters",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.sun.crypto.provider.HmacCore$HmacSHA256",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.sun.crypto.provider.TlsKeyMaterialGenerator",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.sun.crypto.provider.TlsMasterSecretGenerator",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.sun.crypto.provider.TlsPrfGenerator$V12",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"java.security.AlgorithmParametersSpi"
+  },
+  {
+    "name":"java.security.KeyStoreSpi"
+  },
+  {
+    "name":"java.security.MessageDigestSpi"
+  },
+  {
+    "name":"java.security.SecureRandomParameters"
+  },
+  {
+    "name":"java.security.interfaces.DSAPrivateKey"
+  },
+  {
+    "name":"java.security.interfaces.DSAPublicKey"
+  },
+  {
+    "name":"java.security.interfaces.ECPrivateKey"
+  },
+  {
+    "name":"java.security.interfaces.ECPublicKey"
+  },
+  {
+    "name":"java.security.interfaces.RSAPrivateKey"
+  },
+  {
+    "name":"java.security.interfaces.RSAPublicKey"
+  },
+  {
+    "name":"java.security.spec.DSAParameterSpec"
+  },
+  {
+    "name":"javax.net.ssl.SSLParameters",
+    "methods":[{"name":"setApplicationProtocols","parameterTypes":["java.lang.String[]"] }]
+  },
+  {
+    "name":"javax.net.ssl.SSLSocket",
+    "methods":[{"name":"getApplicationProtocol","parameterTypes":[] }]
+  },
+  {
+    "name":"javax.security.auth.x500.X500Principal",
+    "fields":[{"name":"thisX500Name"}],
+    "methods":[{"name":"<init>","parameterTypes":["sun.security.x509.X500Name"] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.asymmetric.DH$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.asymmetric.DSA$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.asymmetric.DSTU4145$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.asymmetric.EC$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.asymmetric.ECGOST$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.asymmetric.ElGamal$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.asymmetric.GM$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.asymmetric.GOST$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.asymmetric.IES$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.asymmetric.RSA$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.asymmetric.X509$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.digest.Blake2b$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.digest.DSTU7564$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.digest.GOST3411$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.digest.Keccak$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.digest.MD2$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.digest.MD4$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.digest.MD5$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.digest.RIPEMD128$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.digest.RIPEMD160$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.digest.RIPEMD256$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.digest.RIPEMD320$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.digest.SHA1$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.digest.SHA224$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.digest.SHA256$Digest",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.digest.SHA256$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.digest.SHA3$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.digest.SHA384$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.digest.SHA512$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.digest.SM3$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.digest.Skein$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.digest.Tiger$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.digest.Whirlpool$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.drbg.DRBG$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.keystore.BC$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.keystore.BCFKS$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.keystore.PKCS12$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.keystore.bc.BcKeyStoreSpi$Std",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.AES$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.ARC4$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.ARIA$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.Blowfish$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.CAST5$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.CAST6$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.Camellia$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.ChaCha$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.DES$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.DESede$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.DSTU7624$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.GOST28147$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.Grain128$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.Grainv1$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.HC128$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.HC256$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.IDEA$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.Noekeon$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.OpenSSLPBKDF$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.PBEPBKDF1$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.PBEPBKDF2$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.PBEPKCS12$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.Poly1305$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.RC2$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.RC5$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.RC6$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.Rijndael$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.SEED$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.SM4$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.Salsa20$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.Serpent$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.Shacal2$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.SipHash$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.Skipjack$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.TEA$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.TLSKDF$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.Threefish$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.Twofish$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.VMPC$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.VMPCKSA3$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.XSalsa20$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.bouncycastle.jcajce.provider.symmetric.XTEA$Mappings",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.fxmisc.richtext.ParagraphBox",
+    "methods":[{"name":"getLineCount","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.libsignal.state.StorageProtos$SessionStructure$Chain",
     "methods":[
-      {"name":"<init>","parameterTypes":[] }
+      {"name":"getChainKey","parameterTypes":[] },
+      {"name":"getMessageKeys","parameterTypes":["int"] },
+      {"name":"getMessageKeysCount","parameterTypes":[] },
+      {"name":"getMessageKeysList","parameterTypes":[] },
+      {"name":"getSenderRatchetKey","parameterTypes":[] },
+      {"name":"getSenderRatchetKeyPrivate","parameterTypes":[] },
+      {"name":"hasChainKey","parameterTypes":[] },
+      {"name":"hasSenderRatchetKey","parameterTypes":[] },
+      {"name":"hasSenderRatchetKeyPrivate","parameterTypes":[] }
     ]
+  },
+  {
+    "name":"org.whispersystems.libsignal.state.StorageProtos$SessionStructure$Chain$Builder",
+    "methods":[
+      {"name":"addMessageKeys","parameterTypes":["org.whispersystems.libsignal.state.StorageProtos$SessionStructure$Chain$MessageKey"] },
+      {"name":"clearChainKey","parameterTypes":[] },
+      {"name":"clearMessageKeys","parameterTypes":[] },
+      {"name":"clearSenderRatchetKey","parameterTypes":[] },
+      {"name":"clearSenderRatchetKeyPrivate","parameterTypes":[] },
+      {"name":"getChainKey","parameterTypes":[] },
+      {"name":"getChainKeyBuilder","parameterTypes":[] },
+      {"name":"getMessageKeys","parameterTypes":["int"] },
+      {"name":"getMessageKeysBuilder","parameterTypes":["int"] },
+      {"name":"getMessageKeysCount","parameterTypes":[] },
+      {"name":"getMessageKeysList","parameterTypes":[] },
+      {"name":"getSenderRatchetKey","parameterTypes":[] },
+      {"name":"getSenderRatchetKeyPrivate","parameterTypes":[] },
+      {"name":"hasChainKey","parameterTypes":[] },
+      {"name":"hasSenderRatchetKey","parameterTypes":[] },
+      {"name":"hasSenderRatchetKeyPrivate","parameterTypes":[] },
+      {"name":"setChainKey","parameterTypes":["org.whispersystems.libsignal.state.StorageProtos$SessionStructure$Chain$ChainKey"] },
+      {"name":"setMessageKeys","parameterTypes":["int","org.whispersystems.libsignal.state.StorageProtos$SessionStructure$Chain$MessageKey"] },
+      {"name":"setSenderRatchetKey","parameterTypes":["com.google.protobuf.ByteString"] },
+      {"name":"setSenderRatchetKeyPrivate","parameterTypes":["com.google.protobuf.ByteString"] }
+    ]
+  },
+  {
+    "name":"org.whispersystems.libsignal.state.StorageProtos$SessionStructure$Chain$ChainKey",
+    "methods":[
+      {"name":"getIndex","parameterTypes":[] },
+      {"name":"getKey","parameterTypes":[] },
+      {"name":"hasIndex","parameterTypes":[] },
+      {"name":"hasKey","parameterTypes":[] },
+      {"name":"newBuilder","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"org.whispersystems.libsignal.state.StorageProtos$SessionStructure$Chain$ChainKey$Builder",
+    "methods":[
+      {"name":"clearIndex","parameterTypes":[] },
+      {"name":"clearKey","parameterTypes":[] },
+      {"name":"getIndex","parameterTypes":[] },
+      {"name":"getKey","parameterTypes":[] },
+      {"name":"hasIndex","parameterTypes":[] },
+      {"name":"hasKey","parameterTypes":[] },
+      {"name":"setIndex","parameterTypes":["int"] },
+      {"name":"setKey","parameterTypes":["com.google.protobuf.ByteString"] }
+    ]
+  },
+  {
+    "name":"org.whispersystems.libsignal.state.StorageProtos$SessionStructure$Chain$MessageKey",
+    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.api.push.SignedPreKeyEntity",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true
+  },
+  {
+    "name":"org.whispersystems.signalservice.api.push.SignedPreKeyEntity$ByteArrayDeserializer",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.api.push.SignedPreKeyEntity$ByteArraySerializer",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.OutgoingPushMessage",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.OutgoingPushMessageList",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.PreKeyEntity",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.PreKeyEntity$ECPublicKeyDeserializer",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.PreKeyEntity$ECPublicKeySerializer",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.PreKeyResponse",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.PreKeyResponseItem",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.PreKeyState",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SendMessageResponse",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$AttachmentPointer",
+    "methods":[
+      {"name":"getAttachmentIdentifierCase","parameterTypes":[] },
+      {"name":"getBlurHash","parameterTypes":[] },
+      {"name":"getBlurHashBytes","parameterTypes":[] },
+      {"name":"getCaption","parameterTypes":[] },
+      {"name":"getCaptionBytes","parameterTypes":[] },
+      {"name":"getCdnId","parameterTypes":[] },
+      {"name":"getCdnKey","parameterTypes":[] },
+      {"name":"getCdnKeyBytes","parameterTypes":[] },
+      {"name":"getCdnNumber","parameterTypes":[] },
+      {"name":"getContentType","parameterTypes":[] },
+      {"name":"getContentTypeBytes","parameterTypes":[] },
+      {"name":"getDigest","parameterTypes":[] },
+      {"name":"getFileName","parameterTypes":[] },
+      {"name":"getFileNameBytes","parameterTypes":[] },
+      {"name":"getFlags","parameterTypes":[] },
+      {"name":"getHeight","parameterTypes":[] },
+      {"name":"getKey","parameterTypes":[] },
+      {"name":"getSize","parameterTypes":[] },
+      {"name":"getThumbnail","parameterTypes":[] },
+      {"name":"getUploadTimestamp","parameterTypes":[] },
+      {"name":"getWidth","parameterTypes":[] },
+      {"name":"hasBlurHash","parameterTypes":[] },
+      {"name":"hasCaption","parameterTypes":[] },
+      {"name":"hasCdnId","parameterTypes":[] },
+      {"name":"hasCdnKey","parameterTypes":[] },
+      {"name":"hasCdnNumber","parameterTypes":[] },
+      {"name":"hasContentType","parameterTypes":[] },
+      {"name":"hasDigest","parameterTypes":[] },
+      {"name":"hasFileName","parameterTypes":[] },
+      {"name":"hasFlags","parameterTypes":[] },
+      {"name":"hasHeight","parameterTypes":[] },
+      {"name":"hasKey","parameterTypes":[] },
+      {"name":"hasSize","parameterTypes":[] },
+      {"name":"hasThumbnail","parameterTypes":[] },
+      {"name":"hasUploadTimestamp","parameterTypes":[] },
+      {"name":"hasWidth","parameterTypes":[] },
+      {"name":"newBuilder","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$AttachmentPointer$Builder",
+    "methods":[
+      {"name":"clearAttachmentIdentifier","parameterTypes":[] },
+      {"name":"clearBlurHash","parameterTypes":[] },
+      {"name":"clearCaption","parameterTypes":[] },
+      {"name":"clearCdnId","parameterTypes":[] },
+      {"name":"clearCdnKey","parameterTypes":[] },
+      {"name":"clearCdnNumber","parameterTypes":[] },
+      {"name":"clearContentType","parameterTypes":[] },
+      {"name":"clearDigest","parameterTypes":[] },
+      {"name":"clearFileName","parameterTypes":[] },
+      {"name":"clearFlags","parameterTypes":[] },
+      {"name":"clearHeight","parameterTypes":[] },
+      {"name":"clearKey","parameterTypes":[] },
+      {"name":"clearSize","parameterTypes":[] },
+      {"name":"clearThumbnail","parameterTypes":[] },
+      {"name":"clearUploadTimestamp","parameterTypes":[] },
+      {"name":"clearWidth","parameterTypes":[] },
+      {"name":"getAttachmentIdentifierCase","parameterTypes":[] },
+      {"name":"getBlurHash","parameterTypes":[] },
+      {"name":"getBlurHashBytes","parameterTypes":[] },
+      {"name":"getCaption","parameterTypes":[] },
+      {"name":"getCaptionBytes","parameterTypes":[] },
+      {"name":"getCdnId","parameterTypes":[] },
+      {"name":"getCdnKey","parameterTypes":[] },
+      {"name":"getCdnKeyBytes","parameterTypes":[] },
+      {"name":"getCdnNumber","parameterTypes":[] },
+      {"name":"getContentType","parameterTypes":[] },
+      {"name":"getContentTypeBytes","parameterTypes":[] },
+      {"name":"getDigest","parameterTypes":[] },
+      {"name":"getFileName","parameterTypes":[] },
+      {"name":"getFileNameBytes","parameterTypes":[] },
+      {"name":"getFlags","parameterTypes":[] },
+      {"name":"getHeight","parameterTypes":[] },
+      {"name":"getKey","parameterTypes":[] },
+      {"name":"getSize","parameterTypes":[] },
+      {"name":"getThumbnail","parameterTypes":[] },
+      {"name":"getUploadTimestamp","parameterTypes":[] },
+      {"name":"getWidth","parameterTypes":[] },
+      {"name":"hasBlurHash","parameterTypes":[] },
+      {"name":"hasCaption","parameterTypes":[] },
+      {"name":"hasCdnId","parameterTypes":[] },
+      {"name":"hasCdnKey","parameterTypes":[] },
+      {"name":"hasCdnNumber","parameterTypes":[] },
+      {"name":"hasContentType","parameterTypes":[] },
+      {"name":"hasDigest","parameterTypes":[] },
+      {"name":"hasFileName","parameterTypes":[] },
+      {"name":"hasFlags","parameterTypes":[] },
+      {"name":"hasHeight","parameterTypes":[] },
+      {"name":"hasKey","parameterTypes":[] },
+      {"name":"hasSize","parameterTypes":[] },
+      {"name":"hasThumbnail","parameterTypes":[] },
+      {"name":"hasUploadTimestamp","parameterTypes":[] },
+      {"name":"hasWidth","parameterTypes":[] },
+      {"name":"setBlurHash","parameterTypes":["java.lang.String"] },
+      {"name":"setBlurHashBytes","parameterTypes":["com.google.protobuf.ByteString"] },
+      {"name":"setCaption","parameterTypes":["java.lang.String"] },
+      {"name":"setCaptionBytes","parameterTypes":["com.google.protobuf.ByteString"] },
+      {"name":"setCdnId","parameterTypes":["long"] },
+      {"name":"setCdnKey","parameterTypes":["java.lang.String"] },
+      {"name":"setCdnKeyBytes","parameterTypes":["com.google.protobuf.ByteString"] },
+      {"name":"setCdnNumber","parameterTypes":["int"] },
+      {"name":"setContentType","parameterTypes":["java.lang.String"] },
+      {"name":"setContentTypeBytes","parameterTypes":["com.google.protobuf.ByteString"] },
+      {"name":"setDigest","parameterTypes":["com.google.protobuf.ByteString"] },
+      {"name":"setFileName","parameterTypes":["java.lang.String"] },
+      {"name":"setFileNameBytes","parameterTypes":["com.google.protobuf.ByteString"] },
+      {"name":"setFlags","parameterTypes":["int"] },
+      {"name":"setHeight","parameterTypes":["int"] },
+      {"name":"setKey","parameterTypes":["com.google.protobuf.ByteString"] },
+      {"name":"setSize","parameterTypes":["int"] },
+      {"name":"setThumbnail","parameterTypes":["com.google.protobuf.ByteString"] },
+      {"name":"setUploadTimestamp","parameterTypes":["long"] },
+      {"name":"setWidth","parameterTypes":["int"] }
+    ]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$CallMessage",
+    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$Content",
+    "methods":[
+      {"name":"getCallMessage","parameterTypes":[] },
+      {"name":"getDataMessage","parameterTypes":[] },
+      {"name":"getDecryptionErrorMessage","parameterTypes":[] },
+      {"name":"getNullMessage","parameterTypes":[] },
+      {"name":"getReceiptMessage","parameterTypes":[] },
+      {"name":"getSenderKeyDistributionMessage","parameterTypes":[] },
+      {"name":"getSyncMessage","parameterTypes":[] },
+      {"name":"getTypingMessage","parameterTypes":[] },
+      {"name":"hasCallMessage","parameterTypes":[] },
+      {"name":"hasDataMessage","parameterTypes":[] },
+      {"name":"hasDecryptionErrorMessage","parameterTypes":[] },
+      {"name":"hasNullMessage","parameterTypes":[] },
+      {"name":"hasReceiptMessage","parameterTypes":[] },
+      {"name":"hasSenderKeyDistributionMessage","parameterTypes":[] },
+      {"name":"hasSyncMessage","parameterTypes":[] },
+      {"name":"hasTypingMessage","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$Content$Builder",
+    "methods":[
+      {"name":"clearCallMessage","parameterTypes":[] },
+      {"name":"clearDataMessage","parameterTypes":[] },
+      {"name":"clearDecryptionErrorMessage","parameterTypes":[] },
+      {"name":"clearNullMessage","parameterTypes":[] },
+      {"name":"clearReceiptMessage","parameterTypes":[] },
+      {"name":"clearSenderKeyDistributionMessage","parameterTypes":[] },
+      {"name":"clearSyncMessage","parameterTypes":[] },
+      {"name":"clearTypingMessage","parameterTypes":[] },
+      {"name":"getCallMessage","parameterTypes":[] },
+      {"name":"getCallMessageBuilder","parameterTypes":[] },
+      {"name":"getDataMessage","parameterTypes":[] },
+      {"name":"getDataMessageBuilder","parameterTypes":[] },
+      {"name":"getDecryptionErrorMessage","parameterTypes":[] },
+      {"name":"getNullMessage","parameterTypes":[] },
+      {"name":"getNullMessageBuilder","parameterTypes":[] },
+      {"name":"getReceiptMessage","parameterTypes":[] },
+      {"name":"getReceiptMessageBuilder","parameterTypes":[] },
+      {"name":"getSenderKeyDistributionMessage","parameterTypes":[] },
+      {"name":"getSyncMessage","parameterTypes":[] },
+      {"name":"getSyncMessageBuilder","parameterTypes":[] },
+      {"name":"getTypingMessage","parameterTypes":[] },
+      {"name":"getTypingMessageBuilder","parameterTypes":[] },
+      {"name":"hasCallMessage","parameterTypes":[] },
+      {"name":"hasDataMessage","parameterTypes":[] },
+      {"name":"hasDecryptionErrorMessage","parameterTypes":[] },
+      {"name":"hasNullMessage","parameterTypes":[] },
+      {"name":"hasReceiptMessage","parameterTypes":[] },
+      {"name":"hasSenderKeyDistributionMessage","parameterTypes":[] },
+      {"name":"hasSyncMessage","parameterTypes":[] },
+      {"name":"hasTypingMessage","parameterTypes":[] },
+      {"name":"setCallMessage","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$CallMessage"] },
+      {"name":"setDataMessage","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage"] },
+      {"name":"setDecryptionErrorMessage","parameterTypes":["com.google.protobuf.ByteString"] },
+      {"name":"setNullMessage","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$NullMessage"] },
+      {"name":"setReceiptMessage","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$ReceiptMessage"] },
+      {"name":"setSenderKeyDistributionMessage","parameterTypes":["com.google.protobuf.ByteString"] },
+      {"name":"setSyncMessage","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage"] },
+      {"name":"setTypingMessage","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$TypingMessage"] }
+    ]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage",
+    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$NullMessage",
+    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$ReceiptMessage",
+    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage",
+    "methods":[
+      {"name":"getBlocked","parameterTypes":[] },
+      {"name":"getConfiguration","parameterTypes":[] },
+      {"name":"getContacts","parameterTypes":[] },
+      {"name":"getFetchLatest","parameterTypes":[] },
+      {"name":"getGroups","parameterTypes":[] },
+      {"name":"getKeys","parameterTypes":[] },
+      {"name":"getMessageRequestResponse","parameterTypes":[] },
+      {"name":"getOutgoingPayment","parameterTypes":[] },
+      {"name":"getPadding","parameterTypes":[] },
+      {"name":"getRead","parameterTypes":["int"] },
+      {"name":"getReadCount","parameterTypes":[] },
+      {"name":"getReadList","parameterTypes":[] },
+      {"name":"getRequest","parameterTypes":[] },
+      {"name":"getSent","parameterTypes":[] },
+      {"name":"getStickerPackOperation","parameterTypes":["int"] },
+      {"name":"getStickerPackOperationCount","parameterTypes":[] },
+      {"name":"getStickerPackOperationList","parameterTypes":[] },
+      {"name":"getVerified","parameterTypes":[] },
+      {"name":"getViewOnceOpen","parameterTypes":[] },
+      {"name":"getViewed","parameterTypes":["int"] },
+      {"name":"getViewedCount","parameterTypes":[] },
+      {"name":"getViewedList","parameterTypes":[] },
+      {"name":"hasBlocked","parameterTypes":[] },
+      {"name":"hasConfiguration","parameterTypes":[] },
+      {"name":"hasContacts","parameterTypes":[] },
+      {"name":"hasFetchLatest","parameterTypes":[] },
+      {"name":"hasGroups","parameterTypes":[] },
+      {"name":"hasKeys","parameterTypes":[] },
+      {"name":"hasMessageRequestResponse","parameterTypes":[] },
+      {"name":"hasOutgoingPayment","parameterTypes":[] },
+      {"name":"hasPadding","parameterTypes":[] },
+      {"name":"hasRequest","parameterTypes":[] },
+      {"name":"hasSent","parameterTypes":[] },
+      {"name":"hasVerified","parameterTypes":[] },
+      {"name":"hasViewOnceOpen","parameterTypes":[] },
+      {"name":"newBuilder","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Blocked",
+    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Builder",
+    "methods":[
+      {"name":"addRead","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Read"] },
+      {"name":"addStickerPackOperation","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$StickerPackOperation"] },
+      {"name":"addViewed","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Viewed"] },
+      {"name":"clearBlocked","parameterTypes":[] },
+      {"name":"clearConfiguration","parameterTypes":[] },
+      {"name":"clearContacts","parameterTypes":[] },
+      {"name":"clearFetchLatest","parameterTypes":[] },
+      {"name":"clearGroups","parameterTypes":[] },
+      {"name":"clearKeys","parameterTypes":[] },
+      {"name":"clearMessageRequestResponse","parameterTypes":[] },
+      {"name":"clearOutgoingPayment","parameterTypes":[] },
+      {"name":"clearPadding","parameterTypes":[] },
+      {"name":"clearRead","parameterTypes":[] },
+      {"name":"clearRequest","parameterTypes":[] },
+      {"name":"clearSent","parameterTypes":[] },
+      {"name":"clearStickerPackOperation","parameterTypes":[] },
+      {"name":"clearVerified","parameterTypes":[] },
+      {"name":"clearViewOnceOpen","parameterTypes":[] },
+      {"name":"clearViewed","parameterTypes":[] },
+      {"name":"getBlocked","parameterTypes":[] },
+      {"name":"getBlockedBuilder","parameterTypes":[] },
+      {"name":"getConfiguration","parameterTypes":[] },
+      {"name":"getConfigurationBuilder","parameterTypes":[] },
+      {"name":"getContacts","parameterTypes":[] },
+      {"name":"getContactsBuilder","parameterTypes":[] },
+      {"name":"getFetchLatest","parameterTypes":[] },
+      {"name":"getFetchLatestBuilder","parameterTypes":[] },
+      {"name":"getGroups","parameterTypes":[] },
+      {"name":"getGroupsBuilder","parameterTypes":[] },
+      {"name":"getKeys","parameterTypes":[] },
+      {"name":"getKeysBuilder","parameterTypes":[] },
+      {"name":"getMessageRequestResponse","parameterTypes":[] },
+      {"name":"getMessageRequestResponseBuilder","parameterTypes":[] },
+      {"name":"getOutgoingPayment","parameterTypes":[] },
+      {"name":"getOutgoingPaymentBuilder","parameterTypes":[] },
+      {"name":"getPadding","parameterTypes":[] },
+      {"name":"getRead","parameterTypes":["int"] },
+      {"name":"getReadBuilder","parameterTypes":["int"] },
+      {"name":"getReadCount","parameterTypes":[] },
+      {"name":"getReadList","parameterTypes":[] },
+      {"name":"getRequest","parameterTypes":[] },
+      {"name":"getRequestBuilder","parameterTypes":[] },
+      {"name":"getSent","parameterTypes":[] },
+      {"name":"getSentBuilder","parameterTypes":[] },
+      {"name":"getStickerPackOperation","parameterTypes":["int"] },
+      {"name":"getStickerPackOperationBuilder","parameterTypes":["int"] },
+      {"name":"getStickerPackOperationCount","parameterTypes":[] },
+      {"name":"getStickerPackOperationList","parameterTypes":[] },
+      {"name":"getVerified","parameterTypes":[] },
+      {"name":"getVerifiedBuilder","parameterTypes":[] },
+      {"name":"getViewOnceOpen","parameterTypes":[] },
+      {"name":"getViewOnceOpenBuilder","parameterTypes":[] },
+      {"name":"getViewed","parameterTypes":["int"] },
+      {"name":"getViewedBuilder","parameterTypes":["int"] },
+      {"name":"getViewedCount","parameterTypes":[] },
+      {"name":"getViewedList","parameterTypes":[] },
+      {"name":"hasBlocked","parameterTypes":[] },
+      {"name":"hasConfiguration","parameterTypes":[] },
+      {"name":"hasContacts","parameterTypes":[] },
+      {"name":"hasFetchLatest","parameterTypes":[] },
+      {"name":"hasGroups","parameterTypes":[] },
+      {"name":"hasKeys","parameterTypes":[] },
+      {"name":"hasMessageRequestResponse","parameterTypes":[] },
+      {"name":"hasOutgoingPayment","parameterTypes":[] },
+      {"name":"hasPadding","parameterTypes":[] },
+      {"name":"hasRequest","parameterTypes":[] },
+      {"name":"hasSent","parameterTypes":[] },
+      {"name":"hasVerified","parameterTypes":[] },
+      {"name":"hasViewOnceOpen","parameterTypes":[] },
+      {"name":"setBlocked","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Blocked"] },
+      {"name":"setConfiguration","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Configuration"] },
+      {"name":"setContacts","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Contacts"] },
+      {"name":"setFetchLatest","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$FetchLatest"] },
+      {"name":"setGroups","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Groups"] },
+      {"name":"setKeys","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Keys"] },
+      {"name":"setMessageRequestResponse","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$MessageRequestResponse"] },
+      {"name":"setOutgoingPayment","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$OutgoingPayment"] },
+      {"name":"setPadding","parameterTypes":["com.google.protobuf.ByteString"] },
+      {"name":"setRead","parameterTypes":["int","org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Read"] },
+      {"name":"setRequest","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Request"] },
+      {"name":"setSent","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Sent"] },
+      {"name":"setStickerPackOperation","parameterTypes":["int","org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$StickerPackOperation"] },
+      {"name":"setVerified","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$Verified"] },
+      {"name":"setViewOnceOpen","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$ViewOnceOpen"] },
+      {"name":"setViewed","parameterTypes":["int","org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Viewed"] }
+    ]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Configuration",
+    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Contacts",
+    "methods":[
+      {"name":"getBlob","parameterTypes":[] },
+      {"name":"getComplete","parameterTypes":[] },
+      {"name":"hasBlob","parameterTypes":[] },
+      {"name":"hasComplete","parameterTypes":[] },
+      {"name":"newBuilder","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Contacts$Builder",
+    "methods":[
+      {"name":"clearBlob","parameterTypes":[] },
+      {"name":"clearComplete","parameterTypes":[] },
+      {"name":"getBlob","parameterTypes":[] },
+      {"name":"getBlobBuilder","parameterTypes":[] },
+      {"name":"getComplete","parameterTypes":[] },
+      {"name":"hasBlob","parameterTypes":[] },
+      {"name":"hasComplete","parameterTypes":[] },
+      {"name":"setBlob","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$AttachmentPointer"] },
+      {"name":"setComplete","parameterTypes":["boolean"] }
+    ]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$FetchLatest",
+    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Groups",
+    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Keys",
+    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$MessageRequestResponse",
+    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$OutgoingPayment",
+    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Read",
+    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Request",
+    "methods":[
+      {"name":"getType","parameterTypes":[] },
+      {"name":"hasType","parameterTypes":[] },
+      {"name":"newBuilder","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Request$Builder",
+    "methods":[
+      {"name":"clearType","parameterTypes":[] },
+      {"name":"getType","parameterTypes":[] },
+      {"name":"hasType","parameterTypes":[] },
+      {"name":"setType","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Request$Type"] }
+    ]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Request$Type",
+    "methods":[
+      {"name":"getValueDescriptor","parameterTypes":[] },
+      {"name":"valueOf","parameterTypes":["com.google.protobuf.Descriptors$EnumValueDescriptor"] }
+    ]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Sent",
+    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$StickerPackOperation",
+    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$ViewOnceOpen",
+    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Viewed",
+    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$TypingMessage",
+    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$Verified",
+    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.util.JsonUtil$IdentityKeyDeserializer",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.util.JsonUtil$IdentityKeySerializer",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.websocket.WebSocketProtos$WebSocketMessage",
+    "methods":[
+      {"name":"getRequest","parameterTypes":[] },
+      {"name":"getResponse","parameterTypes":[] },
+      {"name":"getType","parameterTypes":[] },
+      {"name":"hasRequest","parameterTypes":[] },
+      {"name":"hasResponse","parameterTypes":[] },
+      {"name":"hasType","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.websocket.WebSocketProtos$WebSocketMessage$Builder",
+    "methods":[
+      {"name":"clearRequest","parameterTypes":[] },
+      {"name":"clearResponse","parameterTypes":[] },
+      {"name":"clearType","parameterTypes":[] },
+      {"name":"getRequest","parameterTypes":[] },
+      {"name":"getRequestBuilder","parameterTypes":[] },
+      {"name":"getResponse","parameterTypes":[] },
+      {"name":"getResponseBuilder","parameterTypes":[] },
+      {"name":"getType","parameterTypes":[] },
+      {"name":"hasRequest","parameterTypes":[] },
+      {"name":"hasResponse","parameterTypes":[] },
+      {"name":"hasType","parameterTypes":[] },
+      {"name":"setRequest","parameterTypes":["org.whispersystems.signalservice.internal.websocket.WebSocketProtos$WebSocketRequestMessage"] },
+      {"name":"setResponse","parameterTypes":["org.whispersystems.signalservice.internal.websocket.WebSocketProtos$WebSocketResponseMessage"] },
+      {"name":"setType","parameterTypes":["org.whispersystems.signalservice.internal.websocket.WebSocketProtos$WebSocketMessage$Type"] }
+    ]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.websocket.WebSocketProtos$WebSocketMessage$Type",
+    "methods":[
+      {"name":"getValueDescriptor","parameterTypes":[] },
+      {"name":"valueOf","parameterTypes":["com.google.protobuf.Descriptors$EnumValueDescriptor"] }
+    ]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.websocket.WebSocketProtos$WebSocketRequestMessage",
+    "methods":[
+      {"name":"getBody","parameterTypes":[] },
+      {"name":"getHeaders","parameterTypes":["int"] },
+      {"name":"getHeadersCount","parameterTypes":[] },
+      {"name":"getHeadersList","parameterTypes":[] },
+      {"name":"getId","parameterTypes":[] },
+      {"name":"getPath","parameterTypes":[] },
+      {"name":"getPathBytes","parameterTypes":[] },
+      {"name":"getVerb","parameterTypes":[] },
+      {"name":"getVerbBytes","parameterTypes":[] },
+      {"name":"hasBody","parameterTypes":[] },
+      {"name":"hasId","parameterTypes":[] },
+      {"name":"hasPath","parameterTypes":[] },
+      {"name":"hasVerb","parameterTypes":[] },
+      {"name":"newBuilder","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.websocket.WebSocketProtos$WebSocketRequestMessage$Builder",
+    "methods":[
+      {"name":"addHeaders","parameterTypes":["java.lang.String"] },
+      {"name":"clearBody","parameterTypes":[] },
+      {"name":"clearHeaders","parameterTypes":[] },
+      {"name":"clearId","parameterTypes":[] },
+      {"name":"clearPath","parameterTypes":[] },
+      {"name":"clearVerb","parameterTypes":[] },
+      {"name":"getBody","parameterTypes":[] },
+      {"name":"getHeaders","parameterTypes":["int"] },
+      {"name":"getHeadersCount","parameterTypes":[] },
+      {"name":"getHeadersList","parameterTypes":[] },
+      {"name":"getId","parameterTypes":[] },
+      {"name":"getPath","parameterTypes":[] },
+      {"name":"getPathBytes","parameterTypes":[] },
+      {"name":"getVerb","parameterTypes":[] },
+      {"name":"getVerbBytes","parameterTypes":[] },
+      {"name":"hasBody","parameterTypes":[] },
+      {"name":"hasId","parameterTypes":[] },
+      {"name":"hasPath","parameterTypes":[] },
+      {"name":"hasVerb","parameterTypes":[] },
+      {"name":"setBody","parameterTypes":["com.google.protobuf.ByteString"] },
+      {"name":"setHeaders","parameterTypes":["int","java.lang.String"] },
+      {"name":"setId","parameterTypes":["long"] },
+      {"name":"setPath","parameterTypes":["java.lang.String"] },
+      {"name":"setPathBytes","parameterTypes":["com.google.protobuf.ByteString"] },
+      {"name":"setVerb","parameterTypes":["java.lang.String"] },
+      {"name":"setVerbBytes","parameterTypes":["com.google.protobuf.ByteString"] }
+    ]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.websocket.WebSocketProtos$WebSocketResponseMessage",
+    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.misc.Unsafe",
+    "allDeclaredFields":true,
+    "methods":[
+      {"name":"arrayBaseOffset","parameterTypes":["java.lang.Class"] },
+      {"name":"arrayIndexScale","parameterTypes":["java.lang.Class"] },
+      {"name":"copyMemory","parameterTypes":["long","long","long"] },
+      {"name":"copyMemory","parameterTypes":["java.lang.Object","long","java.lang.Object","long","long"] },
+      {"name":"getBoolean","parameterTypes":["java.lang.Object","long"] },
+      {"name":"getByte","parameterTypes":["long"] },
+      {"name":"getByte","parameterTypes":["java.lang.Object","long"] },
+      {"name":"getDouble","parameterTypes":["java.lang.Object","long"] },
+      {"name":"getFloat","parameterTypes":["java.lang.Object","long"] },
+      {"name":"getInt","parameterTypes":["long"] },
+      {"name":"getInt","parameterTypes":["java.lang.Object","long"] },
+      {"name":"getLong","parameterTypes":["long"] },
+      {"name":"getLong","parameterTypes":["java.lang.Object","long"] },
+      {"name":"getObject","parameterTypes":["java.lang.Object","long"] },
+      {"name":"objectFieldOffset","parameterTypes":["java.lang.reflect.Field"] },
+      {"name":"putBoolean","parameterTypes":["java.lang.Object","long","boolean"] },
+      {"name":"putByte","parameterTypes":["long","byte"] },
+      {"name":"putByte","parameterTypes":["java.lang.Object","long","byte"] },
+      {"name":"putDouble","parameterTypes":["java.lang.Object","long","double"] },
+      {"name":"putFloat","parameterTypes":["java.lang.Object","long","float"] },
+      {"name":"putInt","parameterTypes":["long","int"] },
+      {"name":"putInt","parameterTypes":["java.lang.Object","long","int"] },
+      {"name":"putLong","parameterTypes":["long","long"] },
+      {"name":"putLong","parameterTypes":["java.lang.Object","long","long"] },
+      {"name":"putObject","parameterTypes":["java.lang.Object","long","java.lang.Object"] }
+    ]
+  },
+  {
+    "name":"sun.security.pkcs.SignerInfo[]"
+  },
+  {
+    "name":"sun.security.provider.DSA$SHA1withDSA",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.security.provider.DSA$SHA224withDSA",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.security.provider.DSA$SHA256withDSA",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.security.provider.DSAKeyFactory",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.security.provider.DSAParameters",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.security.provider.MD5",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.security.provider.NativePRNG",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.security.provider.SHA",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.security.provider.SHA2$SHA224",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.security.provider.SHA2$SHA256",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.security.provider.SHA5$SHA384",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.security.provider.SHA5$SHA512",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.security.provider.Sun",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.security.provider.X509Factory",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.security.provider.certpath.PKIXCertPathValidator",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.security.rsa.RSAKeyFactory$Legacy",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.security.rsa.RSAPSSSignature",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.security.rsa.RSASignature$SHA224withRSA",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.security.rsa.RSASignature$SHA256withRSA",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.security.rsa.RSASignature$SHA512withRSA",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.security.ssl.SSLContextImpl$TLSContext",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.security.ssl.TrustManagerFactoryImpl$PKIXFactory",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"sun.security.util.ObjectIdentifier"
+  },
+  {
+    "name":"sun.security.x509.AuthorityInfoAccessExtension",
+    "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
+  },
+  {
+    "name":"sun.security.x509.AuthorityKeyIdentifierExtension",
+    "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
+  },
+  {
+    "name":"sun.security.x509.BasicConstraintsExtension",
+    "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
+  },
+  {
+    "name":"sun.security.x509.CRLDistributionPointsExtension",
+    "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
+  },
+  {
+    "name":"sun.security.x509.CertificateExtensions"
+  },
+  {
+    "name":"sun.security.x509.CertificatePoliciesExtension",
+    "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
+  },
+  {
+    "name":"sun.security.x509.ExtendedKeyUsageExtension",
+    "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
+  },
+  {
+    "name":"sun.security.x509.KeyUsageExtension",
+    "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
+  },
+  {
+    "name":"sun.security.x509.NetscapeCertTypeExtension",
+    "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
+  },
+  {
+    "name":"sun.security.x509.SubjectAlternativeNameExtension",
+    "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
+  },
+  {
+    "name":"sun.security.x509.SubjectKeyIdentifierExtension",
+    "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
   }
 ]
