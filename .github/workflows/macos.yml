@@ -25,10 +25,12 @@ jobs:
           dir: App
 
       - name: Gluon Build
-        run: mvn install && mvn -Pdesktop gluonfx:build gluonfx:package -f App
+        run: mvn clean install && mvn -Pdesktop gluonfx:build -f App
 
       - name: Copy native image to staging
-        run: cp -r App/target/gluonfx/x86_64-darwin/ChatApp* staging
+        run: |
+          cp -r App/target/gluonfx/x86_64-darwin/ChatApp* staging
+          cp -r App/target/gluonfx/x86_64-darwin/gvm/log/* staging
 
       - name: Upload
         uses: actions/upload-artifact@v2
