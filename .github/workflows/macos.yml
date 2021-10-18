@@ -30,6 +30,7 @@ jobs:
       - name: Copy native image to staging
         run: |
           cp -r App/target/gluonfx/x86_64-darwin/ChatApp* staging
+          cp -r App/target/gluonfx/x86_64-darwin/gvm/*.json staging
           cp -r App/target/gluonfx/x86_64-darwin/gvm/log/* staging
 
       - name: Upload
