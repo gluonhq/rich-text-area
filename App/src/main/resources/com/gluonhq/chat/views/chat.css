@@ -11,24 +11,39 @@
     -fx-padding: 2 5 2 25;
 }
 
-.chat-channel-box .label.chat-channel-avatar {
+.chat-channel-box > .chat-channel-icon {
+    -fx-pref-width: 8mm;
+    -fx-pref-height: 8mm;
+    -fx-alignment: center;
+}
+
+.chat-channel-box > .chat-channel-icon > .avatar {
+    -charm-radius: 4mm;
+}
+
+.chat-channel-box > .chat-channel-icon > .avatar > .decoration {
+    -fx-fill: transparent;
+    -fx-stroke: transparent;
+}
+
+.chat-channel-box > .chat-channel-icon > .chat-channel-icon {
     -fx-text-fill: -chat-text-fill-light;
     -fx-background-color: -chat-background;
-    -fx-border-radius: 50;
-    -fx-background-radius: 50;
+    -fx-border-radius: 40;
+    -fx-background-radius: 40;
     -fx-alignment: center;
     -fx-padding: 5;
-    -fx-font-size: 1em;
+    -fx-font-size: 0.9em;
     -fx-pref-width: 8mm;
     -fx-pref-height: 8mm;
 }
 
-.chat-channel-box .label.chat-channel-name {
+.chat-channel-box > .label.chat-channel-name {
     -fx-text-fill: -chat-text-fill;
     -fx-font-size: 1.2em;
 }
 
-.chat-channel-box .chat-channel-button {
+.chat-channel-box > .chat-channel-button {
     -fx-font-family: "FontAwesome";
     -fx-font-size: 1.5em;
     -fx-text-fill: -chat-text-fill;

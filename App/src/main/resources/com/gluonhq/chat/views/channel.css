@@ -63,3 +63,12 @@ leads it to covering the entire width **/
     -fx-padding: 6;
     -fx-font-weight: normal;
 }
+
+.avatar {
+    -charm-radius: 5mm;
+}
+
+.avatar > .decoration {
+    -fx-fill: transparent;
+    -fx-stroke: transparent;
+}

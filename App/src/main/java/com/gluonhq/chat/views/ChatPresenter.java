@@ -4,12 +4,14 @@ import com.gluonhq.attach.display.DisplayService;
 import com.gluonhq.attach.keyboard.KeyboardService;
 import com.gluonhq.attach.util.Platform;
 import com.gluonhq.charm.glisten.afterburner.GluonPresenter;
+import com.gluonhq.charm.glisten.control.Avatar;
 import com.gluonhq.charm.glisten.mvc.View;
 import com.gluonhq.chat.GluonChat;
 import com.gluonhq.chat.chatlistview.ChatListView;
 import com.gluonhq.chat.model.Channel;
 import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.service.Service;
+import com.gluonhq.chat.util.ImageCache;
 import com.gluonhq.chat.views.helper.PlusPopupView;
 import com.gluonhq.emoji.control.EmojiTextArea;
 import javafx.animation.PauseTransition;
@@ -25,6 +27,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 import javax.inject.Inject;
@@ -41,7 +44,7 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
     @FXML private View chatView;
 
     @FXML private HBox channelBox;
-    @FXML private Label channelAvatar;
+    @FXML private VBox channelIcon;
     @FXML private Label channelName;
     @FXML private Button closeChannel;
 
@@ -140,11 +143,20 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
         if (channel != null) {
             createSortList(channel.getMessages());
             channelName.setText(channel.displayName());
-            String initials = Service.getInitials(channel.displayName());
-            channelAvatar.setText(initials.substring(0, Math.min(initials.length(), 2)));
+            ImageCache.getImage(channel.getMembers().isEmpty() ? null : channel.getMembers().get(0).getAvatarPath())
+                    .ifPresentOrElse(im -> {
+                        Avatar avatar = new Avatar(0, im);
+                        avatar.setMouseTransparent(true);
+                        channelIcon.getChildren().setAll(avatar);
+                    }, () -> {
+                        String initials = Service.getInitials(channel.displayName());
+                        Label icon = new Label(initials.substring(0, Math.min(initials.length(), 2)));
+                        icon.getStyleClass().add("chat-channel-icon");
+                        channelIcon.getChildren().setAll(icon);
+                    });
         } else {
             chatList.setItems(null);
-            channelAvatar.setText(null);
+            channelIcon.getChildren().clear();
             channelName.setText(null);
         }
         bottomPane.setDisable(false);
