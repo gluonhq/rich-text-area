@@ -121,8 +121,7 @@ class MessageCell extends CharmListCell<ChatMessage> {
             setGraphic(null);
         } else {
             boolean isMe = item.getUser() != null &&
-                    item.getUser().equals(service.loggedUser());
-
+                    item.getUser().getId().equals(service.loggedUser().getId());
             message.getChildren().setAll(formatText(item.getMessage()));
             BorderPane.setMargin(message, isMe ? meInsets : notMeInsets);
 

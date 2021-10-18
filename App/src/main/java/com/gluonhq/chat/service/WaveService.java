@@ -22,8 +22,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -36,16 +38,17 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
     private User loggedUser;
     private final WaveManager wave;
-    ObservableList<Channel> channels = FXCollections.observableArrayList();
     Map<Channel, ObservableList<ChatMessage>> channelMap = new HashMap<>();
     boolean channelsClean = false;
     private ObservableList<Contact> contacts;
     private BootstrapClient bootstrapClient;
+    private ObservableList<User> users;
+    private ObservableList<Channel> channels;
 
     public WaveService() {
         wave = WaveManager.getInstance();
-        wave.setLogLevel(Level.INFO);
-        System.err.println("Creating waveService: " + System.identityHashCode(wave));
+        wave.setLogLevel(Level.DEBUG);
+        wave.getWaveLogger().log(Level.DEBUG, "Creating waveService: " + System.identityHashCode(wave));
         if (wave.isProvisioned()) {
             login(wave.getMyUuid());
             this.wave.setMessageListener(this);
@@ -76,20 +79,30 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
     @Override
     public ObservableList<User> getUsers() {
+        if (this.users == null) {
+            this.users = retrieveUsers();
+        }
+        return users;
+    }
+    
+    private ObservableList<User> retrieveUsers() {
         ObservableList<User> answer = FXCollections.observableArrayList();
         contacts = wave.getContacts();
 
         answer.addAll(contacts.stream()
                 .map(a -> createUserFromContact(a))
                 .collect(Collectors.toList()));
-
-        contacts.addListener(new InvalidationListener() {
-            @Override
-            public void invalidated(Observable o) {
-                answer.clear();
-                answer.addAll(contacts.stream()
-                        .map(a -> createUserFromContact(a))
-                        .collect(Collectors.toList()));
+        contacts.addListener((ListChangeListener.Change<? extends Contact> change) -> {
+            while (change.next()) {
+                List<User> addedUsers = change.getAddedSubList().stream()
+                        .map(contact -> createUserFromContact(contact))
+                        .collect(Collectors.toList());
+                Platform.runLater(()-> answer.addAll(addedUsers));
+                List<User> removedUsers = change.getRemoved().stream()
+                        .map(contact -> findUserByContact(contact, answer))
+                        .filter(opt -> opt.isPresent())
+                        .map(opt -> opt.get()).collect(Collectors.toList());
+                Platform.runLater(() -> answer.removeAll(removedUsers));
             }
         });
         return answer;
@@ -97,27 +110,27 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
     @Override
     public ObservableList<Channel> getChannels() {
-        if (!channelsClean) {
-            channels = FXCollections.observableArrayList();
-            ObservableList<User> users = getUsers();
-            channels.addAll(users.stream().map(user -> createChannelFromUser(user))
-                    .collect(Collectors.toList()));
-            channels.forEach(c -> readMessageForChannel(c));
-            users.addListener(new InvalidationListener() {
-                @Override
-                public void invalidated(Observable o) {
-                    Platform.runLater(() -> {
-                        channels.clear();
-                        channelMap.clear();
-                        channels.addAll(users.stream().map(user -> createChannelFromUser(user))
-                                .collect(Collectors.toList()));
-                    });
-                }
-            });
-
-            channelsClean = true;
+        if (this.channels == null) {
+            this.channels = retrieveChannels();
         }
-        return channels;
+        return this.channels;
+    }
+    
+    private ObservableList<Channel> retrieveChannels() {
+        ObservableList<Channel> answer = FXCollections.observableArrayList();
+        ObservableList<User> users = getUsers();
+        answer.addAll(users.stream().map(user -> createChannelFromUser(user))
+                .collect(Collectors.toList()));
+        answer.forEach(c -> readMessageForChannel(c));
+        users.addListener((ListChangeListener.Change<? extends User> change) -> {
+            while (change.next()) {
+                List<Channel> addedChannels = change.getAddedSubList().stream()
+                        .map(user -> createChannelFromUser(user))
+                        .collect(Collectors.toList());
+                answer.addAll(addedChannels);
+            }
+        });
+        return answer;
     }
 
     private void readMessageForChannel(Channel c) {
@@ -154,15 +167,21 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
     @Override
     public void gotMessage(String senderUuid, String content, long timestamp) {
-        wave.getWaveLogger().log(Level.DEBUG, 
-                "GOT MESSAGE from " + senderUuid + " with content " + content);
+        gotMessage(senderUuid, content, timestamp, senderUuid);
+    }
+
+    @Override
+    public void gotMessage(String senderUuid, String content, long timestamp, String receiverUuid) {
+        wave.getWaveLogger().log(Level.DEBUG,
+                "GOT MESSAGE from " + senderUuid + " for "+ receiverUuid+" with content " + content);
         Channel dest = this.channels.stream()
                 .filter(c -> c.getMembers().size() > 0)
-                .filter(c -> c.getMembers().get(0).getId().equals(senderUuid))
+                .filter(c -> c.getMembers().get(0).getId().equals(receiverUuid))
                 .findFirst().get();
-        ChatMessage chatMessage = new ChatMessage(content, dest.getMembers().get(0), LocalDateTime.now());
+        User sender = findUserByUuid(senderUuid, users).get();
+        ChatMessage chatMessage = new ChatMessage(content, sender, LocalDateTime.now());
         Platform.runLater(() -> dest.getMessages().add(chatMessage));
-        storeMessage(senderUuid, senderUuid, content, timestamp);
+        storeMessage(receiverUuid, senderUuid, content, timestamp);
     }
 
     private void storeMessage(String userUuid, String senderUuid, String content, long timestamp) {
@@ -216,7 +235,6 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         return answer;
     }
 
-
     @Override
     public void gotProvisioningUrl(String url) {
         Image image = QRGenerator.getImage(url);
@@ -227,7 +245,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     public void gotProvisionMessage(String number) {
         int rnd = new Random().nextInt(1000);
         try {
-            wave.getWaveLogger().log(Level.DEBUG, "[WAVESERVICE] rnd = "+rnd+", create account");
+            wave.getWaveLogger().log(Level.DEBUG, "[WAVESERVICE] rnd = " + rnd + ", create account");
             wave.createAccount(number, "Gluon-" + rnd);
             login(wave.getMyUuid());
 
@@ -252,6 +270,25 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         User answer = new User(firstName, firstName, "", c.getUuid());
         answer.setAvatarPath(c.getAvatarPath());
         return answer;
+    }
+
+    private Optional<User> findUserByUuid(String uuid, List<User> users) {
+        Optional<User> target = users.stream().filter(u -> u.getId().equals(uuid)).findFirst();
+        return target;
+    }
+
+    private Optional<User> findUserByContact(Contact contact, List<User> users) {
+        String cuuid = contact.getUuid();
+        Optional<User> target = users.stream().filter(u -> u.getId().equals(cuuid)).findFirst();
+        return target;
+    }
+
+    // this will never give a match since we use a random id when creating a channel.
+    // There is no 1-1 relation between User and Channel in case a channel has many users.
+    private Optional<Channel> findChannelByUser(User user, List<Channel> channels) {
+        String cuuid = user.getId();
+        Optional<Channel> target = channels.stream().filter(u -> u.getId().equals(cuuid)).findFirst();
+        return target;
     }
 
 }
