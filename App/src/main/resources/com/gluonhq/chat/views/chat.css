@@ -85,7 +85,6 @@
     -fx-font-size: 1em;
     -fx-text-fill: -chat-text-fill;
     -fx-prompt-text-fill: derive(-chat-text-fill, 50%);
-    -fx-pref-height: 30;
     -fx-wrap-text: true;
     -fx-border-width: 0;
 }
