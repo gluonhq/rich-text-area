@@ -56,6 +56,7 @@ jobs:
 
       - name: Create Bundle using jpackage
         id: outputfile
+        shell: cmd
         run: |
           call .github\scripts\build_app_windows.bat
           echo ::set-output name=path::App\target\installer\ChatApp-${{ env.APP_VERSION }}.pkg
