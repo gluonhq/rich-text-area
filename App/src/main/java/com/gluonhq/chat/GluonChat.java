@@ -4,13 +4,13 @@ import com.airhacks.afterburner.injection.Injector;
 import com.gluonhq.attach.lifecycle.LifecycleService;
 import com.gluonhq.attach.util.Platform;
 import com.gluonhq.charm.glisten.afterburner.GluonInstanceProvider;
-import com.gluonhq.charm.glisten.application.MobileApplication;
+import com.gluonhq.charm.glisten.application.AppManager;
 import com.gluonhq.charm.glisten.visual.Swatch;
-import com.gluonhq.chat.service.DummyService;
-import com.gluonhq.chat.service.WaveService;
 import com.gluonhq.chat.service.Service;
+import com.gluonhq.chat.service.WaveService;
 import com.gluonhq.chat.views.AppViewManager;
 import com.gluonhq.emoji.EmojiData;
+import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
@@ -20,13 +20,15 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-public class GluonChat extends MobileApplication {
+public class GluonChat extends Application {
 
     private static final Logger LOG = Logger.getLogger(GluonChat.class.getName());
     private static final int DESKTOP_DEFAULT_WIDTH = 800;
     private static final int DESKTOP_DEFAULT_HEIGHT = 600;
     
     public static final int VIEW_CHANGE_WIDTH = 600;
+
+    private final AppManager appManager = AppManager.initialize(this::postInit);
     
     static {
         try {
@@ -49,11 +51,15 @@ public class GluonChat extends MobileApplication {
 
     @Override
     public void init() {
-        AppViewManager.registerViewsAndDrawer(this);
+        AppViewManager.registerViewsAndDrawer();
     }
 
     @Override
-    public void postInit(Scene scene) {
+    public void start(Stage stage) {
+        appManager.start(stage);
+    }
+
+    private void postInit(Scene scene) {
         Swatch.RED.assignTo(scene);
 
         scene.getStylesheets().add(GluonChat.class.getResource("/styles.css").toExternalForm());

@@ -1,9 +1,7 @@
 package com.gluonhq.chat.views;
 
-import com.gluonhq.charm.glisten.afterburner.GluonPresenter;
 import com.gluonhq.charm.glisten.control.CharmListView;
 import com.gluonhq.charm.glisten.control.TextField;
-import com.gluonhq.chat.GluonChat;
 import com.gluonhq.chat.model.Channel;
 import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.service.Service;
@@ -17,7 +15,7 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.ResourceBundle;
 
-public class ChannelPresenter extends GluonPresenter<GluonChat> {
+public class ChannelPresenter {
 
     @FXML private TextField search;
     @FXML private CharmListView<Channel, String> channelList;

@@ -1,10 +1,8 @@
 package com.gluonhq.chat.views;
 
 //import com.gluonhq.attach.orientation.OrientationService;
-import com.gluonhq.charm.glisten.afterburner.GluonPresenter;
 import com.gluonhq.charm.glisten.application.ViewStackPolicy;
 import com.gluonhq.charm.glisten.mvc.View;
-import com.gluonhq.chat.GluonChat;
 import com.gluonhq.chat.service.Service;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -13,7 +11,7 @@ import javax.inject.Inject;
 
 import static com.gluonhq.chat.GluonChat.VIEW_CHANGE_WIDTH;
 
-public class HomePresenter extends GluonPresenter<GluonChat> {
+public class HomePresenter {
 
     @FXML private View homeView;
     @Inject private Service service;

@@ -1,9 +1,8 @@
 package com.gluonhq.chat.views;
 
-import com.gluonhq.charm.glisten.afterburner.GluonPresenter;
+import com.gluonhq.charm.glisten.application.AppManager;
 import com.gluonhq.charm.glisten.application.ViewStackPolicy;
 import com.gluonhq.charm.glisten.mvc.View;
-import com.gluonhq.chat.GluonChat;
 import com.gluonhq.chat.service.BootstrapClient;
 import com.gluonhq.chat.service.Service;
 import javafx.fxml.FXML;
@@ -14,7 +13,7 @@ import javax.inject.Inject;
 import java.util.ResourceBundle;
 import javafx.scene.image.Image;
 
-public class LoginPresenter extends GluonPresenter<GluonChat> implements BootstrapClient{
+public class LoginPresenter implements BootstrapClient{
 
     @FXML private View loginView;
     @FXML private ImageView qrImageView;
@@ -25,8 +24,8 @@ public class LoginPresenter extends GluonPresenter<GluonChat> implements Bootstr
 
     public void initialize() {
         loginView.setOnShowing(e -> {
-            getApp().getAppBar().setVisible(false);
-            getApp().getAppBar().setManaged(false);
+            AppManager.getInstance().getAppBar().setVisible(false);
+            AppManager.getInstance().getAppBar().setManaged(false);
         });
         if (service.loggedUser() != null) {
             nextStep();

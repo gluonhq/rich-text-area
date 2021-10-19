@@ -23,8 +23,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>11</maven.compiler.release>
 
-        <glistenVersion>6.0.6</glistenVersion>
-        <glistenAfterburnerVersion>2.0.5</glistenAfterburnerVersion>
+        <glistenVersion>6.1.0</glistenVersion>
+        <charmCloudLinkClientVersion>6.0.7</charmCloudLinkClientVersion>
+        <glistenAfterburnerVersion>2.1.0</glistenAfterburnerVersion>
         <attachVersion>4.0.13</attachVersion>
         <mapsVersion>2.0.0-ea+5</mapsVersion>
         <connectVersion>2.0.1</connectVersion>

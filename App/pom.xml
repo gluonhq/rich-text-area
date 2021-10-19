@@ -95,8 +95,8 @@
                         <list>com.gluonhq.chat.views.maps</list>
                         <list>com.gluonhq.chat.views.portrait</list>
                         <list>org.glassfish.json.messages</list>
-                        <!--<list>com.gluonhq.emoji.popup.emoji-popover</list>-->
-                        <!--<list>controlsfx</list>-->
+                        <list>com.gluonhq.emoji.popup.emoji-popover</list>
+                        <list>controlsfx</list>
                     </bundlesList>
                     <resourcesList>
                         <item>logging.properties</item>
@@ -198,7 +198,7 @@
         <dependency>
             <groupId>com.gluonhq</groupId>
             <artifactId>charm-cloudlink-client</artifactId>
-            <version>${glistenVersion}</version>
+            <version>${charmCloudLinkClientVersion}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.openjfx</groupId>

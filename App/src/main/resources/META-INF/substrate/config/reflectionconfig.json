@@ -60,6 +60,28 @@
     "methods":[{"name":"<init>","parameterTypes":[] }]
   },
   {
+    "name":"javafx.scene.layout.GridPane",
+    "methods":[
+      {"name":"setHgap","parameterTypes":["double"] },
+      {"name":"getHgap","parameterTypes":[] },
+      {"name":"setVgap","parameterTypes":["double"] },
+      {"name":"getVgap","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"javafx.css.converter.SizeConverter$SequenceConverter",
+    "methods":[
+      {"name":"<init>","parameterTypes":[] },
+      {"name":"getInstance","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"javafx.scene.text.Text",
+    "methods":[
+      {"name":"selectionFillProperty","parameterTypes":[] }
+    ]
+  },
+  {
     "name":"org.glassfish.json.JsonProviderImpl",
     "allDeclaredFields":true,
     "allDeclaredMethods":true

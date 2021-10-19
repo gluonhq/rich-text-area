@@ -3,10 +3,8 @@ package com.gluonhq.chat.views;
 import com.gluonhq.attach.display.DisplayService;
 import com.gluonhq.attach.keyboard.KeyboardService;
 import com.gluonhq.attach.util.Platform;
-import com.gluonhq.charm.glisten.afterburner.GluonPresenter;
 import com.gluonhq.charm.glisten.control.Avatar;
 import com.gluonhq.charm.glisten.mvc.View;
-import com.gluonhq.chat.GluonChat;
 import com.gluonhq.chat.chatlistview.ChatListView;
 import com.gluonhq.chat.model.Channel;
 import com.gluonhq.chat.model.ChatMessage;
@@ -35,11 +33,9 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.ResourceBundle;
 
-//import com.gluonhq.emoji.control.EmojiTextArea;
-
 // TODO Show user images when available
 
-public class ChatPresenter extends GluonPresenter<GluonChat> {
+public class ChatPresenter {
 
     @FXML private View chatView;
 
@@ -154,12 +150,13 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
                         icon.getStyleClass().add("chat-channel-icon");
                         channelIcon.getChildren().setAll(icon);
                     });
+            bottomPane.setDisable(false);
         } else {
             chatList.setItems(null);
             channelIcon.getChildren().clear();
             channelName.setText(null);
+            bottomPane.setDisable(true);
         }
-        bottomPane.setDisable(false);
 
         AppViewManager.CHANNEL_VIEW.getPresenter()
                 .ifPresent(presenter -> ((ChannelPresenter) presenter).updateChannels(channel == null));

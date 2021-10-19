@@ -3,7 +3,7 @@ package com.gluonhq.chat.views;
 import com.airhacks.afterburner.injection.Injector;
 import com.gluonhq.attach.position.Position;
 import com.gluonhq.charm.glisten.animation.BounceInRightTransition;
-import com.gluonhq.charm.glisten.afterburner.GluonPresenter;
+import com.gluonhq.charm.glisten.application.AppManager;
 import com.gluonhq.charm.glisten.control.AppBar;
 import com.gluonhq.charm.glisten.control.FloatingActionButton;
 import com.gluonhq.charm.glisten.mvc.View;
@@ -13,7 +13,6 @@ import com.gluonhq.chat.model.User;
 import com.gluonhq.chat.service.ImageUtils;
 import com.gluonhq.chat.service.Service;
 import com.gluonhq.chat.views.helper.PoiLayer;
-import com.gluonhq.chat.GluonChat;
 import com.gluonhq.maps.MapPoint;
 import com.gluonhq.maps.MapView;
 import javafx.scene.image.Image;
@@ -27,7 +26,7 @@ import static com.gluonhq.chat.service.ImageUtils.DEFAULT_POSITION;
 import static com.gluonhq.chat.service.ImageUtils.LATLON;
 import static com.gluonhq.chat.service.ImageUtils.LATLON_SEP;
 
-public class MapsPresenter extends GluonPresenter<GluonChat> {
+public class MapsPresenter {
 
     @FXML private View mapsView;
 
@@ -44,11 +43,11 @@ public class MapsPresenter extends GluonPresenter<GluonChat> {
         floatingActionButton = new FloatingActionButton(MaterialDesignIcon.SEND.text, e -> {});
 
         mapsView.showingProperty().addListener((obs, ov, nv) -> {
-            AppBar appBar = getApp().getAppBar();
+            AppBar appBar = AppManager.getInstance().getAppBar();
             if (nv) {
                 appBar.setNavIcon(MaterialDesignIcon.CHEVRON_LEFT.button(e -> {
                         floatingActionButton.hide();
-                        getApp().goHome();
+                    AppManager.getInstance().goHome();
                 }));
                 appBar.setTitleText(resources.getString("maps.view.title"));
             }
@@ -74,7 +73,7 @@ public class MapsPresenter extends GluonPresenter<GluonChat> {
                     var message = new ChatMessage(id, name, LocalDateTime.now());
                     consumer.accept(message);
                 }
-                getApp().switchToPreviousView();
+                AppManager.getInstance().switchToPreviousView();
             });
             floatingActionButton.show();
         }
