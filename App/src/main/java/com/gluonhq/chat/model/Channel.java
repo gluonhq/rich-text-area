@@ -4,6 +4,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.util.UUID;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 
 public class Channel extends Searchable {
 
@@ -13,6 +15,7 @@ public class Channel extends Searchable {
     private final ObservableList<User> members;
     private final ObservableList<ChatMessage> messages;
     private boolean unread;
+    private BooleanProperty typing = new SimpleBooleanProperty(false);
 
     public Channel(String name, ObservableList<User> members, ObservableList<ChatMessage> messages) {
         this.id = UUID.randomUUID().toString();
@@ -83,6 +86,10 @@ public class Channel extends Searchable {
     @Override
     public boolean contains(String keyword) {
         return containsKeyword(getName(), keyword);
+    }
+    
+    public BooleanProperty typing() {
+        return this.typing;
     }
     
     public String displayName() {

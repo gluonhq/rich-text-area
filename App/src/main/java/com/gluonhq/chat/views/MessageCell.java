@@ -145,6 +145,7 @@ class MessageCell extends CharmListCell<ChatMessage> {
                 BorderPane.setAlignment(message, Pos.TOP_RIGHT);
                 BorderPane.setAlignment(messageBubble, Pos.TOP_RIGHT);
                 BorderPane.setAlignment(bottomBox, Pos.BOTTOM_RIGHT);
+                item.receiptProperty().addListener(o -> icon.setText(icon.getText()+ "Receipt = "+item.receiptProperty().get()));
             } else {
                 messageBubble.pseudoClassStateChanged(SIDE_RIGHT, false);
                 messageBubble.setRight(null);

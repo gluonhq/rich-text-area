@@ -88,10 +88,11 @@ public class DummyService implements Service {
                 .collect(Collectors.toCollection(FXCollections::observableArrayList));
     }
 
-    private LocalDateTime randomDateTime() {
+    private long randomDateTime() {
         long minDay = LocalDateTime.of(1970, 1, 1, 0, 0).toEpochSecond(ZoneOffset.UTC);
         long maxDay = LocalDateTime.of(2021, 1, 1, 0, 0).toEpochSecond(ZoneOffset.UTC);
         long randomTime = ThreadLocalRandom.current().nextLong(minDay, maxDay);
-        return LocalDateTime.ofEpochSecond(randomTime, 0, ZoneOffset.UTC);
+        return randomTime;
+//        return LocalDateTime.ofEpochSecond(randomTime, 0, ZoneOffset.UTC);
     }
 }

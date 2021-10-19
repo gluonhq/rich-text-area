@@ -67,7 +67,7 @@ public class PlusPopupView extends PopupView {
                         Image image = new Image(new FileInputStream(file));
                         String id = service.addImage(file.getName() + "-" + System.currentTimeMillis(), image);
                         if (id != null) {
-                            var message = new ChatMessage(id, service.loggedUser(), LocalDateTime.now());
+                            var message = new ChatMessage(id, service.loggedUser(), System.currentTimeMillis());
                             messages.add(message);
                         }
                     } catch (FileNotFoundException e1) {
@@ -78,7 +78,7 @@ public class PlusPopupView extends PopupView {
                 PicturesService.create().ifPresent(pictures -> pictures.takePhoto(false).ifPresent(image -> {
                     String id = service.addImage("photo" + "-" + System.currentTimeMillis(), image);
                     if (id != null) {
-                        var message = new ChatMessage(id, service.loggedUser(), LocalDateTime.now());
+                        var message = new ChatMessage(id, service.loggedUser(), System.currentTimeMillis());
                         messages.add(message);
                     }
                 }));

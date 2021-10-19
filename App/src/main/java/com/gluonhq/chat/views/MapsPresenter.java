@@ -70,7 +70,7 @@ public class MapsPresenter {
                 Service service = Injector.instantiateModelOrService(Service.class);
                 String id = service.addImage(LATLON + initials + LATLON_SEP + mapPoint.getLatitude() + LATLON_SEP + mapPoint.getLongitude() + LATLON_SEP + System.currentTimeMillis(), snapshot);
                 if (id != null) {
-                    var message = new ChatMessage(id, name, LocalDateTime.now());
+                    var message = new ChatMessage(id, name, System.currentTimeMillis());
                     consumer.accept(message);
                 }
                 AppManager.getInstance().switchToPreviousView();

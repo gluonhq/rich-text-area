@@ -1,35 +1,75 @@
 package com.gluonhq.chat.model;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Objects;
 import java.util.UUID;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 
 public class ChatMessage extends Searchable {
 
+    public enum ReceiptType {
+        UNKNOWN (0),
+        DELIVERY (1),
+        READ (2),
+        VIEWED (3);
+
+        int v;
+
+        ReceiptType(int val) {
+            this.v = val;
+        }
+    }
+    
     private String id;
     private String message;
+    private long timestamp;
     private LocalDateTime time;
     private User user;
     private boolean localOriginated;
+    private ReceiptType receiptType;
+    private final IntegerProperty receiptProperty = new SimpleIntegerProperty();
 
-    public ChatMessage(String message, User user, LocalDateTime time) {
-        this (message, user, time, false);
+    public ChatMessage(String message, User user, long timestamp) {
+        this (message, user, timestamp, false);
     }
 
-    public ChatMessage(String message, User user, LocalDateTime time, boolean localOriginated) {
+    public ChatMessage(String message, User user, long timestamp, boolean localOriginated) {
         this.id = UUID.randomUUID().toString();
         this.message = message;
         this.user = user;
-        this.time = time;
+        this.timestamp = timestamp;
+        this.time = Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
         this.localOriginated = localOriginated;
+        this.receiptType = ReceiptType.UNKNOWN;
     }
 
     public String getMessage() {
         return message;
     }
 
+    public void setTimestamp(long v) {
+        this.timestamp = v;
+    }
+    
+    public long getTimestamp() {
+        return this.timestamp;
+    }
+    
     public LocalDateTime getTime() {
         return time;
+    }
+
+    public void setReceiptType(ReceiptType t) {
+        this.receiptType = t;
+        receiptProperty.set(t.ordinal());
+    }
+
+    public IntegerProperty receiptProperty() {
+        return receiptProperty;
     }
 
     public User getUser() {

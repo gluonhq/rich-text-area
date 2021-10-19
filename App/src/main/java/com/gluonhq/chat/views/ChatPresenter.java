@@ -137,6 +137,16 @@ public class ChatPresenter {
 
     void updateMessages(Channel channel) {
         if (channel != null) {
+            channel.typing().addListener(new InvalidationListener() {
+                @Override
+                public void invalidated(Observable o) {
+                    if (channel.typing().get()) {
+                        channelName.setText(channel.displayName()+"...");
+                    } else {
+                        channelName.setText(channel.displayName());
+                    }
+                }
+            });
             createSortList(channel.getMessages());
             channelName.setText(channel.displayName());
             ImageCache.getImage(channel.getMembers().isEmpty() ? null : channel.getMembers().get(0).getAvatarPath())
@@ -165,7 +175,7 @@ public class ChatPresenter {
     private void sendMessage(EmojiTextArea messageEditor) {
         String text = messageEditor.getText().trim();
         if (!text.isEmpty()) {
-            var message = new ChatMessage(text, service.loggedUser(), LocalDateTime.now(), true);
+            var message = new ChatMessage(text, service.loggedUser(), System.currentTimeMillis(), true);
             messages.add(message);
             messageEditor.clear();
             messageEditor.requestFocus();
