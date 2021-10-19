@@ -59,7 +59,7 @@ jobs:
         shell: cmd
         run: |
           call .github\scripts\build_app_windows.bat
-          echo ::set-output name=path::App\target\installer\ChatApp-${{ env.APP_VERSION }}.pkg
+          echo ::set-output name=path::App\target\installer\ChatApp-${{ env.APP_VERSION }}.msi
         env:
           PROJECT_VERSION: 1.1.0-SNAPSHOT
           APP_VERSION: 1.0.0
