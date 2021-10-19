@@ -538,7 +538,10 @@
   },
   {
     "name":"org.whispersystems.libsignal.state.StorageProtos$SessionStructure$Chain$MessageKey",
-    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+    "methods":[
+      {"name":"newBuilder","parameterTypes":[] },
+      {"name":"getIndex","parameterTypes":[] }
+    ]
   },
   {
     "name":"org.whispersystems.signalservice.api.push.SignedPreKeyEntity",
