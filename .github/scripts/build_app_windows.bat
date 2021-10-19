@@ -5,21 +5,17 @@ rem ------ ENVIRONMENT --------------------------------------------------------
 rem See https://github.com/dlemmermann/JPackageScriptFX
 
 rem The script depends on various environment variables to exist in order to
-rem run properly. The java version we want to use, the location of the java
-rem binaries (java home), and the project version as defined inside the pom.xml
-rem file, e.g. 1.0-SNAPSHOT.
+rem run properly:
 rem
-rem PROJECT_VERSION: version used in pom.xml, e.g. 1.0-SNAPSHOT
-rem APP_VERSION: the application version, e.g. 1.0.0, shown in "about" dialog
+rem PROJECT_VERSION=1.1.0-SNAPSHOT
+rem APP_VERSION=1.0.0
 
 set JAVA_VERSION=17
-set PROJECT_VERSION=1.1.0-SNAPSHOT
 set APP_NAME=ChatApp
-set APP_VERSION=1.0.0
 set MAIN_JAR="App-%PROJECT_VERSION%.jar"
 set LAUNCHER_CLASS=com.gluonhq.chat.AppLauncher
 set MAIN_CLASS=com/gluonhq/chat/GluonChat
-set ICON_PATH=src\main\resources\ChatAppLogo.ico
+set ICON_PATH=App\src\main\resources\ChatAppLogo.ico
 
 rem Set desired installer type: "app-image" "msi" "exe".
 set INSTALLER_TYPE=msi
@@ -28,11 +24,11 @@ rem ------ SETUP DIRECTORIES AND FILES ----------------------------------------
 rem Remove previously generated java runtime and installers. Copy all required
 rem jar files into the input/libs folder.
 
-IF EXIST target\java-runtime rmdir /S /Q  .\target\java-runtime
-IF EXIST target\installer rmdir /S /Q target\installer
+IF EXIST App\target\java-runtime rmdir /S /Q  App\target\java-runtime
+IF EXIST App\target\installer rmdir /S /Q App\target\installer
 
-xcopy /S /Q target\libs\* target\installer\input\libs\
-copy target\%MAIN_JAR% target\installer\input\libs\
+xcopy /S /Q App\target\libs\* App\target\installer\input\libs\
+copy App\target\%MAIN_JAR% App\target\installer\input\libs\
 
 rem ------ REQUIRED MODULES ---------------------------------------------------
 rem Use jlink to detect all modules that are required to run the application.
@@ -45,8 +41,8 @@ echo detecting required modules
   -q ^
   --multi-release %JAVA_VERSION% ^
   --ignore-missing-deps ^
-  --class-path "target\installer\input\libs\*" ^
-  --print-module-deps target\classes\%MAIN_CLASS%.class > temp.txt
+  --class-path "App\target\installer\input\libs\*" ^
+  --print-module-deps App\target\classes\%MAIN_CLASS%.class > temp.txt
 
 set /p detected_modules=<temp.txt
 
@@ -83,7 +79,7 @@ call "%JAVA_HOME%\bin\jlink" ^
   --strip-debug ^
   --add-modules %detected_modules%%manual_modules% ^
   --include-locales=en ^
-  --output target/java-runtime
+  --output App/target/java-runtime
 
 rem ------ PACKAGING ----------------------------------------------------------
 rem In the end we will find the package inside the target/installer directory.
@@ -92,13 +88,13 @@ echo Creating installer
 
 call "%JAVA_HOME%\bin\jpackage" ^
   --type %INSTALLER_TYPE% ^
-  --dest target/installer ^
-  --input target/installer/input/libs ^
+  --dest App/target/installer ^
+  --input App/target/installer/input/libs ^
   --name %APP_NAME% ^
   --main-class %LAUNCHER_CLASS% ^
   --main-jar %MAIN_JAR% ^
   --java-options -Xmx2048m ^
-  --runtime-image target/java-runtime ^
+  --runtime-image App/target/java-runtime ^
   --icon %ICON_PATH% ^
   --app-version %APP_VERSION% ^
   --vendor "Gluon" ^
