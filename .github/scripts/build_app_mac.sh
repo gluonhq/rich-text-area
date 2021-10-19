@@ -105,7 +105,5 @@ $JAVA_HOME/bin/jpackage \
 --vendor "Gluon" \
 --copyright "Copyright © 2021 Gluon" \
 --mac-package-identifier com.gluonhq.chat \
---mac-package-name ${APP_NAME}\
---mac-package-signing-prefix "$GLUON_MACSIGN_PREFIX" \
---mac-signing-key-user-name "$GLUON_MACSIGN_USER" \
---mac-sign
+--mac-package-name ${APP_NAME} \
+"$@"

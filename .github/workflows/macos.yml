@@ -56,7 +56,10 @@ jobs:
       - name: Create Bundle using jpackage
         id: outputfile
         run: |
-          .github/scripts/build_app_mac.sh
+          .github/scripts/build_app_mac.sh \
+          --mac-package-signing-prefix "$GLUON_MACSIGN_PREFIX" \
+          --mac-signing-key-user-name "$GLUON_MACSIGN_USER" \
+          --mac-sign
           echo ::set-output name=path::App/target/installer/ChatApp-${{ env.APP_VERSION }}.pkg
         env:
           GLUON_MACSIGN_PREFIX: ${{ secrets.GLUON_MACSIGN_PREFIX }}
