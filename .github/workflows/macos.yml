@@ -79,7 +79,9 @@ jobs:
 
       - name: Copy installer to staging2
         run: |
-          cp -r App/target/installer/ChatApp-$APP_VERSION.pkg staging2
+          cp -r $INSTALLER staging2
+        env:
+          INSTALLER: ${{ steps.outputfile.outputs.path }}  
 
       - name: Upload installer
         uses: actions/upload-artifact@v2
