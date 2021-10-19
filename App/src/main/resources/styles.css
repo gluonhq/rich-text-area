@@ -5,9 +5,23 @@
     src: url('fontawesome-webfont.ttf');
 }
 
+@font-face {
+    font-family: 'Inter Regular';
+    src: url('Inter-Regular.ttf');
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: 'Inter Bold';
+    src: url('Inter-Bold.ttf');
+    font-weight: bold;
+}
+
+
 .root {
+    -fx-font-family: 'Inter';
     -fx-font-size: 10pt;
-    
+
     /* accent color palette */
     -chat-accent       : #4aadda;
     -chat-accent-light : derive( -chat-accent, 100% );
@@ -19,7 +33,7 @@
     -chat-background-dark  : derive( -chat-background, -20% );
 
     /* text color palette */
-    -chat-text-fill       : #818181;
+    -chat-text-fill       : #5c5c5c;
     -chat-text-fill-light : derive( -chat-text-fill,  50% );
     -chat-text-fill-dark  : derive( -chat-text-fill, -20% );
     
