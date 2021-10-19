@@ -8,18 +8,16 @@
 @font-face {
     font-family: 'Inter Regular';
     src: url('Inter-Regular.ttf');
-    font-weight: normal;
 }
 
 @font-face {
     font-family: 'Inter Bold';
     src: url('Inter-Bold.ttf');
-    font-weight: bold;
 }
 
 
 .root {
-    -fx-font-family: 'Inter';
+    -fx-font-family: 'Inter'; /* uses all available weights*/
     -fx-font-size: 10pt;
 
     /* accent color palette */
