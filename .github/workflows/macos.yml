@@ -33,6 +33,16 @@ jobs:
           cp -r App/target/gluonfx/x86_64-darwin/gvm/*.json staging
           cp -r App/target/gluonfx/x86_64-darwin/gvm/log/* staging
 
+      - name: Notarize Native Build
+        uses: erwin1/xcode-notarize@main
+        with:
+          product-path: staging/ChatApp
+          appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
+          appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
+          primary-bundle-id: com.gluonhq.chat
+          asc-provider: ${{ secrets.GLUON_MACSIGN_PREFIX }}
+          verbose: false
+          
       - name: Upload native image
         uses: actions/upload-artifact@v2
         with:
@@ -67,15 +77,15 @@ jobs:
           PROJECT_VERSION: 1.1.0-SNAPSHOT
           APP_VERSION: 1.0.0
 
-      - name: "Notarize Release Build"
-        uses: erwin1/xcode-notarize@notarization
+      - name: Notarize Release Build
+        uses: erwin1/xcode-notarize@main
         with:
           product-path: ${{ steps.outputfile.outputs.path }}
           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
           primary-bundle-id: com.gluonhq.chat
           asc-provider: ${{ secrets.GLUON_MACSIGN_PREFIX }}
-          verbose: true
+          verbose: false
 
       - name: Upload installer
         uses: actions/upload-artifact@v2
