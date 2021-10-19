@@ -39,7 +39,7 @@ jobs:
           product-path: staging/ChatApp
           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
-          primary-bundle-id: com.gluonhq.chat
+          primary-bundle-id: com.gluonhq.chat.native
           asc-provider: ${{ secrets.GLUON_MACSIGN_PREFIX }}
           verbose: false
           
