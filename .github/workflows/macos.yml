@@ -68,7 +68,7 @@ jobs:
           APP_VERSION: 1.0.0
 
       - name: "Notarize Release Build"
-        uses: jperedadnr/xcode-notarize@main
+        uses: erwin1/xcode-notarize@notarization
         with:
           product-path: ${{ steps.outputfile.outputs.path }}
           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
