@@ -41,7 +41,7 @@ jobs:
           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
           primary-bundle-id: com.gluonhq.chat.native
           asc-provider: ${{ secrets.GLUON_MACSIGN_PREFIX }}
-          verbose: false
+          verbose: true
           
       - name: Upload native image
         uses: actions/upload-artifact@v2
