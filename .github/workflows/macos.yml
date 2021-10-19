@@ -77,14 +77,8 @@ jobs:
           asc-provider: ${{ secrets.GLUON_MACSIGN_PREFIX }}
           verbose: true
 
-      - name: Copy installer to staging2
-        run: |
-          cp -r $INSTALLER staging2
-        env:
-          INSTALLER: ${{ steps.outputfile.outputs.path }}  
-
       - name: Upload installer
         uses: actions/upload-artifact@v2
         with:
           name: InstallerPackage
-          path: staging2
+          path: ${{ steps.outputfile.outputs.path }}
