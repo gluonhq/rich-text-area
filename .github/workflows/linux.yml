@@ -65,10 +65,14 @@ jobs:
           PROJECT_VERSION: 1.1.0-SNAPSHOT
           APP_VERSION: 1.0.0
 
-      - name: Upload installer
+      - name: Upload installer (deb)
         uses: actions/upload-artifact@v2
         with:
-          name: InstallerPackage
-          path: |
-            ${{ steps.outputfile.outputs.pathDeb }}
-            ${{ steps.outputfile.outputs.pathRpm }}
+          name: InstallerPackage (deb)
+          path: ${{ steps.outputfile.outputs.pathDeb }}
+
+      - name: Upload installer (rpm)
+        uses: actions/upload-artifact@v2
+        with:
+          name: InstallerPackage (rpm)
+          path: ${{ steps.outputfile.outputs.pathRpm }}
