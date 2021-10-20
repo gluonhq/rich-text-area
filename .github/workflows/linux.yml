@@ -57,22 +57,20 @@ jobs:
         run: |
           .github/scripts/build_app_linux.sh \
           --type deb
+          mv App/target/installer/*.deb App/target/installer/ChatApp-${{ env.APP_VERSION }}.deb
           echo ::set-output name=pathDeb::App/target/installer/ChatApp-${{ env.APP_VERSION }}.deb
           .github/scripts/build_app_linux.sh \
           --type rpm
+          mv App/target/installer/*.rpm App/target/installer/ChatApp-${{ env.APP_VERSION }}.rpm
           echo ::set-output name=pathRpm::App/target/installer/ChatApp-${{ env.APP_VERSION }}.rpm
         env:
           PROJECT_VERSION: 1.1.0-SNAPSHOT
           APP_VERSION: 1.0.0
 
-      - name: Upload installer (deb)
+      - name: Upload installer
         uses: actions/upload-artifact@v2
         with:
-          name: InstallerPackage (deb)
-          path: ${{ steps.outputfile.outputs.pathDeb }}
-
-      - name: Upload installer (rpm)
-        uses: actions/upload-artifact@v2
-        with:
-          name: InstallerPackage (rpm)
-          path: ${{ steps.outputfile.outputs.pathRpm }}
+          name: InstallerPackage
+          path: |
+            ${{ steps.outputfile.outputs.pathDeb }}
+            ${{ steps.outputfile.outputs.pathRpm }}
