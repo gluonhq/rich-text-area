@@ -4,24 +4,17 @@
 
 # ------ ENVIRONMENT --------------------------------------------------------
 # The script depends on various environment variables to exist in order to
-# run properly. The java version we want to use, the location of the java
-# binaries (java home), and the project version as defined inside the pom.xml
-# file, e.g. 1.0-SNAPSHOT.
+# run properly:
 #
-# PROJECT_VERSION: version used in pom.xml, e.g. 1.0-SNAPSHOT
-# APP_VERSION: the application version, e.g. 1.0.0, shown in "about" dialog
+# PROJECT_VERSION=1.1.0-SNAPSHOT
+# APP_VERSION=1.0.0
 
 JAVA_VERSION=17
-PROJECT_VERSION=1.1.0-SNAPSHOT
 APP_NAME=ChatApp
-APP_VERSION=1.0.0
 MAIN_JAR="App-$PROJECT_VERSION.jar"
 LAUNCHER_CLASS=com.gluonhq.chat.AppLauncher
 MAIN_CLASS=com/gluonhq/chat/GluonChat
-ICON_PATH=src/main/resources/ChatAppLogo.png
-
-# Set desired installer type: "app-image", "rpm" or "deb".
-INSTALLER_TYPE=deb
+ICON_PATH=App/src/main/resources/ChatAppLogo.png
 
 echo "java home: $JAVA_HOME"
 echo "project version: $PROJECT_VERSION"
@@ -32,13 +25,13 @@ echo "main JAR file: $MAIN_JAR"
 # Remove previously generated java runtime and installers. Copy all required
 # jar files into the input/libs folder.
 
-rm -rfd ./target/java-runtime/
-rm -rfd target/installer/
+rm -rfd App/target/java-runtime/
+rm -rfd App/target/installer/
 
-mkdir -p target/installer/input/libs/
+mkdir -p App/target/installer/input/libs/
 
-cp target/libs/* target/installer/input/libs/
-cp target/${MAIN_JAR} target/installer/input/libs/
+cp App/target/libs/* App/target/installer/input/libs/
+cp App/target/${MAIN_JAR} App/target/installer/input/libs/
 
 # ------ REQUIRED MODULES ---------------------------------------------------
 # Use jlink to detect all modules that are required to run the application.
@@ -51,8 +44,8 @@ detected_modules=`$JAVA_HOME/bin/jdeps \
   --multi-release ${JAVA_VERSION} \
   --ignore-missing-deps \
   --print-module-deps \
-  --class-path "target/installer/input/libs/*" \
-    target/classes/${MAIN_CLASS}.class`
+  --class-path "App/target/installer/input/libs/*" \
+    App/target/classes/${MAIN_CLASS}.class`
 echo "detected modules: ${detected_modules}"
 
 
@@ -86,7 +79,7 @@ $JAVA_HOME/bin/jlink \
   --strip-debug \
   --add-modules "${detected_modules}${manual_modules}" \
   --include-locales=en \
-  --output target/java-runtime
+  --output App/target/java-runtime
 
 # ------ PACKAGING ----------------------------------------------------------
 # In the end we will find the package inside the target/installer directory.
@@ -94,15 +87,15 @@ $JAVA_HOME/bin/jlink \
 echo "Creating installer of type $INSTALLER_TYPE"
 
 $JAVA_HOME/bin/jpackage \
---type $INSTALLER_TYPE \
---dest target/installer \
---input target/installer/input/libs \
+--dest App/target/installer \
+--input App/target/installer/input/libs \
 --name ${APP_NAME} \
 --main-class ${LAUNCHER_CLASS} \
 --main-jar ${MAIN_JAR} \
 --java-options -Xmx2048m \
---runtime-image target/java-runtime \
+--runtime-image App/target/java-runtime \
 --icon ${ICON_PATH} \
 --app-version ${APP_VERSION} \
 --vendor "Gluon" \
---copyright "Copyright © 2021 Gluon"
+--copyright "Copyright © 2021 Gluon" \
+"$@"
