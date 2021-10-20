@@ -31,6 +31,7 @@ import javafx.util.Duration;
 import javax.inject.Inject;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 // TODO Show user images when available
@@ -178,7 +179,7 @@ public class ChatPresenter {
             var message = new ChatMessage(text, service.loggedUser(), System.currentTimeMillis(), true);
             messages.add(message);
             messageEditor.clear();
-            messageEditor.requestFocus();
+            Objects.requireNonNullElse(messageEditor.lookup(".styled-text-area"), messageEditor).requestFocus();
         }
     }
 
