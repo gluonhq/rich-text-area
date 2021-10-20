@@ -56,7 +56,12 @@ public class GluonChat extends Application {
 
     @Override
     public void start(Stage stage) {
-        appManager.start(stage);
+        try {
+            appManager.start(stage);
+        } catch (Throwable t) {
+            System.err.println("This should never happen, but we're still in development:");
+            t.printStackTrace();
+        }
     }
 
     private void postInit(Scene scene) {

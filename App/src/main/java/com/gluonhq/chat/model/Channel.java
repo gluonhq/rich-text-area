@@ -1,5 +1,6 @@
 package com.gluonhq.chat.model;
 
+import java.util.Objects;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -17,19 +18,25 @@ public class Channel extends Searchable {
     private boolean unread;
     private BooleanProperty typing = new SimpleBooleanProperty(false);
 
-    public Channel(String name, ObservableList<User> members, ObservableList<ChatMessage> messages) {
-        this.id = UUID.randomUUID().toString();
+
+    public Channel(String id, String name, ObservableList<User> members, ObservableList<ChatMessage> messages) {
+        this.id = id;
         this.name = name;
         this.members = members;
         this.messages = messages;
     }
 
+    public Channel(String name, ObservableList<User> members, ObservableList<ChatMessage> messages) {
+        this(UUID.randomUUID().toString(), name, members, messages);
+    }
+
     /**
-     * Create a direct channel with a user
+     * Create a direct channel with a user. In this case, the unique ID of the channel is 
+     * c + the unique userid
      * @param user Direct channel with
      */
     public Channel(User user, ObservableList<ChatMessage> messages) {
-        this(user.displayName(), FXCollections.observableArrayList(user), messages);
+        this("c"+user.getId(), user.displayName(), FXCollections.observableArrayList(user), messages);
         this.isDirect = true;
     }
 
@@ -94,5 +101,34 @@ public class Channel extends Searchable {
     
     public String displayName() {
         return isDirect ? name : "# " + name;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 53 * hash + Objects.hashCode(this.id);
+        hash = 53 * hash + Objects.hashCode(this.name);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Channel other = (Channel) obj;
+        if (!Objects.equals(this.id, other.id)) {
+            return false;
+        }
+        if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
+        return true;
     }
 }

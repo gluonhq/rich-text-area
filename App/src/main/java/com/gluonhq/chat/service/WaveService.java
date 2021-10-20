@@ -58,6 +58,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             this.wave.setMessageListener(this);
             try {
                 this.wave.ensureConnected();
+                wave.syncContacts();
             } catch (IOException ex) {
                 ex.printStackTrace();
                 System.err.println("We're offline. Not much we can do now!");
@@ -131,7 +132,12 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
                 List<Channel> addedChannels = change.getAddedSubList().stream()
                         .map(user -> createChannelFromUser(user))
                         .collect(Collectors.toList());
-                answer.addAll(addedChannels);
+                Platform.runLater(() -> answer.addAll(addedChannels));
+                List<Channel> removedChannels = change.getRemoved().stream()
+                        .map(user -> findChannelByUser(user, answer))
+                        .filter(opt -> opt.isPresent())
+                        .map(opt -> opt.get()).collect(Collectors.toList());
+                Platform.runLater(() -> answer.removeAll(removedChannels));
             }
         });
         return answer;
@@ -296,7 +302,6 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             wave.getWaveLogger().log(Level.DEBUG, "[WAVESERVICE] synccontacts");
             wave.syncContacts();
             Platform.runLater(() -> bootstrapClient.bootstrapSucceeded());
-
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -341,11 +346,11 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         return target;
     }
 
-    // this will never give a match since we use a random id when creating a channel.
-    // There is no 1-1 relation between User and Channel in case a channel has many users.
+    // A direct channel has an id "c" + userId. This is brittle though, and should be
+    // made more robust once we introduce group channels
     private Optional<Channel> findChannelByUser(User user, List<Channel> channels) {
-        String cuuid = user.getId();
-        Optional<Channel> target = channels.stream().filter(u -> u.getId().equals(cuuid)).findFirst();
+        String cuuid = "c" + user.getId();
+        Optional<Channel> target = channels.stream().filter(c -> c.getId().equals(cuuid)).findFirst();
         return target;
     }
 

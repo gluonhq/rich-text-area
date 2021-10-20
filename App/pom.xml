@@ -160,7 +160,7 @@
         <dependency>
             <groupId>com.gluonhq</groupId>
             <artifactId>wave</artifactId>
-            <version>0.9.2</version>
+            <version>0.9.3</version>
         </dependency>
 
         <dependency>
