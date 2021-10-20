@@ -55,6 +55,7 @@ jobs:
         run: mvn clean install && mvn package -f App
 
       - name: Create Bundle using jpackage
+        id: outputfile
         run: |
           .github/scripts/build_app_linux.sh \
           --type deb
