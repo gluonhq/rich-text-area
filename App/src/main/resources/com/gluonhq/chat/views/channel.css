@@ -21,7 +21,22 @@
     -fx-background-color: transparent;
 }
 
-.channel-list .header-cell,
+.channel-list .floating-header {
+    -fx-effect: -elevation-z1;
+}
+
+.channel-list .list-cell.header-cell > .header-box {
+    -fx-background-color: -chat-background-light;
+    -fx-padding: 10;
+    -fx-alignment: center-left;
+}
+
+.channel-list .list-cell.header-cell > .header-box > .label {
+    -fx-font-weight: bold;
+    -fx-text-fill: -chat-text-fill;
+    -fx-font-size: 1.2em;
+}
+
 .channel-list .list-cell .primary-text {
     -fx-text-fill: -chat-text-fill;
 }
