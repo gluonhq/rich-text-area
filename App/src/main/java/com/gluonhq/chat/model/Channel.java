@@ -16,7 +16,7 @@ public class Channel extends Searchable {
     private final ObservableList<User> members;
     private final ObservableList<ChatMessage> messages;
     private boolean unread;
-    private BooleanProperty typing = new SimpleBooleanProperty(false);
+    private final BooleanProperty typing = new SimpleBooleanProperty();
 
 
     public Channel(String id, String name, ObservableList<User> members, ObservableList<ChatMessage> messages) {
@@ -95,10 +95,18 @@ public class Channel extends Searchable {
         return containsKeyword(getName(), keyword);
     }
     
-    public BooleanProperty typing() {
+    public BooleanProperty typingProperty() {
         return this.typing;
     }
-    
+
+    public boolean isTyping() {
+        return typing.get();
+    }
+
+    public void setTyping(boolean typing) {
+        this.typing.set(typing);
+    }
+
     public String displayName() {
         return isDirect ? name : "# " + name;
     }

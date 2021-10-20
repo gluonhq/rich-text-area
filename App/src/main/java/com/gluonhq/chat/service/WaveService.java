@@ -28,10 +28,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -42,7 +40,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
     private User loggedUser;
     private final WaveManager wave;
-    Map<Channel, ObservableList<ChatMessage>> channelMap = new HashMap<>();
+    private final Map<Channel, ObservableList<ChatMessage>> channelMap = new HashMap<>();
     boolean channelsClean = false;
     private ObservableList<Contact> contacts;
     private BootstrapClient bootstrapClient;
@@ -198,10 +196,10 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         Channel dest = getChannelByUuid(senderUuid);
         Platform.runLater(() -> {
             if (startTyping) {
-                dest.typing().set(true);
+                dest.setTyping(true);
             }
             if (stopTyping) {
-                dest.typing().set(false);
+                dest.setTyping(false);
             }
         });
     }
@@ -210,24 +208,10 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     public void gotReceiptMessage(String senderUuid, int type, List<Long> timestamps) {
         Channel dest = getChannelByUuid(senderUuid);
         Platform.runLater(() -> {
-            FilteredList<ChatMessage> filtered = dest.getMessages()
-                    .filtered(m -> timestamps.contains(m.getTimestamp()));
-            ChatMessage.ReceiptType rtype = ChatMessage.ReceiptType.UNKNOWN;
-            switch (type) {
-                case 1:
-                    rtype = ChatMessage.ReceiptType.DELIVERY;
-                    break;
-                case 2:
-                    rtype = ChatMessage.ReceiptType.VIEWED;
-                    break;
-                case 3:
-                    rtype = ChatMessage.ReceiptType.READ;
-                    break;
-            }
-
-            for (ChatMessage msg : filtered) {
-                msg.setReceiptType(rtype);
-            }
+            ChatMessage.ReceiptType rtype = ChatMessage.ReceiptType.valueOf(type);
+            dest.getMessages()
+                    .filtered(m -> timestamps.contains(m.getTimestamp()))
+                    .forEach(msg -> msg.setReceiptType(rtype));
         });
     }
 

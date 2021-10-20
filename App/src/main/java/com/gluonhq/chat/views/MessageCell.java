@@ -11,6 +11,7 @@ import com.gluonhq.chat.service.Service;
 import com.gluonhq.emoji.EmojiData;
 import com.gluonhq.emoji.popup.util.EmojiImageUtils;
 import javafx.animation.PauseTransition;
+import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.css.PseudoClass;
 import javafx.event.EventHandler;
@@ -32,6 +33,7 @@ import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -50,6 +52,7 @@ class MessageCell extends CharmListCell<ChatMessage> {
     private static final Image clockImage = new Image( "/clock.png");
     private static final PseudoClass SIDE_RIGHT = PseudoClass.getPseudoClass("right");
     private static final PseudoClass UNREAD = PseudoClass.getPseudoClass("unread");
+    private static final PseudoClass READ = PseudoClass.getPseudoClass("read");
     private static final Image loading = new Image(MessageCell.class.getResourceAsStream("/InternetSlowdown_Day.gif"), 150, 150, true, true);
     private ChatListView<ChatMessage> chatList;
 
@@ -125,14 +128,15 @@ class MessageCell extends CharmListCell<ChatMessage> {
             message.getChildren().setAll(formatText(item.getMessage()));
             BorderPane.setMargin(message, isMe ? meInsets : notMeInsets);
 
+            status.textProperty().unbind();
+            status.pseudoClassStateChanged(READ, false);
+            BorderPane.setAlignment(status, isMe ? Pos.CENTER_LEFT : Pos.CENTER_RIGHT);
             if (item.getTime() != null) {
                 date.setText(item.getFormattedTime());
                 status.setContentDisplay(ContentDisplay.TEXT_ONLY);
-                status.setText(resources.getString("label.status.check")); // check mark if read
             } else {
                 status.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             }
-            BorderPane.setAlignment(status, isMe ? Pos.CENTER_LEFT : Pos.CENTER_RIGHT);
 
             icon.setText(isMe ? "ME" : Service.getInitials(item.getUser().displayName()));
 
@@ -145,11 +149,18 @@ class MessageCell extends CharmListCell<ChatMessage> {
                 BorderPane.setAlignment(message, Pos.TOP_RIGHT);
                 BorderPane.setAlignment(messageBubble, Pos.TOP_RIGHT);
                 BorderPane.setAlignment(bottomBox, Pos.BOTTOM_RIGHT);
-                item.receiptProperty().addListener(o -> icon.setText(icon.getText()+ "Receipt = "+item.receiptProperty().get()));
+                status.textProperty().bind(Bindings.createStringBinding(
+                        () -> {
+                            status.pseudoClassStateChanged(READ, item.getReceiptType().getV() > 1);
+                            return resources.getString("label.status.check." + item.getReceiptType().name().toLowerCase(Locale.ROOT));
+                        },
+                        item.receiptProperty()));
+
             } else {
                 messageBubble.pseudoClassStateChanged(SIDE_RIGHT, false);
                 messageBubble.setRight(null);
                 messageBubble.setLeft(msgHandle);
+                status.setText(resources.getString("label.status.check.unknown")); // check mark if read
                 pane.setRight(null);
                 pane.setLeft(icon);
                 BorderPane.setAlignment(message, Pos.TOP_LEFT);

@@ -5,8 +5,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Objects;
 import java.util.UUID;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
+import java.util.stream.Stream;
+
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 
 public class ChatMessage extends Searchable {
 
@@ -16,21 +18,32 @@ public class ChatMessage extends Searchable {
         READ (2),
         VIEWED (3);
 
-        int v;
+        private final int v;
 
         ReceiptType(int val) {
             this.v = val;
         }
+
+        public int getV() {
+            return v;
+        }
+
+        public static ReceiptType valueOf(int v) {
+            return Stream.of(values())
+                    .filter(t -> t.getV() == v)
+                    .findFirst()
+                    .orElse(UNKNOWN);
+        }
+
     }
     
-    private String id;
-    private String message;
+    private final String id;
+    private final String message;
     private long timestamp;
-    private LocalDateTime time;
-    private User user;
-    private boolean localOriginated;
-    private ReceiptType receiptType;
-    private final IntegerProperty receiptProperty = new SimpleIntegerProperty();
+    private final LocalDateTime time;
+    private final User user;
+    private final boolean localOriginated;
+    private final ObjectProperty<ReceiptType> receiptType = new SimpleObjectProperty<>(ReceiptType.UNKNOWN);
 
     public ChatMessage(String message, User user, long timestamp) {
         this (message, user, timestamp, false);
@@ -44,7 +57,6 @@ public class ChatMessage extends Searchable {
         this.time = Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault())
                 .toLocalDateTime();
         this.localOriginated = localOriginated;
-        this.receiptType = ReceiptType.UNKNOWN;
     }
 
     public String getMessage() {
@@ -64,12 +76,15 @@ public class ChatMessage extends Searchable {
     }
 
     public void setReceiptType(ReceiptType t) {
-        this.receiptType = t;
-        receiptProperty.set(t.ordinal());
+        receiptType.set(t);
     }
 
-    public IntegerProperty receiptProperty() {
-        return receiptProperty;
+    public ObjectProperty<ReceiptType> receiptProperty() {
+        return receiptType;
+    }
+
+    public ReceiptType getReceiptType() {
+        return receiptType.get();
     }
 
     public User getUser() {

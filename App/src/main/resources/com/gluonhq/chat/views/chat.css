@@ -208,6 +208,10 @@
     -fx-text-fill: -chat-text-fill-light;
 }
 
+.chat-message-status:read {
+    -fx-text-fill: -chat-text-fill-blue-light;
+}
+
 .user-icon {
     -fx-text-fill: -chat-text-fill-light;
     -fx-background-color: -chat-background;

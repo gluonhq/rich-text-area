@@ -34,7 +34,10 @@
     -chat-text-fill       : #5c5c5c;
     -chat-text-fill-light : derive( -chat-text-fill,  50% );
     -chat-text-fill-dark  : derive( -chat-text-fill, -20% );
-    
+    -chat-text-fill-blue       : #235e95;
+    -chat-text-fill-blue-light  : derive( -chat-text-fill-blue,  50% );
+    -chat-text-fill-blue-dark   : derive( -chat-text-fill-blue,  -20% );
+
     /** Views related vars */
     -chat-accent-selected: -chat-accent-light;
     -chat-bubble-background: -chat-accent-light;
