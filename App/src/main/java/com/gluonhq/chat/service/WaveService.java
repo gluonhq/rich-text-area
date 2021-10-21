@@ -49,7 +49,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
     public WaveService() {
         wave = WaveManager.getInstance();
-        wave.setLogLevel(Level.DEBUG);
+        wave.setLogLevel(Level.INFO);
         wave.getWaveLogger().log(Level.DEBUG, "Creating waveService: " + System.identityHashCode(wave));
         if (wave.isProvisioned()) {
             login(wave.getMyUuid());
