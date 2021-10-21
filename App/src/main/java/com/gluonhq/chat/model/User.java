@@ -31,9 +31,9 @@ public class User extends Searchable {
 
     public User(String username, String firstname, String lastname, String uuid) {
         this.id = uuid;
-        this.username = username;
-        this.firstname = firstname;
-        this.lastname = lastname;
+        this.username = stripBidiProtection(username);
+        this.firstname = stripBidiProtection(firstname);
+        this.lastname = stripBidiProtection(lastname);
     }
 
     public String getId() {
@@ -96,5 +96,10 @@ public class User extends Searchable {
         return containsKeyword(getUsername(), keyword) ||
                containsKeyword(getFirstname(), keyword)  ||
                containsKeyword(getLastname(), keyword);
+    }
+
+    private static String stripBidiProtection(String text) {
+        if (text == null) return null;
+        return text.replaceAll("[\\u2068\\u2069\\u202c]", "");
     }
 }
