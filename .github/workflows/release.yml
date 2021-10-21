@@ -1,0 +1,393 @@
+name: Release
+
+on:
+  push:
+    tags:
+    - 'v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      app_version: ${{ steps.define_version.outputs.app_version }}
+    steps:
+      - name: Define version
+        id: define_version
+        run: |
+          APP_VERSION=${GITHUB_REF/refs\/tags\/v/}
+          echo "Tag: $GITHUB_REF Version = $APP_VERSION"
+          echo "::set-output name=app_version::$APP_VERSION"          
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: true
+          prerelease: false
+
+  linux-jpackage:
+    runs-on: ubuntu-18.04
+    needs: create-release
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Gluon's GraalVM
+        uses: gluonhq/setup-graalvm@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install libraries
+        run: |
+          sudo apt update
+          sudo apt install libasound2-dev libavcodec-dev libavformat-dev libavutil-dev libgl-dev libgtk-3-dev libpango1.0-dev libxtst-dev
+
+      - name: Make staging directory
+        run: |
+          mkdir staging
+
+      - name: Gluon License
+        uses: gluonhq/gluon-build-license@master
+        with:
+          gluon-license: ${{ secrets.GLUON_LICENSE }}
+          dir: App
+
+      - name: Setup java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build and package
+        run: mvn clean install && mvn package -f App
+
+      - name: Create Bundle using jpackage
+        id: outputfile
+        run: |
+          .github/scripts/build_app_linux.sh \
+          --type deb
+          mv App/target/installer/*.deb staging/ChatApp-${{ env.APP_VERSION }}.deb
+          echo ::set-output name=pathDeb::staging/ChatApp-${{ env.APP_VERSION }}.deb
+          .github/scripts/build_app_linux.sh \
+          --type rpm
+          mv App/target/installer/*.rpm staging/ChatApp-${{ env.APP_VERSION }}.rpm
+          echo ::set-output name=pathRpm::staging/ChatApp-${{ env.APP_VERSION }}.rpm
+        env:
+          PROJECT_VERSION: 1.1.0-SNAPSHOT
+          APP_VERSION: ${{needs.create-release.outputs.app_version}}
+
+      - name: Upload installer (deb)
+        uses: actions/upload-artifact@v2
+        with:
+          name: InstallerPackageLinux (deb)
+          path: ${{ steps.outputfile.outputs.pathDeb }}
+
+      - name: Upload installer (rpm)
+        uses: actions/upload-artifact@v2
+        with:
+          name: InstallerPackageLinux (rpm)
+          path: ${{ steps.outputfile.outputs.pathRpm }}
+
+      - name: Upload Release Asset (deb)
+        id: upload-release-asset-deb
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{needs.create-release.outputs.upload_url}}
+          asset_path: ${{ steps.outputfile.outputs.pathDeb }}
+          asset_name: ChatApp-linux-${{needs.create-release.outputs.app_version}}.deb
+          asset_content_type: application/zip       
+
+      - name: Upload Release Asset (rpm)
+        id: upload-release-asset-rpm 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{needs.create-release.outputs.upload_url}}
+          asset_path: ${{ steps.outputfile.outputs.pathRpm }}
+          asset_name: ChatApp-linux-${{needs.create-release.outputs.app_version}}.rpm
+          asset_content_type: application/zip                    
+
+
+  linux-native:
+    runs-on: ubuntu-18.04
+    needs: create-release
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Gluon's GraalVM
+        uses: gluonhq/setup-graalvm@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install libraries
+        run: |
+          sudo apt update
+          sudo apt install libasound2-dev libavcodec-dev libavformat-dev libavutil-dev libgl-dev libgtk-3-dev libpango1.0-dev libxtst-dev
+
+      - name: Make staging directory
+        run: |
+          mkdir staging
+
+      - name: Gluon License
+        uses: gluonhq/gluon-build-license@master
+        with:
+          gluon-license: ${{ secrets.GLUON_LICENSE }}
+          dir: App
+
+      - name: Gluon Build
+        run: |
+          ls App/src/main/resources
+          mvn install && mvn -Pdesktop gluonfx:build gluonfx:package -f App
+
+      - name: Copy native image to staging
+        run: cp -r App/target/gluonfx/x86_64-linux/ChatApp* staging
+
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: NativePackageLinux
+          path: staging
+
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{needs.create-release.outputs.upload_url}}
+          asset_path: App/target/gluonfx/x86_64-linux/ChatApp
+          asset_name: ChatApp-linux-native-${{needs.create-release.outputs.app_version}}
+          asset_content_type: application/zip                    
+          
+
+
+  macos-jpackage:
+    runs-on: macos-latest
+    needs: create-release
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Make staging directory
+        run: mkdir staging
+
+      - name: Gluon License
+        uses: gluonhq/gluon-build-license@master
+        with:
+          gluon-license: ${{ secrets.GLUON_LICENSE }}
+          dir: App
+
+      - name: Setup java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - uses: Apple-Actions/import-codesign-certs@v1
+        with:
+          p12-file-base64: ${{ secrets.CERTIFICATES_FILE_BASE64 }}
+          p12-password: ${{ secrets.CERTIFICATES_PASSWORD }}
+
+      - name: Build and package
+        run: mvn clean install && mvn package -f App
+
+      - name: Create Bundle using jpackage
+        id: outputfile
+        run: |
+          .github/scripts/build_app_mac.sh \
+          --mac-package-signing-prefix "$GLUON_MACSIGN_PREFIX" \
+          --mac-signing-key-user-name "$GLUON_MACSIGN_USER" \
+          --mac-sign          
+          echo ::set-output name=path::App/target/installer/ChatApp-${{ env.APP_VERSION }}.pkg
+        env:
+          GLUON_MACSIGN_PREFIX: ${{ secrets.GLUON_MACSIGN_PREFIX }}
+          GLUON_MACSIGN_USER: ${{ secrets.GLUON_MACSIGN_USER }}
+          PROJECT_VERSION: 1.1.0-SNAPSHOT
+          APP_VERSION: ${{needs.create-release.outputs.app_version}}
+
+      - name: Notarize Installer
+        uses: erwin1/xcode-notarize@main
+        with:
+          product-path: ${{ steps.outputfile.outputs.path }}
+          appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
+          appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
+          primary-bundle-id: com.gluonhq.chat
+          asc-provider: ${{ secrets.GLUON_MACSIGN_PREFIX }}
+          verbose: false
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v2
+        with:
+          name: InstallerPackageMac
+          path: ${{ steps.outputfile.outputs.path }}
+
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{needs.create-release.outputs.upload_url}}
+          asset_path: ${{ steps.outputfile.outputs.path }}
+          asset_name: ChatApp-macos-${{needs.create-release.outputs.app_version}}.pkg
+          asset_content_type: application/zip             
+
+
+  macos-native:
+    runs-on: macos-latest
+    needs: create-release
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Gluon's GraalVM
+        uses: gluonhq/setup-graalvm@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Make staging directory
+        run: mkdir staging
+
+      - name: Gluon License
+        uses: gluonhq/gluon-build-license@master
+        with:
+          gluon-license: ${{ secrets.GLUON_LICENSE }}
+          dir: App
+
+      - name: Gluon Build
+        run: mvn clean install && mvn -Pdesktop gluonfx:build -f App
+
+      - name: Copy native image to staging
+        run: |
+          cp -r App/target/gluonfx/x86_64-darwin/ChatApp* staging
+          cp -r App/target/gluonfx/x86_64-darwin/gvm/*.json staging
+          cp -r App/target/gluonfx/x86_64-darwin/gvm/log/* staging
+          
+      - name: Upload native image
+        uses: actions/upload-artifact@v2
+        with:
+          name: NativePackageMac
+          path: staging
+
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{needs.create-release.outputs.upload_url}}
+          asset_path: App/target/gluonfx/x86_64-darwin/ChatApp
+          asset_name: ChatApp-macos-native-${{needs.create-release.outputs.app_version}}
+          asset_content_type: application/zip               
+
+
+  windows-jpackage:
+    runs-on: windows-latest
+    needs: create-release
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      - name: Visual Studio shell
+        uses: egor-tensin/vs-shell@v1
+
+      - name: Make staging directory
+        run: mkdir staging
+
+      - name: Gluon License
+        uses: gluonhq/gluon-build-license@master
+        with:
+          gluon-license: ${{ secrets.GLUON_LICENSE }}
+          dir: App
+
+      - name: Setup java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build and package
+        run: mvn clean install && mvn package -f App
+
+      - name: Create Bundle using jpackage
+        id: outputfile
+        shell: cmd
+        run: |
+          call .github\scripts\build_app_windows.bat
+          echo ::set-output name=path::App\target\installer\ChatApp-${{ env.APP_VERSION }}.msi
+        env:
+          PROJECT_VERSION: 1.1.0-SNAPSHOT
+          APP_VERSION: ${{needs.create-release.outputs.app_version}}
+
+      - name: Codesign
+        uses: erwin1/code-sign-action@master
+        with:
+          certificate: '${{ secrets.WINDOWS_CERTIFICATE }}'
+          password: '${{ secrets.WINDOWS_PASSWORD }}'
+          certificatename: '${{ secrets.WINDOWS_CERTNAME }}'
+          folder: 'App/target/installer'
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v2
+        with:
+          name: InstallerPackageWindows
+          path: ${{ steps.outputfile.outputs.path }}
+
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{needs.create-release.outputs.upload_url}}
+          asset_path: ${{ steps.outputfile.outputs.path }}
+          asset_name: ChatApp-windows-${{needs.create-release.outputs.app_version}}.msi
+          asset_content_type: application/zip                
+
+
+
+  windows-native:
+    if: ${{ false }}
+    runs-on: windows-latest
+    needs: create-release
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      - name: Visual Studio shell
+        uses: egor-tensin/vs-shell@v1
+
+      - name: Setup Gluon's GraalVM
+        uses: gluonhq/setup-graalvm@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Make staging directory
+        run: mkdir staging
+
+      - name: Gluon License
+        uses: gluonhq/gluon-build-license@master
+        with:
+          gluon-license: ${{ secrets.GLUON_LICENSE }}
+          dir: App
+
+      - name: Gluon Build
+        run: mvn install && mvn -Pdesktop gluonfx:build gluonfx:package -f App
+
+      - name: Copy native image to staging      
+        run: cp -r App/target/gluonfx/x86_64-windows/ChatApp.exe staging
+
+      - name: Upload      
+        uses: actions/upload-artifact@v2
+        with:
+          name: NativePackageWindows
+          path: staging
+
