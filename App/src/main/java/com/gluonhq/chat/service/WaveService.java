@@ -125,6 +125,12 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         answer.addAll(users.stream().map(user -> createChannelFromUser(user))
                 .collect(Collectors.toList()));
         answer.forEach(c -> readMessageForChannel(c));
+        answer.addListener((ListChangeListener.Change<? extends Channel> change) -> {
+            while (change.next()) {
+                change.getAddedSubList().forEach(channel -> readMessageForChannel(channel));
+            }
+        });
+
         users.addListener((ListChangeListener.Change<? extends User> change) -> {
             while (change.next()) {
                 List<Channel> addedChannels = change.getAddedSubList().stream()
@@ -185,6 +191,11 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         wave.getWaveLogger().log(Level.DEBUG,
                 "GOT MESSAGE from " + senderUuid + " for "+ receiverUuid+" with content " + content);
         Channel dest = getChannelByUuid(senderUuid);
+        if (dest == null) {
+            wave.getWaveLogger().log(Level.WARNING, "unknown sender for incoming message: "
+                    +senderUuid+"\nIgnoring message.");
+            return;
+        }
         User sender = findUserByUuid(senderUuid, users).get();
         ChatMessage chatMessage = new ChatMessage(content, sender, timestamp);
         Platform.runLater(() -> dest.getMessages().add(chatMessage));
@@ -296,13 +307,13 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
      * In case of a direct channel, there is only 1 member, so this returns the
      * direct channel belonging to the specified senderUuid.
      * @param senderUuid
-     * @return 
+     * @return the Channel corresponding to this user, or null if no such channel  exists.
      */
     private Channel getChannelByUuid(String senderUuid) {
         Channel dest = this.channels.stream()
                 .filter(c -> c.getMembers().size() > 0)
                 .filter(c -> c.getMembers().get(0).getId().equals(senderUuid))
-                .findFirst().get();
+                .findFirst().orElse(null);
         return dest;
     }
     
