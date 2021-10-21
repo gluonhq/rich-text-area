@@ -139,7 +139,7 @@ public class ChatPresenter {
         if (channel != null) {
             createSortList(channel.getMessages());
             channelName.textProperty().bind(Bindings.createStringBinding(
-                    () -> channel.displayName() + (channel.isTyping() ? " ..." : ""),
+                    () -> channel.displayName() + (channel.isTyping() ? "…" : ""),
                     channel.typingProperty()));
             ImageCache.getImage(channel.getMembers().isEmpty() ? null : channel.getMembers().get(0).getAvatarPath())
                     .ifPresentOrElse(im -> {

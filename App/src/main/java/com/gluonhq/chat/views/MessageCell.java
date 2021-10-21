@@ -62,7 +62,7 @@ class MessageCell extends CharmListCell<ChatMessage> {
     private final BorderPane messageBubble;
     private final Label date  = new Label();
     private final Label status  = new Label();
-    private final Label icon = new Label("ICON");
+//    private final Label icon = new Label("ICON");
     private final Label unread;
     private final BorderPane pane;
     private final StackPane stackPane;
@@ -70,7 +70,7 @@ class MessageCell extends CharmListCell<ChatMessage> {
     private final double imageSize = 20;
     private final Service service;
     private final ResourceBundle resources;
-    private final HBox bottomBox;
+    private final HBox dateAndStatus;
 
     public MessageCell() {
         super();
@@ -79,22 +79,24 @@ class MessageCell extends CharmListCell<ChatMessage> {
 
         getStyleClass().addAll("chat-list-cell");
 
-        icon.getStyleClass().add("user-icon");
-        BorderPane.setAlignment(icon, Pos.TOP_CENTER);
+//        icon.getStyleClass().add("user-icon");
+//        BorderPane.setAlignment(icon, Pos.TOP_CENTER);
 
         setWrapText(true);
         this.message = new TextFlow();
-        message.getStyleClass().add("chat-message-text");
+//        message.getStyleClass().add("chat-message-text");
+
+        dateAndStatus = new HBox(10, date, status);
+        dateAndStatus.setMaxWidth(Region.USE_PREF_SIZE);
 
         messageBubble = new BorderPane(message);
+        messageBubble.setBottom(dateAndStatus);
         messageBubble.setMaxWidth(Region.USE_PREF_SIZE);
-        messageBubble.getStyleClass().add("chat-message-bubble");
-
-        bottomBox = new HBox(10, date, status);
-        bottomBox.setMaxWidth(Region.USE_PREF_SIZE);
+//        messageBubble.getStyleClass().add("chat-message-bubble");
+        messageBubble.getStyleClass().setAll("chat-message-text");
 
         pane = new BorderPane(messageBubble);
-        pane.setBottom(bottomBox);
+//        pane.setBottom(dateAndStatus);
         pane.getStyleClass().add("chat-message");
         pane.prefWidthProperty().bind(widthProperty());
 
@@ -138,34 +140,38 @@ class MessageCell extends CharmListCell<ChatMessage> {
                 status.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             }
 
-            icon.setText(isMe ? "ME" : Service.getInitials(item.getUser().displayName()));
+//            icon.setText(isMe ? "ME" : Service.getInitials(item.getUser().displayName()));
 
             if (isMe) {
+
+                messageBubble.getStyleClass().setAll("chat-message-text", "chat-message-sent");
                 messageBubble.pseudoClassStateChanged(SIDE_RIGHT, true);
                 messageBubble.setLeft(null);
                 messageBubble.setRight(msgHandle);
                 pane.setLeft(null);
-                pane.setRight(icon);
+//                pane.setRight(icon);
                 BorderPane.setAlignment(message, Pos.TOP_RIGHT);
                 BorderPane.setAlignment(messageBubble, Pos.TOP_RIGHT);
-                BorderPane.setAlignment(bottomBox, Pos.BOTTOM_RIGHT);
+                BorderPane.setAlignment(dateAndStatus, Pos.BOTTOM_RIGHT);
                 status.textProperty().bind(Bindings.createStringBinding(
-                        () -> {
-                            status.pseudoClassStateChanged(READ, item.getReceiptType().getV() > 1);
-                            return resources.getString("label.status.check." + item.getReceiptType().name().toLowerCase(Locale.ROOT));
-                        },
-                        item.receiptProperty()));
+                    () -> {
+                        status.pseudoClassStateChanged(READ, item.getReceiptType().getV() > 1);
+                        return resources.getString("label.status.check." + item.getReceiptType().name().toLowerCase(Locale.ROOT));
+                    },
+                    item.receiptProperty()));
 
             } else {
+                messageBubble.getStyleClass().setAll("chat-message-text", "chat-message-received");
                 messageBubble.pseudoClassStateChanged(SIDE_RIGHT, false);
                 messageBubble.setRight(null);
                 messageBubble.setLeft(msgHandle);
-                status.setText(resources.getString("label.status.check.unknown")); // check mark if read
+                //status.setText(resources.getString("label.status.check.unknown")); // check mark if read
+                status.setText(""); // status is only needed for sent messages
                 pane.setRight(null);
-                pane.setLeft(icon);
+//                pane.setLeft(icon);
                 BorderPane.setAlignment(message, Pos.TOP_LEFT);
                 BorderPane.setAlignment(messageBubble, Pos.TOP_LEFT);
-                BorderPane.setAlignment(bottomBox, Pos.BOTTOM_LEFT);
+                BorderPane.setAlignment(dateAndStatus, Pos.BOTTOM_LEFT);
             }
             pseudoClassStateChanged(UNREAD, getIndex() == getUnreadIndex());
 

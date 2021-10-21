@@ -174,14 +174,22 @@
     -fx-padding: 10;
 }
 
-.chat-message-text {
+.chat-message-sent {
     -fx-background-color: -chat-bubble-background;
-    -fx-padding: 10;
-    -fx-background-radius: 0 .7em .7em .7em;
+}
+
+.chat-message-received {
+    -fx-background-color: #e9e9e9;
+}
+
+.chat-message-text {
+    /*-fx-background-color: -chat-bubble-background;*/
+    -fx-padding: 5 10 5 10;
+    -fx-background-radius: 0 .8em .8em .8em;
 }
 
 .chat-message-bubble:right .chat-message-text {
-    -fx-background-radius: .7em 0 .7em .7em;
+    -fx-background-radius: .8em 0 .8em .8em;
 }
 
 .chat-message-text > .text {
