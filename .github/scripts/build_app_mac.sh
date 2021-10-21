@@ -12,7 +12,7 @@
 # GLUON_MACSIGN_USER
 
 JAVA_VERSION=17
-APP_NAME=ChatApp
+APP_NAME=WaveApp
 MAIN_JAR="App-$PROJECT_VERSION.jar"
 LAUNCHER_CLASS=com.gluonhq.chat.AppLauncher
 MAIN_CLASS=com/gluonhq/chat/GluonChat
@@ -104,6 +104,6 @@ $JAVA_HOME/bin/jpackage \
 --app-version ${APP_VERSION} \
 --vendor "Gluon" \
 --copyright "Copyright © 2021 Gluon" \
---mac-package-identifier com.gluonhq.chat \
+--mac-package-identifier com.gluonhq.waveapp \
 --mac-package-name ${APP_NAME} \
 "$@"

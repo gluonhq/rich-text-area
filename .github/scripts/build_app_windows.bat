@@ -11,7 +11,7 @@ rem PROJECT_VERSION=1.1.0-SNAPSHOT
 rem APP_VERSION=1.0.0
 
 set JAVA_VERSION=17
-set APP_NAME=ChatApp
+set APP_NAME=WaveApp
 set MAIN_JAR="App-%PROJECT_VERSION%.jar"
 set LAUNCHER_CLASS=com.gluonhq.chat.AppLauncher
 set MAIN_CLASS=com/gluonhq/chat/GluonChat

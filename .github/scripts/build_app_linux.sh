@@ -10,7 +10,7 @@
 # APP_VERSION=1.0.0
 
 JAVA_VERSION=17
-APP_NAME=ChatApp
+APP_NAME=WaveApp
 MAIN_JAR="App-$PROJECT_VERSION.jar"
 LAUNCHER_CLASS=com.gluonhq.chat.AppLauncher
 MAIN_CLASS=com/gluonhq/chat/GluonChat

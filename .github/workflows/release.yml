@@ -99,7 +99,7 @@ jobs:
         with:
           upload_url: ${{needs.create-release.outputs.upload_url}}
           asset_path: ${{ steps.outputfile.outputs.pathDeb }}
-          asset_name: ChatApp-linux-${{needs.create-release.outputs.app_version}}.deb
+          asset_name: WaveApp-linux-${{needs.create-release.outputs.app_version}}.deb
           asset_content_type: application/zip       
 
       - name: Upload Release Asset (rpm)
@@ -110,7 +110,7 @@ jobs:
         with:
           upload_url: ${{needs.create-release.outputs.upload_url}}
           asset_path: ${{ steps.outputfile.outputs.pathRpm }}
-          asset_name: ChatApp-linux-${{needs.create-release.outputs.app_version}}.rpm
+          asset_name: WaveApp-linux-${{needs.create-release.outputs.app_version}}.rpm
           asset_content_type: application/zip                    
 
 
@@ -162,7 +162,7 @@ jobs:
         with:
           upload_url: ${{needs.create-release.outputs.upload_url}}
           asset_path: App/target/gluonfx/x86_64-linux/ChatApp
-          asset_name: ChatApp-linux-native-${{needs.create-release.outputs.app_version}}
+          asset_name: WaveApp-linux-native-${{needs.create-release.outputs.app_version}}
           asset_content_type: application/zip                    
           
 
@@ -203,7 +203,7 @@ jobs:
           --mac-package-signing-prefix "$GLUON_MACSIGN_PREFIX" \
           --mac-signing-key-user-name "$GLUON_MACSIGN_USER" \
           --mac-sign          
-          echo ::set-output name=path::App/target/installer/ChatApp-${{ env.APP_VERSION }}.pkg
+          echo ::set-output name=path::App/target/installer/WaveApp-${{ env.APP_VERSION }}.pkg
         env:
           GLUON_MACSIGN_PREFIX: ${{ secrets.GLUON_MACSIGN_PREFIX }}
           GLUON_MACSIGN_USER: ${{ secrets.GLUON_MACSIGN_USER }}
@@ -234,7 +234,7 @@ jobs:
         with:
           upload_url: ${{needs.create-release.outputs.upload_url}}
           asset_path: ${{ steps.outputfile.outputs.path }}
-          asset_name: ChatApp-macos-${{needs.create-release.outputs.app_version}}.pkg
+          asset_name: WaveApp-macos-${{needs.create-release.outputs.app_version}}.pkg
           asset_content_type: application/zip             
 
 
@@ -281,7 +281,7 @@ jobs:
         with:
           upload_url: ${{needs.create-release.outputs.upload_url}}
           asset_path: App/target/gluonfx/x86_64-darwin/ChatApp
-          asset_name: ChatApp-macos-native-${{needs.create-release.outputs.app_version}}
+          asset_name: WaveApp-macos-native-${{needs.create-release.outputs.app_version}}
           asset_content_type: application/zip               
 
 
@@ -320,7 +320,7 @@ jobs:
         shell: cmd
         run: |
           call .github\scripts\build_app_windows.bat
-          echo ::set-output name=path::App\target\installer\ChatApp-${{ env.APP_VERSION }}.msi
+          echo ::set-output name=path::App\target\installer\WaveApp-${{ env.APP_VERSION }}.msi
         env:
           PROJECT_VERSION: 1.1.0-SNAPSHOT
           APP_VERSION: ${{needs.create-release.outputs.app_version}}
@@ -347,7 +347,7 @@ jobs:
         with:
           upload_url: ${{needs.create-release.outputs.upload_url}}
           asset_path: ${{ steps.outputfile.outputs.path }}
-          asset_name: ChatApp-windows-${{needs.create-release.outputs.app_version}}.msi
+          asset_name: WaveApp-windows-${{needs.create-release.outputs.app_version}}.msi
           asset_content_type: application/zip                
 
 
