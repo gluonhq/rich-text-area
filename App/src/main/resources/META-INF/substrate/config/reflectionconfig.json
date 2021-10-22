@@ -818,7 +818,8 @@
   },
   {
     "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage",
-    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+    "methods":[{"name":"newBuilder","parameterTypes":[] },
+               {"name":"getBody","parameterTypes":[] }]
   },
   {
     "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$NullMessage",
