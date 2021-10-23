@@ -827,7 +827,14 @@
   },
   {
     "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$ReceiptMessage",
-    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+    "methods":[{"name":"newBuilder","parameterTypes":[] },
+              {"name":"hasType","parameterTypes":[] },
+              {"name":"getType","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$ReceiptMessage$Builder",
+    "methods":[ {"name":"getType","parameterTypes":[] },
+      {"name":"setType","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$ReceiptMessage$Type"] } ]
   },
   {
     "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage",
@@ -998,7 +1005,15 @@
   },
   {
     "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Groups",
-    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+    "methods":[{"name":"newBuilder","parameterTypes":[] },
+               {"name":"hasBlob","parameterTypes":[] },
+               {"name":"getBlob","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Groups$Builder",
+    "methods":[{"name":"getBlob","parameterTypes":[] },
+               {"name":"hasBlob","parameterTypes":[] },
+               {"name":"setBlob","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$AttachmentPointer"] }]
   },
   {
     "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Keys",
@@ -1014,7 +1029,14 @@
   },
   {
     "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Read",
-    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+    "methods":[{"name":"newBuilder","parameterTypes":[] },
+               {"name":"hasSenderE164","parameterTypes":[] },
+               {"name":"getSenderE164","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Read$Builder",
+    "methods":[ {"name":"getSenderE164","parameterTypes":[] },
+                {"name":"setSenderE164","parameterTypes":["java.lang.String"] }]
   },
   {
     "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Request",
@@ -1042,7 +1064,16 @@
   },
   {
     "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Sent",
-    "methods":[{"name":"newBuilder","parameterTypes":[] }]
+    "methods":[{"name":"newBuilder","parameterTypes":[] },
+               {"name":"getDestinationE164","parameterTypes":[] },
+               {"name":"hasDestinationE164","parameterTypes":[] }]
+  },
+  {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Sent$Builder",
+    "methods":[ {"name":"getDestinationE164","parameterTypes":[] },
+                {"name":"hasDestinationE164","parameterTypes":[] },
+                {"name":"clearDestinationE164","parameterTypes":[] },
+                {"name":"setDestinationE164","parameterTypes":["java.lang.String"] }]
   },
   {
     "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$StickerPackOperation",

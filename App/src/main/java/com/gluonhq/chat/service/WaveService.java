@@ -49,14 +49,14 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
     public WaveService() {
         wave = WaveManager.getInstance();
-        wave.setLogLevel(Level.INFO);
+        wave.setLogLevel(Level.DEBUG);
         wave.getWaveLogger().log(Level.DEBUG, "Creating waveService: " + System.identityHashCode(wave));
         if (wave.isProvisioned()) {
             login(wave.getMyUuid());
             this.wave.setMessageListener(this);
             try {
                 this.wave.ensureConnected();
-                wave.syncContacts();
+                wave.syncEverything();
             } catch (IOException ex) {
                 ex.printStackTrace();
                 System.err.println("We're offline. Not much we can do now!");
@@ -295,7 +295,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
             wave.setMessageListener(this);
             wave.getWaveLogger().log(Level.DEBUG, "[WAVESERVICE] synccontacts");
-            wave.syncContacts();
+            wave.syncEverything();
             Platform.runLater(() -> bootstrapClient.bootstrapSucceeded());
         } catch (Exception ex) {
             ex.printStackTrace();
