@@ -818,28 +818,261 @@
   },
   {
     "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage",
-    "methods":[{"name":"newBuilder","parameterTypes":[] },
-               {"name":"getBody","parameterTypes":[] }]
-  },
+    "methods":[
+    {"name":"getAttachments","parameterTypes":["int"] },
+    {"name":"getAttachmentsCount","parameterTypes":[] },
+    {"name":"getAttachmentsList","parameterTypes":[] },
+    {"name":"getBody","parameterTypes":[] },
+    {"name":"getBodyBytes","parameterTypes":[] },
+    {"name":"getBodyRanges","parameterTypes":["int"] },
+    {"name":"getBodyRangesCount","parameterTypes":[] },
+    {"name":"getBodyRangesList","parameterTypes":[] },
+    {"name":"getContact","parameterTypes":["int"] },
+    {"name":"getContactCount","parameterTypes":[] },
+    {"name":"getContactList","parameterTypes":[] }, 
+    {"name":"getDelete","parameterTypes":[] }, 
+    {"name":"getExpireTimer","parameterTypes":[] }, 
+    {"name":"getFlags","parameterTypes":[] }, 
+    {"name":"getGroup","parameterTypes":[] }, 
+    {"name":"getGroupCallUpdate","parameterTypes":[] },
+    {"name":"getGroupV2","parameterTypes":[] }, 
+    {"name":"getIsViewOnce","parameterTypes":[] }, 
+    {"name":"getPayment","parameterTypes":[] }, 
+    {"name":"getPreview","parameterTypes":["int"] }, 
+    {"name":"getPreviewCount","parameterTypes":[] },
+    {"name":"getPreviewList","parameterTypes":[] }, 
+    {"name":"getProfileKey","parameterTypes":[] }, 
+    {"name":"getQuote","parameterTypes":[] }, 
+    {"name":"getReaction","parameterTypes":[] }, 
+    {"name":"getRequiredProtocolVersion","parameterTypes":[] }, 
+    {"name":"getSticker","parameterTypes":[] }, 
+    {"name":"getTimestamp","parameterTypes":[] }, 
+    {"name":"hasBody","parameterTypes":[] }, 
+    {"name":"hasDelete","parameterTypes":[] }, 
+    {"name":"hasExpireTimer","parameterTypes":[] },
+    {"name":"hasFlags","parameterTypes":[] },
+    {"name":"hasGroup","parameterTypes":[] },
+    {"name":"hasGroupCallUpdate","parameterTypes":[] }, 
+    {"name":"hasGroupV2","parameterTypes":[] },
+    {"name":"hasIsViewOnce","parameterTypes":[] },
+    {"name":"hasPayment","parameterTypes":[] }, 
+    {"name":"hasProfileKey","parameterTypes":[] }, 
+    {"name":"hasQuote","parameterTypes":[] },
+    {"name":"hasReaction","parameterTypes":[] }, 
+    {"name":"hasRequiredProtocolVersion","parameterTypes":[] },
+    {"name":"hasSticker","parameterTypes":[] }, 
+    {"name":"hasTimestamp","parameterTypes":[] }, 
+    {"name":"newBuilder","parameterTypes":[] }
+  ] },
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$BodyRange",
+  "methods":[{"name":"newBuilder","parameterTypes":[] }]
+},
   {
     "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$Builder",
-    "methods":[{"name":"getBody","parameterTypes":[] }]
+    "methods":[
+    {"name":"addAttachments","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$AttachmentPointer"] },
+    {"name":"addBodyRanges","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$BodyRange"] },
+    {"name":"addContact","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$Contact"] },
+    {"name":"addPreview","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$Preview"] },
+    {"name":"clearAttachments","parameterTypes":[] },
+    {"name":"clearBody","parameterTypes":[] },
+    {"name":"clearBodyRanges","parameterTypes":[] },
+    {"name":"clearContact","parameterTypes":[] },
+    {"name":"clearDelete","parameterTypes":[] },
+    {"name":"clearExpireTimer","parameterTypes":[] },
+    {"name":"clearFlags","parameterTypes":[] },
+    {"name":"clearGroup","parameterTypes":[] },
+    {"name":"clearGroupCallUpdate","parameterTypes":[] },
+    {"name":"clearGroupV2","parameterTypes":[] },
+    {"name":"clearIsViewOnce","parameterTypes":[] },
+    {"name":"clearPayment","parameterTypes":[] },
+    {"name":"clearPreview","parameterTypes":[] },
+    {"name":"clearProfileKey","parameterTypes":[] },
+    {"name":"clearQuote","parameterTypes":[] },
+    {"name":"clearReaction","parameterTypes":[] },
+    {"name":"clearRequiredProtocolVersion","parameterTypes":[] },
+    {"name":"clearSticker","parameterTypes":[] },
+    {"name":"clearTimestamp","parameterTypes":[] },
+    {"name":"getAttachments","parameterTypes":["int"] },
+    {"name":"getAttachmentsBuilder","parameterTypes":["int"] },
+    {"name":"getAttachmentsCount","parameterTypes":[] },
+    {"name":"getAttachmentsList","parameterTypes":[] },
+    {"name":"getBody","parameterTypes":[] },
+    {"name":"getBodyBytes","parameterTypes":[] },
+    {"name":"getBodyRanges","parameterTypes":["int"] },
+    {"name":"getBodyRangesBuilder","parameterTypes":["int"] },
+    {"name":"getBodyRangesCount","parameterTypes":[] },
+    {"name":"getBodyRangesList","parameterTypes":[] },
+    {"name":"getContact","parameterTypes":["int"] },
+    {"name":"getContactBuilder","parameterTypes":["int"] },
+    {"name":"getContactCount","parameterTypes":[] }, 
+    {"name":"getContactList","parameterTypes":[] }, 
+    {"name":"getDelete","parameterTypes":[] }, 
+    {"name":"getDeleteBuilder","parameterTypes":[] }, 
+    {"name":"getExpireTimer","parameterTypes":[] }, 
+    {"name":"getFlags","parameterTypes":[] }, 
+    {"name":"getGroup","parameterTypes":[] }, 
+    {"name":"getGroupBuilder","parameterTypes":[] },
+    {"name":"getGroupCallUpdate","parameterTypes":[] },
+    {"name":"getGroupCallUpdateBuilder","parameterTypes":[] },
+    {"name":"getGroupV2","parameterTypes":[] },
+    {"name":"getGroupV2Builder","parameterTypes":[] },
+    {"name":"getIsViewOnce","parameterTypes":[] }, 
+    {"name":"getPayment","parameterTypes":[] }, 
+    {"name":"getPaymentBuilder","parameterTypes":[] },
+    {"name":"getPreview","parameterTypes":["int"] },
+    {"name":"getPreviewBuilder","parameterTypes":["int"] },
+    {"name":"getPreviewCount","parameterTypes":[] },
+    {"name":"getPreviewList","parameterTypes":[] },
+    {"name":"getProfileKey","parameterTypes":[] },
+    {"name":"getQuote","parameterTypes":[] }, 
+    {"name":"getQuoteBuilder","parameterTypes":[] },
+    {"name":"getReaction","parameterTypes":[] }, 
+    {"name":"getReactionBuilder","parameterTypes":[] }, 
+    {"name":"getRequiredProtocolVersion","parameterTypes":[] },
+    {"name":"getSticker","parameterTypes":[] }, 
+    {"name":"getStickerBuilder","parameterTypes":[] }, 
+    {"name":"getTimestamp","parameterTypes":[] },
+    {"name":"hasBody","parameterTypes":[] }, 
+    {"name":"hasDelete","parameterTypes":[] }, 
+    {"name":"hasExpireTimer","parameterTypes":[] }, 
+    {"name":"hasFlags","parameterTypes":[] }, 
+    {"name":"hasGroup","parameterTypes":[] }, 
+    {"name":"hasGroupCallUpdate","parameterTypes":[] },
+    {"name":"hasGroupV2","parameterTypes":[] }, 
+    {"name":"hasIsViewOnce","parameterTypes":[] }, 
+    {"name":"hasPayment","parameterTypes":[] },  
+    {"name":"hasProfileKey","parameterTypes":[] },
+    {"name":"hasQuote","parameterTypes":[] }, 
+    {"name":"hasReaction","parameterTypes":[] }, 
+    {"name":"hasRequiredProtocolVersion","parameterTypes":[] },
+    {"name":"hasSticker","parameterTypes":[] },
+    {"name":"hasTimestamp","parameterTypes":[] }, 
+    {"name":"setAttachments","parameterTypes":["int","org.whispersystems.signalservice.internal.push.SignalServiceProtos$AttachmentPointer"] },
+    {"name":"setBody","parameterTypes":["java.lang.String"] },
+    {"name":"setBodyBytes","parameterTypes":["com.google.protobuf.ByteString"] },
+    {"name":"setBodyRanges","parameterTypes":["int","org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$BodyRange"] },
+    {"name":"setContact","parameterTypes":["int","org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$Contact"] },
+    {"name":"setDelete","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$Delete"] },
+    {"name":"setExpireTimer","parameterTypes":["int"] },
+    {"name":"setFlags","parameterTypes":["int"] }, 
+    {"name":"setGroup","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$GroupContext"] },
+    {"name":"setGroupCallUpdate","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$GroupCallUpdate"] },
+    {"name":"setGroupV2","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$GroupContextV2"] },
+    {"name":"setIsViewOnce","parameterTypes":["boolean"] },
+    {"name":"setPayment","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$Payment"] },
+    {"name":"setPreview","parameterTypes":["int","org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$Preview"] },
+    {"name":"setProfileKey","parameterTypes":["com.google.protobuf.ByteString"] },
+    {"name":"setQuote","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$Quote"] },
+    {"name":"setReaction","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$Reaction"] },
+    {"name":"setRequiredProtocolVersion","parameterTypes":["int"] },
+    {"name":"setSticker","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$Sticker"] },
+    {"name":"setTimestamp","parameterTypes":["long"] }]
   },
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$Contact",
+  "methods":[{"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$Delete",
+  "methods":[{"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$GroupCallUpdate",
+  "methods":[{"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$Payment",
+  "methods":[{"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$Preview",
+  "methods":[{"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$Quote",
+  "methods":[{"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$Reaction",
+  "methods":[{"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$Sticker",
+  "methods":[{"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$GroupContext",
+  "methods":[{"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$GroupContextV2",
+  "methods":[
+    {"name":"getGroupChange","parameterTypes":[] },
+    {"name":"getMasterKey","parameterTypes":[] },
+    {"name":"getRevision","parameterTypes":[] },
+    {"name":"hasGroupChange","parameterTypes":[] },
+    {"name":"hasMasterKey","parameterTypes":[] },
+    {"name":"hasRevision","parameterTypes":[] },
+    {"name":"newBuilder","parameterTypes":[] }
+  ]
+},
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$GroupContextV2$Builder",
+  "methods":[
+    {"name":"clearGroupChange","parameterTypes":[] },
+    {"name":"clearMasterKey","parameterTypes":[] },
+    {"name":"clearRevision","parameterTypes":[] }, 
+    {"name":"getGroupChange","parameterTypes":[] },
+    {"name":"getMasterKey","parameterTypes":[] },
+    {"name":"getRevision","parameterTypes":[] }, 
+    {"name":"hasGroupChange","parameterTypes":[] },
+    {"name":"hasMasterKey","parameterTypes":[] },
+    {"name":"hasRevision","parameterTypes":[] }, 
+    {"name":"setGroupChange","parameterTypes":["com.google.protobuf.ByteString"] },
+    {"name":"setMasterKey","parameterTypes":["com.google.protobuf.ByteString"] },
+    {"name":"setRevision","parameterTypes":["int"] }
+  ]
+},
+
   {
     "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$NullMessage",
     "methods":[{"name":"newBuilder","parameterTypes":[] }]
   },
-  {
-    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$ReceiptMessage",
-    "methods":[{"name":"newBuilder","parameterTypes":[] },
-              {"name":"hasType","parameterTypes":[] },
-              {"name":"getType","parameterTypes":[] }]
-  },
-  {
-    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$ReceiptMessage$Builder",
-    "methods":[ {"name":"getType","parameterTypes":[] },
-      {"name":"setType","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$ReceiptMessage$Type"] } ]
-  },
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$ReceiptMessage",
+  "methods":[
+    {"name":"getTimestamp","parameterTypes":["int"] },
+    {"name":"getTimestampCount","parameterTypes":[] },
+    {"name":"getTimestampList","parameterTypes":[] },
+    {"name":"getType","parameterTypes":[] },
+    {"name":"hasType","parameterTypes":[] },
+    {"name":"newBuilder","parameterTypes":[] }
+  ]
+},
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$ReceiptMessage$Builder",
+  "methods":[
+    {"name":"addTimestamp","parameterTypes":["long"] },
+    {"name":"clearTimestamp","parameterTypes":[] },
+    {"name":"clearType","parameterTypes":[] },
+    {"name":"getTimestamp","parameterTypes":["int"] },
+    {"name":"getTimestampCount","parameterTypes":[] },
+    {"name":"getTimestampList","parameterTypes":[] },
+    {"name":"getType","parameterTypes":[] },
+    {"name":"hasType","parameterTypes":[] },
+    {"name":"setTimestamp","parameterTypes":["int","long"] },
+    {"name":"setType","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$ReceiptMessage$Type"] }
+  ]
+},
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$ReceiptMessage$Type",
+  "methods":[
+    {"name":"getValueDescriptor","parameterTypes":[] }, 
+    {"name":"valueOf","parameterTypes":["com.google.protobuf.Descriptors$EnumValueDescriptor"] }
+  ]
+},
   {
     "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage",
     "methods":[
@@ -975,10 +1208,47 @@
       {"name":"setViewed","parameterTypes":["int","org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Viewed"] }
     ]
   },
-  {
-    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Configuration",
-    "methods":[{"name":"newBuilder","parameterTypes":[] }]
-  },
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Configuration",
+  "methods":[
+    {"name":"getLinkPreviews","parameterTypes":[] },
+    {"name":"getProvisioningVersion","parameterTypes":[] },
+    {"name":"getReadReceipts","parameterTypes":[] },
+    {"name":"getTypingIndicators","parameterTypes":[] },
+    {"name":"getUnidentifiedDeliveryIndicators","parameterTypes":[] },
+    {"name":"hasLinkPreviews","parameterTypes":[] },
+    {"name":"hasProvisioningVersion","parameterTypes":[] },
+    {"name":"hasReadReceipts","parameterTypes":[] },
+    {"name":"hasTypingIndicators","parameterTypes":[] },
+    {"name":"hasUnidentifiedDeliveryIndicators","parameterTypes":[] },
+    {"name":"newBuilder","parameterTypes":[] }
+  ]
+},
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Configuration$Builder",
+  "methods":[
+    {"name":"clearLinkPreviews","parameterTypes":[] },
+    {"name":"clearProvisioningVersion","parameterTypes":[] },
+    {"name":"clearReadReceipts","parameterTypes":[] },
+    {"name":"clearTypingIndicators","parameterTypes":[] },
+    {"name":"clearUnidentifiedDeliveryIndicators","parameterTypes":[] },
+    {"name":"getLinkPreviews","parameterTypes":[] },
+    {"name":"getProvisioningVersion","parameterTypes":[] },
+    {"name":"getReadReceipts","parameterTypes":[] },
+    {"name":"getTypingIndicators","parameterTypes":[] },
+    {"name":"getUnidentifiedDeliveryIndicators","parameterTypes":[] },
+    {"name":"hasLinkPreviews","parameterTypes":[] },
+    {"name":"hasProvisioningVersion","parameterTypes":[] },
+    {"name":"hasReadReceipts","parameterTypes":[] },
+    {"name":"hasTypingIndicators","parameterTypes":[] },
+    {"name":"hasUnidentifiedDeliveryIndicators","parameterTypes":[] },
+    {"name":"setLinkPreviews","parameterTypes":["boolean"] },
+    {"name":"setProvisioningVersion","parameterTypes":["int"] },
+    {"name":"setReadReceipts","parameterTypes":["boolean"] },
+    {"name":"setTypingIndicators","parameterTypes":["boolean"] },
+    {"name":"setUnidentifiedDeliveryIndicators","parameterTypes":["boolean"] }
+  ]
+},
   {
     "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Contacts",
     "methods":[
@@ -1017,6 +1287,8 @@
     "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Groups$Builder",
     "methods":[{"name":"getBlob","parameterTypes":[] },
                {"name":"hasBlob","parameterTypes":[] },
+               {"name":"clearBlob","parameterTypes":[] },
+               {"name":"getBlobBuilder","parameterTypes":[] },
                {"name":"setBlob","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$AttachmentPointer"] }]
   },
   {
@@ -1031,17 +1303,41 @@
     "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$OutgoingPayment",
     "methods":[{"name":"newBuilder","parameterTypes":[] }]
   },
-  {
-    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Read",
-    "methods":[{"name":"newBuilder","parameterTypes":[] },
-               {"name":"hasSenderE164","parameterTypes":[] },
-               {"name":"getSenderE164","parameterTypes":[] }]
-  },
-  {
-    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Read$Builder",
-    "methods":[ {"name":"getSenderE164","parameterTypes":[] },
-                {"name":"setSenderE164","parameterTypes":["java.lang.String"] }]
-  },
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Read",
+  "methods":[
+    {"name":"getSenderE164","parameterTypes":[] },
+    {"name":"getSenderE164Bytes","parameterTypes":[] },
+    {"name":"getSenderUuid","parameterTypes":[] },
+    {"name":"getSenderUuidBytes","parameterTypes":[] },
+    {"name":"getTimestamp","parameterTypes":[] },
+    {"name":"hasSenderE164","parameterTypes":[] },
+    {"name":"hasSenderUuid","parameterTypes":[] },
+    {"name":"hasTimestamp","parameterTypes":[] },
+    {"name":"newBuilder","parameterTypes":[] }
+  ]
+},
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Read$Builder",
+  "methods":[
+    {"name":"clearSenderE164","parameterTypes":[] },
+    {"name":"clearSenderUuid","parameterTypes":[] },
+    {"name":"clearTimestamp","parameterTypes":[] },
+    {"name":"getSenderE164","parameterTypes":[] },
+    {"name":"getSenderE164Bytes","parameterTypes":[] },
+    {"name":"getSenderUuid","parameterTypes":[] },
+    {"name":"getSenderUuidBytes","parameterTypes":[] },
+    {"name":"getTimestamp","parameterTypes":[] },
+    {"name":"hasSenderE164","parameterTypes":[] },
+    {"name":"hasSenderUuid","parameterTypes":[] },
+    {"name":"hasTimestamp","parameterTypes":[] },
+    {"name":"setSenderE164","parameterTypes":["java.lang.String"] },
+    {"name":"setSenderE164Bytes","parameterTypes":["com.google.protobuf.ByteString"] },
+    {"name":"setSenderUuid","parameterTypes":["java.lang.String"] },
+    {"name":"setSenderUuidBytes","parameterTypes":["com.google.protobuf.ByteString"] },
+    {"name":"setTimestamp","parameterTypes":["long"] }
+  ]
+},
   {
     "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Request",
     "methods":[
@@ -1066,23 +1362,141 @@
       {"name":"valueOf","parameterTypes":["com.google.protobuf.Descriptors$EnumValueDescriptor"] }
     ]
   },
-  {
-    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Sent",
-    "methods":[{"name":"newBuilder","parameterTypes":[] },
-               {"name":"getDestinationE164","parameterTypes":[] },
-               {"name":"hasDestinationE164","parameterTypes":[] }]
-  },
-  {
-    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Sent$Builder",
-    "methods":[ {"name":"getDestinationE164","parameterTypes":[] },
-                {"name":"hasDestinationE164","parameterTypes":[] },
-                {"name":"clearDestinationE164","parameterTypes":[] },
-                {"name":"setDestinationE164","parameterTypes":["java.lang.String"] }]
-  },
-  {
-    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$StickerPackOperation",
-    "methods":[{"name":"newBuilder","parameterTypes":[] }]
-  },
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Sent",
+  "methods":[
+    {"name":"getDestinationE164","parameterTypes":[] }, 
+    {"name":"getDestinationE164Bytes","parameterTypes":[] },
+    {"name":"getDestinationUuid","parameterTypes":[] }, 
+    {"name":"getDestinationUuidBytes","parameterTypes":[] },  
+    {"name":"getExpirationStartTimestamp","parameterTypes":[] },
+    {"name":"getIsRecipientUpdate","parameterTypes":[] },
+    {"name":"getMessage","parameterTypes":[] }, 
+    {"name":"getTimestamp","parameterTypes":[] }, 
+    {"name":"getUnidentifiedStatus","parameterTypes":["int"] }, 
+    {"name":"getUnidentifiedStatusCount","parameterTypes":[] },
+    {"name":"getUnidentifiedStatusList","parameterTypes":[] },
+    {"name":"hasDestinationE164","parameterTypes":[] },
+    {"name":"hasDestinationUuid","parameterTypes":[] }, 
+    {"name":"hasExpirationStartTimestamp","parameterTypes":[] },
+    {"name":"hasIsRecipientUpdate","parameterTypes":[] },
+    {"name":"hasMessage","parameterTypes":[] }, 
+    {"name":"hasTimestamp","parameterTypes":[] },
+    {"name":"newBuilder","parameterTypes":[] }
+  ] 
+},
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Sent$Builder",
+  "methods":[
+    {"name":"addUnidentifiedStatus","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Sent$UnidentifiedDeliveryStatus"] },
+    {"name":"clearDestinationE164","parameterTypes":[] },
+    {"name":"clearDestinationUuid","parameterTypes":[] },
+    {"name":"clearExpirationStartTimestamp","parameterTypes":[] },
+    {"name":"clearIsRecipientUpdate","parameterTypes":[] },
+    {"name":"clearMessage","parameterTypes":[] },
+    {"name":"clearTimestamp","parameterTypes":[] },
+    {"name":"clearUnidentifiedStatus","parameterTypes":[] },
+    {"name":"getDestinationE164","parameterTypes":[] },
+    {"name":"getDestinationE164Bytes","parameterTypes":[] },
+    {"name":"getDestinationUuid","parameterTypes":[] }, 
+    {"name":"getDestinationUuidBytes","parameterTypes":[] },
+    {"name":"getExpirationStartTimestamp","parameterTypes":[] },
+    {"name":"getIsRecipientUpdate","parameterTypes":[] }, 
+    {"name":"getMessage","parameterTypes":[] }, 
+    {"name":"getMessageBuilder","parameterTypes":[] }, 
+    {"name":"getTimestamp","parameterTypes":[] }, 
+    {"name":"getUnidentifiedStatus","parameterTypes":["int"] },
+    {"name":"getUnidentifiedStatusBuilder","parameterTypes":["int"] },
+    {"name":"getUnidentifiedStatusCount","parameterTypes":[] },
+    {"name":"getUnidentifiedStatusList","parameterTypes":[] },  
+    {"name":"hasDestinationE164","parameterTypes":[] }, 
+    {"name":"hasDestinationUuid","parameterTypes":[] }, 
+    {"name":"hasExpirationStartTimestamp","parameterTypes":[] },
+    {"name":"hasIsRecipientUpdate","parameterTypes":[] },
+    {"name":"hasMessage","parameterTypes":[] }, 
+    {"name":"hasTimestamp","parameterTypes":[] }, 
+    {"name":"setDestinationE164","parameterTypes":["java.lang.String"] },
+    {"name":"setDestinationE164Bytes","parameterTypes":["com.google.protobuf.ByteString"] },
+    {"name":"setDestinationUuid","parameterTypes":["java.lang.String"] },
+    {"name":"setDestinationUuidBytes","parameterTypes":["com.google.protobuf.ByteString"] },
+    {"name":"setExpirationStartTimestamp","parameterTypes":["long"] },
+    {"name":"setIsRecipientUpdate","parameterTypes":["boolean"] },
+    {"name":"setMessage","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage"] },
+    {"name":"setTimestamp","parameterTypes":["long"] },
+    {"name":"setUnidentifiedStatus","parameterTypes":["int","org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Sent$UnidentifiedDeliveryStatus"] }
+  ]
+},
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Sent$UnidentifiedDeliveryStatus",
+  "methods":[
+    {"name":"getDestinationE164","parameterTypes":[] },
+    {"name":"getDestinationE164Bytes","parameterTypes":[] },
+    {"name":"getDestinationUuid","parameterTypes":[] },
+    {"name":"getDestinationUuidBytes","parameterTypes":[] },
+    {"name":"getUnidentified","parameterTypes":[] },
+    {"name":"hasDestinationE164","parameterTypes":[] },
+    {"name":"hasDestinationUuid","parameterTypes":[] },
+    {"name":"hasUnidentified","parameterTypes":[] },
+    {"name":"newBuilder","parameterTypes":[] }
+  ]
+},
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Sent$UnidentifiedDeliveryStatus$Builder",
+  "methods":[
+    {"name":"clearDestinationE164","parameterTypes":[] },
+    {"name":"clearDestinationUuid","parameterTypes":[] },
+    {"name":"clearUnidentified","parameterTypes":[] },
+    {"name":"getDestinationE164","parameterTypes":[] },
+    {"name":"getDestinationE164Bytes","parameterTypes":[] },
+    {"name":"getDestinationUuid","parameterTypes":[] },
+    {"name":"getDestinationUuidBytes","parameterTypes":[] },
+    {"name":"getUnidentified","parameterTypes":[] },
+    {"name":"hasDestinationE164","parameterTypes":[] },
+    {"name":"hasDestinationUuid","parameterTypes":[] },
+    {"name":"hasUnidentified","parameterTypes":[] },
+    {"name":"setDestinationE164","parameterTypes":["java.lang.String"] },
+    {"name":"setDestinationE164Bytes","parameterTypes":["com.google.protobuf.ByteString"] },
+    {"name":"setDestinationUuid","parameterTypes":["java.lang.String"] },
+    {"name":"setDestinationUuidBytes","parameterTypes":["com.google.protobuf.ByteString"] },
+    {"name":"setUnidentified","parameterTypes":["boolean"] }
+  ]
+},
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$StickerPackOperation",
+  "methods":[
+    {"name":"getPackId","parameterTypes":[] },
+    {"name":"getPackKey","parameterTypes":[] },
+    {"name":"getType","parameterTypes":[] },
+    {"name":"hasPackId","parameterTypes":[] },
+    {"name":"hasPackKey","parameterTypes":[] },
+    {"name":"hasType","parameterTypes":[] },
+    {"name":"newBuilder","parameterTypes":[] }
+  ]
+},
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$StickerPackOperation$Builder",
+  "methods":[
+    {"name":"clearPackId","parameterTypes":[] },
+    {"name":"clearPackKey","parameterTypes":[] },
+    {"name":"clearType","parameterTypes":[] },
+    {"name":"getPackId","parameterTypes":[] },
+    {"name":"getPackKey","parameterTypes":[] },
+    {"name":"getType","parameterTypes":[] },
+    {"name":"hasPackId","parameterTypes":[] },
+    {"name":"hasPackKey","parameterTypes":[] },
+    {"name":"hasType","parameterTypes":[] },
+    {"name":"setPackId","parameterTypes":["com.google.protobuf.ByteString"] },
+    {"name":"setPackKey","parameterTypes":["com.google.protobuf.ByteString"] },
+    {"name":"setType","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$StickerPackOperation$Type"] }
+  ]
+},
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$StickerPackOperation$Type",
+  "methods":[
+    {"name":"getValueDescriptor","parameterTypes":[] },
+    {"name":"valueOf","parameterTypes":["com.google.protobuf.Descriptors$EnumValueDescriptor"] }
+  ]
+},
   {
     "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$ViewOnceOpen",
     "methods":[{"name":"newBuilder","parameterTypes":[] }]
@@ -1091,10 +1505,42 @@
     "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$SyncMessage$Viewed",
     "methods":[{"name":"newBuilder","parameterTypes":[] }]
   },
-  {
-    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$TypingMessage",
-    "methods":[{"name":"newBuilder","parameterTypes":[] }]
-  },
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$TypingMessage",
+  "methods":[
+    {"name":"getAction","parameterTypes":[] },
+    {"name":"getGroupId","parameterTypes":[] },
+    {"name":"getTimestamp","parameterTypes":[] },
+    {"name":"hasAction","parameterTypes":[] },
+    {"name":"hasGroupId","parameterTypes":[] },
+    {"name":"hasTimestamp","parameterTypes":[] },
+    {"name":"newBuilder","parameterTypes":[] }
+  ]
+},
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$TypingMessage$Action",
+  "methods":[
+    {"name":"getValueDescriptor","parameterTypes":[] },
+    {"name":"valueOf","parameterTypes":["com.google.protobuf.Descriptors$EnumValueDescriptor"] }
+  ]
+},
+{
+  "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$TypingMessage$Builder",
+  "methods":[
+    {"name":"clearAction","parameterTypes":[] },
+    {"name":"clearGroupId","parameterTypes":[] },
+    {"name":"clearTimestamp","parameterTypes":[] },
+    {"name":"getAction","parameterTypes":[] },
+    {"name":"getGroupId","parameterTypes":[] },
+    {"name":"getTimestamp","parameterTypes":[] },
+    {"name":"hasAction","parameterTypes":[] },
+    {"name":"hasGroupId","parameterTypes":[] },
+    {"name":"hasTimestamp","parameterTypes":[] },
+    {"name":"setAction","parameterTypes":["org.whispersystems.signalservice.internal.push.SignalServiceProtos$TypingMessage$Action"] },
+    {"name":"setGroupId","parameterTypes":["com.google.protobuf.ByteString"] },
+    {"name":"setTimestamp","parameterTypes":["long"] }
+  ]
+},
   {
     "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$Verified",
     "methods":[{"name":"newBuilder","parameterTypes":[] }]
