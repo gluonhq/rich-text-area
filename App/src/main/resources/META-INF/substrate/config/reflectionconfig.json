@@ -822,6 +822,10 @@
                {"name":"getBody","parameterTypes":[] }]
   },
   {
+    "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$DataMessage$Builder",
+    "methods":[{"name":"getBody","parameterTypes":[] }]
+  },
+  {
     "name":"org.whispersystems.signalservice.internal.push.SignalServiceProtos$NullMessage",
     "methods":[{"name":"newBuilder","parameterTypes":[] }]
   },
