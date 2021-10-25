@@ -1,28 +1,7 @@
-ChatApp
+Wave App
 ====
 
-The Gluon Chat App that runs with Gluon Mobile, OpenJFX, OpenJDK 11 and GraalVM
-
-Prerequisites
--------------
-
-You need a valid subscription to Gluon CloudLink. You can get it [here](http://gluonhq.com/products/cloudlink/buy/), and 
-there is a 30-day free trial. Sign up and get a valid account on Gluon CloudLink and a link to download the Gluon CloudLink 
-Dashboard. 
-
-Install and open the Dashboard, and sign in using the Gluon account credentials provided above. Go to the App Management view, and you will 
-find a pair of key/secret tokens. Save the file `gluoncloudlink_config.json` under your project 
-`src/main/resources/` folder. The content of the file is a JSON object with the key and secret that will grant access
-to Gluon CloudLink:
-
-```json
-{
-  "gluonCredentials": {
-    "applicationKey": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
-    "applicationSecret": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
-  }
-}
-```
+The Wave App runs with Gluon Mobile, OpenJFX, OpenJDK 11 and GraalVM
 
 Instructions
 ------------
@@ -34,40 +13,41 @@ mvn clean install
 ```
 * Execute the application:
 ```
-mvn javafx:run -pl App
+cd App && mvn gluonfx:run
 ```
 
 Instructions for Native Image
 ------------
 
-* Download the following version of GraalVM and unpack it like you would any other JDK. (e.g. in `/opt`):
+* Download the latest version of [GraalVM from Gluon](https://github.com/gluonhq/graal/releases/latest) and unpack it like you would any other JDK.
 
-  * [GraalVM for Linux](https://download2.gluonhq.com/substrate/graalvm/graalvm-svm-linux-20.1.0-ea+25.zip)
-  * [GraalVM for Mac](https://download2.gluonhq.com/substrate/graalvm/graalvm-svm-darwin-20.1.0-ea+25.zip)
-
-* Configure the runtime environment. Set `GRAALVM_HOME` environment variable to the GraalVM installation directory:
+* Set `GRAALVM_HOME` environment variable to the GraalVM installation directory:
 ```
 export GRAALVM_HOME=path-to-graalvm-directory
 ```
 
-### Desktop
-
 * Native build the application:
 ```
-mvn client:build -pl App
+mvn gluonfx:build -pl App
 ```
 * Once the build is successful, the native image be executed by:
 ```
-mvn client:run -pl App
+mvn gluonfx:nativerun -pl App
 ```
 
-### iOS
+## FAQs
 
-* Native build the application:
-```
-mvn -Pios client:build -pl App
-```
-* Once the build is successful, the native image be installed on a connected iOS device by:
-```
-mvn -Pios client:run -pl App
-```
+Below is a list of frequently asked questions / issues one might face during running ChatApp from source:
+
+### No Device Found
+
+This error comes when the app is started, but we waited too long to scan the QR code
+
+### Network Error
+
+This error normally occurs due to "Rate Limit Exceeded", which means that scanning was tried too often.
+We need to allow it to cool down and try again after 1 or 2 minutes.
+
+### Scanning done but no contact list shown
+
+Current workaround is to remove all your linked devices from mobile app, remove `~/.signalfx` directory and re-scan.
