@@ -33,7 +33,6 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.scene.image.Image;
 
 public class WaveService implements Service, ProvisioningClient, MessagingClient {
@@ -55,8 +54,11 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             login(wave.getMyUuid());
             this.wave.setMessageListener(this);
             try {
+                wave.getWaveLogger().log(Level.DEBUG, "ensure we are connected");
                 this.wave.ensureConnected();
+                wave.getWaveLogger().log(Level.DEBUG, "we are connected, let's sync");
                 wave.syncEverything();
+                wave.getWaveLogger().log(Level.DEBUG, "sync requests are sent");
             } catch (IOException ex) {
                 ex.printStackTrace();
                 System.err.println("We're offline. Not much we can do now!");
@@ -290,7 +292,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         int rnd = new Random().nextInt(1000);
         try {
             wave.getWaveLogger().log(Level.DEBUG, "[WAVESERVICE] rnd = " + rnd + ", create account");
-            wave.createAccount(number, "Gluon-" + rnd);
+            wave.createAccount(number, "Gluon" + rnd);
             login(wave.getMyUuid());
 
             wave.setMessageListener(this);
