@@ -4,6 +4,17 @@ Gluon Wave Application
 This repository contains the Gluon Wave Application, which is using the 
 Signal protocol with Java and JavaFX.
 
+Where can I test it?
+--------------------
+
+We highly recommend to read this README first. Gluon Wave is a technical
+project, in an experimental phase. We hope it can serve many people and
+help achieve the goals of the Signal Foundation. At this moment though,
+you should not expect top-quality from this project.
+If you're not scared by that, and want to go to the download page 
+immediately, here you go: 
+https://github.com/gluonhq/wave-app/releases/tag/v1.0.4
+
 About Signal
 ------------
 
@@ -59,11 +70,21 @@ You can run Gluon Wave in 3 ways:
 * Download and run the jpackaged installers for Windows, Mac or Linux
 * Build the code from this repository and run it.
 
-The first 2 options don't require a JVM at runtime. The first option leverages
+Download and run
+----------------
+
+The first 2 options don't require a JVM at runtime. 
+You can get the latest development versions and instructions from
+https://github.com/gluonhq/wave-app/releases/tag/v1.0.4
+
+*Keep in mind that this is a developer project, and you should not
+use this for critical/production purposes*
+
+The first option leverages
 the Java packager that is part of the JDK distributions.
 The second option leverages [GraalVM native-image](https://graalvm.org).
 
-Downloading and running with the Java packager-based build
+Building and running with the Java packager-based build
 ----------------------------------------------------------
 
 * Set `JAVA_HOME` to a JDK 11+
@@ -76,7 +97,7 @@ mvn clean install
 cd App && mvn gluonfx:run
 ```
 
-Downloading and running with the GraalVM Native Image-based build
+Building and running with the GraalVM Native Image-based build
 -----------------------------------------------------------------
 
 * Download the latest version of [GraalVM from Gluon](https://github.com/gluonhq/graal/releases/latest) and unpack it like you would any other JDK.
