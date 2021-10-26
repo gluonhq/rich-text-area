@@ -1,10 +1,68 @@
-Wave App
+Gluon Wave Application
 ====
 
-The Wave App runs with Gluon Mobile, OpenJFX, OpenJDK 11 and GraalVM
+This repository contains the Gluon Wave Application, which is using the 
+Signal protocol with Java and JavaFX.
 
-Instructions
+About Signal
 ------------
+
+[Signal](https:/signal.org) is an encryption tool enabling end-to-end
+encryption. Messages sent via the Signal Protocol are encrypted by the
+sender, and decrypted by the recipient, using a combination of clever
+techniques including [Extended Triple Diffie-Hellman](https://signal.org/docs/specifications/x3dh/)
+and [Double Ratchet](https://signal.org/docs/specifications/doubleratchet/).
+
+The Signal protocol and its implementations are open-source and free to
+use (as long as the GPL license is respected). Signal respects users privacy
+and is not showing ads. Signal is a non-profit organisation, and accepts
+[donations](https://signal.org/donate).
+
+Signal on mobile and desktop
+----------------------------
+
+In order to use Signal, you need to install it on your phone first.
+Go to https://signal.org/download/ and follow the links for Android or
+iOS. Once you are using Signal on your phone, you can _pair_ other
+devices, e.g. your desktop or laptop, and use Signal on those devices as
+well -- using the same account as the one you use on your phone.
+Currently, there is an electron-based desktop application that you can
+use on your system. The Wave Application in the repository you're 
+currently looking at is a Java and JavaFX based alternative for this electron
+based application.
+
+Signal and Java
+---------------
+
+We didn't have to start from scratch when writing this application.
+There is a Java implementation of the Signal protocol that is (or was) used by
+the Android client. That implementation served as the basis for the Java
+API's we needed for the Wave Application. We made a number of changes though,
+since we don't have to worry about Android restrictions. We rather use
+the latest Java, as developed in the [OpenJDK](https://openjdk.java.net).
+We forked the Signal repositories and updated them to Java 17.
+
+Wave App
+--------
+
+The application in this repository uses the libraries described in the
+previous section, and creates a JavaFX user interface around them.
+
+Running the Wave App
+====================
+
+You can run Gluon Wave in 3 ways:
+
+* Download and run the native executables for Windows, Mac or Linux
+* Download and run the jpackaged installers for Windows, Mac or Linux
+* Build the code from this repository and run it.
+
+The first 2 options don't require a JVM at runtime. The first option leverages
+the Java packager that is part of the JDK distributions.
+The second option leverages [GraalVM native-image](https://graalvm.org).
+
+Downloading and running with the Java packager-based build
+----------------------------------------------------------
 
 * Set `JAVA_HOME` to a JDK 11+
 * Install all sub-projects in local maven repository:
@@ -16,8 +74,8 @@ mvn clean install
 cd App && mvn gluonfx:run
 ```
 
-Instructions for Native Image
-------------
+Downloading and running with the GraalVM Native Image-based build
+-----------------------------------------------------------------
 
 * Download the latest version of [GraalVM from Gluon](https://github.com/gluonhq/graal/releases/latest) and unpack it like you would any other JDK.
 
@@ -35,19 +93,47 @@ mvn gluonfx:build -pl App
 mvn gluonfx:nativerun -pl App
 ```
 
-## FAQs
+What to do now?
+===============
 
+Issues
+------
+
+There are a bunch of known and unknown issues, which you can report in
+the issue tracker of this repository.
+
+Missing functionality
+---------------------
+* No support for groups
+* No support for attachments
+* No support for stickers
+
+... but that is just a matter of time.
+
+Known issues:
+-------------
 Below is a list of frequently asked questions / issues one might face during running ChatApp from source:
 
-### No Device Found
+### No Device Found (in the mobile app)
 
-This error comes when the app is started, but we waited too long to scan the QR code
+This error comes when the app is started, but you waited too long to scan the QR code
 
-### Network Error
+### Network Error (in the mobile app)
 
 This error normally occurs due to "Rate Limit Exceeded", which means that scanning was tried too often.
-We need to allow it to cool down and try again after 1 or 2 minutes.
+You need to allow it to cool down and try again after 1 or 2 minutes.
 
 ### Scanning done but no contact list shown
 
-Current workaround is to remove all your linked devices from mobile app, remove `~/.signalfx` directory and re-scan.
+If all goes well, after the QR code is scanned, you should see your contact list in a few
+seconds. Sometimes, the contact sync requests isn't received. 
+Current workaround is to close the application and start it again.
+If that doesn't work, remove all your linked devices from mobile app, remove `~/.signalfx` directory and restart the application.
+
+I want to contribute!
+=====================
+We're excited you're reading until here! We recommend that you fork this repository, and change
+whatever you want. You can work on a different theme, by modifying the CSS files. You can
+create a different layout, by modifying the FXML files. Or you can modify the flow and logic,
+by modifying the Java files.
+
