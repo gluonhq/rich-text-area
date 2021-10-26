@@ -159,8 +159,8 @@
         </dependency>
         <dependency>
             <groupId>com.gluonhq</groupId>
-            <artifactId>wave</artifactId>
-            <version>0.9.9</version>
+            <artifactId>equation</artifactId>
+            <version>0.9.10</version>
         </dependency>
 
         <dependency>

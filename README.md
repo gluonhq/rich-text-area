@@ -41,6 +41,8 @@ API's we needed for the Wave Application. We made a number of changes though,
 since we don't have to worry about Android restrictions. We rather use
 the latest Java, as developed in the [OpenJDK](https://openjdk.java.net).
 We forked the Signal repositories and updated them to Java 17.
+The access to the Signal Protocol is defined in the Gluon Equation
+project, which can be found at https://github.com/gluonhq/equation.git .
 
 Wave App
 --------
