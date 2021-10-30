@@ -1,12 +1,14 @@
 package com.gluonhq.chat.model;
 
-import java.util.Objects;
+import com.airhacks.afterburner.injection.Injector;
+import com.gluonhq.chat.service.Service;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.util.Objects;
 import java.util.UUID;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 
 public class Channel extends Searchable {
 
@@ -15,8 +17,14 @@ public class Channel extends Searchable {
     private boolean isDirect;
     private final ObservableList<User> members;
     private final ObservableList<ChatMessage> messages;
-    private boolean unread;
+    private final BooleanProperty unread = new SimpleBooleanProperty() {
+        @Override
+        protected void invalidated() {
+            service.updateUnreadList(getId(), get());
+        }
+    };
     private final BooleanProperty typing = new SimpleBooleanProperty();
+    private final Service service;
 
 
     public Channel(String id, String name, ObservableList<User> members, ObservableList<ChatMessage> messages) {
@@ -24,6 +32,7 @@ public class Channel extends Searchable {
         this.name = name;
         this.members = members;
         this.messages = messages;
+        service = Injector.instantiateModelOrService(Service.class);
     }
 
     public Channel(String name, ObservableList<User> members, ObservableList<ChatMessage> messages) {
@@ -78,7 +87,7 @@ public class Channel extends Searchable {
      * @return true if there are new messages in this channel, false otherwise 
      */
     public boolean isUnread() {
-        return unread;
+        return unread.get();
     }
 
     /**
@@ -87,7 +96,11 @@ public class Channel extends Searchable {
      * @param unread true if there are unread messages, false otherwise
      */
     public void setUnread(boolean unread) {
-        this.unread = unread;
+        this.unread.set(unread);
+    }
+
+    public BooleanProperty unreadProperty() {
+        return unread;
     }
 
     @Override

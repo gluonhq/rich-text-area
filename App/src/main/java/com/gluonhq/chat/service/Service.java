@@ -9,6 +9,8 @@ import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -66,6 +68,20 @@ public interface Service {
      * to be completed successfully once (but not during this run)
      */
     default void initializeService() {}
+
+    /**
+     * Returns list of channel ids which are currently unread by user
+     * @return List of channel id
+     */
+    default List<String> readUnreadList() {
+        return Collections.emptyList();
+    }
+
+    /**
+     * Add or remove a channel from unread channel list
+     * @param channelId channel id
+     */
+    default void updateUnreadList(String channelId, boolean add) {}
 
 
     static String getInitials(String name) {

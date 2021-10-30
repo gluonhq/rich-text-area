@@ -9,6 +9,12 @@ import com.gluonhq.equation.message.MessagingClient;
 import com.gluonhq.equation.model.Contact;
 import com.gluonhq.equation.provision.ProvisioningClient;
 import com.gluonhq.equation.util.QRGenerator;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.scene.image.Image;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.System.Logger.Level;
@@ -21,19 +27,8 @@ import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
-
-import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
-import javafx.scene.image.Image;
 
 public class WaveService implements Service, ProvisioningClient, MessagingClient {
 
@@ -272,11 +267,15 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
                                     ex.printStackTrace();
                                 }
                                 storeMessage(uuid, loggedUser.getId(), m.getMessage(), System.currentTimeMillis());
+                                if (!uuid.equals(loggedUser.getId())) {
+                                    answer.setUnread(true);
+                                }
                             });
-                    answer.setUnread(true);
+                    if (readUnreadList().contains(answer.getId())) {
+                        answer.setUnread(true);
+                    }
                 }
             }
-
         });
         return answer;
     }
@@ -300,6 +299,35 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             wave.syncEverything();
             Platform.runLater(() -> bootstrapClient.bootstrapSucceeded());
         } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public List<String> readUnreadList() {
+        try {
+            File contactsDir = wave.SIGNAL_FX_CONTACTS_DIR;
+            Path contactPath = contactsDir.toPath().resolve("unreadcontacts.csv");
+            final String csvString = Files.readString(contactPath);
+            return List.of(csvString.split(","));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return Collections.emptyList();
+    }
+    
+    public void updateUnreadList(String channelId, boolean add) {
+        try {
+            final List<String> unreadList = new ArrayList<>(readUnreadList());
+            if (add) {
+                if (!unreadList.contains(channelId)) unreadList.add(channelId);
+            } else {
+                unreadList.remove(channelId);
+            }
+            File contactsDir = wave.SIGNAL_FX_CONTACTS_DIR;
+            Path contactPath = contactsDir.toPath().resolve("unreadcontacts.csv");
+            final String unreadCSVString = String.join(",", unreadList);
+            Files.writeString(contactPath, unreadCSVString);
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
