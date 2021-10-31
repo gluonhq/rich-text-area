@@ -45,25 +45,15 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         wave = WaveManager.getInstance();
         wave.setLogLevel(Level.DEBUG);
         wave.getWaveLogger().log(Level.DEBUG, "Creating waveService: " + System.identityHashCode(wave));
+        this.wave.setMessageListener(this);
         if (wave.isProvisioned()) {
             login(wave.getMyUuid());
-            this.wave.setMessageListener(this);
-            try {
-                wave.getWaveLogger().log(Level.DEBUG, "ensure we are connected");
-                this.wave.ensureConnected();
-                wave.getWaveLogger().log(Level.DEBUG, "we are connected, let's sync");
-                wave.syncEverything();
-                wave.getWaveLogger().log(Level.DEBUG, "sync requests are sent");
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                System.err.println("We're offline. Not much we can do now!");
-            }
         }
     }
 
     @Override
     public void initializeService() {
-        this.wave.startListening();
+        this.wave.initialize();
     }
 
     @Override
@@ -295,8 +285,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             login(wave.getMyUuid());
 
             wave.setMessageListener(this);
-            wave.getWaveLogger().log(Level.DEBUG, "[WAVESERVICE] synccontacts");
-            wave.syncEverything();
+            wave.reset();
             Platform.runLater(() -> bootstrapClient.bootstrapSucceeded());
         } catch (Exception ex) {
             ex.printStackTrace();
