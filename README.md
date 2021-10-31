@@ -13,7 +13,7 @@ help achieve the goals of the Signal Foundation. At this moment though,
 you should not expect top-quality from this project.
 If you're not scared by that, and want to go to the download page 
 immediately, here you go: 
-https://github.com/gluonhq/wave-app/releases/tag/v1.0.4
+https://github.com/gluonhq/wave-app/releases/tag/v1.0.5
 
 About Signal
 ------------
