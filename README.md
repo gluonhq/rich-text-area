@@ -75,7 +75,7 @@ Download and run
 
 The first 2 options don't require a JVM at runtime. 
 You can get the latest development versions and instructions from
-https://github.com/gluonhq/wave-app/releases/tag/v1.0.4
+https://github.com/gluonhq/wave-app/releases/tag/v1.0.5
 
 *Keep in mind that this is a developer project, and you should not
 use this for critical/production purposes*
