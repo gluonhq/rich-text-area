@@ -296,6 +296,9 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         try {
             File contactsDir = wave.SIGNAL_FX_CONTACTS_DIR;
             Path contactPath = contactsDir.toPath().resolve("unreadcontacts.csv");
+            if (!Files.exists(contactPath)) {
+                return List.of();
+            }
             final String csvString = Files.readString(contactPath);
             return List.of(csvString.split(","));
         } catch (IOException ex) {
