@@ -50,7 +50,7 @@ class MessageCell extends CharmListCell<ChatMessage> {
     private static final Insets meInsets = new Insets(10, 0, 10, 0);
     private static final Insets notMeInsets = new Insets(10, 0, 10, 0);
     private static final Image clockImage = new Image( "/clock.png");
-    private static final PseudoClass SIDE_RIGHT = PseudoClass.getPseudoClass("right");
+    private static final PseudoClass SENT_PSEUDO_CLASS = PseudoClass.getPseudoClass("sent");
     private static final PseudoClass UNREAD = PseudoClass.getPseudoClass("unread");
     private static final PseudoClass READ = PseudoClass.getPseudoClass("read");
     private static final Image loading = new Image(MessageCell.class.getResourceAsStream("/InternetSlowdown_Day.gif"), 150, 150, true, true);
@@ -62,7 +62,6 @@ class MessageCell extends CharmListCell<ChatMessage> {
     private final BorderPane messageBubble;
     private final Label date  = new Label();
     private final Label status  = new Label();
-//    private final Label icon = new Label("ICON");
     private final Label unread;
     private final BorderPane pane;
     private final StackPane stackPane;
@@ -79,12 +78,8 @@ class MessageCell extends CharmListCell<ChatMessage> {
 
         getStyleClass().addAll("chat-list-cell");
 
-//        icon.getStyleClass().add("user-icon");
-//        BorderPane.setAlignment(icon, Pos.TOP_CENTER);
-
         setWrapText(true);
         this.message = new TextFlow();
-//        message.getStyleClass().add("chat-message-text");
 
         dateAndStatus = new HBox(10, date, status);
         dateAndStatus.setMaxWidth(Region.USE_PREF_SIZE);
@@ -92,11 +87,9 @@ class MessageCell extends CharmListCell<ChatMessage> {
         messageBubble = new BorderPane(message);
         messageBubble.setBottom(dateAndStatus);
         messageBubble.setMaxWidth(Region.USE_PREF_SIZE);
-//        messageBubble.getStyleClass().add("chat-message-bubble");
-        messageBubble.getStyleClass().setAll("chat-message-text");
+        messageBubble.getStyleClass().setAll("chat-message-bubble");
 
         pane = new BorderPane(messageBubble);
-//        pane.setBottom(dateAndStatus);
         pane.getStyleClass().add("chat-message");
         pane.prefWidthProperty().bind(widthProperty());
 
@@ -140,16 +133,11 @@ class MessageCell extends CharmListCell<ChatMessage> {
                 status.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             }
 
-//            icon.setText(isMe ? "ME" : Service.getInitials(item.getUser().displayName()));
-
             if (isMe) {
-
-                messageBubble.getStyleClass().setAll("chat-message-text", "chat-message-sent");
-                messageBubble.pseudoClassStateChanged(SIDE_RIGHT, true);
+                messageBubble.pseudoClassStateChanged(SENT_PSEUDO_CLASS, true);
                 messageBubble.setLeft(null);
                 messageBubble.setRight(msgHandle);
                 pane.setLeft(null);
-//                pane.setRight(icon);
                 BorderPane.setAlignment(message, Pos.TOP_RIGHT);
                 BorderPane.setAlignment(messageBubble, Pos.TOP_RIGHT);
                 BorderPane.setAlignment(dateAndStatus, Pos.BOTTOM_RIGHT);
@@ -161,14 +149,12 @@ class MessageCell extends CharmListCell<ChatMessage> {
                     item.receiptProperty()));
 
             } else {
-                messageBubble.getStyleClass().setAll("chat-message-text", "chat-message-received");
-                messageBubble.pseudoClassStateChanged(SIDE_RIGHT, false);
+                messageBubble.pseudoClassStateChanged(SENT_PSEUDO_CLASS, false);
                 messageBubble.setRight(null);
                 messageBubble.setLeft(msgHandle);
                 //status.setText(resources.getString("label.status.check.unknown")); // check mark if read
                 status.setText(""); // status is only needed for sent messages
                 pane.setRight(null);
-//                pane.setLeft(icon);
                 BorderPane.setAlignment(message, Pos.TOP_LEFT);
                 BorderPane.setAlignment(messageBubble, Pos.TOP_LEFT);
                 BorderPane.setAlignment(dateAndStatus, Pos.BOTTOM_LEFT);

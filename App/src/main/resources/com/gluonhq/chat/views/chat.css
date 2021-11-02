@@ -4,8 +4,8 @@
 
 .chat-channel-box {
     -fx-alignment: center;
-    -fx-background-color: -chat-background-light;
-    -fx-border-color: -chat-accent-light;
+    -fx-background-color: -chat-background-200;
+    -fx-border-color: -chat-accent-200;
     -fx-border-width: 0 0 2 0;
     -fx-spacing: 10;
     -fx-padding: 2 5 2 25;
@@ -27,8 +27,8 @@
 }
 
 .chat-channel-box > .chat-channel-icon > .chat-channel-icon {
-    -fx-text-fill: -chat-text-fill-light;
-    -fx-background-color: -chat-background;
+    -fx-text-fill: -chat-text-sent-fill-200;
+    -fx-background-color: -chat-background-500;
     -fx-border-radius: 40;
     -fx-background-radius: 40;
     -fx-alignment: center;
@@ -39,20 +39,20 @@
 }
 
 .chat-channel-box > .label.chat-channel-name {
-    -fx-text-fill: -chat-text-fill;
+    -fx-text-fill: -chat-text-sent-fill-500;
     -fx-font-size: 1.2em;
 }
 
 .chat-channel-box > .chat-channel-button {
     -fx-font-family: "FontAwesome";
     -fx-font-size: 1.5em;
-    -fx-text-fill: -chat-text-fill;
+    -fx-text-fill: -chat-text-sent-fill-500;
     -fx-background-color: transparent;
     -fx-effect: null;
 }
 
 .chat-toolbar {
-    -fx-background-color: -chat-accent;
+    -fx-background-color: -chat-accent-500;
     -fx-padding: 10;
     -fx-alignment: center-left;
     -fx-spacing: 10;
@@ -60,11 +60,11 @@
 }
 
 .chat-toolbar .label {
-    -fx-text-fill: -chat-text-fill-light;
+    -fx-text-fill: -chat-text-sent-fill-200;
 }
 
 .chat-bottom-bar {
-    -fx-background-color: -chat-background;
+    -fx-background-color: -chat-background-500;
     -fx-background-radius: 3em;
     /* Margin fix start */
     -fx-padding: 0.75em 1.25em 0.75em 1.25em;
@@ -83,8 +83,8 @@
 .chat-bottom-bar .chat-text-editor {
     -fx-background-color: transparent;
     -fx-font-size: 1em;
-    -fx-text-fill: -chat-text-fill;
-    -fx-prompt-text-fill: derive(-chat-text-fill, 50%);
+    -fx-text-fill: -chat-text-sent-fill-500;
+    -fx-prompt-text-fill: derive(-chat-text-sent-fill-500, 50%);
     -fx-wrap-text: true;
     -fx-border-width: 0;
 }
@@ -100,7 +100,7 @@
 }
 
 .chat-bottom-bar .chat-text-editor .paragraph-text .text {
-    -fx-fill: -chat-text-fill;
+    -fx-fill: -chat-text-sent-fill-500;
 }
 
 /** Emoji Button inside Text Editor **/
@@ -110,11 +110,11 @@
 }
 
 .chat-bottom-bar .chat-text-editor > .emoji-button > .icon {
-    -fx-background-color: -chat-text-fill;
+    -fx-background-color: -chat-text-sent-fill-500;
 }
 
 .chat-bottom-bar .chat-text-editor > .emoji-button:hover > .icon {
-    -fx-background-color: -chat-text-fill-dark;
+    -fx-background-color: -chat-text-sent-fill-700;
 }
 
 /** Text Area inside Text Editor **/
@@ -123,7 +123,7 @@
 }
 
 .chat-bottom-bar .chat-text-editor .styled-text-area .text {
-    -fx-text-fill: -chat-text-fill;
+    -fx-text-fill: -chat-text-sent-fill-500;
 }
 
 .chat-bottom-bar .chat-text-editor > .virtualized-scroll-pane {
@@ -135,13 +135,13 @@
 .chat-bottom-bar .chat-button {
     -fx-font-family: "FontAwesome";
     -fx-font-size: 1.5em;
-    -fx-text-fill: -chat-text-fill;
+    -fx-text-fill: -chat-text-sent-fill-500;
     -fx-background-color: transparent;
     -fx-effect: null;
 }
 
 .chat-bottom-bar .chat-button:hover {
-    -fx-text-fill: -chat-text-fill-dark;
+    -fx-text-fill: -chat-text-sent-fill-700;
     -fx-background-color: transparent;
 }
 
@@ -174,62 +174,41 @@
     -fx-padding: 10;
 }
 
-.chat-message-sent {
-    -fx-background-color: -chat-bubble-background;
-}
-
-.chat-message-received {
-    -fx-background-color: #e9e9e9;
-}
-
-.chat-message-text {
-    /*-fx-background-color: -chat-bubble-background;*/
+.chat-message > .chat-message-bubble {
+    -fx-background-color: -chat-bubble-received-background;
     -fx-padding: 5 10 5 10;
     -fx-background-radius: 0 .8em .8em .8em;
 }
 
-.chat-message-bubble:right .chat-message-text {
-    -fx-background-radius: .8em 0 .8em .8em;
+.chat-message > .chat-message-bubble > * > .text {
+    -fx-fill: -chat-text-received-fill-500;
 }
 
-.chat-message-text > .text {
-    -fx-fill: -chat-text-fill;
+.chat-message > .chat-message-bubble:sent {
+    -fx-background-color: -chat-bubble-sent-background;
 }
 
-.chat-message-bubble .chat-message-text-handle {
-    -fx-padding: 10 0 0 10;
-    -fx-alignment: top-right;
+.chat-message > .chat-message-bubble:sent > * > .text {
+    -fx-fill: -chat-text-sent-fill-500;
 }
 
-.chat-message-bubble:right .chat-message-text-handle {
-    -fx-padding: 10 10 0 0;
-}
-
-.chat-message-date {
+.chat-message > .chat-message-bubble > HBox > .chat-message-date {
     -fx-font-size: 0.8em;
-    -fx-text-fill: -chat-text-fill-light;
+    -fx-text-fill: -chat-text-received-fill-200;
 }
 
-.chat-message-status {
+.chat-message > .chat-message-bubble > HBox > .chat-message-date:sent {
+    -fx-text-fill: -chat-text-sent-fill-200;
+}
+
+.chat-message > .chat-message-bubble > HBox > .chat-message-status {
     -fx-font-family: "FontAwesome";
     -fx-font-size: 0.8em;
-    -fx-text-fill: -chat-text-fill-light;
+    -fx-text-fill: -chat-text-sent-fill-200;
 }
 
-.chat-message-status:read {
-    -fx-text-fill: -chat-text-fill-blue-light;
-}
-
-.user-icon {
-    -fx-text-fill: -chat-text-fill-light;
-    -fx-background-color: -chat-background;
-    -fx-border-width: 2.5;
-    -fx-border-radius: 35;
-    -fx-background-radius: 35;
-    -fx-alignment: top-right;
-    -fx-padding: 15;
-    -fx-font-size: 1.1em;
-    -fx-font-weight: bold;
+.chat-message > .chat-message-bubble > HBox > .chat-message-status:read {
+    -fx-text-fill: -chat-text-fill-blue-200;
 }
 
 .outer-box {

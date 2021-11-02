@@ -6,12 +6,12 @@
 }
 
 .search-box > .icon > .icon-text {
-    -fx-text-fill: -chat-text-fill;
+    -fx-text-fill: -chat-text-sent-fill-500;
 }
 
 .search-box > .charm-text-field > .text-field {
-    -fx-text-fill: -chat-text-fill;
-    -fx-prompt-text-fill: derive(-fx-text-fill, 10%);
+    -fx-text-fill: -chat-text-sent-fill-500;
+    -fx-prompt-text-fill: derive(-chat-text-sent-fill-500, 10%);
 }
 
 .channel-list,
@@ -26,29 +26,26 @@
 }
 
 .channel-list .list-cell.header-cell > .header-box {
-    -fx-background-color: -chat-background-light;
+    -fx-background-color: -chat-background-200;
     -fx-padding: 10;
     -fx-alignment: center-left;
 }
 
 .channel-list .list-cell.header-cell > .header-box > .label {
     -fx-font-weight: bold;
-    -fx-text-fill: -chat-text-fill;
+    -fx-text-fill: -chat-text-sent-fill-500;
     -fx-font-size: 1.2em;
 }
 
 .channel-list .list-cell .primary-text {
-    -fx-text-fill: -chat-text-fill;
+    -fx-text-fill: -chat-text-sent-fill-500;
 }
 
 .channel-list .channel-cell:hover {
-    -fx-background-color: -chat-background;
+    -fx-background-color: -chat-background-500;
 }
 
-.channel-list .channel-cell:selected {
-    -fx-background-color: -chat-accent-selected;
-}
-
+.channel-list .channel-cell:selected,
 .channel-list .channel-cell:selected .primary-text {
     -fx-background-color: -chat-accent-selected;
 }
@@ -70,8 +67,8 @@ leads it to covering the entire width **/
 }
 
 .channel-icon {
-    -fx-text-fill: -chat-text-fill;
-    -fx-background-color: -chat-background;
+    -fx-text-fill: -chat-text-sent-fill-500;
+    -fx-background-color: -chat-background-500;
     -fx-border-radius: 50;
     -fx-background-radius: 50;
     -fx-alignment: center;

@@ -1,25 +1,25 @@
 @import "styles.css";
 
 .root {
-    /* accent color pallete */
-    -chat-accent       : #4aadda;
-    -chat-accent-light : derive( -chat-accent, 100% );
-    -chat-accent-dark  : derive( -chat-accent, -20% );
 
-    /* background color palette */
-    -chat-background       : #677585;
-    -chat-background-light : derive( -chat-background, -20% );
-    -chat-background-dark  : derive( -chat-background,  20% );
+    /* default color palette for dark theme
+    -500: default color
+    -200: darker version
+    -700: lighter version
+    */
 
-    /* text color palette */
-    -chat-text-fill       : #e7e4e4;
-    -chat-text-fill-light : derive( -chat-text-fill,  50% );
-    -chat-text-fill-dark  : derive( -chat-text-fill, -20% );
+    -chat-background-500     : #677585;
+    -chat-background-200     : #525e6a; /* derive( -chat-background-500, -20% ); */
+    -chat-background-700     : #7c8999; /* derive( -chat-background-500,  20% ); */
 
-    /** Views related vars */
-    -chat-accent-selected: -chat-background-dark;
-    -chat-bubble-background: -chat-background-dark;
+    -chat-accent-500         : #3b8cae;
+    -chat-accent-200         : #7c8999;
+    -chat-fill-500           : #474747;
 
-    /** Glisten swatch */
-    -primary-swatch-500: -chat-accent;
+    -chat-text-1-fill-500    : #e7e4e4;
+    -chat-text-1-fill-200    : #b9b6b6; /* derive( -chat-text-1-fill-500, -20% ); */
+    -chat-text-1-fill-700    : #efeded; /* derive( -chat-text-1-fill-500,  20% ); */
+    -chat-text-2-fill-500    : #e9e9e9;
+    -chat-text-2-fill-200    : #bababa; /* derive( -chat-text-2-fill-500, -20% ); */
+    -chat-text-2-fill-700    : #f0f0f0; /* derive( -chat-text-2-fill-500,  20% ); */
 }

@@ -20,57 +20,77 @@
     -fx-font-family: 'Inter'; /* uses all available weights*/
     -fx-font-size: 10pt;
 
-    /* accent color palette */
-    -chat-accent       : #4aadda;
-    -chat-accent-light : derive( -chat-accent, 100% );
-    -chat-accent-dark  : derive( -chat-accent, -20% );
+    /* default color palette for light theme
+    -500: default color
+    -200: lighter version
+    -700: darker version
+    */
+    -chat-background-500     : #EBEDEF;
+    -chat-background-200     : #ffffff; /* derive( -chat-background-500, 100% ); */
+    -chat-background-700     : #bcbebf; /* derive( -chat-background-500, -20% ); */
 
-    /* background color palette */
-    -chat-background       : #EBEDEF;
-    -chat-background-light : white;
-    -chat-background-dark  : derive( -chat-background, -20% );
+    /* accent color palette */
+    -chat-accent-500         : #4aadda;
+    -chat-accent-200         : #ebf6fb; /* derive( -chat-accent-500, 100% ); */
+    -chat-accent-700         : #3b8cae; /* derive( -chat-accent-500, -20% ); */
+
+    -chat-fill-500           : #e9e9e9;
 
     /* text color palette */
-    -chat-text-fill       : #5c5c5c;
-    -chat-text-fill-light : derive( -chat-text-fill,  50% );
-    -chat-text-fill-dark  : derive( -chat-text-fill, -20% );
-    -chat-text-fill-blue       : #235e95;
-    -chat-text-fill-blue-light  : derive( -chat-text-fill-blue,  50% );
-    -chat-text-fill-blue-dark   : derive( -chat-text-fill-blue,  -20% );
+    -chat-text-1-fill-500    : #5c5c5c;
+    -chat-text-1-fill-200    : #959595; /* derive( -chat-text-1-fill-500,  50% ); */
+    -chat-text-1-fill-700    : #4a4a4a; /* derive( -chat-text-1-fill-500, -20% ); */
+    -chat-text-2-fill-500    : #1b1b1b;
+    -chat-text-2-fill-200    : #5f5f5f; /* derive( -chat-text-2-fill-500,  50% ); */
+    -chat-text-2-fill-700    : #181818; /* derive( -chat-text-2-fill-500, -20% ); */
+
+    -chat-text-fill-blue-500 : #235e95;
+    -chat-text-fill-blue-200 : #5e8fba; /* derive( -chat-text-fill-blue-500,  50% ); */
+    -chat-text-fill-blue-700 : #1c4d77; /* derive( -chat-text-fill-blue-500, -20% ); */
+
+    -unread-label            : #f17835;
+    -unread-color            : #f17835cc;
+    -unread-color-hover      : #df502dcc;
+
+    /* text related vars */
+    -chat-text-sent-fill-500       : -chat-text-1-fill-500;
+    -chat-text-sent-fill-200       : -chat-text-1-fill-200;
+    -chat-text-sent-fill-700       : -chat-text-1-fill-700;
+
+    -chat-text-received-fill-500   : -chat-text-2-fill-500;
+    -chat-text-received-fill-200   : -chat-text-2-fill-200;
+    -chat-text-received-fill-700   : -chat-text-2-fill-700;
 
     /** Views related vars */
-    -chat-accent-selected: -chat-accent-light;
-    -chat-bubble-background: -chat-accent-light;
-
-    -unread-label: #f17835;
-    -unread-color: #f17835cc;
-    -unread-color-hover: #df502dcc;
+    -chat-accent-selected          : -chat-accent-200;
+    -chat-bubble-sent-background   : -chat-accent-200;
+    -chat-bubble-received-background : -chat-fill-500;
 
     /** Glisten swatch */
-    -primary-swatch-500: -chat-accent;
+    -primary-swatch-500: -chat-accent-500;
 }
 
 .view {
-    -fx-background-color: -chat-background-light;
+    -fx-background-color: -chat-background-200;
 }
 
 .app-bar {
-    -fx-background-color: -chat-background-light;
+    -fx-background-color: -chat-background-200;
 }
 
 .app-bar,
 .app-bar > .title-box > .label {
-    -fx-icon-fill: -chat-text-fill;
+    -fx-icon-fill: -chat-text-sent-fill-500;
 }
 
 .app-bar  > .action-items > .icon-toggle {
-    -fx-text-fill: -chat-text-fill;
+    -fx-text-fill: -chat-text-sent-fill-500;
     -fx-label-padding: 0 0 0 0;
 }
 
 .app-bar  > .action-items > .icon-toggle:hover {
-    -fx-text-fill: -chat-text-fill-dark;
-    -fx-background-color: -chat-background-dark;
+    -fx-text-fill: -chat-text-sent-fill-700;
+    -fx-background-color: -chat-background-700;
 }
 
 .font-icon {
