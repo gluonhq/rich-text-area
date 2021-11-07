@@ -10,8 +10,6 @@ import javafx.beans.InvalidationListener;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 
@@ -62,7 +60,6 @@ public class ChannelPresenter {
                 }
             }
         });
-        service.initializeService();
     }
 
     public void updateChannels(boolean removeSelection) {
