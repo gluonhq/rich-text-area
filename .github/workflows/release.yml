@@ -329,7 +329,7 @@ jobs:
 
       - name: Build and package
         run: |
-          mvn versions:set -DnewVersion=${{ env.APP_VERSION }} -DgenerateBackupPoms=false
+          mvn versions:set -DnewVersion="${{ env.APP_VERSION }}" -DgenerateBackupPoms=false
           mvn clean install && mvn package -f App
         env:
           APP_VERSION: ${{needs.create-release.outputs.app_version}}
