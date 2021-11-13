@@ -63,7 +63,7 @@ jobs:
 
       - name: Build and package
         run: |
-          mvn versions:set -DnewVersion=$APP_VERSION -DgenerateBackupPoms=false
+          mvn versions:set -DnewVersion=${{ env.APP_VERSION }} -DgenerateBackupPoms=false
           mvn clean install && mvn package -f App
         env:
           APP_VERSION: ${{needs.create-release.outputs.app_version}}
@@ -80,7 +80,7 @@ jobs:
           mv App/target/installer/*.rpm staging/ChatApp-${{ env.APP_VERSION }}.rpm
           echo ::set-output name=pathRpm::staging/ChatApp-${{ env.APP_VERSION }}.rpm
         env:
-          PROJECT_VERSION: 1.1.0-SNAPSHOT
+          PROJECT_VERSION: ${{needs.create-release.outputs.app_version}}
           APP_VERSION: ${{needs.create-release.outputs.app_version}}
 
       - name: Upload installer (deb)
@@ -147,7 +147,7 @@ jobs:
       - name: Gluon Build
         run: |
           ls App/src/main/resources
-          mvn versions:set -DnewVersion=$APP_VERSION -DgenerateBackupPoms=false
+          mvn versions:set -DnewVersion=${{ env.APP_VERSION }} -DgenerateBackupPoms=false
           mvn install && mvn gluonfx:build gluonfx:package -f App
         env:
           APP_VERSION: ${{needs.create-release.outputs.app_version}}
@@ -202,7 +202,7 @@ jobs:
 
       - name: Build and package
         run: |
-          mvn versions:set -DnewVersion=$APP_VERSION -DgenerateBackupPoms=false
+          mvn versions:set -DnewVersion=${{ env.APP_VERSION }} -DgenerateBackupPoms=false
           mvn clean install && mvn package -f App
         env:
           APP_VERSION: ${{needs.create-release.outputs.app_version}}
@@ -218,7 +218,7 @@ jobs:
         env:
           GLUON_MACSIGN_PREFIX: ${{ secrets.GLUON_MACSIGN_PREFIX }}
           GLUON_MACSIGN_USER: ${{ secrets.GLUON_MACSIGN_USER }}
-          PROJECT_VERSION: 1.1.0-SNAPSHOT
+          PROJECT_VERSION: ${{needs.create-release.outputs.app_version}}
           APP_VERSION: ${{needs.create-release.outputs.app_version}}
 
       - name: Notarize Installer
@@ -271,7 +271,7 @@ jobs:
 
       - name: Gluon Build
         run: |
-          mvn versions:set -DnewVersion=$APP_VERSION -DgenerateBackupPoms=false
+          mvn versions:set -DnewVersion=${{ env.APP_VERSION }} -DgenerateBackupPoms=false
           mvn clean install && mvn -Pdesktop gluonfx:build -f App
         env:
           APP_VERSION: ${{needs.create-release.outputs.app_version}}
@@ -329,7 +329,7 @@ jobs:
 
       - name: Build and package
         run: |
-          mvn versions:set -DnewVersion=$APP_VERSION -DgenerateBackupPoms=false
+          mvn versions:set -DnewVersion=${{ env.APP_VERSION }} -DgenerateBackupPoms=false
           mvn clean install && mvn package -f App
         env:
           APP_VERSION: ${{needs.create-release.outputs.app_version}}
@@ -341,7 +341,7 @@ jobs:
           call .github\scripts\build_app_windows.bat
           echo ::set-output name=path::App\target\installer\WaveApp-${{ env.APP_VERSION }}.msi
         env:
-          PROJECT_VERSION: 1.1.0-SNAPSHOT
+          PROJECT_VERSION: ${{needs.create-release.outputs.app_version}}
           APP_VERSION: ${{needs.create-release.outputs.app_version}}
 
       - name: Codesign
@@ -400,7 +400,7 @@ jobs:
 
       - name: Gluon Build
         run: |
-          mvn versions:set -DnewVersion=$APP_VERSION -DgenerateBackupPoms=false
+          mvn versions:set -DnewVersion=${{ env.APP_VERSION }} -DgenerateBackupPoms=false
           mvn install && mvn -Pdesktop gluonfx:build gluonfx:package -f App
         env:
           APP_VERSION: ${{needs.create-release.outputs.app_version}}

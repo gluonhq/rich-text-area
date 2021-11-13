@@ -7,8 +7,26 @@ on:
     branches: [ master ]
 
 jobs:
+  find-version:
+    runs-on: ubuntu-latest
+    outputs:
+      project_version: ${{ steps.define_version.outputs.project_version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Define version
+        id: define_version
+        run: |
+          PROJECT_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+          echo "::set-output name=project_version::$PROJECT_VERSION"
+
   linux-jpackage:
     runs-on: ubuntu-18.04
+    needs: find-version
     steps:
       - uses: actions/checkout@v2
 
@@ -53,7 +71,7 @@ jobs:
           mv App/target/installer/*.rpm staging/ChatApp-${{ env.APP_VERSION }}.rpm
           echo ::set-output name=pathRpm::staging/ChatApp-${{ env.APP_VERSION }}.rpm
         env:
-          PROJECT_VERSION: 1.1.0-SNAPSHOT
+          PROJECT_VERSION: ${{needs.find-version.outputs.project_version}}
           APP_VERSION: 1.0.0
 
       - name: Upload installer (deb)
@@ -71,6 +89,7 @@ jobs:
 
   linux-native:
     runs-on: ubuntu-18.04
+    needs: find-version
     steps:
       - uses: actions/checkout@v2
 
@@ -111,6 +130,7 @@ jobs:
 
   macos-jpackage:
     runs-on: macos-latest
+    needs: find-version
     steps:
       - uses: actions/checkout@v2
 
@@ -140,7 +160,7 @@ jobs:
         env:
           GLUON_MACSIGN_PREFIX: ${{ secrets.GLUON_MACSIGN_PREFIX }}
           GLUON_MACSIGN_USER: ${{ secrets.GLUON_MACSIGN_USER }}
-          PROJECT_VERSION: 1.1.0-SNAPSHOT
+          PROJECT_VERSION: ${{needs.find-version.outputs.project_version}}
           APP_VERSION: 1.0.0
 
       - name: Upload installer
@@ -152,6 +172,7 @@ jobs:
 
   macos-native:
     runs-on: macos-latest
+    needs: find-version
     steps:
       - uses: actions/checkout@v2
 
@@ -187,6 +208,7 @@ jobs:
 
   windows-jpackage:
     runs-on: windows-latest
+    needs: find-version
     steps:
       - uses: actions/checkout@v2
 
@@ -221,7 +243,7 @@ jobs:
           call .github\scripts\build_app_windows.bat
           echo ::set-output name=path::App\target\installer\ChatApp-${{ env.APP_VERSION }}.msi
         env:
-          PROJECT_VERSION: 1.1.0-SNAPSHOT
+          PROJECT_VERSION: ${{needs.find-version.outputs.project_version}}
           APP_VERSION: 1.0.0
 
       - name: Upload installer
@@ -235,6 +257,7 @@ jobs:
   windows-native:
     if: ${{ false }}
     runs-on: windows-latest
+    needs: find-version
     steps:
       - uses: actions/checkout@v2
 
