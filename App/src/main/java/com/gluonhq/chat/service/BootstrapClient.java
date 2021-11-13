@@ -18,4 +18,10 @@ public interface BootstrapClient {
      */
     void bootstrapSucceeded();
     
+    /**
+     * Callback method, invoked by a Service, when bootstrap has failed.
+     * @param msg a message with some raw explanation about the failure
+     */
+    default void bootstrapFailed(String msg) {}
+    
 }

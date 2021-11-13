@@ -11,6 +11,10 @@ import javafx.scene.image.ImageView;
 
 import javax.inject.Inject;
 import java.util.ResourceBundle;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.image.Image;
 
 public class LoginPresenter implements BootstrapClient{
@@ -42,6 +46,17 @@ public class LoginPresenter implements BootstrapClient{
     @Override
     public void bootstrapSucceeded() {
         nextStep();
+    }
+
+    @Override 
+    public void bootstrapFailed(String msg) {
+        System.err.println("BOOTSTRAP FAILED");
+        Dialog dialog = new Dialog();
+        dialog.setTitle("bootstrap failed");
+        ButtonType type = new ButtonType("Ok", ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().add(type);
+        dialog.setContentText(msg);
+        dialog.showAndWait();
     }
 
     private void nextStep() {

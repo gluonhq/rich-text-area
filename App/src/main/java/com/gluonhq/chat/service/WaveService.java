@@ -48,6 +48,8 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     private ObservableList<Channel> channels;
 
     public WaveService() {
+        // set this property to edit the time we allow to sync contacts at bootstrap
+       // System.setProperty("com.gluonhq.wave.provisioningTimeout","30000"); // 30 seconds
         wave = WaveManager.getInstance();
         wave.setLogLevel(Level.DEBUG);
         wave.getWaveLogger().log(Level.DEBUG, "Creating waveService: " + System.identityHashCode(wave));
@@ -237,7 +239,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     }
 
     @Override
-    public void bootstrap(BootstrapClient loginPresenter) {
+    public void bootstrap(BootstrapClient loginPresenter) {      
         this.bootstrapClient = loginPresenter;
         Runnable r = () -> wave.startProvisioning(this);
         Thread t = new Thread(r);
@@ -295,6 +297,17 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             Platform.runLater(() -> bootstrapClient.bootstrapSucceeded());
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+    
+    @Override public void gotProvisioningError(String msg) {
+        System.err.println("WAVESERVICE received error: "+ msg);
+        if ("CONTACT_SYNC_ERROR".equals(msg)) {
+            String text = "We couldn't get your contacts in the past 30 seconds. "+
+                    "This happens sometimes at bootstrapping. Restarting the application "
+                    + "typically fixes this. You do not need to pair your device anymore, "
+                    + "that's already done.";
+            Platform.runLater(() -> bootstrapClient.bootstrapFailed(text));
         }
     }
 
