@@ -7,13 +7,17 @@
 <?import com.gluonhq.charm.glisten.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import com.gluonhq.charm.glisten.control.Icon?>
+<?import org.controlsfx.control.NotificationPane?>
 <View fx:id="channels" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gluonhq.chat.views.ChannelPresenter">
     <top>
-        <HBox fx:id="searchBox" styleClass="search-box">
-            <Icon content="SEARCH" />
-            <TextField fx:id="search" promptText="%search.placeholder.text"/>
-        </HBox>
-        
+        <NotificationPane fx:id="notificationPane">
+            <content>
+                <HBox fx:id="searchBox" styleClass="search-box">
+                    <Icon content="SEARCH" />
+                    <TextField fx:id="search" promptText="%search.placeholder.text"/>
+                </HBox>
+            </content>
+        </NotificationPane>
     </top>
     <center>
         <CharmListView fx:id="channelList" styleClass="channel-list" BorderPane.alignment="CENTER" />

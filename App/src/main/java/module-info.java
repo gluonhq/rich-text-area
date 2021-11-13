@@ -25,6 +25,7 @@ module com.gluonhq.chat {
     requires com.gluonhq.emoji.popup;
     requires com.gluonhq.emoji.control;
     requires java.sql;
+    requires java.net.http;
     // TODO: Remove
     // requires org.scenicview.scenicview;
 
@@ -32,6 +33,7 @@ module com.gluonhq.chat {
     requires java.annotation;
     requires afterburner.mfx;
     requires com.gluonhq.wave;
+    requires org.controlsfx.controls;
 
     opens com.gluonhq.chat.service to afterburner.mfx;
     opens com.gluonhq.chat.views to com.gluonhq.glisten.afterburner,
@@ -40,4 +42,5 @@ module com.gluonhq.chat {
     opens com.gluonhq.chat.model to com.gluonhq.cloudlink.client;
 
     exports com.gluonhq.chat;
+    exports com.gluonhq.chat.model to com.gluonhq.connect;
 }

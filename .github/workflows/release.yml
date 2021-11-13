@@ -62,7 +62,11 @@ jobs:
           java-version: '17'
 
       - name: Build and package
-        run: mvn clean install && mvn package -f App
+        run: |
+          mvn versions:set -DnewVersion=$APP_VERSION -DgenerateBackupPoms=false
+          mvn clean install && mvn package -f App
+        env:
+          APP_VERSION: ${{needs.create-release.outputs.app_version}}
 
       - name: Create Bundle using jpackage
         id: outputfile
@@ -143,7 +147,10 @@ jobs:
       - name: Gluon Build
         run: |
           ls App/src/main/resources
-          mvn install && mvn -Pdesktop gluonfx:build gluonfx:package -f App
+          mvn versions:set -DnewVersion=$APP_VERSION -DgenerateBackupPoms=false
+          mvn install && mvn gluonfx:build gluonfx:package -f App
+        env:
+          APP_VERSION: ${{needs.create-release.outputs.app_version}}
 
       - name: Copy native image to staging
         run: cp -r App/target/gluonfx/x86_64-linux/ChatApp* staging
@@ -194,7 +201,11 @@ jobs:
           p12-password: ${{ secrets.CERTIFICATES_PASSWORD }}
 
       - name: Build and package
-        run: mvn clean install && mvn package -f App
+        run: |
+          mvn versions:set -DnewVersion=$APP_VERSION -DgenerateBackupPoms=false
+          mvn clean install && mvn package -f App
+        env:
+          APP_VERSION: ${{needs.create-release.outputs.app_version}}
 
       - name: Create Bundle using jpackage
         id: outputfile
@@ -259,7 +270,11 @@ jobs:
           dir: App
 
       - name: Gluon Build
-        run: mvn clean install && mvn -Pdesktop gluonfx:build -f App
+        run: |
+          mvn versions:set -DnewVersion=$APP_VERSION -DgenerateBackupPoms=false
+          mvn clean install && mvn -Pdesktop gluonfx:build -f App
+        env:
+          APP_VERSION: ${{needs.create-release.outputs.app_version}}
 
       - name: Copy native image to staging
         run: |
@@ -313,7 +328,11 @@ jobs:
           java-version: '17'
 
       - name: Build and package
-        run: mvn clean install && mvn package -f App
+        run: |
+          mvn versions:set -DnewVersion=$APP_VERSION -DgenerateBackupPoms=false
+          mvn clean install && mvn package -f App
+        env:
+          APP_VERSION: ${{needs.create-release.outputs.app_version}}
 
       - name: Create Bundle using jpackage
         id: outputfile
@@ -380,7 +399,11 @@ jobs:
           dir: App
 
       - name: Gluon Build
-        run: mvn install && mvn -Pdesktop gluonfx:build gluonfx:package -f App
+        run: |
+          mvn versions:set -DnewVersion=$APP_VERSION -DgenerateBackupPoms=false
+          mvn install && mvn -Pdesktop gluonfx:build gluonfx:package -f App
+        env:
+          APP_VERSION: ${{needs.create-release.outputs.app_version}}
 
       - name: Copy native image to staging      
         run: cp -r App/target/gluonfx/x86_64-windows/ChatApp.exe staging

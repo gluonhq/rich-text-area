@@ -84,3 +84,11 @@ leads it to covering the entire width **/
     -fx-fill: transparent;
     -fx-stroke: transparent;
 }
+
+.notification-pane .notification-bar > .pane > .label {
+    -fx-font-size: 1em;
+}
+
+.notification-pane .notification-bar > .pane > .button-bar .action  {
+    -fx-font-size: 0.9em;
+}

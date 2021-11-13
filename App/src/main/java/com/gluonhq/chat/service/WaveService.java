@@ -3,13 +3,17 @@ package com.gluonhq.chat.service;
 import com.gluonhq.chat.model.Channel;
 import com.gluonhq.chat.model.ChatImage;
 import com.gluonhq.chat.model.ChatMessage;
+import com.gluonhq.chat.model.GithubRelease;
 import com.gluonhq.chat.model.User;
+import com.gluonhq.connect.GluonObservableList;
 import com.gluonhq.equation.WaveManager;
 import com.gluonhq.equation.message.MessagingClient;
 import com.gluonhq.equation.model.Contact;
 import com.gluonhq.equation.provision.ProvisioningClient;
 import com.gluonhq.equation.util.QRGenerator;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -29,6 +33,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.gluonhq.chat.service.UpdateService.*;
 
 public class WaveService implements Service, ProvisioningClient, MessagingClient {
 
@@ -323,7 +329,34 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             ex.printStackTrace();
         }
     }
-    
+
+    @Override
+    public BooleanProperty newVersionAvailable() {
+        BooleanProperty versionAvailable = new SimpleBooleanProperty();
+        String OS = System.getProperty("os.name").toLowerCase();
+        if (OS.contains("win") || OS.contains("mac")) {
+            GluonObservableList<GithubRelease> githubReleases = UpdateService.queryReleases();
+            githubReleases.setOnSucceeded(e -> {
+                Optional<GithubRelease> latestVersion = githubReleases.stream()
+                        .max((o1, o2) -> compareVersions(o1.getTag_version(), o2.getTag_version()));
+                final String appVersion = currentAppVersion();
+                if (latestVersion.isPresent() && !appVersion.contains("SNAPSHOT")) {
+                    if (compareVersions(latestVersion.get().getTag_version(), appVersion) > 0) {
+                        downloadNewVersion(latestVersion.get(), versionAvailable::set);
+                    } else {
+                        deleteExistingFiles();
+                    }
+                }
+            });
+        }
+        return versionAvailable;
+    }
+
+    @Override
+    public void installNewVersion() {
+        UpdateService.installNewVersion();
+    }
+
     /**
      * Return the channel that contains the given senderUuid as its first member.
      * In case of a direct channel, there is only 1 member, so this returns the

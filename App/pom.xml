@@ -14,6 +14,7 @@
         <mainClassName>com.gluonhq.chat.GluonChat</mainClassName>
         <form.factor>phone</form.factor>
 <!--        <form.factor>tablet</form.factor>-->
+        <app.version>${project.version}</app.version>
     </properties>
 
     <build>
@@ -35,6 +36,10 @@
                         <option>javafx.graphics/com.sun.javafx.geom=richtextfx</option>
                         <option>--add-opens</option>
                         <option>javafx.graphics/com.sun.javafx.css=org.controlsfx.controls</option>
+                        <option>--add-exports</option>
+                        <option>javafx.graphics/com.sun.javafx.scene=org.controlsfx.controls</option>
+                        <option>--add-exports</option>
+                        <option>javafx.graphics/com.sun.javafx.scene.traversal=org.controlsfx.controls</option>
                     </options>
                     <mainClass>${mainClassName}</mainClass>
                 </configuration>
@@ -63,6 +68,10 @@
                                 <option>javafx.graphics/com.sun.javafx.geom=richtextfx</option>
                                 <option>--add-opens</option>
                                 <option>javafx.graphics/com.sun.javafx.css=org.controlsfx.controls</option>
+                                <option>--add-exports</option>
+                                <option>javafx.graphics/com.sun.javafx.scene=org.controlsfx.controls</option>
+                                <option>--add-exports</option>
+                                <option>javafx.graphics/com.sun.javafx.scene.traversal=org.controlsfx.controls</option>
                             </options>
                             <mainClass>${mainClassName}</mainClass>
                         </configuration>
@@ -144,6 +153,12 @@
                 </executions>
             </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
     </build>
 
     <dependencies>
@@ -157,6 +172,16 @@
             <artifactId>javafx-fxml</artifactId>
             <version>${javafxVersion}</version>
         </dependency>
+        <!--<dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>${javafxVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
+            <version>${javafxVersion}</version>
+        </dependency>-->
         <dependency>
             <groupId>com.gluonhq</groupId>
             <artifactId>equation</artifactId>

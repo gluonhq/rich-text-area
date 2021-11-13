@@ -4,6 +4,8 @@ import com.gluonhq.chat.model.Channel;
 import com.gluonhq.chat.model.ChatImage;
 import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.model.User;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
@@ -83,6 +85,11 @@ public interface Service {
      */
     default void updateUnreadList(String channelId, boolean add) {}
 
+    default BooleanProperty newVersionAvailable() {
+        return new SimpleBooleanProperty(false);
+    }
+
+    default void installNewVersion() { }
 
     static String getInitials(String name) {
         if (name != null) {

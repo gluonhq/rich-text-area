@@ -12,6 +12,8 @@ import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import org.controlsfx.control.NotificationPane;
+import org.controlsfx.control.action.Action;
 
 import javax.inject.Inject;
 import java.time.LocalDateTime;
@@ -22,6 +24,7 @@ public class ChannelPresenter {
 
     @FXML private TextField search;
     @FXML private CharmListView<Channel, String> channelList;
+    @FXML private NotificationPane notificationPane;
 
     @Inject private Service service;
     @FXML private ResourceBundle resources;
@@ -58,6 +61,16 @@ public class ChannelPresenter {
                     label.setText(resources.getString(item.isDirect() ? "channels.category.direct" : "channels.category.group"));
                     setGraphic(box);
                 }
+            }
+        });
+        notificationPane.setText("Update Available");
+        notificationPane.getActions().addAll(new Action("Install", ae -> {
+            service.installNewVersion();
+            notificationPane.hide();
+        }));
+        service.newVersionAvailable().addListener((o, ov, nv) -> {
+            if (nv) {
+                notificationPane.show();
             }
         });
     }
