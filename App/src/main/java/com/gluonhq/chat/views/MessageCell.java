@@ -158,6 +158,15 @@ class MessageCell extends CharmListCell<ChatMessage> {
                 BorderPane.setAlignment(message, Pos.TOP_LEFT);
                 BorderPane.setAlignment(messageBubble, Pos.TOP_LEFT);
                 BorderPane.setAlignment(dateAndStatus, Pos.BOTTOM_LEFT);
+                if (!item.getReceiptType().equals(ChatMessage.ReceiptType.READ)){
+                    if (this.isVisible()) {
+                        // TODO: even when this entry is outside the listview boundaries,
+                        // we sent a READ message which is not wat we want.
+                        item.receiptProperty().set(ChatMessage.ReceiptType.READ);
+                    } else {
+                        System.err.println("not visible!");
+                    }
+                }
             }
             pseudoClassStateChanged(UNREAD, getIndex() == getUnreadIndex());
 

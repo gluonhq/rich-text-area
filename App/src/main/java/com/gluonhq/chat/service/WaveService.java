@@ -35,6 +35,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.gluonhq.chat.service.UpdateService.*;
+import javafx.beans.InvalidationListener;
 
 public class WaveService implements Service, ProvisioningClient, MessagingClient {
 
@@ -193,6 +194,18 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         }
         User sender = findUserByUuid(senderUuid, users).get();
         ChatMessage chatMessage = new ChatMessage(content, sender, timestamp);
+        InvalidationListener il = o -> new InvalidationListener() {
+            @Override
+            public void invalidated(javafx.beans.Observable obs) {
+                ChatMessage.ReceiptType rtype = chatMessage.receiptProperty().get();
+                wave.getWaveLogger().log(Level.DEBUG, "new receipt for msg with timestamp "+timestamp+" and senderuid = "+senderUuid);
+                if (rtype.equals(ChatMessage.ReceiptType.READ)) {
+                    wave.sendReadReceipt(timestamp, senderUuid);
+                    chatMessage.receiptProperty().removeListener(this);
+                }
+            }
+        };
+        chatMessage.receiptProperty().addListener(il);
         Platform.runLater(() -> dest.getMessages().add(chatMessage));
         storeMessage(receiverUuid, senderUuid, content, timestamp);
     }
