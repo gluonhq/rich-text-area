@@ -104,4 +104,8 @@ public interface Service {
         }
     }
 
+    default public ObservableList<ChatMessage> getMessages(User loggedUser) {
+        return FXCollections.emptyObservableList();
+    }
+
 }

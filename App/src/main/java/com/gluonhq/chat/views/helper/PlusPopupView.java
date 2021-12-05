@@ -6,6 +6,7 @@ import com.gluonhq.attach.position.Position;
 import com.gluonhq.attach.position.PositionService;
 import com.gluonhq.attach.util.Platform;
 import com.gluonhq.charm.glisten.layout.layer.PopupView;
+import com.gluonhq.chat.model.Channel;
 import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.service.Service;
 import com.gluonhq.chat.views.AppViewManager;
@@ -26,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.ResourceBundle;
 
 import static com.gluonhq.chat.service.ImageUtils.*;
+import java.util.List;
 
 public class PlusPopupView extends PopupView {
 
@@ -45,9 +47,13 @@ public class PlusPopupView extends PopupView {
         service = Injector.instantiateModelOrService(Service.class);
         
         //TODO: FixME
-        // messages = service.getMessages(service.loggedUser());
-        messages = FXCollections.observableArrayList();
+        messages = service.getMessages(service.loggedUser());
+       //  messages = FXCollections.observableArrayList();
         initialize();
+    }
+    
+    public void setActiveChannel(Channel c) {
+        this.messages = c.getMessages();
     }
 
     private void initialize() {
@@ -65,11 +71,16 @@ public class PlusPopupView extends PopupView {
                 if (file != null) {
                     try {
                         Image image = new Image(new FileInputStream(file));
-                        String id = service.addImage(file.getName() + "-" + System.currentTimeMillis(), image);
-                        if (id != null) {
-                            var message = new ChatMessage(id, service.loggedUser(), System.currentTimeMillis());
-                            messages.add(message);
-                        }
+                        ChatMessage msg = new ChatMessage("", service.loggedUser(), System.currentTimeMillis(),true);
+                        msg.setAttachment(List.of(file.toPath()));
+                        messages.add(msg);
+                        
+                        System.err.println("done adding "+msg);
+//                        String id = service.addImage(file.getName() + "-" + System.currentTimeMillis(), image);
+//                        if (id != null) {
+//                            var message = new ChatMessage(id, service.loggedUser(), System.currentTimeMillis());
+//                            messages.add(message);
+//                        }
                     } catch (FileNotFoundException e1) {
                         e1.printStackTrace();
                     }

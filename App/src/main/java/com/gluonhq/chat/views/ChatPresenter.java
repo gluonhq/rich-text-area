@@ -57,6 +57,7 @@ public class ChatPresenter {
     private ChatListView<ChatMessage> chatList;
     private ObservableList<ChatMessage> messages;
     private PauseTransition pause;
+    private PlusPopupView popup;
 
     public void initialize() {
         closeChannel.setOnAction(e -> updateMessages(null));
@@ -153,6 +154,7 @@ public class ChatPresenter {
                         channelIcon.getChildren().setAll(icon);
                     });
             bottomPane.setDisable(false);
+            popup.setActiveChannel(channel);
         } else {
             chatList.setItems(null);
             channelIcon.getChildren().clear();
@@ -196,7 +198,7 @@ public class ChatPresenter {
     }
 
     private void setupAddButton() {
-        PlusPopupView popup = new PlusPopupView(addButton, resources);
+        popup = new PlusPopupView(addButton, resources);
         addButton.setOnAction(event -> popup.show());
     }
 }

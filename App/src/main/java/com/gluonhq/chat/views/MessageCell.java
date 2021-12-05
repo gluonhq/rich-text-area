@@ -43,6 +43,14 @@ import java.util.regex.Pattern;
 import static com.gluonhq.chat.service.ImageUtils.IMAGE_PREFIX;
 import static com.gluonhq.chat.service.ImageUtils.LATLON;
 import com.gluonhq.connect.GluonObservableList;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.nio.file.Path;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.scene.Scene;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 class MessageCell extends CharmListCell<ChatMessage> {
 
@@ -56,6 +64,7 @@ class MessageCell extends CharmListCell<ChatMessage> {
     private static final Image loading = new Image(MessageCell.class.getResourceAsStream("/InternetSlowdown_Day.gif"), 150, 150, true, true);
     private ChatListView<ChatMessage> chatList;
 
+    private final VBox messageBox;
     private final TextFlow message;
     private final Label msgHandle = new Label("", null);
 
@@ -80,11 +89,12 @@ class MessageCell extends CharmListCell<ChatMessage> {
 
         setWrapText(true);
         this.message = new TextFlow();
+        this.messageBox = new VBox(this.message);
 
         dateAndStatus = new HBox(10, date, status);
         dateAndStatus.setMaxWidth(Region.USE_PREF_SIZE);
 
-        messageBubble = new BorderPane(message);
+        messageBubble = new BorderPane(messageBox);
         messageBubble.setBottom(dateAndStatus);
         messageBubble.setMaxWidth(Region.USE_PREF_SIZE);
         messageBubble.getStyleClass().setAll("chat-message-bubble");
@@ -118,6 +128,35 @@ class MessageCell extends CharmListCell<ChatMessage> {
         if (empty || item == null) {
             setGraphic(null);
         } else {
+            this.messageBox.getChildren().clear();
+            List<Path> attachment = item.getAttachment();
+            for (Path p : attachment) {
+                try {
+                    Image i = new Image(new FileInputStream(p.toFile()));
+                    ImageView iv = new ImageView(i);
+                    iv.setFitHeight(100);
+                    iv.setFitWidth(100);
+                    iv.setOnMouseClicked(e -> {
+                        try {
+                            Stage stage = new Stage();
+                            BorderPane bp = new BorderPane();
+                            Image bigi = new Image(new FileInputStream(p.toFile()));
+                            ImageView bigiv = new ImageView(bigi);
+                            bp.setCenter(bigiv);
+                            Scene scene = new Scene(bp, 400, 400);
+                            stage.setScene(scene);
+                            stage.show();
+                        } catch (FileNotFoundException ex) {
+                            Logger.getLogger(MessageCell.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+
+                    });
+                    this.messageBox.getChildren().add(iv);
+                } catch (FileNotFoundException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            this.messageBox.getChildren().add(this.message);
             boolean isMe = item.getUser() != null &&
                     item.getUser().getId().equals(service.loggedUser().getId());
             message.getChildren().setAll(formatText(item.getMessage()));

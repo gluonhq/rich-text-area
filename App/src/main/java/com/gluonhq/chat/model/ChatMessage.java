@@ -1,8 +1,11 @@
 package com.gluonhq.chat.model;
 
+import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -44,7 +47,8 @@ public class ChatMessage extends Searchable {
     private final User user;
     private final boolean localOriginated;
     private final ObjectProperty<ReceiptType> receiptType = new SimpleObjectProperty<>(ReceiptType.UNKNOWN);
-
+    private List<Path> attachment = new LinkedList<>();
+    
     public ChatMessage(String message, User user, long timestamp) {
         this (message, user, timestamp, false);
     }
@@ -100,6 +104,14 @@ public class ChatMessage extends Searchable {
     */
     public boolean getLocalOriginated() {
         return this.localOriginated;
+    }
+
+    public void setAttachment(List<Path> v) {
+        this.attachment = v;
+    }
+    
+    public List<Path> getAttachment() {
+        return this.attachment;
     }
 
     @Override

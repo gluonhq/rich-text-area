@@ -172,7 +172,7 @@
             <artifactId>javafx-fxml</artifactId>
             <version>${javafxVersion}</version>
         </dependency>
-        <!--<dependency>
+        <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-swing</artifactId>
             <version>${javafxVersion}</version>
@@ -181,11 +181,11 @@
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-web</artifactId>
             <version>${javafxVersion}</version>
-        </dependency>-->
+        </dependency>
         <dependency>
             <groupId>com.gluonhq</groupId>
             <artifactId>equation</artifactId>
-            <version>0.9.14</version>
+            <version>0.9.15</version>
         </dependency>
 
         <dependency>
