@@ -108,6 +108,7 @@
                         <list>controlsfx</list>
                     </bundlesList>
                     <resourcesList>
+                        <item>about.properties</item>
                         <item>logging.properties</item>
                         <item>whisper.store</item>
                     </resourcesList>
