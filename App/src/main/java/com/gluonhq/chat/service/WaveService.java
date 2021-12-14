@@ -247,6 +247,12 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     @Override
     public void gotReceiptMessage(String senderUuid, int type, List<Long> timestamps) {
         Channel dest = getChannelByUuid(senderUuid);
+        if (dest == null) {
+            System.err.println("[WARNING] This should never happen. We got a receipt message"
+                    + "for someone we don't know: "+senderUuid);
+            System.err.println("Channels = "+channels);
+            return;
+        }
         Platform.runLater(() -> {
             ChatMessage.ReceiptType rtype = ChatMessage.ReceiptType.valueOf(type);
             dest.getMessages()
