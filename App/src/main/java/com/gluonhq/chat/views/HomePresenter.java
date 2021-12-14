@@ -21,6 +21,7 @@ import javafx.scene.layout.VBox;
 import javax.inject.Inject;
 
 import static com.gluonhq.chat.GluonChat.VIEW_CHANGE_WIDTH;
+import java.util.Objects;
 
 public class HomePresenter {
 
@@ -30,9 +31,11 @@ public class HomePresenter {
     private final ChangeListener<Number> widthListener = (o, ov, nv) -> changeOrientation(nv.doubleValue());
 
     public void initialize() {
+        System.err.println("HOMEPRESENTER init");
 //        OrientationService.create().ifPresent(o -> o.orientationProperty().addListener(obs -> setupView()));
 
         homeView.showingProperty().addListener((obs, ov, nv) -> {
+            System.err.println("HOMEPRESENTER shoing: "+nv);
             if (nv) {
                 AppManager.getInstance().getAppBar().setVisible(false);
                 setupView();
@@ -45,6 +48,7 @@ public class HomePresenter {
 
     private void setupView() {
         if (service.loggedUser() == null) {
+            System.err.println("HOMEPRESENTER setupView lu = null");
             AppViewManager.LOGIN_VIEW.switchView(ViewStackPolicy.SKIP);
         } else {
             showProgressIndicator();
@@ -63,13 +67,16 @@ public class HomePresenter {
 
     private void showProgressIndicator() {
         final ObservableList<Channel> channels = service.getChannels();
-        if (channels.isEmpty()) {
+        System.err.println("HV SHOWPI, channels = "+Objects.hash(channels)+" = " + channels);
+        if ((service.loggedUser() == null) && (channels.isEmpty())) {
+            System.err.println("HV EMPTY!");
             final VBox vBox = new VBox(10, new ProgressIndicator(), new Label("Retrieving contacts.."));
             vBox.setAlignment(Pos.CENTER);
             homeView.setCenter(new StackPane(vBox));
             channels.addListener(new InvalidationListener() {
                 @Override
                 public void invalidated(Observable o) {
+                    System.err.println("HV INVALIDATED");
                     if (homeView.isShowing()) {
                         changeOrientation(homeView.getScene().getWidth());
                     }
@@ -78,7 +85,10 @@ public class HomePresenter {
             });
         } else {
             if (homeView.isShowing()) {
+                System.err.println("HV showing");
                 changeOrientation(homeView.getScene().getWidth());
+            } else {
+                System.err.println("HV NOT showing");
             }
         }
         service.initializeService();

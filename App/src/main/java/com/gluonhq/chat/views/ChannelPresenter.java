@@ -18,7 +18,9 @@ import org.controlsfx.control.action.Action;
 import javax.inject.Inject;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.ResourceBundle;
+import javafx.beans.Observable;
 
 public class ChannelPresenter {
 
@@ -32,6 +34,7 @@ public class ChannelPresenter {
     private FilteredList<Channel> channelFilteredList;
 
     public void initialize() {
+        System.err.println("INIT CHANNELPRESENTER!!!!!!!!!!!!!!!\n\n\n\n\n\n\n");
         channelFilteredList = createChannelList();
         search.textProperty().addListener((o, ov, nv) -> channelFilteredList.setPredicate(channel -> {
             if (nv == null || nv.isEmpty()) {
@@ -90,6 +93,13 @@ public class ChannelPresenter {
                 sortedList.setComparator(Comparator.comparing(ChannelPresenter.this::latestMessageTime).reversed());
             });
         }
+        System.err.println("[WS] created channellist sortedlist = "+Objects.hash(sortedList));
+        sortedList.addListener(new InvalidationListener() {
+            @Override
+            public void invalidated(Observable o) {
+                System.err.println("[WS], sortedlist is now "+sortedList);
+            }
+        });
         return new FilteredList<>(sortedList);
     }
 

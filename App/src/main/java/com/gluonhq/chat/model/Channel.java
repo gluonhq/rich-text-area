@@ -2,6 +2,7 @@ package com.gluonhq.chat.model;
 
 import com.airhacks.afterburner.injection.Injector;
 import com.gluonhq.chat.service.Service;
+import com.gluonhq.equation.model.Group;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
@@ -47,6 +48,11 @@ public class Channel extends Searchable {
     public Channel(User user, ObservableList<ChatMessage> messages) {
         this("c"+user.getId(), user.displayName(), FXCollections.observableArrayList(user), messages);
         this.isDirect = true;
+    }
+
+    public Channel(Group group, ObservableList<ChatMessage> message) {
+        this("g"+group.getName(), group.getName(), FXCollections.emptyObservableList(), message );
+        this.isDirect = false;
     }
 
     public String getId() {
