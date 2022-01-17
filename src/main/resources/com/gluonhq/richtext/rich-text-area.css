@@ -1,0 +1,8 @@
+.rich-text .scroll-pane {
+    -fx-padding: 5;
+}
+
+.selection {
+    -fx-stroke: transparent;
+    -fx-fill: rgba(71, 145, 245, 0.3);
+}
