@@ -109,7 +109,7 @@ public class PieceTableTests {
     @DisplayName("Block line stops generated correctly")
     public void lineStopsGeneratedCorrectly() {
         PieceTable pt = new PieceTable(originalText);
-        Piece piece = pt.appendText(" \n \n \n   ");
+        Piece piece = pt.appendTextInternal(" \n \n \n   ");
         Assertions.assertArrayEquals( new int[]{1,3,5}, piece.lineStops );
     }
 

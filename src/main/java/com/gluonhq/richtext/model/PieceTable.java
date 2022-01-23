@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static com.gluonhq.richtext.model.Piece.BufferType.*;
 
@@ -13,7 +14,7 @@ import static com.gluonhq.richtext.model.Piece.BufferType.*;
  * Piece table implementation.<br>
  * More info at  https://en.wikipedia.org/wiki/Piece_table
  */
-public class PieceTable extends  AbstractTextBuffer {
+public class PieceTable extends AbstractTextBuffer {
 
     final String originalText;
     String additionBuffer = "";
@@ -62,7 +63,7 @@ public class PieceTable extends  AbstractTextBuffer {
     }
 
     // internal append
-    Piece appendText(String text) {
+    Piece appendTextInternal(String text) {
         int pos = additionBuffer.length();
         additionBuffer += text;
         textLength = getTextLength() + text.length();
@@ -78,7 +79,7 @@ public class PieceTable extends  AbstractTextBuffer {
         Objects.requireNonNull(text);
         if (!text.isEmpty()) {
             int pos = additionBuffer.length();
-            pieces.add(appendText(text));
+            pieces.add(appendTextInternal(text));
             fireInsert(text, pos);
         }
     }
@@ -90,11 +91,11 @@ public class PieceTable extends  AbstractTextBuffer {
     }
 
     // Walks through pieces. Returns true if process was interrupted
-    private void walkPieces(WalkStep iteration) {
+    private void walkPieces(WalkStep step) {
         int textPosition = 0;
         int pieceIndex = 0;
         for (Piece piece : pieces) {
-            if (iteration.process(piece, textPosition, pieceIndex)) {
+            if (step.process(piece, textPosition, pieceIndex)) {
                 return;
             }
             textPosition += piece.length;
@@ -130,7 +131,7 @@ public class PieceTable extends  AbstractTextBuffer {
                     pieces.addAll( pieceIndex,
                         normalize( List.of(
                             piece.pieceBefore(pieceOffset),
-                            appendText(text),
+                            appendTextInternal(text),
                             piece.pieceFrom(pieceOffset)
                         ))
                     );
@@ -219,7 +220,6 @@ class Piece {
     enum BufferType { ORIGINAL, ADDITION }
 
     final PieceTable source;
-//    final boolean isOriginalBuffer; // which buffer the text is in
     final BufferType bufferType;
     final int start;                // start position with the buffer
     final int length;               // text length
