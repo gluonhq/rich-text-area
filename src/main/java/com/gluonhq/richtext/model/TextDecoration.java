@@ -1,13 +1,19 @@
-package com.gluonhq.richtext.decoration;
+package com.gluonhq.richtext.model;
 
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 
 public class TextDecoration {
 
-    public static TextDecoration DEFAULT = builder().foreground(Color.BLACK).build();
+    public static TextDecoration DEFAULT = builder()
+            .foreground(Color.BLACK)
+            .font( Font.font( "Consolas", FontWeight.NORMAL, 15 ))
+            .build();
 
     private Color foreground;
     private Color background;
+    private Font font;
 
     private TextDecoration() {}
 
@@ -19,6 +25,10 @@ public class TextDecoration {
         return background;
     }
 
+    public Font getFont() {
+        return font;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -27,6 +37,7 @@ public class TextDecoration {
 
         private Color foreground;
         private Color background;
+        private Font font;
 
         private Builder() {}
 
@@ -34,6 +45,7 @@ public class TextDecoration {
             TextDecoration decoration = new TextDecoration();
             decoration.foreground = this.foreground;
             decoration.background = this.background;
+            decoration.font = this.font;
             return decoration;
         }
 
@@ -44,6 +56,11 @@ public class TextDecoration {
 
         Builder background( Color color ) {
             this.background = color;
+            return this;
+        }
+
+        Builder font( Font font ) {
+            this.font = font;
             return this;
         }
     }

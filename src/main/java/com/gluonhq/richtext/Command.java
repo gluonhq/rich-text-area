@@ -1,6 +1,8 @@
 package com.gluonhq.richtext;
 
+import com.gluonhq.richtext.model.TextBuffer;
+
 public interface Command {
-    void redo( EditableTextFlow textFlow );
-    void undo( EditableTextFlow textFlow );
+    void redo( RichTextAreaSkin skin );
+    void undo( RichTextAreaSkin skin );
 }

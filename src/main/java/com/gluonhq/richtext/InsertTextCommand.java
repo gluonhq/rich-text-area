@@ -2,10 +2,11 @@ package com.gluonhq.richtext;
 
 import javafx.scene.control.IndexRange;
 
+import java.util.Objects;
+
 class InsertTextCommand implements Command {
 
     private final String content;
-
     private int caretPosition;
     private IndexRange selection;
 
@@ -14,16 +15,16 @@ class InsertTextCommand implements Command {
     }
 
     @Override
-    public void redo( EditableTextFlow textFlow ) {
-        this.caretPosition = textFlow.getCaretPosition();
-        this.selection = textFlow.getSelection();
-        textFlow.insertText(content);
+    public void redo( RichTextAreaSkin skin ) {
+        this.caretPosition = skin.getCaretPosition();
+        this.selection = skin.getSelection();
+        Objects.requireNonNull(skin).insert(content);
     }
 
     @Override
-    public void undo( EditableTextFlow textFlow ) {
-        textFlow.removeText(textFlow.getCaretPosition(), content.length());
-        textFlow.setSelection(selection);
-        textFlow.setCaretPosition(caretPosition);
+    public void undo( RichTextAreaSkin skin ) {
+//        textFlow.removeText(textFlow.getCaretPosition(), content.length());
+//        textFlow.setSelection(selection);
+//        textFlow.setCaretPosition(caretPosition);
     }
 }

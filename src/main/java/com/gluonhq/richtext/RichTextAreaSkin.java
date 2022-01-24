@@ -1,9 +1,16 @@
 package com.gluonhq.richtext;
 
+import com.gluonhq.richtext.model.TextDecoration;
+import com.gluonhq.richtext.model.PieceTable;
+import com.gluonhq.richtext.model.TextChangeListener;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
@@ -12,13 +19,14 @@ import javafx.scene.control.IndexRange;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SkinBase;
 import javafx.scene.input.*;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
 import javafx.scene.text.*;
 import javafx.util.Duration;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static javafx.scene.input.KeyCombination.*;
 import static javafx.scene.input.KeyCode.*;
@@ -26,8 +34,10 @@ import static javafx.scene.input.KeyCode.*;
 
 class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
+    private final PieceTable textBuffer = new PieceTable("Simple text text text");
+
     private final EditableTextFlow textFlow = new EditableTextFlow();
-    private final CommandManager commandManager = new CommandManager(textFlow);
+    private final CommandManager commandManager = new CommandManager(this);
     private final Path caretShape = new Path();
     private final Path selectionShape = new Path();
 
@@ -36,6 +46,18 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         new KeyFrame(Duration.seconds(0.5), e -> setCaretVisibility(true)),
         new KeyFrame(Duration.seconds(1.0))
     );
+
+    private final TextChangeListener textChangeListener = new TextChangeListener() {
+        @Override
+        public void onInsert(String text, int position) {
+            refreshTextFlow();
+        }
+
+        @Override
+        public void onDelete(int position, int length) {
+            refreshTextFlow();
+        }
+    };
 
     protected RichTextAreaSkin(final RichTextArea control) {
         super(control);
@@ -54,31 +76,137 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
         // all listeners have to be removed within dispose method
         control.editableProperty().addListener(this::editableChangeListener);
-        editableChangeListener( null); // sets up all related listeners
+        editableChangeListener(null); // sets up all related listeners
 
-        // REMOVE -- FOR TESTING ONLY
-        Text text1 = new javafx.scene.text.Text("Big italic\n red text");
-        text1.setFocusTraversable(false);
-        text1.setFill(Color.ORANGERED);
-        text1.setFont(Font.font("Arial", FontPosture.ITALIC, 40));
-        Text text2 = new Text(" little bold\n blue text");
-        text2.setFocusTraversable(false);
-        text2.setFill(Color.STEELBLUE);
-        text2.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-        textFlow.getChildren().addAll(text1, text2);
+        textBuffer.addChangeListener(textChangeListener);
+        refreshTextFlow();
+
+//        // REMOVE -- FOR TESTING ONLY
+//        Text text1 = new javafx.scene.text.Text("Big italic\n red text");
+//        text1.setFocusTraversable(false);
+//        text1.setFill(Color.ORANGERED);
+//        text1.setFont(Font.font("Arial", FontPosture.ITALIC, 40));
+//        Text text2 = new Text(" little bold\n blue text");
+//        text2.setFocusTraversable(false);
+//        text2.setFill(Color.STEELBLUE);
+//        text2.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+//        textFlow.getChildren().addAll(text1, text2);
 
     }
 
-    @Override public void dispose() {
-        getSkinnable().setEditable(false); // removes all related listeners
-        getSkinnable().editableProperty().removeListener(this::editableChangeListener);
-    }
+
+
 
     /// PROPERTIES ///////////////////////////////////////////////////////////////
 
 
+    // caretPositionProperty
+    private final IntegerProperty caretPositionProperty = new SimpleIntegerProperty(this, "caretPosition", -1);
+    public final IntegerProperty caretPositionProperty() {
+        return caretPositionProperty;
+    }
+    public final int getCaretPosition() {
+        return caretPositionProperty.get();
+    }
+    public final void setCaretPosition(int value) {
+        caretPositionProperty.set(value);
+    }
+
+
+    // selectionProperty
+    private final ObjectProperty<IndexRange> selectionProperty = new SimpleObjectProperty<>(this, "selection", Tools.NO_SELECTION) {
+        @Override
+        public void set(IndexRange value) {
+            IndexRange selection = Objects.requireNonNull(value);
+            selection = IndexRange.normalize(selection.getStart(), selection.getEnd());
+            if (!Tools.isIndexRangeValid(selection) || selection.getStart() > getTextLength() ) {
+                selection = Tools.NO_SELECTION;
+            } else if ( selection.getStart() > getTextLength() ){
+                selection = IndexRange.normalize( selection.getStart(), getTextLength());
+            }
+            super.set(value);
+        }
+    };
+    public final ObjectProperty<IndexRange> selectionProperty() {
+        return selectionProperty;
+    }
+    public final IndexRange getSelection() {
+        return selectionProperty.get();
+    }
+    final void setSelection(IndexRange value) {
+        selectionProperty.set(value);
+    }
+
+
+    /// PUBLIC METHODS  /////////////////////////////////////////////////////////
+
+    public int getTextLength() {
+        return textBuffer.getTextLength();
+    }
+
+    @Override
+    public void dispose() {
+        getSkinnable().setEditable(false); // removes all related listeners
+        getSkinnable().editableProperty().removeListener(this::editableChangeListener);
+        textBuffer.removeChangeListener(textChangeListener);
+    }
+
+    public void incrementCaretPosition( final int increment ) {
+        int pos = getCaretPosition() + increment;
+        if ( pos >= 0 && pos <= getTextLength()) {
+            setCaretPosition(pos);
+        }
+    }
+
+    public void insert( String text ) {
+        textBuffer.insert( text, getCaretPosition());
+        incrementCaretPosition(1);
+    }
+
+    public void remove(int caretOffset) {
+        if (hasSelection()) {
+            deleteSelection();
+        } else {
+            int position = getCaretPosition() + caretOffset;
+            if (position >= 0 && position < getTextLength() ) {
+                textBuffer.delete(position, 1);
+                setCaretPosition(position);
+            }
+        }
+    }
+
+    public boolean hasSelection() {
+        return Tools.isIndexRangeValid(getSelection());
+    }
+
+    public  void clearSelection() {
+        setSelection(Tools.NO_SELECTION);
+    }
+
+    // deletes selection if exists and set caret to the start position of the deleted selection
+    public void deleteSelection() {
+        if ( hasSelection() ) {
+            IndexRange selection = getSelection();
+            //removeText(selection.getStart(), selection.getEnd() - selection.getStart());
+            textBuffer.delete(selection.getStart(), selection.getEnd() - selection.getStart() );
+            setSelection(Tools.NO_SELECTION);
+            setCaretPosition(selection.getStart());
+        }
+    }
+
     /// PRIVATE METHODS /////////////////////////////////////////////////////////
 
+    private void refreshTextFlow() {
+        var fragments = textBuffer.getPieces().stream().map(piece -> {
+            Text text = new javafx.scene.text.Text(piece.getText());
+            TextDecoration decor = piece.getDecoration();
+            text.setStroke( decor.getForeground());
+            text.setFill( decor.getForeground());
+            text.setFont(decor.getFont());
+            return text;
+        }).collect(Collectors.toList());
+        textFlow.getChildren().setAll(fragments);
+    }
 
     private void editableChangeListener(Observable o ) {
 
@@ -86,9 +214,9 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
         if (editable) {
 
-            textFlow.caretPositionProperty().addListener(caretPositionListener);
+            caretPositionProperty().addListener(caretPositionListener);
 
-            textFlow.selectionProperty().addListener(selectionChangeListener);
+            selectionProperty().addListener(selectionChangeListener);
             selectionChangeListener.invalidated(null);
 
             getSkinnable().setOnKeyPressed( this::keyPressedListener);
@@ -97,10 +225,10 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
             textFlow.setOnMouseDragged(this::mouseDraggedListener);
 
         } else {
-            textFlow.caretPositionProperty().removeListener(caretPositionListener);
+            caretPositionProperty().removeListener(caretPositionListener);
 
-            textFlow.clearSelection();
-            textFlow.selectionProperty().removeListener(selectionChangeListener);
+            clearSelection();
+            selectionProperty().removeListener(selectionChangeListener);
 
             getSkinnable().setOnKeyPressed(null);
             getSkinnable().setOnKeyTyped(null);
@@ -109,14 +237,14 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
         }
 
-        textFlow.setCaretPosition( editable? 0:-1 );
+        setCaretPosition( editable? 0:-1 );
         textFlow.setCursor( editable? Cursor.TEXT: Cursor.DEFAULT);
 
     }
 
     private final InvalidationListener caretPositionListener = (Observable o) -> {
         caretShape.getElements().clear();
-        int newPos = textFlow.getCaretPosition();
+        int newPos = getCaretPosition();
         if (newPos < 0 ) {
             caretTimeline.stop();
         } else {
@@ -133,11 +261,11 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private final InvalidationListener selectionChangeListener = (Observable o) -> {
         selectionShape.getElements().clear();
-        IndexRange selection = textFlow.getSelection();
+        IndexRange selection = getSelection();
         if ( selection != null && Tools.isIndexRangeValid(selection)) {
             selectionShape.getElements().setAll(textFlow.rangeShape( selection.getStart(), selection.getEnd() ));
         }
-        getSkinnable().setSelection(textFlow.getSelection());
+        getSkinnable().setSelection(getSelection());
     };
 
     private int dragStart = -1;
@@ -145,10 +273,10 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private void mousePressedListener(MouseEvent e) {
         HitInfo hitInfo = textFlow.hitTest(new Point2D( e.getX(), e.getY()));
         if (hitInfo.getCharIndex() >= 0) {
-            textFlow.setCaretPosition(hitInfo.getCharIndex());
-            dragStart = textFlow.getCaretPosition();
+            setCaretPosition(hitInfo.getCharIndex());
+            dragStart = getCaretPosition();
         }
-        textFlow.clearSelection();
+        clearSelection();
         getSkinnable().requestFocus();
         e.consume();
     }
@@ -156,8 +284,8 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private void mouseDraggedListener(MouseEvent e) {
         HitInfo hitInfo = textFlow.hitTest(new Point2D( e.getX(), e.getY()));
         if (hitInfo.getCharIndex() >= 0) {
-            textFlow.setSelection( IndexRange.normalize(dragStart, hitInfo.getCharIndex()));
-            textFlow.setCaretPosition(hitInfo.getCharIndex());
+            setSelection( IndexRange.normalize(dragStart, hitInfo.getCharIndex()));
+            setCaretPosition(hitInfo.getCharIndex());
         }
         e.consume();
     }
@@ -175,18 +303,18 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private void moveCaret( Direction direction, boolean changeSelection ) {
 
-        IndexRange prevSelection = textFlow.getSelection();
-        int prevCaretPosition = textFlow.getCaretPosition();
+        IndexRange prevSelection = getSelection();
+        int prevCaretPosition = getCaretPosition();
         switch (direction) {
             case FORWARD:
             case BACK:
-                textFlow.incrementCaretPosition( Direction.FORWARD == direction ? 1:-1);
+                incrementCaretPosition( Direction.FORWARD == direction ? 1:-1);
                 break;
             case DOWN:
             case UP:
                 int rowCharIndex = getNextRowPosition(Direction.DOWN == direction);
                 if (rowCharIndex >= 0) {
-                    textFlow.setCaretPosition(rowCharIndex);
+                    setCaretPosition(rowCharIndex);
                 }
                 break;
         }
@@ -195,9 +323,9 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
             int pos = Tools.isIndexRangeValid(prevSelection)?
                     prevCaretPosition == prevSelection.getStart()? prevSelection.getEnd(): prevSelection.getStart():
                     prevCaretPosition;
-            textFlow.setSelection(IndexRange.normalize(pos, textFlow.getCaretPosition()));
+            setSelection(IndexRange.normalize(pos, getCaretPosition()));
         } else {
-            textFlow.clearSelection();
+            clearSelection();
         }
 
     }
