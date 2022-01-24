@@ -3,12 +3,15 @@ package com.gluonhq.richtext.model;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+
+import java.util.Optional;
 
 public class TextDecoration {
 
     public static TextDecoration DEFAULT = builder()
-            .foreground(Color.BLACK)
-            .font( Font.font( "Consolas", FontWeight.NORMAL, 15 ))
+            .foreground(Color.BLUE)
+            .font( Font.font( "Consolas", 15 ))
             .build();
 
     private Color foreground;
@@ -17,16 +20,12 @@ public class TextDecoration {
 
     private TextDecoration() {}
 
-    public Color getForeground() {
-        return foreground;
-    }
-
-    public Color getBackground() {
-        return background;
-    }
-
-    public Font getFont() {
-        return font;
+    public Text asText( String content ) {
+        Text text = new javafx.scene.text.Text(content);
+        Optional.ofNullable(foreground).ifPresent(text::setStroke);
+        Optional.ofNullable(background).ifPresent(text::setFill);
+        Optional.ofNullable(font).ifPresentOrElse(text::setFont, () -> text.setFont(DEFAULT.font) );
+        return text;
     }
 
     public static Builder builder() {

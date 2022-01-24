@@ -81,21 +81,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         textBuffer.addChangeListener(textChangeListener);
         refreshTextFlow();
 
-//        // REMOVE -- FOR TESTING ONLY
-//        Text text1 = new javafx.scene.text.Text("Big italic\n red text");
-//        text1.setFocusTraversable(false);
-//        text1.setFill(Color.ORANGERED);
-//        text1.setFont(Font.font("Arial", FontPosture.ITALIC, 40));
-//        Text text2 = new Text(" little bold\n blue text");
-//        text2.setFocusTraversable(false);
-//        text2.setFill(Color.STEELBLUE);
-//        text2.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-//        textFlow.getChildren().addAll(text1, text2);
-
     }
-
-
-
 
     /// PROPERTIES ///////////////////////////////////////////////////////////////
 
@@ -124,7 +110,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
             } else if ( selection.getStart() > getTextLength() ){
                 selection = IndexRange.normalize( selection.getStart(), getTextLength());
             }
-            super.set(value);
+            super.set(selection);
         }
     };
     public final ObjectProperty<IndexRange> selectionProperty() {
@@ -159,7 +145,10 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     public void insert( String text ) {
-        textBuffer.insert( text, getCaretPosition());
+        if (hasSelection()) {
+            deleteSelection();
+        }
+        textBuffer.insert(text, getCaretPosition());
         incrementCaretPosition(1);
     }
 
@@ -197,14 +186,9 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     /// PRIVATE METHODS /////////////////////////////////////////////////////////
 
     private void refreshTextFlow() {
-        var fragments = textBuffer.getPieces().stream().map(piece -> {
-            Text text = new javafx.scene.text.Text(piece.getText());
-            TextDecoration decor = piece.getDecoration();
-            text.setStroke( decor.getForeground());
-            text.setFill( decor.getForeground());
-            text.setFont(decor.getFont());
-            return text;
-        }).collect(Collectors.toList());
+        var fragments = textBuffer.getPieces().stream()
+                .map(piece -> piece.getDecoration().asText( piece.getText()))
+                .collect(Collectors.toList());
         textFlow.getChildren().setAll(fragments);
     }
 
