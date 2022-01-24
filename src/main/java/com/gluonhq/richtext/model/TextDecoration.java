@@ -2,7 +2,6 @@ package com.gluonhq.richtext.model;
 
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
 import java.util.Optional;
@@ -11,7 +10,8 @@ public class TextDecoration {
 
     public static TextDecoration DEFAULT = builder()
             .foreground(Color.BLUE)
-            .font( Font.font( "Consolas", 15 ))
+            .background(Color.BLUE)
+            .font( Font.font( "Arial", 14 ))
             .build();
 
     private Color foreground;
@@ -21,9 +21,8 @@ public class TextDecoration {
     private TextDecoration() {}
 
     public Text asText( String content ) {
-        Text text = new javafx.scene.text.Text(content);
-        Optional.ofNullable(foreground).ifPresent(text::setStroke);
-        Optional.ofNullable(background).ifPresent(text::setFill);
+        Text text = new Text(content);
+        Optional.ofNullable(foreground).ifPresent(text::setFill); // has to be fill for font to render properly
         Optional.ofNullable(font).ifPresentOrElse(text::setFont, () -> text.setFont(DEFAULT.font) );
         return text;
     }
