@@ -1,6 +1,5 @@
 package com.gluonhq.richtext;
 
-import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.model.PieceTable;
 import com.gluonhq.richtext.model.TextChangeListener;
 import javafx.animation.KeyFrame;
@@ -20,7 +19,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SkinBase;
 import javafx.scene.input.*;
 import javafx.scene.shape.Path;
-import javafx.scene.text.*;
+import javafx.scene.text.HitInfo;
 import javafx.util.Duration;
 
 import java.util.Map;
@@ -28,8 +27,8 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static javafx.scene.input.KeyCombination.*;
 import static javafx.scene.input.KeyCode.*;
+import static javafx.scene.input.KeyCombination.*;
 
 
 class RichTextAreaSkin extends SkinBase<RichTextArea> {
@@ -126,10 +125,6 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     /// PUBLIC METHODS  /////////////////////////////////////////////////////////
 
-    public int getTextLength() {
-        return textBuffer.getTextLength();
-    }
-
     @Override
     public void dispose() {
         getSkinnable().setEditable(false); // removes all related listeners
@@ -137,7 +132,11 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         textBuffer.removeChangeListener(textChangeListener);
     }
 
-    public void incrementCaretPosition( final int increment ) {
+    public int getTextLength() {
+        return textBuffer.getTextLength();
+    }
+
+    public void incrementCaretPosition(final int increment) {
         int pos = getCaretPosition() + increment;
         if ( pos >= 0 && pos <= getTextLength()) {
             setCaretPosition(pos);
@@ -239,7 +238,9 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private void setCaretVisibility(boolean on) {
         if (caretShape.getElements().size() > 0) {
-            caretShape.setVisible(on);
+            // Opacity is used since we don't want the changing caret size to affect the layout
+            // Otherwise text appears to be jumping
+            caretShape.setOpacity( on? 1: 0 );
         }
     }
 
@@ -305,8 +306,8 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
         if (changeSelection) {
             int pos = Tools.isIndexRangeValid(prevSelection)?
-                    prevCaretPosition == prevSelection.getStart()? prevSelection.getEnd(): prevSelection.getStart():
-                    prevCaretPosition;
+                prevCaretPosition == prevSelection.getStart()? prevSelection.getEnd(): prevSelection.getStart():
+                prevCaretPosition;
             setSelection(IndexRange.normalize(pos, getCaretPosition()));
         } else {
             clearSelection();
@@ -352,12 +353,11 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     );
 
     private boolean executeKeyboardAction(KeyEvent e) {
+
         for ( KeyCombination kc: keyMap.keySet()) {
-//            System.out.println(kc);
             if (kc.match(e)) {
                 ACTION action = keyMap.get(kc);
                 actionMap.get(action).accept(e);
-//                System.out.println("Executing action: " + action );
                 e.consume();
                 return true;
             }
@@ -378,5 +378,3 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
 }
-
-
