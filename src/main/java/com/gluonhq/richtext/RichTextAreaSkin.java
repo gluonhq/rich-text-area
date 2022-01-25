@@ -4,7 +4,6 @@ import com.gluonhq.richtext.model.PieceTable;
 import com.gluonhq.richtext.model.TextChangeListener;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
@@ -86,7 +85,23 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
 
     // caretPositionProperty
-    private final IntegerProperty caretPositionProperty = new SimpleIntegerProperty(this, "caretPosition", -1);
+    private final IntegerProperty caretPositionProperty = new SimpleIntegerProperty(this, "caretPosition", -1){
+        @Override
+        public void set(int value) {
+            updateCaretShape(value);
+            super.set(value);
+        }
+
+        private void updateCaretShape(int newPos) {
+            caretShape.getElements().clear();
+            if (newPos < 0 ) {
+                caretTimeline.stop();
+            } else {
+                caretShape.getElements().addAll(textFlow.caretShape(newPos, true));
+                caretTimeline.play();
+            }
+        }
+    };
     public final IntegerProperty caretPositionProperty() {
         return caretPositionProperty;
     }
@@ -109,7 +124,15 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
             } else if ( selection.getStart() > getTextLength() ){
                 selection = IndexRange.normalize( selection.getStart(), getTextLength());
             }
+            updateSelectionShape(selection);
             super.set(selection);
+        }
+
+        private void updateSelectionShape( IndexRange selection ) {
+            selectionShape.getElements().clear();
+            if ( selection != null && Tools.isIndexRangeValid(selection)) {
+                selectionShape.getElements().setAll(textFlow.rangeShape( selection.getStart(), selection.getEnd() ));
+            }
         }
     };
     public final ObjectProperty<IndexRange> selectionProperty() {
@@ -136,8 +159,8 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         return textBuffer.getTextLength();
     }
 
-    public void incrementCaretPosition(final int increment) {
-        int pos = getCaretPosition() + increment;
+    public void moveCaretPosition(final int charCount) {
+        int pos = getCaretPosition() + charCount;
         if ( pos >= 0 && pos <= getTextLength()) {
             setCaretPosition(pos);
         }
@@ -145,15 +168,15 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     public void insert( String text ) {
         if (hasSelection()) {
-            deleteSelection();
+            removeSelection();
         }
         textBuffer.insert(text, getCaretPosition());
-        incrementCaretPosition(1);
+        moveCaretPosition(1);
     }
 
     public void remove(int caretOffset) {
         if (hasSelection()) {
-            deleteSelection();
+            removeSelection();
         } else {
             int position = getCaretPosition() + caretOffset;
             if (position >= 0 && position < getTextLength() ) {
@@ -172,10 +195,9 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     // deletes selection if exists and set caret to the start position of the deleted selection
-    public void deleteSelection() {
+    public void removeSelection() {
         if ( hasSelection() ) {
             IndexRange selection = getSelection();
-            //removeText(selection.getStart(), selection.getEnd() - selection.getStart());
             textBuffer.delete(selection.getStart(), selection.getEnd() - selection.getStart() );
             setSelection(Tools.NO_SELECTION);
             setCaretPosition(selection.getStart());
@@ -195,46 +217,23 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
         boolean editable = getSkinnable().isEditable();
 
+        clearSelection();
         if (editable) {
-
-            caretPositionProperty().addListener(caretPositionListener);
-
-            selectionProperty().addListener(selectionChangeListener);
-            selectionChangeListener.invalidated(null);
-
             getSkinnable().setOnKeyPressed( this::keyPressedListener);
             getSkinnable().setOnKeyTyped(this::keyTypedListener);
             textFlow.setOnMousePressed(this::mousePressedListener);
             textFlow.setOnMouseDragged(this::mouseDraggedListener);
-
         } else {
-            caretPositionProperty().removeListener(caretPositionListener);
-
-            clearSelection();
-            selectionProperty().removeListener(selectionChangeListener);
-
             getSkinnable().setOnKeyPressed(null);
             getSkinnable().setOnKeyTyped(null);
             textFlow.setOnMousePressed(null);
             textFlow.setOnMouseDragged(null);
-
         }
 
         setCaretPosition( editable? 0:-1 );
         textFlow.setCursor( editable? Cursor.TEXT: Cursor.DEFAULT);
 
     }
-
-    private final InvalidationListener caretPositionListener = (Observable o) -> {
-        caretShape.getElements().clear();
-        int newPos = getCaretPosition();
-        if (newPos < 0 ) {
-            caretTimeline.stop();
-        } else {
-            caretShape.getElements().addAll(textFlow.caretShape(newPos, true));
-            caretTimeline.play();
-        }
-    };
 
     private void setCaretVisibility(boolean on) {
         if (caretShape.getElements().size() > 0) {
@@ -243,15 +242,6 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
             caretShape.setOpacity( on? 1: 0 );
         }
     }
-
-    private final InvalidationListener selectionChangeListener = (Observable o) -> {
-        selectionShape.getElements().clear();
-        IndexRange selection = getSelection();
-        if ( selection != null && Tools.isIndexRangeValid(selection)) {
-            selectionShape.getElements().setAll(textFlow.rangeShape( selection.getStart(), selection.getEnd() ));
-        }
-        getSkinnable().setSelection(getSelection());
-    };
 
     private int dragStart = -1;
 
@@ -293,7 +283,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         switch (direction) {
             case FORWARD:
             case BACK:
-                incrementCaretPosition( Direction.FORWARD == direction ? 1:-1);
+                moveCaretPosition( Direction.FORWARD == direction ? 1:-1);
                 break;
             case DOWN:
             case UP:
