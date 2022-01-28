@@ -159,4 +159,3 @@ We're excited you're reading until here! We recommend that you fork this reposit
 whatever you want. You can work on a different theme, by modifying the CSS files. You can
 create a different layout, by modifying the FXML files. Or you can modify the flow and logic,
 by modifying the Java files.
-
