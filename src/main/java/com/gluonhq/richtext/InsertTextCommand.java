@@ -15,16 +15,13 @@ class InsertTextCommand implements Command {
     }
 
     @Override
-    public void redo( RichTextAreaSkin skin ) {
-        this.caretPosition = skin.getCaretPosition();
-        this.selection = skin.getSelection();
-        Objects.requireNonNull(skin).insert(content);
+    public void redo( RichTextAreaViewModel viewModel ) {
+        this.caretPosition = viewModel.getCaretPosition();
+        this.selection = viewModel.getSelection();
+        Objects.requireNonNull(viewModel).insert(content);
     }
 
     @Override
-    public void undo( RichTextAreaSkin skin ) {
-//        textFlow.removeText(textFlow.getCaretPosition(), content.length());
-//        textFlow.setSelection(selection);
-//        textFlow.setCaretPosition(caretPosition);
+    public void undo( RichTextAreaViewModel viewModel ) {
     }
 }

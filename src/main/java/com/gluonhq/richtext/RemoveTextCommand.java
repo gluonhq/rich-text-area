@@ -16,14 +16,14 @@ class RemoveTextCommand implements Command {
     }
 
     @Override
-    public void redo(RichTextAreaSkin skin) {
-        this.caretPosition = skin.getCaretPosition();
-        this.selection = skin.getSelection();
-        Objects.requireNonNull(skin).remove(caretOffset);
+    public void redo( RichTextAreaViewModel viewModel ) {
+        this.caretPosition = viewModel.getCaretPosition();
+        this.selection = viewModel.getSelection();
+        Objects.requireNonNull(viewModel).remove(caretOffset);
     }
 
     @Override
-    public void undo( RichTextAreaSkin skin ) {
+    public void undo( RichTextAreaViewModel viewModel ) {
         //TODO need to know the removed text with all attributes
         //     to be able to add it correctly
 //        textFlow.setSelection(selection);

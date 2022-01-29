@@ -11,7 +11,7 @@ public class TextDecoration {
     public static TextDecoration DEFAULT = builder()
             .foreground(Color.BLUE)
             .background(Color.BLUE)
-            .font( Font.font( "Arial", 14 ))
+            .font( Font.font( "Arial", 17 ))
             .build();
 
     private Color foreground;
@@ -20,7 +20,19 @@ public class TextDecoration {
 
     private TextDecoration() {}
 
-    public Text asText( String content ) {
+    public Color getForeground() {
+        return foreground;
+    }
+
+    public Color getBackground() {
+        return background;
+    }
+
+    public Font getFont() {
+        return font;
+    }
+
+    public Text asText(String content ) {
         Text text = new Text(content);
         Optional.ofNullable(foreground).ifPresent(text::setFill); // has to be fill for font to render properly
         Optional.ofNullable(font).ifPresentOrElse(text::setFont, () -> text.setFont(DEFAULT.font) );
@@ -53,7 +65,7 @@ public class TextDecoration {
         }
 
         Builder background( Color color ) {
-            this.background = color;
+            this.background = color; 
             return this;
         }
 

@@ -1,6 +1,7 @@
 package com.gluonhq.richtext.model;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 /**
@@ -78,6 +79,13 @@ public final class PieceTable extends AbstractTextBuffer {
             int pos = additionBuffer.length();
             pieces.add(appendTextInternal(text));
             fireInsert(text, pos);
+        }
+    }
+
+    @Override
+    public void walkFragments(BiConsumer<String, TextDecoration> onFragment) {
+        for (Piece piece : getPieces()) {
+            onFragment.accept( piece.getText(), piece.getDecoration());
         }
     }
 

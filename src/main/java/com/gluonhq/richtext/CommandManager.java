@@ -1,23 +1,21 @@
 package com.gluonhq.richtext;
 
-import com.gluonhq.richtext.model.TextBuffer;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class CommandManager {
 
-    private final RichTextAreaSkin skin;
+    private final RichTextAreaViewModel viewModel;
     private final List<Command> commands = new ArrayList<>();
     private int undoCmdIndex = -1;
 
-    CommandManager( RichTextAreaSkin skin ) {
-        this.skin =  Objects.requireNonNull(skin);
+    CommandManager( RichTextAreaViewModel viewModel ) {
+        this.viewModel =  Objects.requireNonNull(viewModel);
     }
 
     public void execute( Command command) {
-        Objects.requireNonNull(command).redo(skin);
+        Objects.requireNonNull(command).redo(viewModel);
         if (canRedo()) {
           // clear all commands after current one
           commands.removeAll( commands.subList( undoCmdIndex+1, commands.size()));
@@ -37,13 +35,13 @@ public class CommandManager {
 
     public void undo() {
         if (canUndo()) {
-            commands.get(undoCmdIndex--).undo(skin);
+            commands.get(undoCmdIndex--).undo(viewModel);
         }
     }
 
     public void redo() {
         if (canRedo()) {
-            commands.get(undoCmdIndex++).redo(skin);
+            commands.get(undoCmdIndex++).redo(viewModel);
         }
     }
 

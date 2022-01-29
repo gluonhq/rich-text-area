@@ -2,13 +2,10 @@ package com.gluonhq.richtext;
 
 import com.gluonhq.richtext.model.PieceTable;
 import com.gluonhq.richtext.model.TextChangeListener;
+import com.gluonhq.richtext.model.TextDecoration;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.Observable;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
@@ -19,12 +16,13 @@ import javafx.scene.control.SkinBase;
 import javafx.scene.input.*;
 import javafx.scene.shape.Path;
 import javafx.scene.text.HitInfo;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
+import java.util.ArrayList;
 import java.util.Map;
-import java.util.Objects;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import static javafx.scene.input.KeyCode.*;
 import static javafx.scene.input.KeyCombination.*;
@@ -32,10 +30,24 @@ import static javafx.scene.input.KeyCombination.*;
 
 class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
-    private final PieceTable textBuffer = new PieceTable("Simple text text text");
+    private static final Map<KeyCombination, EditorAction> INPUT_MAP = Map.of(
+            kc(RIGHT, SHIFT_ANY),      EditorAction.FORWARD,
+            kc(LEFT,  SHIFT_ANY),      EditorAction.BACK,
+            kc(DOWN,  SHIFT_ANY),      EditorAction.DOWN,
+            kc(UP,    SHIFT_ANY),      EditorAction.UP,
+            kc(BACK_SPACE, SHIFT_ANY), EditorAction.BACKSPACE,
+            kc(DELETE),                EditorAction.DELETE,
+            kc(Z, SHORTCUT_DOWN ),     EditorAction.UNDO
+    );
 
-    private final EditableTextFlow textFlow = new EditableTextFlow();
-    private final CommandManager commandManager = new CommandManager(this);
+
+    private RichTextAreaViewModel viewModel =
+        new RichTextAreaViewModel(
+            new PieceTable("Simple text text text"),
+            this::getNextRowPosition // TODO need to find a better way to find a better way
+        );
+
+    private final TextFlow textFlow = new TextFlow();
     private final Path caretShape = new Path();
     private final Path selectionShape = new Path();
 
@@ -76,74 +88,33 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         control.editableProperty().addListener(this::editableChangeListener);
         editableChangeListener(null); // sets up all related listeners
 
-        textBuffer.addChangeListener(textChangeListener);
+        //TODO remove listener on viewModel change
+        viewModel.caretPositionProperty().addListener( (o,ocp, p) -> {
+            int caretPosition = p.intValue();
+            caretShape.getElements().clear();
+            if (caretPosition < 0 ) {
+                caretTimeline.stop();
+            } else {
+                caretShape.getElements().addAll(textFlow.caretShape(caretPosition, true));
+                caretTimeline.play();
+            }
+        });
+
+        //TODO remove listener on viewModel change
+        viewModel.selectionProperty().addListener( (o, os, selection) -> {
+            selectionShape.getElements().clear();
+            if ( selection != null && Tools.isIndexRangeValid(selection)) {
+                selectionShape.getElements().setAll(textFlow.rangeShape( selection.getStart(), selection.getEnd() ));
+            }
+        });
+
+
+        viewModel.addChangeListener(textChangeListener);
         refreshTextFlow();
 
     }
 
     /// PROPERTIES ///////////////////////////////////////////////////////////////
-
-
-    // caretPositionProperty
-    private final IntegerProperty caretPositionProperty = new SimpleIntegerProperty(this, "caretPosition", -1){
-        @Override
-        public void set(int value) {
-            updateCaretShape(value);
-            super.set(value);
-        }
-
-        private void updateCaretShape(int newPos) {
-            caretShape.getElements().clear();
-            if (newPos < 0 ) {
-                caretTimeline.stop();
-            } else {
-                caretShape.getElements().addAll(textFlow.caretShape(newPos, true));
-                caretTimeline.play();
-            }
-        }
-    };
-    public final IntegerProperty caretPositionProperty() {
-        return caretPositionProperty;
-    }
-    public final int getCaretPosition() {
-        return caretPositionProperty.get();
-    }
-    public final void setCaretPosition(int value) {
-        caretPositionProperty.set(value);
-    }
-
-
-    // selectionProperty
-    private final ObjectProperty<IndexRange> selectionProperty = new SimpleObjectProperty<>(this, "selection", Tools.NO_SELECTION) {
-        @Override
-        public void set(IndexRange value) {
-            IndexRange selection = Objects.requireNonNull(value);
-            selection = IndexRange.normalize(selection.getStart(), selection.getEnd());
-            if (!Tools.isIndexRangeValid(selection) || selection.getStart() > getTextLength() ) {
-                selection = Tools.NO_SELECTION;
-            } else if ( selection.getStart() > getTextLength() ){
-                selection = IndexRange.normalize( selection.getStart(), getTextLength());
-            }
-            updateSelectionShape(selection);
-            super.set(selection);
-        }
-
-        private void updateSelectionShape( IndexRange selection ) {
-            selectionShape.getElements().clear();
-            if ( selection != null && Tools.isIndexRangeValid(selection)) {
-                selectionShape.getElements().setAll(textFlow.rangeShape( selection.getStart(), selection.getEnd() ));
-            }
-        }
-    };
-    public final ObjectProperty<IndexRange> selectionProperty() {
-        return selectionProperty;
-    }
-    public final IndexRange getSelection() {
-        return selectionProperty.get();
-    }
-    final void setSelection(IndexRange value) {
-        selectionProperty.set(value);
-    }
 
 
     /// PUBLIC METHODS  /////////////////////////////////////////////////////////
@@ -152,72 +123,31 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     public void dispose() {
         getSkinnable().setEditable(false); // removes all related listeners
         getSkinnable().editableProperty().removeListener(this::editableChangeListener);
-        textBuffer.removeChangeListener(textChangeListener);
-    }
-
-    public int getTextLength() {
-        return textBuffer.getTextLength();
-    }
-
-    public void moveCaretPosition(final int charCount) {
-        int pos = getCaretPosition() + charCount;
-        if ( pos >= 0 && pos <= getTextLength()) {
-            setCaretPosition(pos);
-        }
-    }
-
-    public void insert( String text ) {
-        if (hasSelection()) {
-            removeSelection();
-        }
-        textBuffer.insert(text, getCaretPosition());
-        moveCaretPosition(1);
-    }
-
-    public void remove(int caretOffset) {
-        if (hasSelection()) {
-            removeSelection();
-        } else {
-            int position = getCaretPosition() + caretOffset;
-            if (position >= 0 && position < getTextLength() ) {
-                textBuffer.delete(position, 1);
-                setCaretPosition(position);
-            }
-        }
-    }
-
-    public boolean hasSelection() {
-        return Tools.isIndexRangeValid(getSelection());
-    }
-
-    public  void clearSelection() {
-        setSelection(Tools.NO_SELECTION);
-    }
-
-    // deletes selection if exists and set caret to the start position of the deleted selection
-    public void removeSelection() {
-        if ( hasSelection() ) {
-            IndexRange selection = getSelection();
-            textBuffer.delete(selection.getStart(), selection.getEnd() - selection.getStart() );
-            setSelection(Tools.NO_SELECTION);
-            setCaretPosition(selection.getStart());
-        }
+        viewModel.removeChangeListener(textChangeListener);
     }
 
     /// PRIVATE METHODS /////////////////////////////////////////////////////////
 
+    //TODO Need more optimal way of rendering text fragments.
+    //  For now rebuilding the whole text flow
     private void refreshTextFlow() {
-        var fragments = textBuffer.getPieces().stream()
-                .map(piece -> piece.getDecoration().asText( piece.getText()))
-                .collect(Collectors.toList());
+        var fragments = new ArrayList<Text>();
+        viewModel.walkFragments( (text, decoration) -> fragments.add( buildText(text, decoration)));
         textFlow.getChildren().setAll(fragments);
     }
 
-    private void editableChangeListener(Observable o ) {
+    private Text buildText(String content, TextDecoration decoration ) {
+        Text text = new Text(content);
+        Optional.ofNullable(decoration.getForeground()).ifPresent(text::setFill); // has to be fill for font to render properly
+        Optional.ofNullable(decoration.getFont()).ifPresentOrElse(text::setFont, () -> text.setFont(TextDecoration.DEFAULT.getFont()) );
+        return text;
+    }
+
+    private void editableChangeListener(Observable o) {
 
         boolean editable = getSkinnable().isEditable();
 
-        clearSelection();
+        viewModel.clearSelection();
         if (editable) {
             getSkinnable().setOnKeyPressed( this::keyPressedListener);
             getSkinnable().setOnKeyTyped(this::keyTypedListener);
@@ -230,14 +160,14 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
             textFlow.setOnMouseDragged(null);
         }
 
-        setCaretPosition( editable? 0:-1 );
+        viewModel.setCaretPosition( editable? 0:-1 );
         textFlow.setCursor( editable? Cursor.TEXT: Cursor.DEFAULT);
 
     }
 
     private void setCaretVisibility(boolean on) {
         if (caretShape.getElements().size() > 0) {
-            // Opacity is used since we don't want the changing caret size to affect the layout
+            // Opacity is used since we don't want the changing caret bounds to affect the layout
             // Otherwise text appears to be jumping
             caretShape.setOpacity( on? 1: 0 );
         }
@@ -248,10 +178,10 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private void mousePressedListener(MouseEvent e) {
         HitInfo hitInfo = textFlow.hitTest(new Point2D( e.getX(), e.getY()));
         if (hitInfo.getCharIndex() >= 0) {
-            setCaretPosition(hitInfo.getCharIndex());
-            dragStart = getCaretPosition();
+            viewModel.setCaretPosition(hitInfo.getCharIndex());
+            dragStart = viewModel.getCaretPosition();
         }
-        clearSelection();
+        viewModel.clearSelection();
         getSkinnable().requestFocus();
         e.consume();
     }
@@ -259,13 +189,13 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private void mouseDraggedListener(MouseEvent e) {
         HitInfo hitInfo = textFlow.hitTest(new Point2D( e.getX(), e.getY()));
         if (hitInfo.getCharIndex() >= 0) {
-            setSelection( IndexRange.normalize(dragStart, hitInfo.getCharIndex()));
-            setCaretPosition(hitInfo.getCharIndex());
+            viewModel.setSelection( IndexRange.normalize(dragStart, hitInfo.getCharIndex()));
+            viewModel.setCaretPosition(hitInfo.getCharIndex());
         }
         e.consume();
     }
 
-    // So far the most pragmatic way to find prev/next row location is ot use the size of the caret,
+    // So far the only way to find prev/next row location is to use the size of the caret,
     // which always has the height of the row. Adding line spacing to it allows us to find a point which
     // belongs to the desired row. Then using the `hitTest` we can find the related caret position.
     private int getNextRowPosition( boolean down ) {
@@ -276,78 +206,23 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         return hitInfo.getCharIndex();
     }
 
-    private void moveCaret( Direction direction, boolean changeSelection ) {
-
-        IndexRange prevSelection = getSelection();
-        int prevCaretPosition = getCaretPosition();
-        switch (direction) {
-            case FORWARD:
-            case BACK:
-                moveCaretPosition( Direction.FORWARD == direction ? 1:-1);
-                break;
-            case DOWN:
-            case UP:
-                int rowCharIndex = getNextRowPosition(Direction.DOWN == direction);
-                if (rowCharIndex >= 0) {
-                    setCaretPosition(rowCharIndex);
-                }
-                break;
-        }
-
-        if (changeSelection) {
-            int pos = Tools.isIndexRangeValid(prevSelection)?
-                prevCaretPosition == prevSelection.getStart()? prevSelection.getEnd(): prevSelection.getStart():
-                prevCaretPosition;
-            setSelection(IndexRange.normalize(pos, getCaretPosition()));
-        } else {
-            clearSelection();
-        }
-
-    }
-
-    private static boolean isPrintableChar(char c) {
-        Character.UnicodeBlock changeBlock = Character.UnicodeBlock.of(c);
-        return c == '\n' &&
-                !Character.isISOControl(c) &&
-                !KeyEvent.CHAR_UNDEFINED.equals(String.valueOf(c))&&
-                changeBlock != null && changeBlock != Character.UnicodeBlock.SPECIALS;
-    }
+//    private static boolean isPrintableChar(char c) {
+//        Character.UnicodeBlock changeBlock = Character.UnicodeBlock.of(c);
+//        return c == '\n' &&
+//                !Character.isISOControl(c) &&
+//                !KeyEvent.CHAR_UNDEFINED.equals(String.valueOf(c))&&
+//                changeBlock != null && changeBlock != Character.UnicodeBlock.SPECIALS;
+//    }
 
     private static KeyCombination kc( KeyCode code, Modifier... modifiers ) {
         return  new KeyCodeCombination( code, modifiers );
     }
 
-    private enum ACTION {
-        FORWARD, BACK, DOWN, UP, BACKSPACE, DELETE,
-        UNDO
-    }
-
-    private final Map<ACTION, Consumer<KeyEvent>> actionMap = Map.of(
-        ACTION.FORWARD,   e -> moveCaret(Direction.FORWARD, e.isShiftDown()),
-        ACTION.BACK,      e -> moveCaret(Direction.BACK, e.isShiftDown()),
-        ACTION.DOWN,      e -> moveCaret(Direction.DOWN, e.isShiftDown()),
-        ACTION.UP,        e -> moveCaret(Direction.UP, e.isShiftDown()),
-        ACTION.BACKSPACE, e -> commandManager.execute(new RemoveTextCommand(-1)),
-        ACTION.DELETE,    e -> commandManager.execute(new RemoveTextCommand(0)),
-        ACTION.UNDO,      e -> commandManager.undo()
-    );
-
-    private static final Map<KeyCombination, ACTION> keyMap = Map.of(
-        kc(RIGHT, SHIFT_ANY),      ACTION.FORWARD,
-        kc(LEFT,  SHIFT_ANY),      ACTION.BACK,
-        kc(DOWN,  SHIFT_ANY),      ACTION.DOWN,
-        kc(UP,    SHIFT_ANY),      ACTION.UP,
-        kc(BACK_SPACE, SHIFT_ANY), ACTION.BACKSPACE,
-        kc(DELETE),                ACTION.DELETE,
-        kc(Z, SHORTCUT_DOWN ),     ACTION.UNDO
-    );
-
     private boolean executeKeyboardAction(KeyEvent e) {
 
-        for ( KeyCombination kc: keyMap.keySet()) {
+        for ( KeyCombination kc: INPUT_MAP.keySet()) {
             if (kc.match(e)) {
-                ACTION action = keyMap.get(kc);
-                actionMap.get(action).accept(e);
+                viewModel.executeAction(INPUT_MAP.get(kc),e);
                 e.consume();
                 return true;
             }
@@ -362,7 +237,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private void keyTypedListener(KeyEvent e) {
         if ( !executeKeyboardAction(e) ) { //&& isPrintableChar( e.getCharacter().charAt(0) )) {
             // TODO this should only be done for printable chars
-            commandManager.execute(new InsertTextCommand(e.getCharacter()));
+            viewModel.executeAction(EditorAction.INSERT,e);
             e.consume();
         }
     }
