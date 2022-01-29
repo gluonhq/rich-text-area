@@ -1,4 +1,4 @@
-package com.gluonhq.richtext;
+package com.gluonhq.richtext.viewmodel;
 
 import javafx.scene.control.IndexRange;
 

@@ -1,5 +1,6 @@
-package com.gluonhq.richtext;
+package com.gluonhq.richtext.viewmodel;
 
+import com.gluonhq.richtext.*;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextChangeListener;
 import com.gluonhq.richtext.model.TextDecoration;
@@ -16,7 +17,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-class RichTextAreaViewModel {
+public class RichTextAreaViewModel {
 
     private final TextBuffer textBuffer;
     private final CommandManager commandManager = new CommandManager(this);
@@ -73,7 +74,7 @@ class RichTextAreaViewModel {
     public final IndexRange getSelection() {
         return selectionProperty.get();
     }
-    final void setSelection(IndexRange value) {
+    public final void setSelection(IndexRange value) {
         selectionProperty.set(value);
     }
 
@@ -96,23 +97,22 @@ class RichTextAreaViewModel {
         this.textBuffer.removeChangeListener(listener);
     }
 
-
-    public void moveCaretPosition(final int charCount) {
+    void moveCaretPosition(final int charCount) {
         int pos = getCaretPosition() + charCount;
         if ( pos >= 0 && pos <= getTextLength()) {
             setCaretPosition(pos);
         }
     }
 
-    public boolean hasSelection() {
+    boolean hasSelection() {
         return Tools.isIndexRangeValid( getSelection());
     }
 
-    public  void clearSelection() {
+    public void clearSelection() {
         setSelection(Tools.NO_SELECTION);
     }
 
-    public void insert( String text ) {
+    void insert( String text ) {
         if (hasSelection()) {
             removeSelection();
         }
@@ -120,7 +120,7 @@ class RichTextAreaViewModel {
         moveCaretPosition(1);
     }
 
-    public void remove(int caretOffset) {
+    void remove(int caretOffset) {
         if (hasSelection()) {
             removeSelection();
         } else {
@@ -133,7 +133,7 @@ class RichTextAreaViewModel {
     }
 
     // deletes selection if exists and set caret to the start position of the deleted selection
-    public void removeSelection() {
+    private void removeSelection() {
         if ( hasSelection() ) {
             IndexRange selection = getSelection();
             textBuffer.delete(selection.getStart(), selection.getEnd() - selection.getStart() );
@@ -142,7 +142,7 @@ class RichTextAreaViewModel {
         }
     }
 
-    void executeAction(EditorAction action, KeyEvent e) {
+    public void executeAction(EditorAction action, KeyEvent e) {
         actionMap.get(Objects.requireNonNull(action)).accept(e);
     }
 

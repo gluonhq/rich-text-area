@@ -1,6 +1,5 @@
-package com.gluonhq.richtext;
+package com.gluonhq.richtext.viewmodel;
 
-import com.gluonhq.richtext.model.TextBuffer;
 import javafx.scene.control.IndexRange;
 
 import java.util.Objects;

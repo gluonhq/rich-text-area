@@ -2,7 +2,7 @@ package com.gluonhq.richtext;
 
 import javafx.scene.control.IndexRange;
 
-class Tools {
+public class Tools {
 
     private Tools() {}
 

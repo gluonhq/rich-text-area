@@ -1,10 +1,10 @@
-package com.gluonhq.richtext;
+package com.gluonhq.richtext.viewmodel;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class CommandManager {
+class CommandManager {
 
     private final RichTextAreaViewModel viewModel;
     private final List<Command> commands = new ArrayList<>();

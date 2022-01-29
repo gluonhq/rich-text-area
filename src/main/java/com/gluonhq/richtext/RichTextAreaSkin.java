@@ -3,6 +3,7 @@ package com.gluonhq.richtext;
 import com.gluonhq.richtext.model.PieceTable;
 import com.gluonhq.richtext.model.TextChangeListener;
 import com.gluonhq.richtext.model.TextDecoration;
+import com.gluonhq.richtext.viewmodel.RichTextAreaViewModel;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.Observable;
@@ -44,7 +45,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private RichTextAreaViewModel viewModel =
         new RichTextAreaViewModel(
             new PieceTable("Simple text text text"),
-            this::getNextRowPosition // TODO need to find a better way to find a better way
+            this::getNextRowPosition // TODO need to find a better way to find next row caret position
         );
 
     private final TextFlow textFlow = new TextFlow();
