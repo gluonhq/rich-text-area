@@ -218,16 +218,13 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         return  new KeyCodeCombination( code, modifiers );
     }
 
-    private boolean executeKeyboardAction(KeyEvent e) {
-
+    private void executeKeyboardAction(KeyEvent e) {
         for ( KeyCombination kc: INPUT_MAP.keySet()) {
             if (kc.match(e)) {
                 viewModel.executeAction(INPUT_MAP.get(kc),e);
                 e.consume();
-                return true;
             }
         }
-        return false;
     }
 
     private void keyPressedListener(KeyEvent e) {
@@ -235,11 +232,9 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     private void keyTypedListener(KeyEvent e) {
-        if ( !executeKeyboardAction(e) ) { //&& isPrintableChar( e.getCharacter().charAt(0) )) {
             // TODO this should only be done for printable chars
             viewModel.executeAction(EditorAction.INSERT,e);
             e.consume();
-        }
     }
 
 }
