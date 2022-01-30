@@ -11,7 +11,6 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
-import javafx.scene.control.IndexRange;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SkinBase;
 import javafx.scene.input.*;
@@ -221,13 +220,15 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         return  new KeyCodeCombination( code, modifiers );
     }
 
-    private void executeKeyboardAction(KeyEvent e) {
+    private boolean executeKeyboardAction(KeyEvent e) {
         for ( KeyCombination kc: INPUT_MAP.keySet()) {
             if (kc.match(e)) {
                 viewModel.executeAction(INPUT_MAP.get(kc),e);
                 e.consume();
+                return true;
             }
         }
+        return false;
     }
 
     private void keyPressedListener(KeyEvent e) {
@@ -235,9 +236,13 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     private void keyTypedListener(KeyEvent e) {
-            // TODO this should only be done for printable chars
-            viewModel.executeAction(EditorAction.INSERT,e);
-            e.consume();
+        if (!executeKeyboardAction(e)) {
+            if ( !e.isConsumed() && !e.getCharacter().isEmpty() ) {
+                // TODO this should only be done for printable chars
+                viewModel.executeAction(EditorAction.INSERT, e);
+                e.consume();
+            }
+        }
     }
 
 }

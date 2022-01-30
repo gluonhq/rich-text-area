@@ -1,6 +1,7 @@
 package com.gluonhq.richtext.viewmodel;
 
-import com.gluonhq.richtext.*;
+import com.gluonhq.richtext.EditorAction;
+import com.gluonhq.richtext.Selection;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextChangeListener;
 import com.gluonhq.richtext.model.TextDecoration;
@@ -8,7 +9,6 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.scene.control.IndexRange;
 import javafx.scene.input.KeyEvent;
 
 import java.util.Map;
@@ -60,7 +60,7 @@ public class RichTextAreaViewModel {
             Selection selection = Selection.UNDEFINED;
             if (value != null) {
                 selection = value.getEnd() >= getTextLength()?
-                        new Selection( value.getStart(), getTextLength()): value;
+                    new Selection( value.getStart(), getTextLength()): value;
             }
             super.set(selection);
         }
@@ -111,38 +111,31 @@ public class RichTextAreaViewModel {
     }
 
     void insert( String text ) {
-        if (hasSelection()) {
-            removeSelection();
-        }
+        removeSelection();
         textBuffer.insert(text, getCaretPosition());
         moveCaretPosition(1);
     }
 
     void remove(int caretOffset) {
-        if (hasSelection()) {
-            removeSelection();
-        } else {
-
-            System.out.println("Current pos: " + getCaretPosition());
-            System.out.println("Offset: " + caretOffset);
-
+        if (!removeSelection()) {
             int position = getCaretPosition() + caretOffset;
-            if (position >= 0 && position < getTextLength() ) {
+            if (position >= 0 && position <= getTextLength() ) {
                 textBuffer.delete(position, 1);
                 setCaretPosition(position);
             }
-            System.out.println("New pos: " + getCaretPosition());
         }
     }
 
     // deletes selection if exists and set caret to the start position of the deleted selection
-    private void removeSelection() {
+    private boolean removeSelection() {
         if ( hasSelection() ) {
             Selection selection = getSelection();
             textBuffer.delete(selection.getStart(), selection.getLength() );
             clearSelection();
             setCaretPosition(selection.getStart());
+            return true;
         }
+        return false;
     }
 
     public void executeAction(EditorAction action, KeyEvent e) {
