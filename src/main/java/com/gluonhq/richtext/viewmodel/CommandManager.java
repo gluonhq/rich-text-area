@@ -7,14 +7,14 @@ import java.util.Objects;
 class CommandManager {
 
     private final RichTextAreaViewModel viewModel;
-    private final List<Command> commands = new ArrayList<>();
+    private final List<AbstractCommand> commands = new ArrayList<>();
     private int undoCmdIndex = -1;
 
     CommandManager( RichTextAreaViewModel viewModel ) {
         this.viewModel =  Objects.requireNonNull(viewModel);
     }
 
-    public void execute( Command command) {
+    public void execute( AbstractCommand command) {
         Objects.requireNonNull(command).redo(viewModel);
         if (canRedo()) {
           // clear all commands after current one

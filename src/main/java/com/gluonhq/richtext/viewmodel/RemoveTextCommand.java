@@ -1,23 +1,18 @@
 package com.gluonhq.richtext.viewmodel;
 
-import javafx.scene.control.IndexRange;
-
 import java.util.Objects;
 
-class RemoveTextCommand implements Command {
+class RemoveTextCommand extends AbstractCommand {
 
     private int caretOffset;
-    private int caretPosition;
-    private IndexRange selection;
 
-    public RemoveTextCommand( int caretOffset ) {
+    public RemoveTextCommand(int caretOffset ) {
         this.caretOffset = caretOffset;
     }
 
     @Override
     public void redo( RichTextAreaViewModel viewModel ) {
-        this.caretPosition = viewModel.getCaretPosition();
-        this.selection = viewModel.getSelection();
+        storeContext(viewModel);
         Objects.requireNonNull(viewModel).remove(caretOffset);
     }
 
