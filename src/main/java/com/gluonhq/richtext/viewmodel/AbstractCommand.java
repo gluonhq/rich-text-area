@@ -1,5 +1,6 @@
 package com.gluonhq.richtext.viewmodel;
 
+import com.gluonhq.richtext.Selection;
 import javafx.scene.control.IndexRange;
 
 abstract class AbstractCommand {
@@ -21,7 +22,7 @@ abstract class AbstractCommand {
 class CommandContext {
 
     private final int caretPosition;
-    private final IndexRange selection;
+    private final Selection selection;
 
     CommandContext(RichTextAreaViewModel model) {
         this.caretPosition = model.getCaretPosition();
@@ -32,7 +33,7 @@ class CommandContext {
         return caretPosition;
     }
 
-    public IndexRange getSelection() {
+    public Selection getSelection() {
         return selection;
     }
 }

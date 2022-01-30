@@ -105,13 +105,13 @@ public class PieceTableTests {
         Assertions.assertThrows( IllegalArgumentException.class, () -> pt.delete(-1, 100));
     }
 
-    @Test
-    @DisplayName("Block line stops generated correctly")
-    public void lineStopsGeneratedCorrectly() {
-        PieceTable pt = new PieceTable(originalText);
-        Piece piece = pt.appendTextInternal(" \n \n \n   ");
-        Assertions.assertArrayEquals( new int[]{1,3,5}, piece.lineStops );
-    }
+//    @Test
+//    @DisplayName("Block line stops generated correctly")
+//    public void lineStopsGeneratedCorrectly() {
+//        PieceTable pt = new PieceTable(originalText);
+//        Piece piece = pt.appendTextInternal(" \n \n \n   ");
+//        Assertions.assertArrayEquals( new int[]{1,3,5}, piece.lineStops );
+//    }
 
     @Test
     @DisplayName("Events are fired")

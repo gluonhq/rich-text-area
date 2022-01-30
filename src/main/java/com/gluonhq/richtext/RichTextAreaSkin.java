@@ -96,7 +96,8 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
             if (caretPosition < 0 ) {
                 caretTimeline.stop();
             } else {
-                caretShape.getElements().addAll(textFlow.caretShape(caretPosition, true));
+                var pathElements = textFlow.caretShape(caretPosition, true);
+                caretShape.getElements().addAll(pathElements);
                 caretTimeline.play();
             }
         });
@@ -104,7 +105,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         //TODO remove listener on viewModel change
         viewModel.selectionProperty().addListener( (o, os, selection) -> {
             selectionShape.getElements().clear();
-            if ( selection != null && Tools.isIndexRangeValid(selection)) {
+            if (selection.isDefined()) {
                 selectionShape.getElements().setAll(textFlow.rangeShape( selection.getStart(), selection.getEnd() ));
             }
         });
@@ -190,7 +191,8 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private void mouseDraggedListener(MouseEvent e) {
         HitInfo hitInfo = textFlow.hitTest(new Point2D( e.getX(), e.getY()));
         if (hitInfo.getCharIndex() >= 0) {
-            viewModel.setSelection( IndexRange.normalize(dragStart, hitInfo.getCharIndex()));
+            int dragEnd = hitInfo.getCharIndex();
+            viewModel.setSelection( new Selection(dragStart, dragEnd));
             viewModel.setCaretPosition(hitInfo.getCharIndex());
         }
         e.consume();

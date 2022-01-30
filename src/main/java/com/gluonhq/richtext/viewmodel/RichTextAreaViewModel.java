@@ -54,27 +54,25 @@ public class RichTextAreaViewModel {
 
 
     // selectionProperty
-    private final ObjectProperty<IndexRange> selectionProperty = new SimpleObjectProperty<>(this, "selection", Tools.NO_SELECTION) {
+    private final ObjectProperty<Selection> selectionProperty = new SimpleObjectProperty<>(this, "selection", Selection.UNDEFINED) {
         @Override
-        public void set(IndexRange value) {
-            IndexRange selection = Objects.requireNonNull(value);
-            selection = IndexRange.normalize(selection.getStart(), selection.getEnd());
-            if (!Tools.isIndexRangeValid(selection) || selection.getStart() > getTextLength() ) {
-                selection = Tools.NO_SELECTION;
-            } else if ( selection.getStart() > getTextLength() ){
-                selection = IndexRange.normalize( selection.getStart(), getTextLength());
+        public void set(Selection value) {
+            Selection selection = Selection.UNDEFINED;
+            if (value != null) {
+                selection = value.getEnd() >= getTextLength()?
+                        new Selection( value.getStart(), getTextLength()): value;
             }
             super.set(selection);
         }
 
     };
-    public final ObjectProperty<IndexRange> selectionProperty() {
+    public final ObjectProperty<Selection> selectionProperty() {
         return selectionProperty;
     }
-    public final IndexRange getSelection() {
+    public final Selection getSelection() {
         return selectionProperty.get();
     }
-    public final void setSelection(IndexRange value) {
+    public final void setSelection(Selection value) {
         selectionProperty.set(value);
     }
 
@@ -105,11 +103,11 @@ public class RichTextAreaViewModel {
     }
 
     boolean hasSelection() {
-        return Tools.isIndexRangeValid( getSelection());
+        return getSelection().isDefined();
     }
 
     public void clearSelection() {
-        setSelection(Tools.NO_SELECTION);
+        setSelection(Selection.UNDEFINED);
     }
 
     void insert( String text ) {
@@ -124,20 +122,25 @@ public class RichTextAreaViewModel {
         if (hasSelection()) {
             removeSelection();
         } else {
+
+            System.out.println("Current pos: " + getCaretPosition());
+            System.out.println("Offset: " + caretOffset);
+
             int position = getCaretPosition() + caretOffset;
             if (position >= 0 && position < getTextLength() ) {
                 textBuffer.delete(position, 1);
                 setCaretPosition(position);
             }
+            System.out.println("New pos: " + getCaretPosition());
         }
     }
 
     // deletes selection if exists and set caret to the start position of the deleted selection
     private void removeSelection() {
         if ( hasSelection() ) {
-            IndexRange selection = getSelection();
-            textBuffer.delete(selection.getStart(), selection.getEnd() - selection.getStart() );
-            setSelection(Tools.NO_SELECTION);
+            Selection selection = getSelection();
+            textBuffer.delete(selection.getStart(), selection.getLength() );
+            clearSelection();
             setCaretPosition(selection.getStart());
         }
     }
@@ -148,7 +151,7 @@ public class RichTextAreaViewModel {
 
     void moveCaret( Direction direction, boolean changeSelection ) {
 
-        IndexRange prevSelection = getSelection();
+        Selection prevSelection = getSelection();
         int prevCaretPosition = getCaretPosition();
         switch (direction) {
             case FORWARD:
@@ -165,10 +168,10 @@ public class RichTextAreaViewModel {
         }
 
         if (changeSelection) {
-            int pos = Tools.isIndexRangeValid(prevSelection)?
+            int pos = prevSelection.isDefined()?
                     prevCaretPosition == prevSelection.getStart()? prevSelection.getEnd(): prevSelection.getStart():
                     prevCaretPosition;
-            setSelection(IndexRange.normalize(pos, getCaretPosition()));
+            setSelection( new Selection(pos, getCaretPosition()));
         } else {
             clearSelection();
         }
