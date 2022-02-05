@@ -160,8 +160,7 @@ public final class PieceTable extends AbstractTextBuffer {
     public void delete( final int deletePosition, int length ) {
 
         if ( !inRange(deletePosition, 0, getTextLength())) {
-            //throw new IllegalArgumentException("Position is outside of text bounds");
-            return;
+            throw new IllegalArgumentException("Position is outside of text bounds");
         }
 
         //  Accept length larger than actual and adjust it to actual
