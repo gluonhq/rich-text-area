@@ -31,15 +31,14 @@ import static javafx.scene.input.KeyCombination.*;
 class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private static final Map<KeyCombination, EditorAction> INPUT_MAP = Map.of(
-            kc(RIGHT, SHIFT_ANY),      EditorAction.FORWARD,
-            kc(LEFT,  SHIFT_ANY),      EditorAction.BACK,
-            kc(DOWN,  SHIFT_ANY),      EditorAction.DOWN,
-            kc(UP,    SHIFT_ANY),      EditorAction.UP,
-            kc(BACK_SPACE, SHIFT_ANY), EditorAction.BACKSPACE,
-            kc(DELETE),                EditorAction.DELETE,
-            kc(Z, SHORTCUT_DOWN ),     EditorAction.UNDO
+        new KeyCodeCombination(RIGHT, SHIFT_ANY),      EditorAction.FORWARD,
+        new KeyCodeCombination(LEFT,  SHIFT_ANY),      EditorAction.BACK,
+        new KeyCodeCombination(DOWN,  SHIFT_ANY),      EditorAction.DOWN,
+        new KeyCodeCombination(UP,    SHIFT_ANY),      EditorAction.UP,
+        new KeyCodeCombination(BACK_SPACE, SHIFT_ANY), EditorAction.BACKSPACE,
+        new KeyCodeCombination(DELETE),                EditorAction.DELETE,
+        new KeyCodeCombination(Z, META_ANY  ),         EditorAction.UNDO
     );
-
 
     private RichTextAreaViewModel viewModel =
         new RichTextAreaViewModel(
@@ -208,40 +207,36 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         return hitInfo.getCharIndex();
     }
 
-//    private static boolean isPrintableChar(char c) {
-//        Character.UnicodeBlock changeBlock = Character.UnicodeBlock.of(c);
-//        return c == '\n' &&
-//                !Character.isISOControl(c) &&
-//                !KeyEvent.CHAR_UNDEFINED.equals(String.valueOf(c))&&
-//                changeBlock != null && changeBlock != Character.UnicodeBlock.SPECIALS;
-//    }
-
-    private static KeyCombination kc( KeyCode code, Modifier... modifiers ) {
-        return  new KeyCodeCombination( code, modifiers );
+    private static boolean isPrintableChar(char c) {
+        Character.UnicodeBlock changeBlock = Character.UnicodeBlock.of(c);
+        return  ( c == '\n' || c == '\t' || !Character.isISOControl(c)) &&
+                !KeyEvent.CHAR_UNDEFINED.equals(String.valueOf(c)) &&
+                changeBlock != null && changeBlock != Character.UnicodeBlock.SPECIALS;
     }
 
-    private boolean executeKeyboardAction(KeyEvent e) {
-        for ( KeyCombination kc: INPUT_MAP.keySet()) {
-            if (kc.match(e)) {
-                viewModel.executeAction(INPUT_MAP.get(kc),e);
-                e.consume();
-                return true;
-            }
-        }
-        return false;
+    private static boolean isCharOnly(KeyEvent e ) {
+        char c = e.getCharacter().isEmpty()? 0: e.getCharacter().charAt(0);
+        return isPrintableChar(c) &&
+               !e.isControlDown() &&
+               !e.isMetaDown() &&
+               !e.isAltDown();
     }
 
     private void keyPressedListener(KeyEvent e) {
-        executeKeyboardAction(e);
+        // Find an applicable action and execute it if found
+        for (KeyCombination kc : INPUT_MAP.keySet()) {
+            if (kc.match(e)) {
+                viewModel.executeAction(INPUT_MAP.get(kc), e);
+                e.consume();
+            }
+        }
+
     }
 
     private void keyTypedListener(KeyEvent e) {
-        if (!executeKeyboardAction(e)) {
-            if ( !e.isConsumed() && !e.getCharacter().isEmpty() ) {
-                // TODO this should only be done for printable chars
-                viewModel.executeAction(EditorAction.INSERT, e);
-                e.consume();
-            }
+        if ( isCharOnly(e) ) {
+            viewModel.executeAction(EditorAction.INSERT, e);
+            e.consume();
         }
     }
 
