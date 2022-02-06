@@ -3,8 +3,8 @@ package com.gluonhq.richtext.viewmodel;
 import com.gluonhq.richtext.EditorAction;
 import com.gluonhq.richtext.Selection;
 import com.gluonhq.richtext.model.TextBuffer;
-import com.gluonhq.richtext.model.TextChangeListener;
 import com.gluonhq.richtext.model.TextDecoration;
+import com.gluonhq.richtext.undo.CommandManager;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -19,6 +19,10 @@ import java.util.function.Function;
 
 public class RichTextAreaViewModel {
 
+    public enum Direction {
+        FORWARD, BACK, UP, DOWN;
+    }
+
     private final TextBuffer textBuffer;
     private final CommandManager commandManager = new CommandManager(this);
 
@@ -28,11 +32,12 @@ public class RichTextAreaViewModel {
         EditorAction.DOWN,      e -> moveCaret(Direction.DOWN, e.isShiftDown()),
         EditorAction.UP,        e -> moveCaret(Direction.UP, e.isShiftDown()),
 
-        EditorAction.INSERT,    e -> commandManager.execute(new InsertTextCommand(e.getCharacter())),
-        EditorAction.BACKSPACE, e -> commandManager.execute(new RemoveTextCommand(-1)),
-        EditorAction.DELETE,    e -> commandManager.execute(new RemoveTextCommand(0)),
+        EditorAction.INSERT,    e -> commandManager.execute(new InsertTextCmd(e.getCharacter())),
+        EditorAction.BACKSPACE, e -> commandManager.execute(new RemoveTextCmd(-1)),
+        EditorAction.DELETE,    e -> commandManager.execute(new RemoveTextCmd(0)),
 
-        EditorAction.UNDO,      e -> commandManager.undo()
+        EditorAction.UNDO,      e -> commandManager.undo(),
+        EditorAction.REDO,      e -> commandManager.redo()
     );
 
     /// PROPERTIES ///////////////////////////////////////////////////////////////
@@ -87,11 +92,11 @@ public class RichTextAreaViewModel {
         return textBuffer.getTextLength();
     }
 
-    public final void addChangeListener(TextChangeListener listener) {
+    public final void addChangeListener(Consumer<TextBuffer.Event> listener) {
         this.textBuffer.addChangeListener(listener);
     }
 
-    public final void removeChangeListener(TextChangeListener listener) {
+    public final void removeChangeListener(Consumer<TextBuffer.Event> listener) {
         this.textBuffer.removeChangeListener(listener);
     }
 
@@ -173,6 +178,10 @@ public class RichTextAreaViewModel {
 
     public void walkFragments(BiConsumer<String, TextDecoration> onFragment) {
         textBuffer.walkFragments(onFragment);
+    }
+
+    public void undo() {
+        this.textBuffer.undo();
     }
 
 }

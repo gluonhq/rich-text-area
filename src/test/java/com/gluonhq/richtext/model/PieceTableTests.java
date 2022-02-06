@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.function.Consumer;
+
 public class PieceTableTests {
 
     private static final String originalText = "Original Text";
@@ -120,21 +122,18 @@ public class PieceTableTests {
         final int[] insertCount = {0};
         final int[] deleteCount = {0};
 
-        class ChangeListener implements TextChangeListener {
-            @Override
-            public void onInsert(String text, int position) {
-                insertCount[0]++;
-            }
+        final Consumer<TextBuffer.Event> changeListener = e -> {
 
-            @Override
-            public void onDelete(int position, int length) {
+            if ( e instanceof TextBuffer.InsertEvent) {
+                insertCount[0]++;
+            } else if ( e instanceof TextBuffer.DeleteEvent) {
                 deleteCount[0]++;
             }
-        }
+        };
 
         PieceTable pt = new PieceTable(originalText);
-        pt.addChangeListener( new ChangeListener());
-        pt.addChangeListener( new ChangeListener());
+        pt.addChangeListener(changeListener::accept);
+        pt.addChangeListener(changeListener::accept);
 
         pt.insert( "XXX", 9);
         pt.delete(9, 3);
@@ -150,23 +149,19 @@ public class PieceTableTests {
         final int[] insertCount = {0};
         final int[] deleteCount = {0};
 
-        class ChangeListener implements TextChangeListener {
+        final Consumer<TextBuffer.Event> changeListener = e -> {
 
-            @Override
-            public void onInsert(String text, int position) {
-                insertCount[0]++; 
-            }
-
-            @Override
-            public void onDelete(int position, int length) {
+            if ( e instanceof TextBuffer.InsertEvent) {
+                insertCount[0]++;
+            } else if ( e instanceof TextBuffer.DeleteEvent) {
                 deleteCount[0]++;
             }
-        }
+        };
 
         PieceTable pt = new PieceTable(originalText);
-        var listener = new ChangeListener();
+        Consumer<TextBuffer.Event> listener = changeListener::accept;
         pt.addChangeListener( listener );
-        pt.addChangeListener( new ChangeListener());
+        pt.addChangeListener( changeListener::accept);
         pt.insert( "XXX", 9);
         pt.removeChangeListener(listener);
         pt.delete(9, 3);

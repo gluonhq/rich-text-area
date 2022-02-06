@@ -1,7 +1,7 @@
 package com.gluonhq.richtext;
 
 import com.gluonhq.richtext.model.PieceTable;
-import com.gluonhq.richtext.model.TextChangeListener;
+import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.viewmodel.RichTextAreaViewModel;
 import javafx.animation.KeyFrame;
@@ -23,6 +23,7 @@ import javafx.util.Duration;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static javafx.scene.input.KeyCode.*;
 import static javafx.scene.input.KeyCombination.*;
@@ -56,17 +57,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         new KeyFrame(Duration.seconds(1.0))
     );
 
-    private final TextChangeListener textChangeListener = new TextChangeListener() {
-        @Override
-        public void onInsert(String text, int position) {
-            refreshTextFlow();
-        }
-
-        @Override
-        public void onDelete(int position, int length) {
-            refreshTextFlow();
-        }
-    };
+    private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow();
 
     protected RichTextAreaSkin(final RichTextArea control) {
         super(control);

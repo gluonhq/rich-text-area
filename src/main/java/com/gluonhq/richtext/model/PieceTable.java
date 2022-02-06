@@ -1,5 +1,8 @@
 package com.gluonhq.richtext.model;
 
+import com.gluonhq.richtext.undo.AbstractCommand;
+import com.gluonhq.richtext.undo.CommandManager;
+
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -13,9 +16,10 @@ public final class PieceTable extends AbstractTextBuffer {
     final String originalText;
     String additionBuffer = "";
 
-    private final List<Piece> pieces = new ArrayList<>();
+    final List<Piece> pieces = new ArrayList<>();
+    private final CommandManager<PieceTable> commander = new CommandManager<>(this);
 
-    private int textLength = -1;
+    int textLength = -1;
 
     /**
      * Creates piece table using original text
@@ -56,10 +60,6 @@ public final class PieceTable extends AbstractTextBuffer {
         return sb.toString();
     }
 
-    public List<Piece> getPieces() {
-        return Collections.unmodifiableList(pieces);
-    }
-
     // internal append
     Piece appendTextInternal(String text) {
         int pos = additionBuffer.length();
@@ -74,39 +74,18 @@ public final class PieceTable extends AbstractTextBuffer {
      */
     @Override
     public void append( String text ) {
-        Objects.requireNonNull(text);
-        if (!text.isEmpty()) {
-            int pos = additionBuffer.length();
-            pieces.add(appendTextInternal(text));
-            fireInsert(text, pos);
-        }
+        commander.execute( new AppendCmd(text));
     }
 
+    /**
+     * Walks through text fragments. Each fragment is represented by related text and decoration
+     * @param onFragment
+     */
     @Override
     public void walkFragments(BiConsumer<String, TextDecoration> onFragment) {
-        for (Piece piece : getPieces()) {
-            onFragment.accept( piece.getText(), piece.getDecoration());
-        }
+        pieces.forEach( p -> onFragment.accept( p.getText(), p.getDecoration()));
     }
 
-    @FunctionalInterface
-    private interface WalkStep {
-        // process step, return true of walk has to be interrupted
-        boolean process(final Piece piece, final int textPosition, final int pieceIndex);
-    }
-
-    // Walks through pieces. Returns true if process was interrupted
-    private void walkPieces(WalkStep step) {
-        int textPosition = 0;
-        int pieceIndex = 0;
-        for (Piece piece : pieces) {
-            if (step.process(piece, textPosition, pieceIndex)) {
-                return;
-            }
-            textPosition += piece.length;
-            pieceIndex++;
-        }
-    }
 
     /**
      * Inserts text at insertPosition
@@ -115,39 +94,8 @@ public final class PieceTable extends AbstractTextBuffer {
      * @throws IllegalArgumentException if insertPosition is not valid
      */
     @Override
-    public void insert( String text, int insertPosition ) {
-
-        Objects.requireNonNull(text);
-
-        if ( text.isEmpty() ) {
-            return; // no need to insert empty text
-        }
-
-        if ( insertPosition < 0 || insertPosition > getTextLength() ) {
-            throw new IllegalArgumentException("Position is outside text bounds");
-        }
-
-        if (insertPosition == getTextLength()) {
-            append(text);
-        } else {
-            walkPieces(( piece, textPosition, pieceIndex) -> {
-                if ( inRange(insertPosition, textPosition, piece.length)) {
-                    int pieceOffset = insertPosition-textPosition;
-                    pieces.addAll( pieceIndex,
-                        normalize( List.of(
-                            piece.pieceBefore(pieceOffset),
-                            appendTextInternal(text),
-                            piece.pieceFrom(pieceOffset)
-                        ))
-                    );
-                    pieces.remove(piece);
-                    fireInsert(text, insertPosition);
-                    return true;
-                }
-                return false;
-            });
-        }
-
+    public void insert( final String text, final int insertPosition ) {
+        commander.execute( new InsertCmd(text, insertPosition));
     }
 
     /**
@@ -158,54 +106,45 @@ public final class PieceTable extends AbstractTextBuffer {
      */
     @Override
     public void delete( final int deletePosition, int length ) {
+        commander.execute( new DeleteCmd(deletePosition, length));
+    }
 
-        if ( !inRange(deletePosition, 0, getTextLength())) {
-            throw new IllegalArgumentException("Position is outside of text bounds");
-        }
+    /**
+     * Undo latest text modification
+     */
+    @Override
+    public void undo() {
+        commander.undo();
+    }
 
-        //  Accept length larger than actual and adjust it to actual
-        if ( (deletePosition + length) >= getTextLength() ) {
-            length = getTextLength()-deletePosition;
-        }
+    @Override
+    public void redo() {
+        commander.redo();
+    }
 
-        int endPosition = deletePosition+length;
+    @FunctionalInterface
+    interface WalkStep {
+        // process step, return true of walk has to be interrupted
+        boolean process(final Piece piece, final int pieceIndex, final int textPosition);
+    }
 
-        final int[] startPieceIndex = new int[1];
-        final List<Piece> additions = new ArrayList<>(); // start and end pieces
-        final List<Piece> removals  = new ArrayList<>();
+    // Walks through pieces. Returns true if process was interrupted
+    void walkPieces(WalkStep step) {
 
-        walkPieces( (piece, textPosition, pieceIndex) -> {
-
-            if ( inRange( deletePosition, textPosition, piece.length) ) {
-                int pieceOffset = deletePosition-textPosition;
-                startPieceIndex[0] = pieceIndex;
-                additions.add(piece.pieceBefore(pieceOffset));
-                removals.add(piece);
+        int textPosition = 0;
+        for (int i = 0; i < pieces.size(); i++) {
+            Piece piece = pieces.get(i);
+            if (step.process(piece, i, textPosition)) {
+                return;
             }
-
-            if (!additions.isEmpty()) {
-                removals.add(piece);
-                if (inRange( endPosition, textPosition, piece.length)) {
-                    additions.add(piece.pieceFrom(endPosition-textPosition));
-                    return true;
-                }
-            }
-            return false;
-        });
-
-        Collection<Piece> newPieces = normalize(additions);
-        if (newPieces.size() > 0 || removals.size() > 0) { // split actually happened
-            this.pieces.addAll(startPieceIndex[0], newPieces );
-            this.pieces.removeAll(removals);
-            textLength = getTextLength() - length;
-            fireDelete(deletePosition, length);
+            textPosition += piece.length;
         }
 
     }
 
     // Normalized list of pieces
     // Empty pieces purged
-    private static Collection<Piece> normalize(Collection<Piece> pieces) {
+    static Collection<Piece> normalize(Collection<Piece> pieces) {
         return Objects.requireNonNull(pieces)
                   .stream()
                   .filter(b -> b == null ||  !b.isEmpty())
@@ -214,10 +153,183 @@ public final class PieceTable extends AbstractTextBuffer {
     }
 
     // TODO is there standard APIs?
-    private static boolean inRange( int index, int start, int length ) {
+    static boolean inRange( int index, int start, int length ) {
         return index >= start && index < start+length;
     }
 
 }
+
+abstract class AbstractPTCmd extends AbstractCommand<PieceTable> {
+
+}
+
+class AppendCmd extends AbstractPTCmd {
+
+    private final String text;
+    private Piece newPiece;
+
+    AppendCmd(String text) {
+        this.text = Objects.requireNonNull(text);
+    }
+
+    @Override
+    protected void doUndo(PieceTable pt) {
+        pt.pieces.remove(newPiece);
+        pt.fire( new TextBuffer.DeleteEvent(pt.getTextLength()-text.length(), text.length() ));
+    }
+
+    @Override
+    protected void doRedo(PieceTable pt) {
+        if (!text.isEmpty()) {
+            int pos = pt.getTextLength();
+            newPiece = pt.appendTextInternal(text);
+            pt.pieces.add(newPiece);
+            pt.fire( new TextBuffer.InsertEvent(text, pos));
+        }
+    }
+}
+
+class InsertCmd extends AbstractCommand<PieceTable> {
+
+    private final String text;
+    private final int insertPosition;
+
+    private Collection<Piece> newPieces;
+    private Piece oldPiece;
+    private int opPieceIndex;
+    private boolean execSuccess = false;
+
+    InsertCmd( String text, int insertPosition )  {
+        this.text = Objects.requireNonNull(text);
+        this.insertPosition = insertPosition;
+    }
+
+    @Override
+    protected void doUndo(PieceTable pt) {
+        if (execSuccess) {
+            pt.pieces.add(opPieceIndex, oldPiece);
+            pt.pieces.removeAll(newPieces);
+            pt.fire(new TextBuffer.DeleteEvent(insertPosition, text.length()));
+        }
+    }
+
+    @Override
+    protected void doRedo(PieceTable pt) {
+
+        if ( text.isEmpty() ) {
+            return; // no need to insert empty text
+        }
+
+        if ( insertPosition < 0 || insertPosition > pt.getTextLength() ) {
+            throw new IllegalArgumentException("Position is outside text bounds");
+        }
+
+        if (insertPosition == pt.getTextLength()) {
+            pt.append(text);
+        } else {
+            pt.walkPieces((piece, pieceIndex, textPosition) -> {
+                if ( PieceTable.inRange(insertPosition, textPosition, piece.length)) {
+                    int pieceOffset = insertPosition-textPosition;
+                    newPieces = PieceTable.normalize( List.of(
+                            piece.pieceBefore(pieceOffset),
+                            pt.appendTextInternal(text),
+                            piece.pieceFrom(pieceOffset)
+                    ));
+                    oldPiece = piece;
+                    pt.pieces.addAll( pieceIndex, newPieces );
+                    pt.pieces.remove(oldPiece);
+                    opPieceIndex = pieceIndex;
+
+                    pt.fire( new TextBuffer.InsertEvent(text, insertPosition));
+                    execSuccess = true;
+                    return true;
+                }
+                return false;
+            });
+        }
+    }
+}
+
+class DeleteCmd extends AbstractCommand<PieceTable> {
+
+    private final int deletePosition;
+    private int length;
+
+    private boolean execSuccess = false;
+    private int pieceIndex = -1;
+    private Collection<Piece> newPieces;
+    private Collection<Piece> oldPieces;
+
+    DeleteCmd(int deletePosition, int length) {
+        this.deletePosition = deletePosition;
+        this.length = length;
+    }
+
+    @Override
+    protected void doUndo(PieceTable pt) {
+        if (execSuccess) {
+            pt.pieces.addAll(pieceIndex, oldPieces);
+            pt.pieces.removeAll(newPieces);
+
+            String text = oldPieces.stream()
+              .map(Piece::getText)
+              .reduce( "", (id, s) -> id + s );
+
+            pt.fire(new TextBuffer.InsertEvent(text, deletePosition));
+        }
+    }
+
+    @Override
+    protected void doRedo(PieceTable pt) {
+
+        if (!PieceTable.inRange(deletePosition, 0, pt.getTextLength())) {
+            throw new IllegalArgumentException("Position is outside of text bounds");
+        }
+
+        //  Accept length larger than actual and adjust it to actual
+        if ((deletePosition + length) >= pt.getTextLength()) {
+            length = pt.getTextLength() - deletePosition;
+        }
+
+        int endPosition = deletePosition + length;
+
+        final int[] startPieceIndex = new int[1];
+        final List<Piece> additions = new ArrayList<>(); // start and end pieces
+        final List<Piece> removals = new ArrayList<>();
+
+        pt.walkPieces((piece, pieceIndex, textPosition) -> {
+
+            if (PieceTable.inRange(deletePosition, textPosition, piece.length)) {
+                int pieceOffset = deletePosition - textPosition;
+                startPieceIndex[0] = pieceIndex;
+                additions.add(piece.pieceBefore(pieceOffset));
+                removals.add(piece);
+            }
+
+            if (!additions.isEmpty()) {
+                removals.add(piece);
+                if (PieceTable.inRange(endPosition, textPosition, piece.length)) {
+                    additions.add(piece.pieceFrom(endPosition - textPosition));
+                    return true;
+                }
+            }
+            return false;
+        });
+
+        newPieces = PieceTable.normalize(additions);
+        oldPieces = removals;
+        if (newPieces.size() > 0 || oldPieces.size() > 0) { // split actually happened
+            pieceIndex = startPieceIndex[0];
+            pt.pieces.addAll(pieceIndex, newPieces);
+            pt.pieces.removeAll(oldPieces);
+            pt.textLength = pt.getTextLength() - length;
+            pt.fire(new TextBuffer.DeleteEvent(deletePosition, length));
+            execSuccess = true;
+        }
+
+    }
+
+}
+
 
 
