@@ -6,9 +6,9 @@ import java.util.Objects;
 
 public class CommandManager<T> {
 
-    private final Deque<AbstractCommand<T>> undoStack = new ArrayDeque<>();
-    private final Deque<AbstractCommand<T>> redoStack = new ArrayDeque<>();
-    private final T context;
+    final Deque<AbstractCommand<T>> undoStack = new ArrayDeque<>();
+    final Deque<AbstractCommand<T>> redoStack = new ArrayDeque<>();
+    final T context;
 
     public CommandManager(T context ) {
         this.context = context;
