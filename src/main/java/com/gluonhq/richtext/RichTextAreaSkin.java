@@ -38,10 +38,11 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         new KeyCodeCombination(UP,    SHIFT_ANY),      EditorAction.UP,
         new KeyCodeCombination(BACK_SPACE, SHIFT_ANY), EditorAction.BACKSPACE,
         new KeyCodeCombination(DELETE),                EditorAction.DELETE,
-        new KeyCodeCombination(Z, META_ANY  ),         EditorAction.UNDO
+        new KeyCodeCombination(Z, META_ANY  ),         EditorAction.UNDO,
+        new KeyCodeCombination(ENTER, SHIFT_ANY),      EditorAction.ENTER
     );
 
-    private RichTextAreaViewModel viewModel =
+    private final RichTextAreaViewModel viewModel =
         new RichTextAreaViewModel(
             new PieceTable("Simple text text text"),
             this::getNextRowPosition // TODO need to find a better way to find next row caret position
@@ -221,7 +222,6 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 e.consume();
             }
         }
-
     }
 
     private void keyTypedListener(KeyEvent e) {

@@ -19,12 +19,10 @@ import java.util.function.Function;
 
 public class RichTextAreaViewModel {
 
-    public enum Direction {
-        FORWARD, BACK, UP, DOWN;
-    }
+    public enum Direction { FORWARD, BACK, UP, DOWN }
 
     private final TextBuffer textBuffer;
-    private final CommandManager commandManager = new CommandManager(this);
+    private final CommandManager<RichTextAreaViewModel> commandManager = new CommandManager<>(this);
 
     private final Map<EditorAction, Consumer<KeyEvent>> actionMap = Map.of(
         EditorAction.FORWARD,   e -> moveCaret(Direction.FORWARD, e.isShiftDown()),
@@ -35,9 +33,11 @@ public class RichTextAreaViewModel {
         EditorAction.INSERT,    e -> commandManager.execute(new InsertTextCmd(e.getCharacter())),
         EditorAction.BACKSPACE, e -> commandManager.execute(new RemoveTextCmd(-1)),
         EditorAction.DELETE,    e -> commandManager.execute(new RemoveTextCmd(0)),
+        EditorAction.ENTER,     e -> commandManager.execute(new InsertTextCmd("\n")),
 
         EditorAction.UNDO,      e -> commandManager.undo(),
         EditorAction.REDO,      e -> commandManager.redo()
+
     );
 
     /// PROPERTIES ///////////////////////////////////////////////////////////////
