@@ -79,7 +79,7 @@ public final class PieceTable extends AbstractTextBuffer {
 
     /**
      * Walks through text fragments. Each fragment is represented by related text and decoration
-     * @param onFragment
+     * @param onFragment callback to get fragment info
      */
     @Override
     public void walkFragments(BiConsumer<String, TextDecoration> onFragment) {
@@ -159,9 +159,7 @@ public final class PieceTable extends AbstractTextBuffer {
 
 }
 
-abstract class AbstractPTCmd extends AbstractCommand<PieceTable> {
-
-}
+abstract class AbstractPTCmd extends AbstractCommand<PieceTable> {}
 
 class AppendCmd extends AbstractPTCmd {
 
