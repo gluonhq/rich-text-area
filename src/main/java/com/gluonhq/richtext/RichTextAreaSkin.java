@@ -38,7 +38,8 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         new KeyCodeCombination(UP,    SHIFT_ANY),      EditorAction.UP,
         new KeyCodeCombination(BACK_SPACE, SHIFT_ANY), EditorAction.BACKSPACE,
         new KeyCodeCombination(DELETE),                EditorAction.DELETE,
-        new KeyCodeCombination(Z, META_ANY  ),         EditorAction.UNDO,
+        new KeyCodeCombination(Z, SHORTCUT_DOWN),             EditorAction.UNDO,
+        new KeyCodeCombination(Z, SHORTCUT_DOWN, SHIFT_DOWN), EditorAction.REDO,
         new KeyCodeCombination(ENTER, SHIFT_ANY),      EditorAction.ENTER
     );
 
