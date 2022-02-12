@@ -10,7 +10,7 @@ The data model  is based on piece table implementation, which helps to easily de
 with huge texts and simplifies to some extent undo functionality. It implements insert, 
 append and delete text operations and a simplistic change listening. Within the piece table 
 changes represented by one or more pieces. Piece does not contain the text itself but points 
-to one of tow buffers: original - fixed original text, additional - "add only" buffer for changes. 
+to one of two buffers: original - fixed original text, additional - "add only" buffer for changes. 
 Actual text can be restored by walking the prices. For now, each piece also contains simplistic 
 `TextDecoration` definition, which is meant to be used to decorate related text. The model also 
 implements an undo/redo mechanism which uses pieces but is based on abstract independent API 
