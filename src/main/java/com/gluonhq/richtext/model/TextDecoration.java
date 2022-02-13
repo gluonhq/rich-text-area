@@ -5,6 +5,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 
+import java.util.Objects;
+
 public class TextDecoration {
 
     public static TextDecoration DEFAULT = builder()
@@ -70,7 +72,7 @@ public class TextDecoration {
         }
 
         Builder fontFamily(String fontFamily) {
-            this.fontFamily = fontFamily;
+            this.fontFamily = Objects.requireNonNull(fontFamily);
             return this;
         }
 
@@ -80,12 +82,12 @@ public class TextDecoration {
         }
 
         Builder fontWeight(FontWeight fontWeight) {
-            this.fontWeight = fontWeight;
+            this.fontWeight = Objects.requireNonNull(fontWeight);
             return this;
         }
 
         Builder fontPosture(FontPosture fontPosture) {
-            this.fontPosture = fontPosture;
+            this.fontPosture = Objects.requireNonNull(fontPosture);
             return this;
         }
 
