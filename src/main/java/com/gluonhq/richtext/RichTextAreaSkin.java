@@ -9,6 +9,7 @@ import javafx.animation.Timeline;
 import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
@@ -62,13 +63,17 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     );
 
     private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow();
-    private ChangeListener<Boolean> focusChangeListener;
+    private final ChangeListener<Boolean> focusChangeListener;
 
     protected RichTextAreaSkin(final RichTextArea control) {
         super(control);
 
         textFlow.setFocusTraversable(false);
+        textFlow.setPadding(new Insets(-1));
+        textFlow.getStyleClass().setAll("text-flow");
+
         caretShape.setFocusTraversable(false);
+        caretShape.getStyleClass().add("caret");
 
         selectionShape.getStyleClass().setAll("selection");
 
