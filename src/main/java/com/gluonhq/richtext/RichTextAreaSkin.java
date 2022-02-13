@@ -7,6 +7,7 @@ import com.gluonhq.richtext.viewmodel.RichTextAreaViewModel;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.Observable;
+import javafx.beans.value.ChangeListener;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
@@ -49,6 +50,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
             this::getNextRowPosition // TODO need to find a better way to find next row caret position
         );
 
+    private final ScrollPane scrollPane;
     private final TextFlow textFlow = new TextFlow();
     private final Path caretShape = new Path();
     private final Path selectionShape = new Path();
@@ -60,6 +62,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     );
 
     private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow();
+    private ChangeListener<Boolean> focusChangeListener;
 
     protected RichTextAreaSkin(final RichTextArea control) {
         super(control);
@@ -72,8 +75,14 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         Group layers = new Group(selectionShape, caretShape, textFlow);
         caretTimeline.setCycleCount(Timeline.INDEFINITE);
 
-        ScrollPane scrollPane = new ScrollPane(layers);
+        scrollPane = new ScrollPane(layers);
         scrollPane.setFocusTraversable(false);
+        focusChangeListener = (obs, ov, nv) -> {
+            if (nv) {
+                getSkinnable().requestFocus();
+            }
+        };
+        scrollPane.focusedProperty().addListener(focusChangeListener);
         getChildren().add(scrollPane);
 
         // all listeners have to be removed within dispose method
@@ -149,6 +158,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         } else {
             getSkinnable().setOnKeyPressed(null);
             getSkinnable().setOnKeyTyped(null);
+            scrollPane.focusedProperty().removeListener(focusChangeListener);
             textFlow.setOnMousePressed(null);
             textFlow.setOnMouseDragged(null);
         }
