@@ -17,14 +17,13 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SkinBase;
 import javafx.scene.input.*;
 import javafx.scene.shape.Path;
+import javafx.scene.text.Font;
 import javafx.scene.text.HitInfo;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static javafx.scene.input.KeyCode.*;
@@ -144,9 +143,17 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     private Text buildText(String content, TextDecoration decoration ) {
-        Text text = new Text(content);
-        Optional.ofNullable(decoration.getForeground()).ifPresent(text::setFill); // has to be fill for font to render properly
-        Optional.ofNullable(decoration.getFont()).ifPresentOrElse(text::setFont, () -> text.setFont(TextDecoration.DEFAULT.getFont()) );
+        Objects.requireNonNull(decoration);
+        Text text = new Text(Objects.requireNonNull(content));
+        text.setFill(decoration.getForeground());
+
+        // Cashing fonts, assuming their, especially for default one
+        Map<String, Font> fontCache = new HashMap<>();
+        String hash = decoration.getFontFamily() + decoration.getFontWeight() + decoration.getFontPosture() + decoration.getFontSize();
+        Font font = fontCache.computeIfAbsent( hash,
+            h -> Font.font( decoration.getFontFamily(), decoration.getFontWeight(), decoration.getFontPosture(), decoration.getFontSize()));
+
+        text.setFont(font);
         return text;
     }
 

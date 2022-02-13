@@ -9,11 +9,6 @@ import java.util.Objects;
 
 public class TextDecoration {
 
-    public static TextDecoration DEFAULT = builder()
-            .foreground(Color.BLUE)
-            .background(Color.BLUE)
-            .build();
-
     private Color foreground;
     private Color background;
     private String fontFamily;
@@ -31,8 +26,20 @@ public class TextDecoration {
         return background;
     }
 
-    public Font getFont() {
-        return Font.font( fontFamily, fontWeight, fontPosture, fontSize);
+    public double getFontSize() {
+        return fontSize;
+    }
+
+    public String getFontFamily() {
+        return fontFamily;
+    }
+
+    public FontPosture getFontPosture() {
+        return fontPosture;
+    }
+
+    public FontWeight getFontWeight() {
+        return fontWeight;
     }
 
     public static Builder builder() {
@@ -41,8 +48,8 @@ public class TextDecoration {
 
     static class Builder {
 
-        private Color foreground;
-        private Color background;
+        private Color foreground = Color.BLUE;
+        private Color background = Color.BLUE;
         private String fontFamily = "Arial";
         private double fontSize = 17.0;
         private FontPosture fontPosture = FontPosture.REGULAR;
@@ -52,22 +59,22 @@ public class TextDecoration {
 
         TextDecoration build() {
             TextDecoration decoration = new TextDecoration();
-            decoration.foreground = this.foreground;
-            decoration.background = this.background;
-            decoration.fontFamily = this.fontFamily;
-            decoration.fontSize   = this.fontSize;
-            decoration.fontWeight = this.fontWeight;
+            decoration.foreground  = this.foreground;
+            decoration.background  = this.background;
+            decoration.fontFamily  = this.fontFamily;
+            decoration.fontSize    = this.fontSize;
+            decoration.fontWeight  = this.fontWeight;
             decoration.fontPosture = this.fontPosture;
             return decoration;
         }
 
         Builder foreground(Color color) {
-            this.foreground = color;
+            this.foreground = Objects.requireNonNull(color);
             return this;
         }
 
         Builder background(Color color) {
-            this.background = color; 
+            this.background = Objects.requireNonNull(color);
             return this;
         }
 
