@@ -24,7 +24,9 @@ import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static javafx.scene.input.KeyCode.*;
 import static javafx.scene.input.KeyCombination.*;
@@ -60,6 +62,9 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         new KeyFrame(Duration.seconds(0.5), e -> setCaretVisibility(true)),
         new KeyFrame(Duration.seconds(1.0))
     );
+
+    private final Map<String, Font> fontCache = new ConcurrentHashMap<>();
+    private final SmartTimer fontCacheEvictionTimer = new SmartTimer( this::evictUnusedFonts, 1000, 60000);
 
     private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow();
     private final ChangeListener<Boolean> focusChangeListener;
@@ -137,9 +142,14 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     //TODO Need more optimal way of rendering text fragments.
     //  For now rebuilding the whole text flow
     private void refreshTextFlow() {
-        var fragments = new ArrayList<Text>();
-        viewModel.walkFragments( (text, decoration) -> fragments.add( buildText(text, decoration)));
-        textFlow.getChildren().setAll(fragments);
+        fontCacheEvictionTimer.pause();
+        try {
+            var fragments = new ArrayList<Text>();
+            viewModel.walkFragments((text, decoration) -> fragments.add(buildText(text, decoration)));
+            textFlow.getChildren().setAll(fragments);
+        } finally {
+            fontCacheEvictionTimer.start();
+        }
     }
 
     private Text buildText(String content, TextDecoration decoration ) {
@@ -148,13 +158,22 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         text.setFill(decoration.getForeground());
 
         // Cashing fonts, assuming their, especially for default one
-        Map<String, Font> fontCache = new HashMap<>();
         String hash = decoration.getFontFamily() + decoration.getFontWeight() + decoration.getFontPosture() + decoration.getFontSize();
         Font font = fontCache.computeIfAbsent( hash,
             h -> Font.font( decoration.getFontFamily(), decoration.getFontWeight(), decoration.getFontPosture(), decoration.getFontSize()));
 
         text.setFont(font);
         return text;
+    }
+
+    private void evictUnusedFonts() {
+        List<Font> usedFonts =  textFlow.getChildren()
+                .stream()
+                .filter(n -> n instanceof Text)
+                .map( t -> ((Text)t).getFont()).collect(Collectors.toList());
+        List<Font> cachedFonts = new ArrayList<>(fontCache.values());
+        cachedFonts.removeAll(usedFonts);
+        fontCache.values().removeAll(cachedFonts);
     }
 
     private void editableChangeListener(Observable o) {
