@@ -1,8 +1,15 @@
-.rich-text .scroll-pane {
+.rich-text > .scroll-pane {
     -fx-padding: 5;
 }
 
-.selection {
+.rich-text .text-flow {
+}
+
+.rich-text .caret {
+    -fx-stroke: rgba(71, 145, 245, 0.9);
+}
+
+.rich-text .selection {
     -fx-stroke: transparent;
     -fx-fill: rgba(71, 145, 245, 0.3);
 }
