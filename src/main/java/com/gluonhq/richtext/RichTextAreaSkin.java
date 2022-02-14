@@ -176,12 +176,12 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     private void evictUnusedFonts() {
-        List<Font> usedFonts =  textFlow.getChildren()
+        Set<Font> usedFonts =  textFlow.getChildren()
                 .stream()
                 .filter(Text.class::isInstance)
                 .map( t -> ((Text)t).getFont())
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
         List<Font> cachedFonts = new ArrayList<>(fontCache.values());
         cachedFonts.removeAll(usedFonts);
         fontCache.values().removeAll(cachedFonts);
