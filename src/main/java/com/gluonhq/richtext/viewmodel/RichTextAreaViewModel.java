@@ -40,7 +40,9 @@ public class RichTextAreaViewModel {
         entry( EditorAction.UNDO,      e -> commandManager.undo()),
         entry( EditorAction.REDO,      e -> commandManager.redo()),
 
-        entry( EditorAction.COPY,      e -> copy())
+        entry( EditorAction.COPY,      e -> clipboardCopy(false)),
+        entry( EditorAction.CUT,       e -> clipboardCopy(true)),
+        entry( EditorAction.PASTE,     e -> clipboardPaste())
 
     );
 
@@ -163,13 +165,26 @@ public class RichTextAreaViewModel {
         return false;
     }
 
-    void copy() {
+    void clipboardCopy( final boolean cutText ) {
         Selection selection = getSelection();
         if (selection.isDefined()) {
             String selectedText = textBuffer.getText(selection.getStart(), selection.getEnd());
             final ClipboardContent content = new ClipboardContent();
             content.putString(selectedText);
+            if (cutText) {
+                commandManager.execute(new RemoveTextCmd(0));
+            }
             Clipboard.getSystemClipboard().setContent(content);
+        }
+    }
+
+    void clipboardPaste() {
+        final Clipboard clipboard = Clipboard.getSystemClipboard();
+        if (clipboard.hasString()) {
+            final String text = clipboard.getString();
+            if (text != null) {
+                commandManager.execute(new InsertTextCmd(text));
+            }
         }
     }
 

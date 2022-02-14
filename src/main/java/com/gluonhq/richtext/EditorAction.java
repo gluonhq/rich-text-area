@@ -4,5 +4,5 @@ public enum EditorAction {
     FORWARD, BACK, DOWN, UP,
     INSERT, BACKSPACE, DELETE, ENTER,
     UNDO, REDO,
-    COPY, PASTE
+    COPY, CUT, PASTE
 }
