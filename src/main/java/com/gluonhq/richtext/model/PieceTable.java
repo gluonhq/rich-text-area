@@ -353,7 +353,7 @@ class TextDecorateCmd extends AbstractCommand<PieceTable> {
 
     private boolean execSuccess = false;
     private int pieceIndex = -1;
-    private List<Piece> newPieces;
+    private List<Piece> newPieces = new ArrayList<>();
     private Piece oldPiece;
 
     /**
@@ -390,11 +390,14 @@ class TextDecorateCmd extends AbstractCommand<PieceTable> {
             if (PieceTable.inRange(start, textPosition, piece.length)) {
                 int offset = start - textPosition;
                 System.out.println("Offset: " + offset);
-                newPieces = PieceTable.normalize(List.of(
+                newPieces.addAll(List.of(
                         piece.pieceBefore(offset),
-                        new Piece(pt, Piece.BufferType.ORIGINAL, piece.start + offset, end - start, decoration),
-                        piece.pieceFrom(offset + end - start)
+                        new Piece(pt, Piece.BufferType.ORIGINAL, piece.start + offset, end - start, decoration)
                 ));
+                if (end < pt.getTextLength()) {
+                    newPieces.add(piece.pieceFrom(offset + end - start));
+                }
+                newPieces = PieceTable.normalize(newPieces);
                 oldPiece = piece;
                 pt.pieces.addAll(pieceIndex, newPieces);
                 pt.pieces.remove(oldPiece);
