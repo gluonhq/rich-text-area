@@ -128,7 +128,7 @@ public class RichTextAreaViewModel {
         } else {
             textBuffer.insert(text, caretPosition);
         }
-        moveCaretPosition(1);
+        moveCaretPosition(text.length());
     }
 
     void remove(int caretOffset) {
