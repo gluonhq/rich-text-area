@@ -1,7 +1,6 @@
 package com.gluonhq.richtext.model;
 
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 
