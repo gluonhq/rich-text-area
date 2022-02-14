@@ -3,7 +3,10 @@ package com.gluonhq.richtext.model;
 import com.gluonhq.richtext.undo.AbstractCommand;
 import com.gluonhq.richtext.undo.CommandManager;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -19,8 +22,6 @@ public final class PieceTable extends AbstractTextBuffer {
     final List<Piece> pieces = new ArrayList<>();
     private final CommandManager<PieceTable> commander = new CommandManager<>(this);
 
-    int textLength = -1;
-
     /**
      * Creates piece table using original text
      * @param originalText text to start with
@@ -28,24 +29,11 @@ public final class PieceTable extends AbstractTextBuffer {
     public PieceTable( String originalText ) {
         this.originalText = Objects.requireNonNull(originalText);
         pieces.add( piece( Piece.BufferType.ORIGINAL, 0, originalText.length()));
+        textLengthProperty.set( pieces.stream().mapToInt(b -> b.length).sum() );
     }
 
     private Piece piece(Piece.BufferType bufferType, int start, int length ) {
         return new Piece( this, bufferType, start, length );
-    }
-
-
-    /**
-     * Returns full text length.
-     * Efficient enough as the internal value is cached and updated on each operation
-     * @return full text length
-     */
-    @Override
-    public int getTextLength() {
-        if ( textLength < 0 ) {
-           textLength = pieces.stream().mapToInt(b -> b.length).sum();
-        }
-        return textLength;
     }
 
     /**
@@ -64,7 +52,7 @@ public final class PieceTable extends AbstractTextBuffer {
     Piece appendTextInternal(String text) {
         int pos = additionBuffer.length();
         additionBuffer += text;
-        textLength = getTextLength() + text.length();
+        textLengthProperty.set(getTextLength() + text.length());
         return piece(Piece.BufferType.ADDITION, pos, text.length());
     }
 
@@ -176,6 +164,7 @@ class AppendCmd extends AbstractPTCmd {
         if (execSuccess) {
             pt.pieces.remove(newPiece);
             pt.fire(new TextBuffer.DeleteEvent(pt.getTextLength() - text.length(), text.length()));
+            pt.textLengthProperty.set( pt.getTextLength() - text.length());
         }
     }
 
@@ -324,7 +313,7 @@ class DeleteCmd extends AbstractCommand<PieceTable> {
             pieceIndex = startPieceIndex[0];
             pt.pieces.addAll(pieceIndex, newPieces);
             pt.pieces.removeAll(oldPieces);
-            pt.textLength = pt.getTextLength() - length;
+            pt.textLengthProperty.set( pt.getTextLength() - length);
             pt.fire(new TextBuffer.DeleteEvent(deletePosition, length));
             execSuccess = true;
         }

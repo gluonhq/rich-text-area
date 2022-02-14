@@ -7,6 +7,7 @@ import com.gluonhq.richtext.viewmodel.RichTextAreaViewModel;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.Observable;
+import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
@@ -97,6 +98,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         // all listeners have to be removed within dispose method
         control.editableProperty().addListener(this::editableChangeListener);
         editableChangeListener(null); // sets up all related listeners
+        control.textLengthProperty.bind(viewModel.textLengthProperty());
 
         //TODO remove listener on viewModel change
         viewModel.caretPositionProperty().addListener( (o,ocp, p) -> {
@@ -126,6 +128,14 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     /// PROPERTIES ///////////////////////////////////////////////////////////////
+
+    // textLengthProperty
+    public final ReadOnlyIntegerProperty textLengthProperty() {
+        return viewModel.textLengthProperty();
+    }
+    public final int getTextLength() {
+        return viewModel.getTextLength();
+    }
 
 
     /// PUBLIC METHODS  /////////////////////////////////////////////////////////

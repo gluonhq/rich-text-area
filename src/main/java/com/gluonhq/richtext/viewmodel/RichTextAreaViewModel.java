@@ -5,10 +5,7 @@ import com.gluonhq.richtext.Selection;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.undo.CommandManager;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.scene.input.KeyEvent;
 
 import java.util.Map;
@@ -82,15 +79,20 @@ public class RichTextAreaViewModel {
     }
 
 
+    // textLengthProperty
+    public final ReadOnlyIntegerProperty textLengthProperty() {
+       return textBuffer.textLengthProperty();
+    }
+    public final int getTextLength() {
+       return textBuffer.getTextLength();
+    }
+
+
     public RichTextAreaViewModel(TextBuffer textBuffer, Function<Boolean,Integer> getNextRowPosition) {
         this.textBuffer = Objects.requireNonNull(textBuffer); // TODO convert to property
         this.getNextRowPosition = Objects.requireNonNull(getNextRowPosition);
     }
 
-
-    public int getTextLength() {
-        return textBuffer.getTextLength();
-    }
 
     public final void addChangeListener(Consumer<TextBuffer.Event> listener) {
         this.textBuffer.addChangeListener(listener);

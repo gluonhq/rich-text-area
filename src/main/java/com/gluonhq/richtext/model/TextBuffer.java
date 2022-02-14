@@ -1,11 +1,14 @@
 package com.gluonhq.richtext.model;
 
+import javafx.beans.property.ReadOnlyIntegerProperty;
+
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public interface TextBuffer {
 
     int getTextLength();
+    ReadOnlyIntegerProperty textLengthProperty();
     String getText();
 
     void insert( String text, int insertPosition );
