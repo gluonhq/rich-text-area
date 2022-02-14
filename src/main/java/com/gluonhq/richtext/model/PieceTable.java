@@ -201,6 +201,7 @@ class InsertCmd extends AbstractCommand<PieceTable> {
             pt.pieces.add(opPieceIndex, oldPiece);
             pt.pieces.removeAll(newPieces);
             pt.fire(new TextBuffer.DeleteEvent(insertPosition, text.length()));
+            pt.textLengthProperty.set(pt.getTextLength() - text.length());
         }
     }
 
@@ -267,6 +268,7 @@ class DeleteCmd extends AbstractCommand<PieceTable> {
               .reduce( "", (id, s) -> id + s );
 
             pt.fire(new TextBuffer.InsertEvent(text, deletePosition));
+            pt.textLengthProperty.set(pt.getTextLength() + length);
         }
     }
 
