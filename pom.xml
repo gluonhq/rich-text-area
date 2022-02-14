@@ -101,13 +101,19 @@
     <developers>
         <developer>
             <name>Eugene Ryzhikov</name>
-            <email>eugene.ryzhikov @gluonhq.com</email>
+            <email>eugene.ryzhikov@gluonhq.com</email>
             <organization>Gluon</organization>
             <organizationUrl>https://www.gluonhq.com</organizationUrl>
         </developer>
         <developer>
             <name>José Pereda</name>
             <email>jose.pereda@gluonhq.com</email>
+            <organization>Gluon</organization>
+            <organizationUrl>https://www.gluonhq.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Abhinay Agarwal</name>
+            <email>abhinay.agarwal@gluonhq.com</email>
             <organization>Gluon</organization>
             <organizationUrl>https://www.gluonhq.com</organizationUrl>
         </developer>
