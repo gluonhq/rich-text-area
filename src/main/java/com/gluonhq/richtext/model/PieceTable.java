@@ -77,6 +77,11 @@ public final class PieceTable extends AbstractTextBuffer {
         commander.execute( new AppendCmd(text));
     }
 
+    @Override
+    public void decorate(int start, int end, TextDecoration textDecoration) {
+        commander.execute(new TextDecorateCmd(start, end, textDecoration));
+    }
+
     /**
      * Walks through text fragments. Each fragment is represented by related text and decoration
      * @param onFragment callback to get fragment info
@@ -122,6 +127,16 @@ public final class PieceTable extends AbstractTextBuffer {
         commander.redo();
     }
 
+    /**
+     *        Piece Table
+     *  Piece A  Piece B   Piece C
+     *  |_____||_______||__________|
+     *
+     *  piece | pieceIndex | textPosition
+     *    A   |     0      |     0
+     *    B   |     1      |     5  (length of Piece A)
+     *    C   |     2      |     12 (length of Piece A + Piece B)
+     */
     @FunctionalInterface
     interface WalkStep {
         // process step, return true of walk has to be interrupted
@@ -227,7 +242,7 @@ class InsertCmd extends AbstractCommand<PieceTable> {
         } else {
             pt.walkPieces((piece, pieceIndex, textPosition) -> {
                 if ( PieceTable.inRange(insertPosition, textPosition, piece.length)) {
-                    int pieceOffset = insertPosition-textPosition;
+                    int pieceOffset = insertPosition - textPosition;
                     newPieces = PieceTable.normalize( List.of(
                             piece.pieceBefore(pieceOffset),
                             pt.appendTextInternal(text),
@@ -258,6 +273,11 @@ class DeleteCmd extends AbstractCommand<PieceTable> {
     private Collection<Piece> newPieces;
     private Collection<Piece> oldPieces;
 
+    /**
+     * Command to delete text starting from an index position to a given length.
+     * @param deletePosition position from where delete operation is to be executed. Normally, this is position of the caret.
+     * @param length Length of the text following the deletePosition to delete.
+     */
     DeleteCmd(int deletePosition, int length) {
         this.deletePosition = deletePosition;
         this.length = length;
@@ -324,10 +344,106 @@ class DeleteCmd extends AbstractCommand<PieceTable> {
             pt.fire(new TextBuffer.DeleteEvent(deletePosition, length));
             execSuccess = true;
         }
-
     }
 
 }
+
+class TextDecorateCmd extends AbstractCommand<PieceTable> {
+
+    private final int start;
+    private int end;
+    private final TextDecoration decoration;
+
+    private boolean execSuccess = false;
+    private int pieceIndex = -1;
+    private Collection<Piece> newPieces;
+    private Collection<Piece> oldPieces;
+
+    /**
+     * Command to delete text starting from an index position to a given length.
+     * @param start index of the first character to be decorated.
+     * @param end index of the last character to be decorated.
+     */
+    TextDecorateCmd(int start, int end, TextDecoration decoration) {
+        this.start = start;
+        this.end = end;
+        this.decoration = decoration;
+    }
+
+    @Override
+    protected void doUndo(PieceTable pt) {
+        if (execSuccess) {
+            pt.pieces.add(pieceIndex, oldPiece);
+            pt.pieces.removeAll(newPieces);
+            pt.fire(new TextBuffer.DecorateEvent(start, end, decoration));
+        }
+    }
+
+    @Override
+    protected void doRedo(PieceTable pt) {
+
+        if (!PieceTable.inRange(start, 0, pt.getTextLength())) {
+            throw new IllegalArgumentException("Position is outside of text bounds");
+        }
+
+        //  Accept length larger than actual and adjust it to actual
+        if (end >= pt.getTextLength()) {
+            end = pt.getTextLength();
+        }
+
+        pt.walkPieces((piece, pieceIndex, textPosition) -> {
+            if ( PieceTable.inRange(start, textPosition, piece.length)) {
+                int offset = start - textPosition;
+                newPieces = PieceTable.normalize( List.of(
+                        piece.pieceBefore(offset),
+                        new Piece(pt, Piece.BufferType.ADDITION, piece.start + offset, end - start, decoration),
+                        piece.pieceFrom(offset)
+                ));
+                oldPiece = piece;
+                pt.pieces.addAll( pieceIndex, newPieces );
+                pt.pieces.remove(oldPiece);
+                this.pieceIndex = pieceIndex;
+
+                pt.fire(new TextBuffer.DecorateEvent(start, end, decoration));
+                execSuccess = true;
+                return true;
+            }
+            return false;
+        });
+
+        /*pt.walkPieces((piece, pieceIndex, textPosition) -> {
+
+            if (PieceTable.inRange(start, textPosition, piece.length)) {
+                int pieceOffset = start - textPosition;
+                startPieceIndex[0] = pieceIndex;
+                additions.add(piece.pieceBefore(pieceOffset));
+                removals.add(piece);
+            }
+
+            if (!additions.isEmpty()) {
+                removals.add(piece);
+                if (PieceTable.inRange(end, textPosition, piece.length)) {
+                    int offset = end - textPosition;
+                    Piece p = new Piece(pt, Piece.BufferType.ADDITION, piece.start + offset, piece.length - offset, decoration);
+                    additions.add(p);
+                    return true;
+                }
+            }
+            return false;
+        });
+
+        newPieces = PieceTable.normalize(additions);
+        oldPieces = removals;
+        if (newPieces.size() > 0 || oldPieces.size() > 0) { // split actually happened
+            pieceIndex = startPieceIndex[0];
+            pt.pieces.addAll(pieceIndex, newPieces);
+            pt.pieces.removeAll(oldPieces);
+            pt.fire(new TextBuffer.DecorateEvent(start, end, decoration));
+            execSuccess = true;
+        }*/
+    }
+}
+
 
 
 

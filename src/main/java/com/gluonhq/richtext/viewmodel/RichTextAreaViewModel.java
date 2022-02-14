@@ -17,6 +17,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static java.util.Map.entry;
+
 public class RichTextAreaViewModel {
 
     public enum Direction { FORWARD, BACK, UP, DOWN }
@@ -24,19 +26,20 @@ public class RichTextAreaViewModel {
     private final TextBuffer textBuffer;
     private final CommandManager<RichTextAreaViewModel> commandManager = new CommandManager<>(this);
 
-    private final Map<EditorAction, Consumer<KeyEvent>> actionMap = Map.of(
-        EditorAction.FORWARD,   e -> moveCaret(Direction.FORWARD, e.isShiftDown()),
-        EditorAction.BACK,      e -> moveCaret(Direction.BACK, e.isShiftDown()),
-        EditorAction.DOWN,      e -> moveCaret(Direction.DOWN, e.isShiftDown()),
-        EditorAction.UP,        e -> moveCaret(Direction.UP, e.isShiftDown()),
+    private final Map<EditorAction, Consumer<KeyEvent>> actionMap = Map.ofEntries(
+        entry(EditorAction.FORWARD,   e -> moveCaret(Direction.FORWARD, e.isShiftDown())),
+        entry(EditorAction.BACK,      e -> moveCaret(Direction.BACK, e.isShiftDown())),
+        entry(EditorAction.DOWN,      e -> moveCaret(Direction.DOWN, e.isShiftDown())),
+        entry(EditorAction.UP,        e -> moveCaret(Direction.UP, e.isShiftDown())),
 
-        EditorAction.INSERT,    e -> commandManager.execute(new InsertTextCmd(e.getCharacter())),
-        EditorAction.BACKSPACE, e -> commandManager.execute(new RemoveTextCmd(-1)),
-        EditorAction.DELETE,    e -> commandManager.execute(new RemoveTextCmd(0)),
-        EditorAction.ENTER,     e -> commandManager.execute(new InsertTextCmd("\n")),
+        entry(EditorAction.INSERT,    e -> commandManager.execute(new InsertTextCmd(e.getCharacter()))),
+        entry(EditorAction.BACKSPACE, e -> commandManager.execute(new RemoveTextCmd(-1))),
+        entry(EditorAction.DELETE,    e -> commandManager.execute(new RemoveTextCmd(0))),
+        entry(EditorAction.ENTER,     e -> commandManager.execute(new InsertTextCmd("\n"))),
+        entry(EditorAction.DECORATE,  e -> commandManager.execute(new DecorateTextCmd())),
 
-        EditorAction.UNDO,      e -> commandManager.undo(),
-        EditorAction.REDO,      e -> commandManager.redo()
+        entry(EditorAction.UNDO,      e -> commandManager.undo()),
+        entry(EditorAction.REDO,      e -> commandManager.redo())
 
     );
 
@@ -128,6 +131,13 @@ public class RichTextAreaViewModel {
                 textBuffer.delete(position, 1);
                 setCaretPosition(position);
             }
+        }
+    }
+
+    void decorate() {
+        if (getSelection().isDefined()) {
+            Selection selection = getSelection();
+            textBuffer.decorate(selection.getStart(), selection.getEnd(), TextDecoration.builder().fontSize(20d).build() );
         }
     }
 
