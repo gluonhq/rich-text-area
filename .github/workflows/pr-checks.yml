@@ -16,4 +16,4 @@ jobs:
         distribution: 'temurin'
 
     - name: Verify with Maven
-      run: mvn -B verify -f pom.xml
+      run: mvn -B verify
