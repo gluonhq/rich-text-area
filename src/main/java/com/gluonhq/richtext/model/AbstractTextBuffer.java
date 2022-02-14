@@ -21,7 +21,6 @@ public abstract class AbstractTextBuffer implements TextBuffer {
         return textLengthProperty.get();
     }
 
-
     public final void addChangeListener(Consumer<TextBuffer.Event> listener) {
         listeners.add(Objects.requireNonNull(listener));
     }

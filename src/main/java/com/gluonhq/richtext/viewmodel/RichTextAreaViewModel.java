@@ -93,7 +93,6 @@ public class RichTextAreaViewModel {
         this.getNextRowPosition = Objects.requireNonNull(getNextRowPosition);
     }
 
-
     public final void addChangeListener(Consumer<TextBuffer.Event> listener) {
         this.textBuffer.addChangeListener(listener);
     }
