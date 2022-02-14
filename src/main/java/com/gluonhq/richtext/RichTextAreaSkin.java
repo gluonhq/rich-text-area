@@ -129,14 +129,6 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     /// PROPERTIES ///////////////////////////////////////////////////////////////
 
-    // textLengthProperty
-    public final ReadOnlyIntegerProperty textLengthProperty() {
-        return viewModel.textLengthProperty();
-    }
-    public final int getTextLength() {
-        return viewModel.getTextLength();
-    }
-
 
     /// PUBLIC METHODS  /////////////////////////////////////////////////////////
 
