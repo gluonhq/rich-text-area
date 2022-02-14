@@ -300,7 +300,9 @@ class DeleteCmd extends AbstractCommand<PieceTable> {
             }
 
             if (!additions.isEmpty()) {
-                removals.add(piece);
+                if (!removals.contains(piece)) {
+                    removals.add(piece);
+                }
                 if (PieceTable.inRange(endPosition, textPosition, piece.length)) {
                     additions.add(piece.pieceFrom(endPosition - textPosition));
                     return true;
