@@ -63,7 +63,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         new KeyFrame(Duration.seconds(1.0))
     );
 
-    private final Map<String, Font> fontCache = new ConcurrentHashMap<>();
+    private final Map<Integer, Font> fontCache = new ConcurrentHashMap<>();
     private final SmartTimer fontCacheEvictionTimer = new SmartTimer( this::evictUnusedFonts, 1000, 60000);
 
     private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow();
@@ -157,10 +157,19 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         Text text = new Text(Objects.requireNonNull(content));
         text.setFill(decoration.getForeground());
 
-        // Cashing fonts, assuming their, especially for default one
-        String hash = decoration.getFontFamily() + decoration.getFontWeight() + decoration.getFontPosture() + decoration.getFontSize();
+        // Cashing fonts, assuming their reuse, especially for default one
+        int hash = Objects.hash(
+                decoration.getFontFamily(),
+                decoration.getFontWeight(),
+                decoration.getFontPosture(),
+                decoration.getFontSize());
+
         Font font = fontCache.computeIfAbsent( hash,
-            h -> Font.font( decoration.getFontFamily(), decoration.getFontWeight(), decoration.getFontPosture(), decoration.getFontSize()));
+            h -> Font.font(
+                    decoration.getFontFamily(),
+                    decoration.getFontWeight(),
+                    decoration.getFontPosture(),
+                    decoration.getFontSize()));
 
         text.setFont(font);
         return text;
@@ -169,8 +178,10 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private void evictUnusedFonts() {
         List<Font> usedFonts =  textFlow.getChildren()
                 .stream()
-                .filter(n -> n instanceof Text)
-                .map( t -> ((Text)t).getFont()).collect(Collectors.toList());
+                .filter(Text.class::isInstance)
+                .map( t -> ((Text)t).getFont())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
         List<Font> cachedFonts = new ArrayList<>(fontCache.values());
         cachedFonts.removeAll(usedFonts);
         fontCache.values().removeAll(cachedFonts);
