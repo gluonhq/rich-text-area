@@ -165,6 +165,7 @@ class AppendCmd extends AbstractPTCmd {
 
     private final String text;
     private Piece newPiece;
+    private boolean execSuccess = false;
 
     AppendCmd(String text) {
         this.text = Objects.requireNonNull(text);
@@ -172,8 +173,10 @@ class AppendCmd extends AbstractPTCmd {
 
     @Override
     protected void doUndo(PieceTable pt) {
-        pt.pieces.remove(newPiece);
-        pt.fire( new TextBuffer.DeleteEvent(pt.getTextLength()-text.length(), text.length() ));
+        if (execSuccess) {
+            pt.pieces.remove(newPiece);
+            pt.fire(new TextBuffer.DeleteEvent(pt.getTextLength() - text.length(), text.length()));
+        }
     }
 
     @Override
@@ -183,6 +186,7 @@ class AppendCmd extends AbstractPTCmd {
             newPiece = pt.appendTextInternal(text);
             pt.pieces.add(newPiece);
             pt.fire( new TextBuffer.InsertEvent(text, pos));
+            execSuccess = true;
         }
     }
 }

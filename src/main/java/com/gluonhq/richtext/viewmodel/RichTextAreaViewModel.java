@@ -115,9 +115,19 @@ public class RichTextAreaViewModel {
         setSelection(Selection.UNDEFINED);
     }
 
+    /**
+     * Inserts new text into the document at current caret position
+     * Smart enough to distinguish between append and insert operations
+     * @param text text to insert
+     */
     void insert( String text ) {
         removeSelection();
-        textBuffer.insert(text, getCaretPosition());
+        int caretPosition =  getCaretPosition();
+        if ( caretPosition >= getTextLength()) {
+            textBuffer.append(text);
+        } else {
+            textBuffer.insert(text, caretPosition);
+        }
         moveCaretPosition(1);
     }
 
@@ -131,7 +141,9 @@ public class RichTextAreaViewModel {
         }
     }
 
-    // deletes selection if exists and set caret to the start position of the deleted selection
+    /**
+     * Deletes selection if exists and sets caret to the start position of the deleted selection
+     */
     private boolean removeSelection() {
         if ( hasSelection() ) {
             Selection selection = getSelection();
