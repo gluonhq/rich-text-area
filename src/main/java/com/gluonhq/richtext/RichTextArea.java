@@ -4,7 +4,6 @@ package com.gluonhq.richtext;
 import javafx.beans.property.*;
 import javafx.scene.Node;
 import javafx.scene.control.Control;
-import javafx.scene.control.IndexRange;
 import javafx.scene.control.SkinBase;
 
 import java.io.InputStream;
@@ -42,15 +41,25 @@ public class RichTextArea extends Control {
     }
 
     // selectionProperty
-    private final ReadOnlyObjectWrapper<IndexRange> selectionProperty = new ReadOnlyObjectWrapper<>(this, "selection", Tools.NO_SELECTION);
-    public final ReadOnlyObjectProperty<IndexRange> selectionProperty() {
+    private final ReadOnlyObjectWrapper<Selection> selectionProperty = new ReadOnlyObjectWrapper<>(this, "selection", Selection.UNDEFINED);
+    public final ReadOnlyObjectProperty<Selection> selectionProperty() {
        return selectionProperty.getReadOnlyProperty();
     }
-    public final IndexRange getSelection() {
+    public final Selection getSelection() {
        return selectionProperty.get();
     }
-    final void setSelection(IndexRange value) {
+    final void setSelection(Selection value) {
         selectionProperty.set(Objects.requireNonNull(value));
+    }
+
+
+    // textLengthProperty
+    final ReadOnlyIntegerWrapper textLengthProperty = new ReadOnlyIntegerWrapper(this, "textLength");
+    public final ReadOnlyIntegerProperty textLengthProperty() {
+        return textLengthProperty.getReadOnlyProperty();
+    }
+    public final int getTextLength() {
+        return textLengthProperty.get();
     }
 
     // codecProperty
@@ -66,7 +75,7 @@ public class RichTextArea extends Control {
     }
 
 
-    public static interface Codec {
+    public interface Codec {
         OutputStream decode(List<Node> nodes);
         List<Node> encode(InputStream stream);
     }
