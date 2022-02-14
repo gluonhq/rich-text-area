@@ -5,10 +5,7 @@ import com.gluonhq.richtext.Selection;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.undo.CommandManager;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.scene.input.KeyEvent;
 
 import java.util.Map;
@@ -86,14 +83,18 @@ public class RichTextAreaViewModel {
     }
 
 
-    public RichTextAreaViewModel(TextBuffer textBuffer, Function<Boolean,Integer> getNextRowPosition) {
-        this.textBuffer = Objects.requireNonNull(textBuffer); // TODO convert to property
-        this.getNextRowPosition = Objects.requireNonNull(getNextRowPosition);
+    // textLengthProperty
+    public final ReadOnlyIntegerProperty textLengthProperty() {
+       return textBuffer.textLengthProperty();
+    }
+    public final int getTextLength() {
+       return textBuffer.getTextLength();
     }
 
 
-    public int getTextLength() {
-        return textBuffer.getTextLength();
+    public RichTextAreaViewModel(TextBuffer textBuffer, Function<Boolean,Integer> getNextRowPosition) {
+        this.textBuffer = Objects.requireNonNull(textBuffer); // TODO convert to property
+        this.getNextRowPosition = Objects.requireNonNull(getNextRowPosition);
     }
 
     public final void addChangeListener(Consumer<TextBuffer.Event> listener) {
@@ -119,10 +120,20 @@ public class RichTextAreaViewModel {
         setSelection(Selection.UNDEFINED);
     }
 
+    /**
+     * Inserts new text into the document at current caret position
+     * Smart enough to distinguish between append and insert operations
+     * @param text text to insert
+     */
     void insert( String text ) {
         removeSelection();
-        textBuffer.insert(text, getCaretPosition());
-        moveCaretPosition(1);
+        int caretPosition =  getCaretPosition();
+        if ( caretPosition >= getTextLength()) {
+            textBuffer.append(text);
+        } else {
+            textBuffer.insert(text, caretPosition);
+        }
+        moveCaretPosition(text.length());
     }
 
     void remove(int caretOffset) {
@@ -142,7 +153,9 @@ public class RichTextAreaViewModel {
         }
     }
 
-    // deletes selection if exists and set caret to the start position of the deleted selection
+    /**
+     * Deletes selection if exists and sets caret to the start position of the deleted selection
+     */
     private boolean removeSelection() {
         if ( hasSelection() ) {
             Selection selection = getSelection();

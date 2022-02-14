@@ -114,4 +114,57 @@
             </properties>
         </profile>
     </profiles>
+
+    <developers>
+        <developer>
+            <name>Eugene Ryzhikov</name>
+            <email>eugene.ryzhikov@gluonhq.com</email>
+            <organization>Gluon</organization>
+            <organizationUrl>https://www.gluonhq.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>José Pereda</name>
+            <email>jose.pereda@gluonhq.com</email>
+            <organization>Gluon</organization>
+            <organizationUrl>https://www.gluonhq.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Abhinay Agarwal</name>
+            <email>abhinay.agarwal@gluonhq.com</email>
+            <organization>Gluon</organization>
+            <organizationUrl>https://www.gluonhq.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://github.com/gluonhq/rich-text-area</url>
+        <connection>scm:git:git://github.com/gluonhq/rich-text-area.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:gluonhq/rich-text-area.git</developerConnection>
+    </scm>
+
+    <organization>
+        <name>Gluon</name>
+        <url>https://www.gluonhq.com</url>
+    </organization>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/gluonhq/rich-text-area/issues</url>
+    </issueManagement>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <!-- Publish the versioned snapshots here -->
+            <id>gluon-nexus</id>
+            <name>Gluon Snapshots</name>
+            <url>https://nexus.gluonhq.com/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+
+        <repository>
+            <!-- Publish the versioned releases here -->
+            <id>gluon-nexus</id>
+            <name>Gluon Releases</name>
+            <url>https://nexus.gluonhq.com/nexus/content/repositories/releases/</url>
+        </repository>
+    </distributionManagement>
 </project>
