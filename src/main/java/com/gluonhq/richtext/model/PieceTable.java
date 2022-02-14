@@ -19,7 +19,7 @@ public final class PieceTable extends AbstractTextBuffer {
     final String originalText;
     String additionBuffer = "";
 
-    public List<Piece> pieces = new ArrayList<>();
+    final List<Piece> pieces = new ArrayList<>();
     private final CommandManager<PieceTable> commander = new CommandManager<>(this);
 
     /**

@@ -146,10 +146,11 @@ public class RichTextAreaViewModel {
         }
     }
 
+    // TODO: Add logic to create various TextDecoration(s)
     void decorate() {
         if (getSelection().isDefined()) {
             Selection selection = getSelection();
-            textBuffer.decorate(selection.getStart(), selection.getEnd(), TextDecoration.builder().fontWeight(BOLD).build() );
+            textBuffer.decorate(selection.getStart(), selection.getEnd(), TextDecoration.builder().fontWeight(BOLD).build());
         }
     }
 
