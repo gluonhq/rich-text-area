@@ -6,6 +6,8 @@ import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.undo.CommandManager;
 import javafx.beans.property.*;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.KeyEvent;
 
 import java.util.Map;
@@ -14,6 +16,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static java.util.Map.entry;
+
 public class RichTextAreaViewModel {
 
     public enum Direction { FORWARD, BACK, UP, DOWN }
@@ -21,19 +25,22 @@ public class RichTextAreaViewModel {
     private final TextBuffer textBuffer;
     private final CommandManager<RichTextAreaViewModel> commandManager = new CommandManager<>(this);
 
-    private final Map<EditorAction, Consumer<KeyEvent>> actionMap = Map.of(
-        EditorAction.FORWARD,   e -> moveCaret(Direction.FORWARD, e.isShiftDown()),
-        EditorAction.BACK,      e -> moveCaret(Direction.BACK, e.isShiftDown()),
-        EditorAction.DOWN,      e -> moveCaret(Direction.DOWN, e.isShiftDown()),
-        EditorAction.UP,        e -> moveCaret(Direction.UP, e.isShiftDown()),
+    private final Map<EditorAction, Consumer<KeyEvent>> actionMap = Map.ofEntries(
 
-        EditorAction.INSERT,    e -> commandManager.execute(new InsertTextCmd(e.getCharacter())),
-        EditorAction.BACKSPACE, e -> commandManager.execute(new RemoveTextCmd(-1)),
-        EditorAction.DELETE,    e -> commandManager.execute(new RemoveTextCmd(0)),
-        EditorAction.ENTER,     e -> commandManager.execute(new InsertTextCmd("\n")),
+        entry( EditorAction.FORWARD,   e -> moveCaret(Direction.FORWARD, e.isShiftDown())),
+        entry( EditorAction.BACK,      e -> moveCaret(Direction.BACK, e.isShiftDown())),
+        entry( EditorAction.DOWN,      e -> moveCaret(Direction.DOWN, e.isShiftDown())),
+        entry( EditorAction.UP,        e -> moveCaret(Direction.UP, e.isShiftDown())),
 
-        EditorAction.UNDO,      e -> commandManager.undo(),
-        EditorAction.REDO,      e -> commandManager.redo()
+        entry( EditorAction.INSERT,    e -> commandManager.execute(new InsertTextCmd(e.getCharacter()))),
+        entry( EditorAction.BACKSPACE, e -> commandManager.execute(new RemoveTextCmd(-1))),
+        entry( EditorAction.DELETE,    e -> commandManager.execute(new RemoveTextCmd(0))),
+        entry( EditorAction.ENTER,     e -> commandManager.execute(new InsertTextCmd("\n"))),
+
+        entry( EditorAction.UNDO,      e -> commandManager.undo()),
+        entry( EditorAction.REDO,      e -> commandManager.redo()),
+
+        entry( EditorAction.COPY,      e -> copy())
 
     );
 
@@ -154,6 +161,16 @@ public class RichTextAreaViewModel {
             return true;
         }
         return false;
+    }
+
+    void copy() {
+        Selection selection = getSelection();
+        if (selection.isDefined()) {
+            String selectedText = textBuffer.getText(selection.getStart(), selection.getEnd());
+            final ClipboardContent content = new ClipboardContent();
+            content.putString(selectedText);
+            Clipboard.getSystemClipboard().setContent(content);
+        }
     }
 
     public void executeAction(EditorAction action, KeyEvent e) {
