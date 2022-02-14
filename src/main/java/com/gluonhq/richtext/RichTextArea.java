@@ -4,7 +4,6 @@ package com.gluonhq.richtext;
 import javafx.beans.property.*;
 import javafx.scene.Node;
 import javafx.scene.control.Control;
-import javafx.scene.control.IndexRange;
 import javafx.scene.control.SkinBase;
 
 import java.io.InputStream;
