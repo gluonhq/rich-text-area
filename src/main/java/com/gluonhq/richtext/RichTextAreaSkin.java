@@ -17,15 +17,16 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SkinBase;
 import javafx.scene.input.*;
 import javafx.scene.shape.Path;
+import javafx.scene.text.Font;
 import javafx.scene.text.HitInfo;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static javafx.scene.input.KeyCode.*;
 import static javafx.scene.input.KeyCombination.*;
@@ -61,6 +62,9 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         new KeyFrame(Duration.seconds(0.5), e -> setCaretVisibility(true)),
         new KeyFrame(Duration.seconds(1.0))
     );
+
+    private final Map<Integer, Font> fontCache = new ConcurrentHashMap<>();
+    private final SmartTimer fontCacheEvictionTimer = new SmartTimer( this::evictUnusedFonts, 1000, 60000);
 
     private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow();
     private final ChangeListener<Boolean> focusChangeListener;
@@ -138,16 +142,49 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     //TODO Need more optimal way of rendering text fragments.
     //  For now rebuilding the whole text flow
     private void refreshTextFlow() {
-        var fragments = new ArrayList<Text>();
-        viewModel.walkFragments( (text, decoration) -> fragments.add( buildText(text, decoration)));
-        textFlow.getChildren().setAll(fragments);
+        fontCacheEvictionTimer.pause();
+        try {
+            var fragments = new ArrayList<Text>();
+            viewModel.walkFragments((text, decoration) -> fragments.add(buildText(text, decoration)));
+            textFlow.getChildren().setAll(fragments);
+        } finally {
+            fontCacheEvictionTimer.start();
+        }
     }
 
     private Text buildText(String content, TextDecoration decoration ) {
-        Text text = new Text(content);
-        Optional.ofNullable(decoration.getForeground()).ifPresent(text::setFill); // has to be fill for font to render properly
-        Optional.ofNullable(decoration.getFont()).ifPresentOrElse(text::setFont, () -> text.setFont(TextDecoration.DEFAULT.getFont()) );
+        Objects.requireNonNull(decoration);
+        Text text = new Text(Objects.requireNonNull(content));
+        text.setFill(decoration.getForeground());
+
+        // Cashing fonts, assuming their reuse, especially for default one
+        int hash = Objects.hash(
+                decoration.getFontFamily(),
+                decoration.getFontWeight(),
+                decoration.getFontPosture(),
+                decoration.getFontSize());
+
+        Font font = fontCache.computeIfAbsent( hash,
+            h -> Font.font(
+                    decoration.getFontFamily(),
+                    decoration.getFontWeight(),
+                    decoration.getFontPosture(),
+                    decoration.getFontSize()));
+
+        text.setFont(font);
         return text;
+    }
+
+    private void evictUnusedFonts() {
+        Set<Font> usedFonts =  textFlow.getChildren()
+                .stream()
+                .filter(Text.class::isInstance)
+                .map( t -> ((Text)t).getFont())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        List<Font> cachedFonts = new ArrayList<>(fontCache.values());
+        cachedFonts.removeAll(usedFonts);
+        fontCache.values().removeAll(cachedFonts);
     }
 
     private void editableChangeListener(Observable o) {

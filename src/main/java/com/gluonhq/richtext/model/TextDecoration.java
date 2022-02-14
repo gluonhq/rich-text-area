@@ -1,22 +1,19 @@
 package com.gluonhq.richtext.model;
 
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
+import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
 
-import java.util.Optional;
+import java.util.Objects;
 
 public class TextDecoration {
 
-    public static TextDecoration DEFAULT = builder()
-            .foreground(Color.BLUE)
-            .background(Color.BLUE)
-            .font( Font.font( "Arial", 17 ))
-            .build();
-
     private Color foreground;
     private Color background;
-    private Font font;
+    private String fontFamily;
+    private double fontSize;
+    private FontPosture fontPosture;
+    private FontWeight fontWeight;
 
     private TextDecoration() {}
 
@@ -28,15 +25,20 @@ public class TextDecoration {
         return background;
     }
 
-    public Font getFont() {
-        return font;
+    public double getFontSize() {
+        return fontSize;
     }
 
-    public Text asText(String content ) {
-        Text text = new Text(content);
-        Optional.ofNullable(foreground).ifPresent(text::setFill); // has to be fill for font to render properly
-        Optional.ofNullable(font).ifPresentOrElse(text::setFont, () -> text.setFont(DEFAULT.font) );
-        return text;
+    public String getFontFamily() {
+        return fontFamily;
+    }
+
+    public FontPosture getFontPosture() {
+        return fontPosture;
+    }
+
+    public FontWeight getFontWeight() {
+        return fontWeight;
     }
 
     public static Builder builder() {
@@ -45,34 +47,56 @@ public class TextDecoration {
 
     static class Builder {
 
-        private Color foreground;
-        private Color background;
-        private Font font;
+        private Color foreground = Color.BLUE;
+        private Color background = Color.BLUE;
+        private String fontFamily = "Arial";
+        private double fontSize = 17.0;
+        private FontPosture fontPosture = FontPosture.REGULAR;
+        private FontWeight fontWeight = FontWeight.MEDIUM;
 
         private Builder() {}
 
         TextDecoration build() {
             TextDecoration decoration = new TextDecoration();
-            decoration.foreground = this.foreground;
-            decoration.background = this.background;
-            decoration.font = this.font;
+            decoration.foreground  = this.foreground;
+            decoration.background  = this.background;
+            decoration.fontFamily  = this.fontFamily;
+            decoration.fontSize    = this.fontSize;
+            decoration.fontWeight  = this.fontWeight;
+            decoration.fontPosture = this.fontPosture;
             return decoration;
         }
 
-        Builder foreground( Color color ) {
-            this.foreground = color;
+        Builder foreground(Color color) {
+            this.foreground = Objects.requireNonNull(color);
             return this;
         }
 
-        Builder background( Color color ) {
-            this.background = color; 
+        Builder background(Color color) {
+            this.background = Objects.requireNonNull(color);
             return this;
         }
 
-        Builder font( Font font ) {
-            this.font = font;
+        Builder fontFamily(String fontFamily) {
+            this.fontFamily = Objects.requireNonNull(fontFamily);
             return this;
         }
+
+        Builder fontSize(double fontSize) {
+            this.fontSize = fontSize;
+            return this;
+        }
+
+        Builder fontWeight(FontWeight fontWeight) {
+            this.fontWeight = Objects.requireNonNull(fontWeight);
+            return this;
+        }
+
+        Builder fontPosture(FontPosture fontPosture) {
+            this.fontPosture = Objects.requireNonNull(fontPosture);
+            return this;
+        }
+
     }
 
 }
