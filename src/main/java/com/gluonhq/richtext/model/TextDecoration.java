@@ -87,7 +87,7 @@ public class TextDecoration {
             return this;
         }
 
-        Builder fontWeight(FontWeight fontWeight) {
+        public Builder fontWeight(FontWeight fontWeight) {
             this.fontWeight = Objects.requireNonNull(fontWeight);
             return this;
         }

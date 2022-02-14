@@ -16,7 +16,7 @@ public final class PieceTable extends AbstractTextBuffer {
     final String originalText;
     String additionBuffer = "";
 
-    final List<Piece> pieces = new ArrayList<>();
+    public List<Piece> pieces = new ArrayList<>();
     private final CommandManager<PieceTable> commander = new CommandManager<>(this);
 
     int textLength = -1;
@@ -159,7 +159,7 @@ public final class PieceTable extends AbstractTextBuffer {
 
     // Normalized list of pieces
     // Empty pieces purged
-    static Collection<Piece> normalize(Collection<Piece> pieces) {
+    static List<Piece> normalize(Collection<Piece> pieces) {
         return Objects.requireNonNull(pieces)
                   .stream()
                   .filter(b -> b == null ||  !b.isEmpty())
@@ -356,8 +356,8 @@ class TextDecorateCmd extends AbstractCommand<PieceTable> {
 
     private boolean execSuccess = false;
     private int pieceIndex = -1;
-    private Collection<Piece> newPieces;
-    private Collection<Piece> oldPieces;
+    private List<Piece> newPieces;
+    private Piece oldPiece;
 
     /**
      * Command to delete text starting from an index position to a given length.
@@ -372,16 +372,12 @@ class TextDecorateCmd extends AbstractCommand<PieceTable> {
 
     @Override
     protected void doUndo(PieceTable pt) {
-        if (execSuccess) {
-            pt.pieces.add(pieceIndex, oldPiece);
-            pt.pieces.removeAll(newPieces);
-            pt.fire(new TextBuffer.DecorateEvent(start, end, decoration));
-        }
+        // TODO: implement
     }
 
     @Override
     protected void doRedo(PieceTable pt) {
-
+        System.out.println("TextDecorateCmd.doRedo");;
         if (!PieceTable.inRange(start, 0, pt.getTextLength())) {
             throw new IllegalArgumentException("Position is outside of text bounds");
         }
@@ -392,55 +388,37 @@ class TextDecorateCmd extends AbstractCommand<PieceTable> {
         }
 
         pt.walkPieces((piece, pieceIndex, textPosition) -> {
-            if ( PieceTable.inRange(start, textPosition, piece.length)) {
+            System.out.println("Piece Index: " + pieceIndex);
+            System.out.println("Text Position: " + textPosition);
+            if (PieceTable.inRange(start, textPosition, piece.length)) {
                 int offset = start - textPosition;
-                newPieces = PieceTable.normalize( List.of(
+                System.out.println("Offset: " + offset);
+                newPieces = PieceTable.normalize(List.of(
                         piece.pieceBefore(offset),
-                        new Piece(pt, Piece.BufferType.ADDITION, piece.start + offset, end - start, decoration),
-                        piece.pieceFrom(offset)
+                        new Piece(pt, Piece.BufferType.ORIGINAL, piece.start + offset, end - start, decoration),
+                        piece.pieceFrom(offset + end - start)
                 ));
                 oldPiece = piece;
-                pt.pieces.addAll( pieceIndex, newPieces );
+                pt.pieces.addAll(pieceIndex, newPieces);
                 pt.pieces.remove(oldPiece);
                 this.pieceIndex = pieceIndex;
 
                 pt.fire(new TextBuffer.DecorateEvent(start, end, decoration));
                 execSuccess = true;
+                print(pt, newPieces, new ArrayList<>());
                 return true;
             }
             return false;
         });
+    }
 
-        /*pt.walkPieces((piece, pieceIndex, textPosition) -> {
-
-            if (PieceTable.inRange(start, textPosition, piece.length)) {
-                int pieceOffset = start - textPosition;
-                startPieceIndex[0] = pieceIndex;
-                additions.add(piece.pieceBefore(pieceOffset));
-                removals.add(piece);
-            }
-
-            if (!additions.isEmpty()) {
-                removals.add(piece);
-                if (PieceTable.inRange(end, textPosition, piece.length)) {
-                    int offset = end - textPosition;
-                    Piece p = new Piece(pt, Piece.BufferType.ADDITION, piece.start + offset, piece.length - offset, decoration);
-                    additions.add(p);
-                    return true;
-                }
-            }
-            return false;
-        });
-
-        newPieces = PieceTable.normalize(additions);
-        oldPieces = removals;
-        if (newPieces.size() > 0 || oldPieces.size() > 0) { // split actually happened
-            pieceIndex = startPieceIndex[0];
-            pt.pieces.addAll(pieceIndex, newPieces);
-            pt.pieces.removeAll(oldPieces);
-            pt.fire(new TextBuffer.DecorateEvent(start, end, decoration));
-            execSuccess = true;
-        }*/
+    public void print(PieceTable pt, List<Piece> additions, List<Piece> removals) {
+        System.out.println("Piece Table:");
+        pt.pieces.forEach(System.out::println);
+        System.out.println("Additions: ");
+        additions.forEach(System.out::println);
+        System.out.println("Removals: ");
+        removals.forEach(System.out::println);
     }
 }
 

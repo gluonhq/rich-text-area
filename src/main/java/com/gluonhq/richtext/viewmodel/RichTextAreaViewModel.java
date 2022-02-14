@@ -18,6 +18,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static java.util.Map.entry;
+import static javafx.scene.text.FontWeight.BOLD;
 
 public class RichTextAreaViewModel {
 
@@ -137,7 +138,7 @@ public class RichTextAreaViewModel {
     void decorate() {
         if (getSelection().isDefined()) {
             Selection selection = getSelection();
-            textBuffer.decorate(selection.getStart(), selection.getEnd(), TextDecoration.builder().fontSize(20d).build() );
+            textBuffer.decorate(selection.getStart(), selection.getEnd(), TextDecoration.builder().fontWeight(BOLD).build() );
         }
     }
 

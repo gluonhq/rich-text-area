@@ -75,4 +75,14 @@ public final class Piece {
         return copy(start + offset, length - offset);
     }
 
+    @Override
+    public String toString() {
+        return "Piece{" +
+                "source=" + source +
+                ", bufferType=" + bufferType +
+                ", start=" + start +
+                ", length=" + length +
+                ", decoration=" + decoration +
+                '}';
+    }
 }
