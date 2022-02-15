@@ -421,9 +421,6 @@ class TextDecorateCmd extends AbstractCommand<PieceTable> {
             if (isPieceInSelection(piece, textPosition)) {
                 startPieceIndex[0] = pieceIndex;
                 if (textPosition <= start) {
-                    if (textPosition + piece.length <= start) { // pieces before selection
-                        return false;
-                    }
                     int offset = start - textPosition;
                     int length = Math.min(end - start, piece.length);
                     additions.add(piece.pieceBefore(offset)); // part of piece before selected
