@@ -347,14 +347,14 @@ class DeleteCmd extends AbstractCommand<PieceTable> {
 
 class TextDecorateCmd extends AbstractCommand<PieceTable> {
 
-    private final int start;
+    private int start;
     private int end;
     private final TextDecoration decoration;
 
     private boolean execSuccess = false;
     private int pieceIndex = -1;
     private List<Piece> newPieces = new ArrayList<>();
-    private Piece oldPiece;
+    private List<Piece> oldPieces = new ArrayList<>();
 
     /**
      * Command to delete text starting from an index position to a given length.
@@ -384,41 +384,50 @@ class TextDecorateCmd extends AbstractCommand<PieceTable> {
             end = pt.getTextLength();
         }
 
-        pt.walkPieces((piece, pieceIndex, textPosition) -> {
-            System.out.println("Piece Index: " + pieceIndex);
-            System.out.println("Text Position: " + textPosition);
-            if (PieceTable.inRange(start, textPosition, piece.length)) {
-                int offset = start - textPosition;
-                System.out.println("Offset: " + offset);
-                newPieces.addAll(List.of(
-                        piece.pieceBefore(offset),
-                        new Piece(pt, Piece.BufferType.ORIGINAL, piece.start + offset, end - start, decoration)
-                ));
-                if (end < pt.getTextLength()) {
-                    newPieces.add(piece.pieceFrom(offset + end - start));
-                }
-                newPieces = PieceTable.normalize(newPieces);
-                oldPiece = piece;
-                pt.pieces.addAll(pieceIndex, newPieces);
-                pt.pieces.remove(oldPiece);
-                this.pieceIndex = pieceIndex;
+        final int[] startPieceIndex = new int[1];
+        final List<Piece> additions = new ArrayList<>(); // start and end pieces
+        final List<Piece> removals = new ArrayList<>();
 
-                pt.fire(new TextBuffer.DecorateEvent(start, end, decoration));
-                execSuccess = true;
-                print(pt, newPieces, new ArrayList<>());
-                return true;
+        pt.walkPieces((piece, pieceIndex, textPosition) -> {
+            if (isPieceInSelection(piece, textPosition)) {
+                startPieceIndex[0] = pieceIndex;
+                if (textPosition <= start) {
+                    if (textPosition + piece.length <= start) { // pieces before selection
+                        return false;
+                    }
+                    int offset = start - textPosition;
+                    int length = Math.min(end - start, piece.length);
+                    additions.add(piece.pieceBefore(offset)); // part of piece before selected
+                    additions.add(piece.copy(textPosition + offset, length, decoration)); // part of piece selected
+                    if (end < textPosition + piece.length) {
+                        additions.add(piece.pieceFrom(end - textPosition)); // part of piece after selection
+                    }
+                }  else if (textPosition + piece.length <= end) { // entire piece is in selection
+                    additions.add(piece.copy(piece.start, piece.length, decoration));
+                } else if (textPosition < end) {
+                    int offset = end - textPosition;
+                    additions.add(piece.copy(piece.start, end, decoration)); // part of piece selected
+                    additions.add(piece.pieceFrom(offset)); // part of piece after selection
+                }
+                removals.add(piece);
             }
             return false;
         });
+
+        newPieces = PieceTable.normalize(additions);
+        oldPieces = removals;
+        if (newPieces.size() > 0 || oldPieces.size() > 0) {
+            pieceIndex = startPieceIndex[0];
+            pt.pieces.addAll(pieceIndex, newPieces);
+            pt.pieces.removeAll(oldPieces);
+            pt.fire(new TextBuffer.DecorateEvent(start, end, decoration));
+            execSuccess = true;
+        }
     }
 
-    public void print(PieceTable pt, List<Piece> additions, List<Piece> removals) {
-        System.out.println("Piece Table:");
-        pt.pieces.forEach(System.out::println);
-        System.out.println("Additions: ");
-        additions.forEach(System.out::println);
-        System.out.println("Removals: ");
-        removals.forEach(System.out::println);
+    private boolean isPieceInSelection(Piece piece, int textPosition) {
+        int pieceEndPosition = textPosition + piece.length - 1;
+        return start <= pieceEndPosition && (end >= pieceEndPosition || end >= textPosition);
     }
 }
 

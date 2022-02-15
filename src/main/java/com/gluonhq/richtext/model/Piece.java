@@ -63,6 +63,10 @@ public final class Piece {
         return new Piece(source, bufferType, newStart, newLength);
     }
 
+    Piece copy(int newStart, int newLength, TextDecoration textDecoration) {
+        return new Piece(source, bufferType, newStart, newLength, textDecoration);
+    }
+
     // excludes char at offset
     public Piece pieceBefore(int offset) {
         validateOffset(offset);
@@ -77,8 +81,7 @@ public final class Piece {
 
     @Override
     public String toString() {
-        return "Piece{" +
-                "source=" + source +
+        return "Piece{ " + getText() +
                 ", bufferType=" + bufferType +
                 ", start=" + start +
                 ", length=" + length +
