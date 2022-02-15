@@ -7,16 +7,18 @@ import com.gluonhq.richtext.viewmodel.RichTextAreaViewModel;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.Observable;
-import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
-import javafx.scene.Group;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SkinBase;
-import javafx.scene.input.*;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.shape.Path;
 import javafx.scene.text.Font;
 import javafx.scene.text.HitInfo;
@@ -24,7 +26,11 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -54,6 +60,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         );
 
     private final ScrollPane scrollPane;
+    private final Pane layers;
     private final TextFlow textFlow = new TextFlow();
     private final Path caretShape = new Path();
     private final Path selectionShape = new Path();
@@ -82,10 +89,12 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
         selectionShape.getStyleClass().setAll("selection");
 
-        Group layers = new Group(selectionShape, caretShape, textFlow);
+        layers = new Pane(selectionShape, caretShape, textFlow);
         caretTimeline.setCycleCount(Timeline.INDEFINITE);
 
         scrollPane = new ScrollPane(layers);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
         scrollPane.setFocusTraversable(false);
         focusChangeListener = (obs, ov, nv) -> {
             if (nv) {
@@ -197,18 +206,18 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         if (editable) {
             getSkinnable().setOnKeyPressed(this::keyPressedListener);
             getSkinnable().setOnKeyTyped(this::keyTypedListener);
-            textFlow.setOnMousePressed(this::mousePressedListener);
-            textFlow.setOnMouseDragged(this::mouseDraggedListener);
+            layers.setOnMousePressed(this::mousePressedListener);
+            layers.setOnMouseDragged(this::mouseDraggedListener);
         } else {
             getSkinnable().setOnKeyPressed(null);
             getSkinnable().setOnKeyTyped(null);
             scrollPane.focusedProperty().removeListener(focusChangeListener);
-            textFlow.setOnMousePressed(null);
-            textFlow.setOnMouseDragged(null);
+            layers.setOnMousePressed(null);
+            layers.setOnMouseDragged(null);
         }
 
         viewModel.setCaretPosition( editable? 0:-1 );
-        textFlow.setCursor( editable? Cursor.TEXT: Cursor.DEFAULT);
+        layers.setCursor( editable? Cursor.TEXT: Cursor.DEFAULT);
 
     }
 
