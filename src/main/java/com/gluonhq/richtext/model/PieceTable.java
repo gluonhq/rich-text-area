@@ -43,9 +43,38 @@ public final class PieceTable extends AbstractTextBuffer {
      */
     @Override
     public String getText() {
+        return pieces.stream()
+                     .map(Piece::getText)
+                     .reduce("", (s1,s2) -> s1+s2);
+    }
+
+    /**
+     * Returns partial text
+     * @param start start position within text, inclusive
+     * @param end end position within text, exclusive
+     * @return partial text
+     * @throws IllegalArgumentException if start or end are not in index range of the text
+     */
+    @Override
+    public String getText(final int start, final int end) {
+
+        if (!inRange(start, 0, getTextLength())) {
+             throw new IllegalArgumentException("Start index is not in range");
+        }
+        if ( end < 0 ) {
+            throw new IllegalArgumentException("End index is not in range");
+        }
+        int realEnd = Math.min(end,getTextLength());
+
         StringBuilder sb = new StringBuilder();
-        pieces.forEach(piece -> sb.append(piece.getText()));
-        return sb.toString();
+        for (Piece value : pieces) {
+            if (sb.length() > realEnd) {
+                break;
+            }
+            sb.append(value.getText());
+        }
+        return sb.substring(start, realEnd);
+
     }
 
     // internal append

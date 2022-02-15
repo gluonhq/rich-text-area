@@ -10,6 +10,7 @@ public interface TextBuffer {
     int getTextLength();
     ReadOnlyIntegerProperty textLengthProperty();
     String getText();
+    String getText(int start, int end);
 
     void insert( String text, int insertPosition );
     void append( String text );
