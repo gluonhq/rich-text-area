@@ -92,7 +92,7 @@ public class TextDecoration {
             return this;
         }
 
-        Builder fontPosture(FontPosture fontPosture) {
+        public Builder fontPosture(FontPosture fontPosture) {
             this.fontPosture = Objects.requireNonNull(fontPosture);
             return this;
         }
