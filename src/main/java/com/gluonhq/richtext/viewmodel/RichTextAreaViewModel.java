@@ -2,6 +2,7 @@ package com.gluonhq.richtext.viewmodel;
 
 import com.gluonhq.richtext.EditorAction;
 import com.gluonhq.richtext.Selection;
+import com.gluonhq.richtext.Tools;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.undo.CommandManager;
@@ -10,6 +11,7 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.KeyEvent;
 
+import java.text.BreakIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -24,13 +26,16 @@ public class RichTextAreaViewModel {
 
     private final TextBuffer textBuffer;
     private final CommandManager<RichTextAreaViewModel> commandManager = new CommandManager<>(this);
+    private BreakIterator wordIterator;
 
     private final Map<EditorAction, Consumer<KeyEvent>> actionMap = Map.ofEntries(
 
-        entry( EditorAction.FORWARD,   e -> moveCaret(Direction.FORWARD, e.isShiftDown())),
-        entry( EditorAction.BACK,      e -> moveCaret(Direction.BACK, e.isShiftDown())),
-        entry( EditorAction.DOWN,      e -> moveCaret(Direction.DOWN, e.isShiftDown())),
-        entry( EditorAction.UP,        e -> moveCaret(Direction.UP, e.isShiftDown())),
+        entry( EditorAction.FORWARD,   e -> moveCaret(Direction.FORWARD, e.isShiftDown(),
+                                                Tools.MAC ? e.isAltDown() : e.isControlDown())),
+        entry( EditorAction.BACK,      e -> moveCaret(Direction.BACK, e.isShiftDown(),
+                                                Tools.MAC ? e.isAltDown() : e.isControlDown())),
+        entry( EditorAction.DOWN,      e -> moveCaret(Direction.DOWN, e.isShiftDown(), e.isAltDown())),
+        entry( EditorAction.UP,        e -> moveCaret(Direction.UP, e.isShiftDown(), e.isAltDown())),
 
         entry( EditorAction.INSERT,    e -> commandManager.execute(new InsertTextCmd(e.getCharacter()))),
         entry( EditorAction.BACKSPACE, e -> commandManager.execute(new RemoveTextCmd(-1))),
@@ -62,8 +67,6 @@ public class RichTextAreaViewModel {
         caretPositionProperty.set(value);
     }
 
-
-
     // selectionProperty
     private final ObjectProperty<Selection> selectionProperty = new SimpleObjectProperty<>(this, "selection", Selection.UNDEFINED) {
         @Override
@@ -86,7 +89,6 @@ public class RichTextAreaViewModel {
     public final void setSelection(Selection value) {
         selectionProperty.set(value);
     }
-
 
     // textLengthProperty
     public final ReadOnlyIntegerProperty textLengthProperty() {
@@ -112,7 +114,7 @@ public class RichTextAreaViewModel {
 
     void moveCaretPosition(final int charCount) {
         int pos = getCaretPosition() + charCount;
-        if ( pos >= 0 && pos <= getTextLength()) {
+        if (pos >= 0 && pos <= getTextLength()) {
             setCaretPosition(pos);
         }
     }
@@ -192,14 +194,23 @@ public class RichTextAreaViewModel {
         actionMap.get(Objects.requireNonNull(action)).accept(e);
     }
 
-    void moveCaret( Direction direction, boolean changeSelection ) {
-
+    void moveCaret(Direction direction, boolean changeSelection, boolean wordSelection) {
         Selection prevSelection = getSelection();
         int prevCaretPosition = getCaretPosition();
         switch (direction) {
             case FORWARD:
+                if (wordSelection) {
+                    nextWord();
+                } else {
+                    moveCaretPosition(1);
+                }
+                break;
             case BACK:
-                moveCaretPosition( Direction.FORWARD == direction ? 1:-1);
+                if (wordSelection) {
+                    previousWord();
+                } else {
+                    moveCaretPosition(-1);
+                }
                 break;
             case DOWN:
             case UP:
@@ -214,7 +225,7 @@ public class RichTextAreaViewModel {
             int pos = prevSelection.isDefined()?
                     prevCaretPosition == prevSelection.getStart()? prevSelection.getEnd(): prevSelection.getStart():
                     prevCaretPosition;
-            setSelection( new Selection(pos, getCaretPosition()));
+            setSelection(new Selection(pos, getCaretPosition()));
         } else {
             clearSelection();
         }
@@ -227,6 +238,51 @@ public class RichTextAreaViewModel {
 
     public void undo() {
         this.textBuffer.undo();
+    }
+
+    private void previousWord() {
+        int textLength = getTextLength();
+        if (textLength <= 0) {
+            return;
+        }
+        if (wordIterator == null) {
+            wordIterator = BreakIterator.getWordInstance();
+        }
+        String text = textBuffer.getText();
+        wordIterator.setText(text);
+
+        int prevCaretPosition = getCaretPosition();
+        int position = wordIterator.preceding(Tools.clamp(0, prevCaretPosition, textLength));
+        while (position != BreakIterator.DONE &&
+                !Character.isLetterOrDigit(text.charAt(Tools.clamp(0, position, textLength - 1)))) {
+            position = wordIterator.preceding(Tools.clamp(0, position, textLength));
+        }
+        setCaretPosition(Tools.clamp(0, position, textLength));
+    }
+
+    private void nextWord() {
+        int textLength = getTextLength();
+        if (wordIterator == null) {
+            wordIterator = BreakIterator.getWordInstance();
+        }
+        String text = textBuffer.getText();
+        wordIterator.setText(text);
+
+        int prevCaretPosition = getCaretPosition();
+        int last = wordIterator.following(Tools.clamp(0, prevCaretPosition, textLength - 1));
+        int current = wordIterator.next();
+        while (current != BreakIterator.DONE) {
+            for (int i = last; i <= current; i++) {
+                char c = text.charAt(Tools.clamp(0, i, textLength - 1));
+                if (c != ' ' && c != '\t') {
+                    setCaretPosition(Tools.clamp(0, i, textLength));
+                    return;
+                }
+            }
+            last = current;
+            current = wordIterator.next();
+        }
+        setCaretPosition(textLength);
     }
 
 }

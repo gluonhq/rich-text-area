@@ -35,8 +35,8 @@ import static java.util.Map.entry;
 class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private static final Map<KeyCombination, EditorAction> INPUT_MAP = Map.ofEntries(
-        entry( new KeyCodeCombination(RIGHT, SHIFT_ANY),      EditorAction.FORWARD),
-        entry( new KeyCodeCombination(LEFT,  SHIFT_ANY),      EditorAction.BACK),
+        entry( new KeyCodeCombination(RIGHT, SHIFT_ANY, ALT_ANY, CONTROL_ANY),      EditorAction.FORWARD),
+        entry( new KeyCodeCombination(LEFT, SHIFT_ANY, ALT_ANY, CONTROL_ANY),       EditorAction.BACK),
         entry( new KeyCodeCombination(DOWN,  SHIFT_ANY),      EditorAction.DOWN),
         entry( new KeyCodeCombination(UP,    SHIFT_ANY),      EditorAction.UP),
         entry( new KeyCodeCombination(BACK_SPACE, SHIFT_ANY), EditorAction.BACKSPACE),
