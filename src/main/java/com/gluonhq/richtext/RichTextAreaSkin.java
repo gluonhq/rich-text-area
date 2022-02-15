@@ -9,7 +9,6 @@ import javafx.animation.Timeline;
 import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Bounds;
-import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.control.ScrollPane;
@@ -81,7 +80,6 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         super(control);
 
         textFlow.setFocusTraversable(false);
-        textFlow.setPadding(new Insets(-1));
         textFlow.getStyleClass().setAll("text-flow");
 
         caretShape.setFocusTraversable(false);
@@ -90,6 +88,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         selectionShape.getStyleClass().setAll("selection");
 
         layers = new Pane(selectionShape, caretShape, textFlow);
+        textFlow.prefWidthProperty().bind(layers.widthProperty());
         caretTimeline.setCycleCount(Timeline.INDEFINITE);
 
         scrollPane = new ScrollPane(layers);
