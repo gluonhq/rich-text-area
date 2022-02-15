@@ -170,4 +170,25 @@ public class PieceTableTests {
 
     }
 
+    @Test
+    @DisplayName("Partial text from one piece")
+    public void getPartialTextFromOnePiece() {
+        PieceTable pt = new PieceTable(originalText);
+        Assertions.assertEquals( "Text", pt.getText(9,13));
+    }
+
+    @Test
+    @DisplayName("Partial text from mutiple pieces")
+    public void getPartialTextFromMultiplePieces() {
+        PieceTable pt = new PieceTable(originalText);
+        pt.insert("Even ", 0);
+//        System.out.println(pt.getText());
+
+        pt.insert("More ", 5);
+        System.out.println(pt.getText());
+//        "Even More Original Text"
+
+        Assertions.assertEquals( "More Original", pt.getText(5,18));
+    }
+
 }
