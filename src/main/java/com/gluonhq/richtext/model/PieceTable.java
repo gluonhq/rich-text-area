@@ -403,7 +403,6 @@ class TextDecorateCmd extends AbstractCommand<PieceTable> {
 
     @Override
     protected void doRedo(PieceTable pt) {
-        System.out.println("TextDecorateCmd.doRedo");;
         if (!PieceTable.inRange(start, 0, pt.getTextLength())) {
             throw new IllegalArgumentException("Position is outside of text bounds");
         }
@@ -423,8 +422,10 @@ class TextDecorateCmd extends AbstractCommand<PieceTable> {
                 if (textPosition <= start) {
                     int offset = start - textPosition;
                     int length = Math.min(end - start, piece.length);
-                    additions.add(piece.pieceBefore(offset)); // part of piece before selected
-                    additions.add(piece.copy(textPosition + offset, length, decoration)); // part of piece selected
+                    if (offset > 0) {
+                        additions.add(piece.pieceBefore(offset)); // part of piece before selected
+                    }
+                    additions.add(piece.copy(offset, length, decoration)); // part of piece selected
                     if (end < textPosition + piece.length) {
                         additions.add(piece.pieceFrom(end - textPosition)); // part of piece after selection
                     }

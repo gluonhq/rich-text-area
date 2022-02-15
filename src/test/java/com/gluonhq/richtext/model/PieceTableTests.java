@@ -1,5 +1,6 @@
 package com.gluonhq.richtext.model;
 
+import javafx.scene.text.FontWeight;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -189,6 +190,39 @@ public class PieceTableTests {
 //        "Even More Original Text"
 
         Assertions.assertEquals( "More Original", pt.getText(5,18));
+    }
+
+    @Test
+    @DisplayName("Same block decorate")
+    public void sameBlockDecorate() {
+        String text = "Original Bigger Text";
+        PieceTable pt = new PieceTable(text);
+        pt.decorate(1,2, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
+        Assertions.assertEquals(
+                text,
+                pt.getText()
+        );
+        Assertions.assertTrue(pt.pieces.stream()
+                .filter(piece -> piece.getText().equals("r"))
+                .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD)
+        );
+    }
+
+    @Test
+    @DisplayName("Multi block decorate")
+    public void multiBlockDecorate() {
+        PieceTable pt = new PieceTable(originalText);
+        String insert = "Bigger ";
+        pt.insert( insert, 9); // 'Original Bigger Text'
+        pt.insert( insert, 9); // 'Original Bigger Bigger Text'
+        pt.decorate(9, 15, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
+        Assertions.assertEquals(
+                "Original Bigger Bigger Text",
+                pt.getText());
+        Assertions.assertTrue(pt.pieces.stream()
+                .filter(piece -> piece.getText().equals("Bigger"))
+                .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD)
+        );
     }
 
 }
