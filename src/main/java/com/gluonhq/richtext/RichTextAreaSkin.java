@@ -7,7 +7,6 @@ import com.gluonhq.richtext.viewmodel.RichTextAreaViewModel;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.Observable;
-import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
@@ -31,20 +30,23 @@ import java.util.stream.Collectors;
 
 import static javafx.scene.input.KeyCode.*;
 import static javafx.scene.input.KeyCombination.*;
-
+import static java.util.Map.entry;
 
 class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
-    private static final Map<KeyCombination, EditorAction> INPUT_MAP = Map.of(
-        new KeyCodeCombination(RIGHT, SHIFT_ANY),      EditorAction.FORWARD,
-        new KeyCodeCombination(LEFT,  SHIFT_ANY),      EditorAction.BACK,
-        new KeyCodeCombination(DOWN,  SHIFT_ANY),      EditorAction.DOWN,
-        new KeyCodeCombination(UP,    SHIFT_ANY),      EditorAction.UP,
-        new KeyCodeCombination(BACK_SPACE, SHIFT_ANY), EditorAction.BACKSPACE,
-        new KeyCodeCombination(DELETE),                EditorAction.DELETE,
-        new KeyCodeCombination(Z, SHORTCUT_DOWN),             EditorAction.UNDO,
-        new KeyCodeCombination(Z, SHORTCUT_DOWN, SHIFT_DOWN), EditorAction.REDO,
-        new KeyCodeCombination(ENTER, SHIFT_ANY),      EditorAction.ENTER
+    private static final Map<KeyCombination, EditorAction> INPUT_MAP = Map.ofEntries(
+        entry( new KeyCodeCombination(RIGHT, SHIFT_ANY),      EditorAction.FORWARD),
+        entry( new KeyCodeCombination(LEFT,  SHIFT_ANY),      EditorAction.BACK),
+        entry( new KeyCodeCombination(DOWN,  SHIFT_ANY),      EditorAction.DOWN),
+        entry( new KeyCodeCombination(UP,    SHIFT_ANY),      EditorAction.UP),
+        entry( new KeyCodeCombination(BACK_SPACE, SHIFT_ANY), EditorAction.BACKSPACE),
+        entry( new KeyCodeCombination(DELETE),                EditorAction.DELETE),
+        entry( new KeyCodeCombination(Z, SHORTCUT_DOWN),      EditorAction.UNDO),
+        entry( new KeyCodeCombination(Z, SHORTCUT_DOWN, SHIFT_DOWN), EditorAction.REDO),
+        entry( new KeyCodeCombination(ENTER, SHIFT_ANY),      EditorAction.ENTER),
+        entry( new KeyCodeCombination(C, SHORTCUT_DOWN),      EditorAction.COPY),
+        entry( new KeyCodeCombination(X, SHORTCUT_DOWN),      EditorAction.CUT),
+        entry( new KeyCodeCombination(V, SHORTCUT_DOWN),      EditorAction.PASTE)
     );
 
     private final RichTextAreaViewModel viewModel =
