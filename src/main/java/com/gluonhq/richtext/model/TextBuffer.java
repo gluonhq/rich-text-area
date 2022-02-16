@@ -15,6 +15,7 @@ public interface TextBuffer {
     void insert( String text, int insertPosition );
     void append( String text );
     void delete( final int deletePosition, int length );
+    void decorate(int start, int end, TextDecoration textDecoration);
 
     void undo();
     void redo();
@@ -62,6 +63,31 @@ public interface TextBuffer {
 
         public int getLength() {
             return length;
+        }
+    }
+
+    class DecorateEvent implements Event {
+
+        private final int start;
+        private final int end;
+        private final TextDecoration decoration;
+
+        DecorateEvent(int start, int end, TextDecoration decoration) {
+            this.start = start;
+            this.end = end;
+            this.decoration = decoration;
+        }
+
+        public int getStart() {
+            return start;
+        }
+
+        public int getEnd() {
+            return end;
+        }
+
+        public TextDecoration getDecoration() {
+            return decoration;
         }
     }
 
