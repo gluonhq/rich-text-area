@@ -398,7 +398,14 @@ class TextDecorateCmd extends AbstractCommand<PieceTable> {
 
     @Override
     protected void doUndo(PieceTable pt) {
-        // TODO: implement
+        if (execSuccess) {
+            pt.pieces.addAll(pieceIndex, oldPieces);
+            pt.pieces.removeAll(newPieces);
+
+            oldPieces.forEach(piece -> {
+                pt.fire(new TextBuffer.DecorateEvent(piece.start, piece.start + piece.length, piece.decoration));
+            });
+        }
     }
 
     @Override
