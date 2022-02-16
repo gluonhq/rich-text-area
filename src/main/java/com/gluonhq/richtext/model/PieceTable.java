@@ -176,7 +176,7 @@ public final class PieceTable extends AbstractTextBuffer {
 
     // Normalized list of pieces
     // Empty pieces purged
-    static List<Piece> normalize(Collection<Piece> pieces) {
+    static Collection<Piece> normalize(Collection<Piece> pieces) {
         return Objects.requireNonNull(pieces)
                   .stream()
                   .filter(b -> b == null ||  !b.isEmpty())
@@ -382,8 +382,8 @@ class TextDecorateCmd extends AbstractCommand<PieceTable> {
 
     private boolean execSuccess = false;
     private int pieceIndex = -1;
-    private List<Piece> newPieces = new ArrayList<>();
-    private List<Piece> oldPieces = new ArrayList<>();
+    private Collection<Piece> newPieces = new ArrayList<>();
+    private Collection<Piece> oldPieces = new ArrayList<>();
 
     /**
      * Command to delete text starting from an index position to a given length.
