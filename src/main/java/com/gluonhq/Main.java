@@ -2,13 +2,12 @@ package com.gluonhq;
 
 import com.gluonhq.richtext.RichTextArea;
 import javafx.application.Application;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -23,10 +22,14 @@ public class Main extends Application {
            textLengthLabel.setText( "Text length: " + nv)
         );
 
+        Button buttonCut = new Button("Cut");
+        Button buttonCopy = new Button("Copy");
+        Button buttonPaste = new Button("Paste");
         CheckBox editableProp = new CheckBox("Editable");
         editableProp.selectedProperty().bindBidirectional(editor.editableProperty());
-        HBox toolbar = new HBox(editableProp);
-        toolbar.setStyle("-fx-padding: 10");
+
+        ToolBar toolbar = new ToolBar();
+        toolbar.getItems().setAll(buttonCut, buttonCopy, buttonPaste, new Separator(Orientation.VERTICAL), editableProp);
 
         HBox statusBar = new HBox(10);
         statusBar.setAlignment(Pos.CENTER_RIGHT);

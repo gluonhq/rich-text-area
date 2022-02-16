@@ -74,7 +74,6 @@ public class RichTextArea extends Control {
         codecProperty.set(value);
     }
 
-
     public interface Codec {
         OutputStream decode(List<Node> nodes);
         List<Node> encode(InputStream stream);
