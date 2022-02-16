@@ -2,6 +2,7 @@ package com.gluonhq.richtext.model;
 
 import javafx.beans.property.ReadOnlyIntegerProperty;
 
+import java.text.CharacterIterator;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -11,6 +12,10 @@ public interface TextBuffer {
     ReadOnlyIntegerProperty textLengthProperty();
     String getText();
     String getText(int start, int end);
+
+    CharacterIterator getCharacterIterator();
+    char charAt(int pos);
+    void resetCharacterIterator();
 
     void insert( String text, int insertPosition );
     void append( String text );

@@ -6,11 +6,14 @@ import com.gluonhq.richtext.Tools;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.undo.CommandManager;
-import javafx.beans.property.*;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyIntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.text.Text;
 
 import java.text.BreakIterator;
 import java.util.Map;
@@ -245,6 +248,7 @@ public class RichTextAreaViewModel {
     }
 
     public void walkFragments(BiConsumer<String, TextDecoration> onFragment) {
+        textBuffer.resetCharacterIterator();
         textBuffer.walkFragments(onFragment);
     }
 
@@ -260,13 +264,12 @@ public class RichTextAreaViewModel {
         if (wordIterator == null) {
             wordIterator = BreakIterator.getWordInstance();
         }
-        String text = textBuffer.getText();
-        wordIterator.setText(text);
+        wordIterator.setText(textBuffer.getCharacterIterator());
 
         int prevCaretPosition = getCaretPosition();
         int position = wordIterator.preceding(Tools.clamp(0, prevCaretPosition, textLength));
         while (position != BreakIterator.DONE &&
-                !Character.isLetterOrDigit(text.charAt(Tools.clamp(0, position, textLength - 1)))) {
+                !Character.isLetterOrDigit(textBuffer.charAt(Tools.clamp(0, position, textLength - 1)))) {
             position = wordIterator.preceding(Tools.clamp(0, position, textLength));
         }
         setCaretPosition(Tools.clamp(0, position, textLength));
@@ -277,15 +280,14 @@ public class RichTextAreaViewModel {
         if (wordIterator == null) {
             wordIterator = BreakIterator.getWordInstance();
         }
-        String text = textBuffer.getText();
-        wordIterator.setText(text);
+        wordIterator.setText(textBuffer.getCharacterIterator());
 
         int prevCaretPosition = getCaretPosition();
         int last = wordIterator.following(Tools.clamp(0, prevCaretPosition, textLength - 1));
         int current = wordIterator.next();
         while (current != BreakIterator.DONE) {
             for (int i = last; i <= current; i++) {
-                char c = text.charAt(Tools.clamp(0, i, textLength - 1));
+                char c = textBuffer.charAt(Tools.clamp(0, i, textLength - 1));
                 if (c != ' ' && c != '\t') {
                     setCaretPosition(Tools.clamp(0, i, textLength));
                     return;
