@@ -428,7 +428,12 @@ class TextDecorateCmd extends AbstractCommand<PieceTable> {
                 startPieceIndex[0] = pieceIndex;
                 if (textPosition <= start) {
                     int offset = start - textPosition;
-                    int length = Math.min(end - start, piece.length);
+                    int length;
+                    if (textPosition + piece.length > end) {
+                        length = Math.min(end - start, piece.length); // selection ends in current piece
+                    } else {
+                        length = piece.length - offset; // selection spans over next piece(s)
+                    }
                     if (offset > 0) {
                         additions.add(piece.pieceBefore(offset));
                     }
