@@ -45,7 +45,7 @@ public class TextDecoration {
         return new Builder();
     }
 
-    static class Builder {
+    public static class Builder {
 
         private Color foreground = Color.BLUE;
         private Color background = Color.BLUE;
@@ -56,7 +56,7 @@ public class TextDecoration {
 
         private Builder() {}
 
-        TextDecoration build() {
+        public TextDecoration build() {
             TextDecoration decoration = new TextDecoration();
             decoration.foreground  = this.foreground;
             decoration.background  = this.background;
@@ -82,17 +82,17 @@ public class TextDecoration {
             return this;
         }
 
-        Builder fontSize(double fontSize) {
+        public Builder fontSize(double fontSize) {
             this.fontSize = fontSize;
             return this;
         }
 
-        Builder fontWeight(FontWeight fontWeight) {
+        public Builder fontWeight(FontWeight fontWeight) {
             this.fontWeight = Objects.requireNonNull(fontWeight);
             return this;
         }
 
-        Builder fontPosture(FontPosture fontPosture) {
+        public Builder fontPosture(FontPosture fontPosture) {
             this.fontPosture = Objects.requireNonNull(fontPosture);
             return this;
         }

@@ -46,7 +46,9 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         entry( new KeyCodeCombination(ENTER, SHIFT_ANY),      EditorAction.ENTER),
         entry( new KeyCodeCombination(C, SHORTCUT_DOWN),      EditorAction.COPY),
         entry( new KeyCodeCombination(X, SHORTCUT_DOWN),      EditorAction.CUT),
-        entry( new KeyCodeCombination(V, SHORTCUT_DOWN),      EditorAction.PASTE)
+        entry( new KeyCodeCombination(V, SHORTCUT_DOWN),      EditorAction.PASTE),
+        entry( new KeyCodeCombination(B, SHORTCUT_DOWN),      EditorAction.DECORATE_WEIGHT),
+        entry( new KeyCodeCombination(I, SHORTCUT_DOWN),      EditorAction.DECORATE_POSTURE)
     );
 
     private final RichTextAreaViewModel viewModel =

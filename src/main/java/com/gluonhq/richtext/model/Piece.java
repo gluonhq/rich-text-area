@@ -60,7 +60,11 @@ public final class Piece {
     }
 
     Piece copy(int newStart, int newLength) {
-        return new Piece(source, bufferType, newStart, newLength);
+        return copy(newStart, newLength, decoration);
+    }
+
+    Piece copy(int newStart, int newLength, TextDecoration textDecoration) {
+        return new Piece(source, bufferType, newStart, newLength, textDecoration);
     }
 
     // excludes char at offset
@@ -75,4 +79,13 @@ public final class Piece {
         return copy(start + offset, length - offset);
     }
 
+    @Override
+    public String toString() {
+        return "Piece{ " + getText() +
+                ", bufferType=" + bufferType +
+                ", start=" + start +
+                ", length=" + length +
+                ", decoration=" + decoration +
+                '}';
+    }
 }

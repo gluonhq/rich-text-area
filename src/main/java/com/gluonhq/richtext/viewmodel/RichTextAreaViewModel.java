@@ -10,6 +10,7 @@ import javafx.beans.property.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.text.Text;
 
 import java.text.BreakIterator;
 import java.util.Map;
@@ -19,6 +20,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static java.util.Map.entry;
+import static javafx.scene.text.FontPosture.ITALIC;
+import static javafx.scene.text.FontWeight.BOLD;
 
 public class RichTextAreaViewModel {
 
@@ -30,24 +33,26 @@ public class RichTextAreaViewModel {
 
     private final Map<EditorAction, Consumer<KeyEvent>> actionMap = Map.ofEntries(
 
-        entry( EditorAction.FORWARD,   e -> moveCaret(Direction.FORWARD, e.isShiftDown(),
-                                                Tools.MAC ? e.isAltDown() : e.isControlDown())),
-        entry( EditorAction.BACK,      e -> moveCaret(Direction.BACK, e.isShiftDown(),
-                                                Tools.MAC ? e.isAltDown() : e.isControlDown())),
-        entry( EditorAction.DOWN,      e -> moveCaret(Direction.DOWN, e.isShiftDown(), e.isAltDown())),
-        entry( EditorAction.UP,        e -> moveCaret(Direction.UP, e.isShiftDown(), e.isAltDown())),
+        entry( EditorAction.FORWARD,            e -> moveCaret(Direction.FORWARD, e.isShiftDown(),
+                                                    Tools.MAC ? e.isAltDown() : e.isControlDown())),
+        entry( EditorAction.BACK,               e -> moveCaret(Direction.BACK, e.isShiftDown(),
+                                                    Tools.MAC ? e.isAltDown() : e.isControlDown())),
+        entry( EditorAction.DOWN,               e -> moveCaret(Direction.DOWN, e.isShiftDown(), e.isAltDown())),
+        entry( EditorAction.UP,                 e -> moveCaret(Direction.UP, e.isShiftDown(), e.isAltDown())),
 
-        entry( EditorAction.INSERT,    e -> commandManager.execute(new InsertTextCmd(e.getCharacter()))),
-        entry( EditorAction.BACKSPACE, e -> commandManager.execute(new RemoveTextCmd(-1))),
-        entry( EditorAction.DELETE,    e -> commandManager.execute(new RemoveTextCmd(0))),
-        entry( EditorAction.ENTER,     e -> commandManager.execute(new InsertTextCmd("\n"))),
+        entry( EditorAction.INSERT,              e -> commandManager.execute(new InsertTextCmd(e.getCharacter()))),
+        entry( EditorAction.BACKSPACE,           e -> commandManager.execute(new RemoveTextCmd(-1))),
+        entry( EditorAction.DELETE,              e -> commandManager.execute(new RemoveTextCmd(0))),
+        entry( EditorAction.ENTER,               e -> commandManager.execute(new InsertTextCmd("\n"))),
+        entry( EditorAction.DECORATE_WEIGHT,     e -> commandManager.execute(new DecorateTextCmd(TextDecoration.builder().fontWeight(BOLD).build()))),
+        entry( EditorAction.DECORATE_POSTURE,    e -> commandManager.execute(new DecorateTextCmd(TextDecoration.builder().fontPosture(ITALIC).build()))),
 
-        entry( EditorAction.UNDO,      e -> commandManager.undo()),
-        entry( EditorAction.REDO,      e -> commandManager.redo()),
+        entry( EditorAction.UNDO,                e -> commandManager.undo()),
+        entry( EditorAction.REDO,                e -> commandManager.redo()),
 
-        entry( EditorAction.COPY,      e -> clipboardCopy(false)),
-        entry( EditorAction.CUT,       e -> clipboardCopy(true)),
-        entry( EditorAction.PASTE,     e -> clipboardPaste())
+        entry( EditorAction.COPY,                e -> clipboardCopy(false)),
+        entry( EditorAction.CUT,                 e -> clipboardCopy(true)),
+        entry( EditorAction.PASTE,               e -> clipboardPaste())
 
     );
 
@@ -150,6 +155,13 @@ public class RichTextAreaViewModel {
                 textBuffer.delete(position, 1);
                 setCaretPosition(position);
             }
+        }
+    }
+
+    void decorate(TextDecoration decoration) {
+        if (getSelection().isDefined()) {
+            Selection selection = getSelection();
+            textBuffer.decorate(selection.getStart(), selection.getEnd(), decoration);
         }
     }
 
