@@ -1,5 +1,6 @@
 package com.gluonhq.richtext.model;
 
+import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -209,6 +210,59 @@ public class PieceTableTests {
     }
 
     @Test
+    @DisplayName("Same block decorate first character")
+    public void sameBlockDecorateFirstCharacter() {
+        String text = "Original Bigger Text";
+        PieceTable pt = new PieceTable(text);
+        pt.decorate(0,1, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
+        Assertions.assertEquals(
+                text,
+                pt.getText()
+        );
+        Assertions.assertTrue(pt.pieces.stream()
+                .filter(piece -> piece.getText().equals("O"))
+                .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD)
+        );
+    }
+
+    @Test
+    @DisplayName("Same block decorate last character")
+    public void sameBlockDecorateLastCharacter() {
+        String text = "Original Bigger Text";
+        PieceTable pt = new PieceTable(text);
+        pt.decorate(text.length() - 1, text.length(), TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
+        Assertions.assertEquals(
+                text,
+                pt.getText()
+        );
+        Assertions.assertTrue(pt.pieces.stream()
+                .filter(piece -> piece.getText().equals("t"))
+                .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD)
+        );
+    }
+
+    @Test
+    @DisplayName("Same block decorate twice")
+    public void sameBlockDecorateTwice() {
+        String text = "Original Bigger Text";
+        PieceTable pt = new PieceTable(text);
+        pt.decorate(1,2, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
+        pt.decorate(1,2, TextDecoration.builder().fontPosture(FontPosture.ITALIC).build());
+        Assertions.assertEquals(
+                text,
+                pt.getText()
+        );
+        Assertions.assertTrue(pt.pieces.stream()
+                .filter(piece -> piece.getText().equals("r"))
+                .anyMatch(piece -> piece.getDecoration().getFontPosture() == FontPosture.ITALIC)
+        );
+        Assertions.assertFalse(pt.pieces.stream()
+                .filter(piece -> piece.getText().equals("r"))
+                .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD)
+        );
+    }
+
+    @Test
     @DisplayName("Multi block decorate")
     public void multiBlockDecorate() {
         PieceTable pt = new PieceTable(originalText);
@@ -220,6 +274,52 @@ public class PieceTableTests {
                 "Original Bigger Bigger Text",
                 pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
+                .filter(piece -> piece.getText().equals("Bigger"))
+                .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD)
+        );
+    }
+
+    @Test
+    @DisplayName("Multi block decorate across pieces")
+    public void multiBlockDecorateSpanningMultiplePieces() {
+        PieceTable pt = new PieceTable(originalText);
+        String insert = "Bigger ";
+        pt.insert( insert, 9); // 'Original Bigger Text'
+        pt.decorate(6, 18, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
+        Assertions.assertEquals(
+                "Original Bigger Text",
+                pt.getText());
+        Assertions.assertTrue(pt.pieces.stream()
+                .filter(piece -> piece.getText().equals("al "))
+                .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD)
+        );
+        Assertions.assertTrue(pt.pieces.stream()
+                .filter(piece -> piece.getText().equals("Bigger "))
+                .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD)
+        );
+        Assertions.assertTrue(pt.pieces.stream()
+                .filter(piece -> piece.getText().equals("Te"))
+                .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD)
+        );
+    }
+
+    @Test
+    @DisplayName("Multi block decorate twice")
+    public void multiBlockDecorateTwice() {
+        PieceTable pt = new PieceTable(originalText);
+        String insert = "Bigger ";
+        pt.insert( insert, 9); // 'Original Bigger Text'
+        pt.insert( insert, 9); // 'Original Bigger Bigger Text'
+        pt.decorate(9, 15, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
+        pt.decorate(9, 15, TextDecoration.builder().fontPosture(FontPosture.ITALIC).build());
+        Assertions.assertEquals(
+                "Original Bigger Bigger Text",
+                pt.getText());
+        Assertions.assertTrue(pt.pieces.stream()
+                .filter(piece -> piece.getText().equals("Bigger"))
+                .anyMatch(piece -> piece.getDecoration().getFontPosture() == FontPosture.ITALIC)
+        );
+        Assertions.assertFalse(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("Bigger"))
                 .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD)
         );
