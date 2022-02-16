@@ -19,8 +19,9 @@ import java.text.BreakIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static java.util.Map.entry;
 import static javafx.scene.text.FontPosture.ITALIC;
@@ -36,12 +37,12 @@ public class RichTextAreaViewModel {
 
     private final Map<EditorAction, Consumer<KeyEvent>> actionMap = Map.ofEntries(
 
-        entry( EditorAction.FORWARD,            e -> moveCaret(Direction.FORWARD, e.isShiftDown(),
-                                                    Tools.MAC ? e.isAltDown() : e.isControlDown())),
-        entry( EditorAction.BACK,               e -> moveCaret(Direction.BACK, e.isShiftDown(),
-                                                    Tools.MAC ? e.isAltDown() : e.isControlDown())),
-        entry( EditorAction.DOWN,               e -> moveCaret(Direction.DOWN, e.isShiftDown(), e.isAltDown())),
-        entry( EditorAction.UP,                 e -> moveCaret(Direction.UP, e.isShiftDown(), e.isAltDown())),
+        entry( EditorAction.FORWARD,             e -> moveCaret(Direction.FORWARD, e.isShiftDown(), isWordSelection(e), isLineSelection(e))),
+        entry( EditorAction.BACK,                e -> moveCaret(Direction.BACK, e.isShiftDown(), isWordSelection(e), isLineSelection(e))),
+        entry( EditorAction.HOME,                e -> moveCaret(Direction.BACK, e.isShiftDown(), false, true)),
+        entry( EditorAction.END,                 e -> moveCaret(Direction.FORWARD, e.isShiftDown(), false, true)),
+        entry( EditorAction.DOWN,                e -> moveCaret(Direction.DOWN, e.isShiftDown(), false, false)),
+        entry( EditorAction.UP,                  e -> moveCaret(Direction.UP, e.isShiftDown(), false, false)),
 
         entry( EditorAction.INSERT,              e -> commandManager.execute(new InsertTextCmd(e.getCharacter()))),
         entry( EditorAction.BACKSPACE,           e -> commandManager.execute(new RemoveTextCmd(-1))),
@@ -59,11 +60,19 @@ public class RichTextAreaViewModel {
 
     );
 
+    private boolean isWordSelection(KeyEvent e) {
+        return Tools.MAC ? e.isAltDown() : e.isControlDown();
+    }
+
+    private boolean isLineSelection(KeyEvent e) {
+        return Tools.MAC && e.isShortcutDown();
+    }
+
     /// PROPERTIES ///////////////////////////////////////////////////////////////
 
     // caretPositionProperty
     private final IntegerProperty caretPositionProperty = new SimpleIntegerProperty(this, "caretPosition", -1);
-    private final Function<Boolean, Integer> getNextRowPosition;
+    private final BiFunction<Double, Boolean, Integer> getNextRowPosition;
 
     public final IntegerProperty caretPositionProperty() {
         return caretPositionProperty;
@@ -107,7 +116,7 @@ public class RichTextAreaViewModel {
     }
 
 
-    public RichTextAreaViewModel(TextBuffer textBuffer, Function<Boolean,Integer> getNextRowPosition) {
+    public RichTextAreaViewModel(TextBuffer textBuffer, BiFunction<Double, Boolean, Integer> getNextRowPosition) {
         this.textBuffer = Objects.requireNonNull(textBuffer); // TODO convert to property
         this.getNextRowPosition = Objects.requireNonNull(getNextRowPosition);
     }
@@ -209,13 +218,15 @@ public class RichTextAreaViewModel {
         actionMap.get(Objects.requireNonNull(action)).accept(e);
     }
 
-    void moveCaret(Direction direction, boolean changeSelection, boolean wordSelection) {
+    void moveCaret(Direction direction, boolean changeSelection, boolean wordSelection, boolean lineSelection) {
         Selection prevSelection = getSelection();
         int prevCaretPosition = getCaretPosition();
         switch (direction) {
             case FORWARD:
                 if (wordSelection) {
-                    nextWord();
+                    nextWord(c -> c != ' ' && c != '\t');
+                } else if (lineSelection) {
+                    lineEnd();
                 } else {
                     moveCaretPosition(1);
                 }
@@ -223,13 +234,15 @@ public class RichTextAreaViewModel {
             case BACK:
                 if (wordSelection) {
                     previousWord();
+                } else if (lineSelection) {
+                    lineStart();
                 } else {
                     moveCaretPosition(-1);
                 }
                 break;
             case DOWN:
             case UP:
-                int rowCharIndex = getNextRowPosition.apply(Direction.DOWN == direction);
+                int rowCharIndex = getNextRowPosition.apply(-1d, Direction.DOWN == direction);
                 if (rowCharIndex >= 0) {
                     setCaretPosition(rowCharIndex);
                 }
@@ -256,6 +269,18 @@ public class RichTextAreaViewModel {
         this.textBuffer.undo();
     }
 
+    public void selectCurrentWord() {
+        moveCaret(Direction.BACK, false, true, false);
+        int prevCaretPosition = getCaretPosition();
+        nextWord(c -> !Character.isLetterOrDigit(c));
+        setSelection(new Selection(prevCaretPosition, getCaretPosition()));
+    }
+
+    public void selectCurrentLine() {
+        moveCaret(Direction.BACK, false, false, true);
+        moveCaret(Direction.FORWARD, true, false, true);
+    }
+
     private void previousWord() {
         int textLength = getTextLength();
         if (textLength <= 0) {
@@ -275,7 +300,7 @@ public class RichTextAreaViewModel {
         setCaretPosition(Tools.clamp(0, position, textLength));
     }
 
-    private void nextWord() {
+    private void nextWord(Predicate<Character> filter) {
         int textLength = getTextLength();
         if (wordIterator == null) {
             wordIterator = BreakIterator.getWordInstance();
@@ -288,7 +313,7 @@ public class RichTextAreaViewModel {
         while (current != BreakIterator.DONE) {
             for (int i = last; i <= current; i++) {
                 char c = textBuffer.charAt(Tools.clamp(0, i, textLength - 1));
-                if (c != ' ' && c != '\t') {
+                if (filter.test(c)) {
                     setCaretPosition(Tools.clamp(0, i, textLength));
                     return;
                 }
@@ -299,4 +324,13 @@ public class RichTextAreaViewModel {
         setCaretPosition(textLength);
     }
 
+    private void lineStart() {
+        int pos = getNextRowPosition.apply(0d, false);
+        setCaretPosition(pos);
+    }
+
+    private void lineEnd() {
+        int pos = getNextRowPosition.apply(Double.MAX_VALUE, false);
+        setCaretPosition(pos);
+    }
 }
