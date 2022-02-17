@@ -6,9 +6,6 @@ import javafx.scene.text.FontWeight;
 
 import java.util.Objects;
 
-import static javafx.scene.text.FontPosture.REGULAR;
-import static javafx.scene.text.FontWeight.NORMAL;
-
 public class TextDecoration {
 
     private Color foreground;
