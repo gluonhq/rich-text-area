@@ -67,7 +67,7 @@ public final class Piece {
     }
 
     Piece copy(int newStart, int newLength, TextDecoration textDecoration) {
-        return new Piece(source, bufferType, newStart, newLength, normalizeDecoration(textDecoration));
+        return new Piece(source, bufferType, newStart, newLength, textDecoration.normalize(decoration));
     }
 
     // excludes char at offset
@@ -90,20 +90,5 @@ public final class Piece {
                 ", length=" + length +
                 ", decoration=" + decoration +
                 '}';
-    }
-
-    private TextDecoration normalizeDecoration(TextDecoration decoration) {
-        if (getDecoration() == null) {
-            return decoration;
-        }
-        TextDecoration previousDecoration = getDecoration();
-        TextDecoration.Builder copy = TextDecoration.Builder.copy(decoration);
-        if (previousDecoration.getFontWeight() == decoration.getFontWeight()) {
-            copy.fontWeight(NORMAL);
-        }
-        if (previousDecoration.getFontPosture() == decoration.getFontPosture()) {
-            copy.fontPosture(REGULAR);
-        }
-        return copy.build();
     }
 }

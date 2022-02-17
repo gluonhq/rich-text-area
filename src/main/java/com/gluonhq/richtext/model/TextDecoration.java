@@ -6,6 +6,9 @@ import javafx.scene.text.FontWeight;
 
 import java.util.Objects;
 
+import static javafx.scene.text.FontPosture.REGULAR;
+import static javafx.scene.text.FontWeight.NORMAL;
+
 public class TextDecoration {
 
     private Color foreground;
@@ -45,6 +48,28 @@ public class TextDecoration {
         return new Builder();
     }
 
+    /**
+     * Returns a new instance of the current TextDecoration
+     * and normalizes properties based on the supplied decoration.
+     * FontWeight and FontPosture normalize into
+     * {@link FontWeight#NORMAL} and {@link FontPosture#REGULAR} respectively.
+     * @param decoration Decoration to compare and normalize
+     * @return New TextDecoration instance with properties normalized
+     */
+    public TextDecoration normalize(TextDecoration decoration) {
+        if (decoration == null) {
+            return this;
+        }
+        Builder copy = Builder.copy(this);
+        if (fontWeight == decoration.getFontWeight()) {
+            copy.fontWeight = NORMAL;
+        }
+        if (fontPosture == decoration.getFontPosture()) {
+            copy.fontPosture = REGULAR;
+        }
+        return copy.build();
+    }
+
     public static class Builder {
 
         private Color foreground = Color.BLUE;
@@ -72,7 +97,7 @@ public class TextDecoration {
          * @param decoration TextDecoration to copy properties from
          * @return An instance of TextDecoration.Builder
          */
-        public static Builder copy(TextDecoration decoration) {
+        private static Builder copy(TextDecoration decoration) {
             return TextDecoration.builder()
                     .foreground(decoration.getForeground())
                     .background(decoration.getBackground())
