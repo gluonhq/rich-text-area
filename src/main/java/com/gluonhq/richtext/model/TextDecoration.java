@@ -60,21 +60,21 @@ public class TextDecoration {
         if (decoration == null) {
             return this;
         }
-        Builder copy = copy();
+        Builder builder = toBuilder();
         if (fontWeight == decoration.getFontWeight()) {
-            copy.fontWeight = NORMAL;
+            builder.fontWeight = NORMAL;
         }
         if (fontPosture == decoration.getFontPosture()) {
-            copy.fontPosture = REGULAR;
+            builder.fontPosture = REGULAR;
         }
-        return copy.build();
+        return builder.build();
     }
 
     /**
      * Returns a new instance of builder by copying the properties of the TextDecoration
      * @return An instance of TextDecoration.Builder
      */
-    private Builder copy() {
+    private Builder toBuilder() {
         return new Builder()
                 .foreground(this.getForeground())
                 .background(this.getBackground())
