@@ -389,7 +389,7 @@ class TextDecorateCmd extends AbstractCommand<PieceTable> {
      * Decorates the text withing the given range with the supplied decoration.
      * @param start index of the first character to decorate
      * @param end index of the last character to decorate
-     * @param decoration Decorations to apply for the selected text
+     * @param decoration Decorations to apply on the selected text
      */
     TextDecorateCmd(int start, int end, TextDecoration decoration) {
         this.start = start;
