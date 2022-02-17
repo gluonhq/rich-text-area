@@ -60,7 +60,7 @@ public class TextDecoration {
         if (decoration == null) {
             return this;
         }
-        Builder copy = Builder.copy(this);
+        Builder copy = copy();
         if (fontWeight == decoration.getFontWeight()) {
             copy.fontWeight = NORMAL;
         }
@@ -68,6 +68,20 @@ public class TextDecoration {
             copy.fontPosture = REGULAR;
         }
         return copy.build();
+    }
+
+    /**
+     * Returns a new instance of builder by copying the properties of the TextDecoration
+     * @return An instance of TextDecoration.Builder
+     */
+    private Builder copy() {
+        return new Builder()
+                .foreground(this.getForeground())
+                .background(this.getBackground())
+                .fontFamily(this.getFontFamily())
+                .fontSize(this.getFontSize())
+                .fontPosture(this.getFontPosture())
+                .fontWeight(this.getFontWeight());
     }
 
     public static class Builder {
@@ -90,21 +104,6 @@ public class TextDecoration {
             decoration.fontWeight  = this.fontWeight;
             decoration.fontPosture = this.fontPosture;
             return decoration;
-        }
-
-        /**
-         * Returns a new instance of builder by copying the properties from the supplied decoration
-         * @param decoration TextDecoration to copy properties from
-         * @return An instance of TextDecoration.Builder
-         */
-        private static Builder copy(TextDecoration decoration) {
-            return TextDecoration.builder()
-                    .foreground(decoration.getForeground())
-                    .background(decoration.getBackground())
-                    .fontFamily(decoration.getFontFamily())
-                    .fontSize(decoration.getFontSize())
-                    .fontPosture(decoration.getFontPosture())
-                    .fontWeight(decoration.getFontWeight());
         }
 
         Builder foreground(Color color) {
