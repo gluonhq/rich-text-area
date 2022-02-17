@@ -67,6 +67,21 @@ public class TextDecoration {
             return decoration;
         }
 
+        /**
+         * Returns a new instance of builder by copying the properties from the supplied decoration
+         * @param decoration TextDecoration to copy properties from
+         * @return An instance of TextDecoration.Builder
+         */
+        public static Builder copy(TextDecoration decoration) {
+            return TextDecoration.builder()
+                    .foreground(decoration.getForeground())
+                    .background(decoration.getBackground())
+                    .fontFamily(decoration.getFontFamily())
+                    .fontSize(decoration.getFontSize())
+                    .fontPosture(decoration.getFontPosture())
+                    .fontWeight(decoration.getFontWeight());
+        }
+
         Builder foreground(Color color) {
             this.foreground = Objects.requireNonNull(color);
             return this;
@@ -96,7 +111,6 @@ public class TextDecoration {
             this.fontPosture = Objects.requireNonNull(fontPosture);
             return this;
         }
-
     }
 
 }
