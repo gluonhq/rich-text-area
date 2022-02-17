@@ -386,9 +386,10 @@ class TextDecorateCmd extends AbstractCommand<PieceTable> {
     private Collection<Piece> oldPieces = new ArrayList<>();
 
     /**
-     * Command to delete text starting from an index position to a given length.
-     * @param start index of the first character to be decorated.
-     * @param end index of the last character to be decorated.
+     * Decorates the text withing the given range with the supplied decoration.
+     * @param start index of the first character to decorate
+     * @param end index of the last character to decorate
+     * @param decoration Decorations to apply for the selected text
      */
     TextDecorateCmd(int start, int end, TextDecoration decoration) {
         this.start = start;
