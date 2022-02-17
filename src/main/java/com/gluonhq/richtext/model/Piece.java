@@ -2,9 +2,6 @@ package com.gluonhq.richtext.model;
 
 import java.util.Objects;
 
-import static javafx.scene.text.FontPosture.REGULAR;
-import static javafx.scene.text.FontWeight.NORMAL;
-
 public final class Piece {
 
     public enum BufferType {ORIGINAL, ADDITION}

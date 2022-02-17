@@ -60,28 +60,14 @@ public class TextDecoration {
         if (decoration == null) {
             return this;
         }
-        Builder builder = toBuilder();
-        if (fontWeight == decoration.getFontWeight()) {
-            builder.fontWeight = NORMAL;
-        }
-        if (fontPosture == decoration.getFontPosture()) {
-            builder.fontPosture = REGULAR;
-        }
-        return builder.build();
-    }
-
-    /**
-     * Returns a new instance of builder by copying the properties of the TextDecoration
-     * @return An instance of TextDecoration.Builder
-     */
-    private Builder toBuilder() {
-        return new Builder()
-                .foreground(this.getForeground())
-                .background(this.getBackground())
-                .fontFamily(this.getFontFamily())
-                .fontSize(this.getFontSize())
-                .fontPosture(this.getFontPosture())
-                .fontWeight(this.getFontWeight());
+        TextDecoration td = new TextDecoration();
+        td.foreground  = foreground;
+        td.background  = background;
+        td.fontFamily  = fontFamily;
+        td.fontSize    = fontSize;
+        td.fontWeight  = fontWeight == decoration.getFontWeight() ? FontWeight.NORMAL : fontWeight;
+        td.fontPosture = fontPosture == decoration.getFontPosture() ? FontPosture.REGULAR : fontPosture;
+        return td;
     }
 
     public static class Builder {
