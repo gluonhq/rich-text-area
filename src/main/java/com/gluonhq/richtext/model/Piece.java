@@ -14,16 +14,16 @@ public final class Piece {
     final TextDecoration decoration;
 
     public Piece(final PieceTable source, final BufferType bufferType, final int start, final int length) {
-        this(source, bufferType, start, length, TextDecoration.builder().build() );
+        this(source, bufferType, start, length, TextDecoration.builder().build());
     }
 
-    public Piece(final PieceTable source, final BufferType bufferType, final int start, final int length, TextDecoration decoration ) {
+    public Piece(final PieceTable source, final BufferType bufferType, final int start, final int length, TextDecoration decoration) {
 
         this.bufferType = bufferType;
         this.start = start;
         this.length = Math.max(length, 0);
         this.source = Objects.requireNonNull(source);
-        this.decoration = decoration == null? TextDecoration.builder().build(): decoration;
+        this.decoration = decoration == null ? TextDecoration.builder().build() : decoration;
 
 
         // find all the line stops
@@ -60,7 +60,11 @@ public final class Piece {
     }
 
     Piece copy(int newStart, int newLength) {
-        return new Piece(source, bufferType, newStart, newLength);
+        return copy(newStart, newLength, decoration);
+    }
+
+    Piece copy(int newStart, int newLength, TextDecoration textDecoration) {
+        return new Piece(source, bufferType, newStart, newLength, textDecoration.normalize(decoration));
     }
 
     // excludes char at offset
@@ -75,4 +79,13 @@ public final class Piece {
         return copy(start + offset, length - offset);
     }
 
+    @Override
+    public String toString() {
+        return "Piece{ " + getText() +
+                ", bufferType=" + bufferType +
+                ", start=" + start +
+                ", length=" + length +
+                ", decoration=" + decoration +
+                '}';
+    }
 }

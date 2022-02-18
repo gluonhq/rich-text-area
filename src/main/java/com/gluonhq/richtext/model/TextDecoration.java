@@ -45,7 +45,29 @@ public class TextDecoration {
         return new Builder();
     }
 
-    static class Builder {
+    /**
+     * Returns a new instance of the current TextDecoration
+     * and normalizes properties based on the supplied decoration.
+     * FontWeight and FontPosture normalize into
+     * {@link FontWeight#NORMAL} and {@link FontPosture#REGULAR} respectively.
+     * @param decoration Decoration to compare and normalize
+     * @return New TextDecoration instance with properties normalized
+     */
+    public TextDecoration normalize(TextDecoration decoration) {
+        if (decoration == null) {
+            return this;
+        }
+        TextDecoration td = new TextDecoration();
+        td.foreground  = foreground;
+        td.background  = background;
+        td.fontFamily  = fontFamily;
+        td.fontSize    = fontSize;
+        td.fontWeight  = fontWeight == decoration.getFontWeight() ? FontWeight.NORMAL : fontWeight;
+        td.fontPosture = fontPosture == decoration.getFontPosture() ? FontPosture.REGULAR : fontPosture;
+        return td;
+    }
+
+    public static class Builder {
 
         private Color foreground = Color.BLUE;
         private Color background = Color.BLUE;
@@ -56,7 +78,7 @@ public class TextDecoration {
 
         private Builder() {}
 
-        TextDecoration build() {
+        public TextDecoration build() {
             TextDecoration decoration = new TextDecoration();
             decoration.foreground  = this.foreground;
             decoration.background  = this.background;
@@ -82,21 +104,20 @@ public class TextDecoration {
             return this;
         }
 
-        Builder fontSize(double fontSize) {
+        public Builder fontSize(double fontSize) {
             this.fontSize = fontSize;
             return this;
         }
 
-        Builder fontWeight(FontWeight fontWeight) {
+        public Builder fontWeight(FontWeight fontWeight) {
             this.fontWeight = Objects.requireNonNull(fontWeight);
             return this;
         }
 
-        Builder fontPosture(FontPosture fontPosture) {
+        public Builder fontPosture(FontPosture fontPosture) {
             this.fontPosture = Objects.requireNonNull(fontPosture);
             return this;
         }
-
     }
 
 }

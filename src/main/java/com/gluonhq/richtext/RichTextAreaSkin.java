@@ -35,23 +35,27 @@ import static java.util.Map.entry;
 class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private static final Map<KeyCombination, EditorAction> INPUT_MAP = Map.ofEntries(
-        entry( new KeyCodeCombination(RIGHT, SHIFT_ANY),      EditorAction.FORWARD),
-        entry( new KeyCodeCombination(LEFT,  SHIFT_ANY),      EditorAction.BACK),
-        entry( new KeyCodeCombination(DOWN,  SHIFT_ANY),      EditorAction.DOWN),
-        entry( new KeyCodeCombination(UP,    SHIFT_ANY),      EditorAction.UP),
-        entry( new KeyCodeCombination(BACK_SPACE, SHIFT_ANY), EditorAction.BACKSPACE),
-        entry( new KeyCodeCombination(DELETE),                EditorAction.DELETE),
-        entry( new KeyCodeCombination(Z, SHORTCUT_DOWN),      EditorAction.UNDO),
-        entry( new KeyCodeCombination(Z, SHORTCUT_DOWN, SHIFT_DOWN), EditorAction.REDO),
-        entry( new KeyCodeCombination(ENTER, SHIFT_ANY),      EditorAction.ENTER),
-        entry( new KeyCodeCombination(C, SHORTCUT_DOWN),      EditorAction.COPY),
-        entry( new KeyCodeCombination(X, SHORTCUT_DOWN),      EditorAction.CUT),
-        entry( new KeyCodeCombination(V, SHORTCUT_DOWN),      EditorAction.PASTE)
+        entry( new KeyCodeCombination(RIGHT, SHIFT_ANY, ALT_ANY, CONTROL_ANY, SHORTCUT_ANY), EditorAction.FORWARD),
+        entry( new KeyCodeCombination(LEFT,  SHIFT_ANY, ALT_ANY, CONTROL_ANY, SHORTCUT_ANY), EditorAction.BACK),
+        entry( new KeyCodeCombination(DOWN,  SHIFT_ANY),                                     EditorAction.DOWN),
+        entry( new KeyCodeCombination(UP,    SHIFT_ANY),                                     EditorAction.UP),
+        entry( new KeyCodeCombination(HOME,  SHIFT_ANY),                                     EditorAction.HOME),
+        entry( new KeyCodeCombination(END,   SHIFT_ANY),                                     EditorAction.END),
+        entry( new KeyCodeCombination(BACK_SPACE, SHIFT_ANY),                                EditorAction.BACKSPACE),
+        entry( new KeyCodeCombination(DELETE),                                               EditorAction.DELETE),
+        entry( new KeyCodeCombination(Z, SHORTCUT_DOWN),                                     EditorAction.UNDO),
+        entry( new KeyCodeCombination(Z, SHORTCUT_DOWN, SHIFT_DOWN),                         EditorAction.REDO),
+        entry( new KeyCodeCombination(ENTER, SHIFT_ANY),                                     EditorAction.ENTER),
+        entry( new KeyCodeCombination(C, SHORTCUT_DOWN),                                     EditorAction.COPY),
+        entry( new KeyCodeCombination(X, SHORTCUT_DOWN),                                     EditorAction.CUT),
+        entry( new KeyCodeCombination(V, SHORTCUT_DOWN),                                     EditorAction.PASTE),
+        entry( new KeyCodeCombination(B, SHORTCUT_DOWN),                                     EditorAction.DECORATE_WEIGHT),
+        entry( new KeyCodeCombination(I, SHORTCUT_DOWN),                                     EditorAction.DECORATE_POSTURE)
     );
 
     private final RichTextAreaViewModel viewModel =
         new RichTextAreaViewModel(
-            new PieceTable("Simple text text text"),
+            new PieceTable("Simple text one two three\nExtra line text"),
             this::getNextRowPosition // TODO need to find a better way to find next row caret position
         );
 
@@ -225,14 +229,30 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private int dragStart = -1;
 
     private void mousePressedListener(MouseEvent e) {
-        HitInfo hitInfo = textFlow.hitTest(new Point2D(e.getX(), e.getY()));
-        if (hitInfo.getInsertionIndex() >= 0) {
-            viewModel.setCaretPosition(hitInfo.getInsertionIndex());
-            dragStart = viewModel.getCaretPosition();
+        if (e.getButton() == MouseButton.PRIMARY && !(e.isMiddleButtonDown() || e.isSecondaryButtonDown())) {
+            HitInfo hitInfo = textFlow.hitTest(new Point2D(e.getX(), e.getY()));
+            int prevCaretPosition = viewModel.getCaretPosition();
+            if (hitInfo.getInsertionIndex() >= 0) {
+                if (!(e.isControlDown() || e.isAltDown() || e.isShiftDown() || e.isMetaDown() || e.isShortcutDown())) {
+                    viewModel.setCaretPosition(hitInfo.getInsertionIndex());
+                    if (e.getClickCount() == 2) {
+                        viewModel.selectCurrentWord();
+                    } else if (e.getClickCount() == 3) {
+                        viewModel.selectCurrentLine();
+                    } else {
+                        dragStart = prevCaretPosition;
+                        viewModel.clearSelection();
+                    }
+                } else if (e.isShiftDown() && e.getClickCount() == 1 && !(e.isControlDown() || e.isAltDown() || e.isMetaDown() || e.isShortcutDown())) {
+                    viewModel.setSelection(new Selection(prevCaretPosition, hitInfo.getInsertionIndex()));
+                    viewModel.setCaretPosition(hitInfo.getInsertionIndex());
+                }
+            }
+            getSkinnable().requestFocus();
+            e.consume();
+        } else {
+            // TODO Add support for ContextMenu
         }
-        viewModel.clearSelection();
-        getSkinnable().requestFocus();
-        e.consume();
     }
 
     private void mouseDraggedListener(MouseEvent e) {
@@ -248,12 +268,16 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     // So far the only way to find prev/next row location is to use the size of the caret,
     // which always has the height of the row. Adding line spacing to it allows us to find a point which
     // belongs to the desired row. Then using the `hitTest` we can find the related caret position.
-    private int getNextRowPosition( boolean down ) {
-        Bounds caretBounds = caretShape.getBoundsInLocal();
-        double nextRowPos =  down? caretBounds.getMaxY() + textFlow.getLineSpacing():
-                caretBounds.getMinY() - textFlow.getLineSpacing();
-        HitInfo hitInfo = textFlow.hitTest(new Point2D( caretBounds.getMinX(), nextRowPos));
-        return hitInfo.getCharIndex();
+    private int getNextRowPosition(double x, boolean down) {
+        Bounds caretBounds = caretShape.getLayoutBounds();
+        double nextRowPos = x < 0d ?
+                down ?
+                    caretBounds.getMaxY() + textFlow.getLineSpacing() :
+                    caretBounds.getMinY() - textFlow.getLineSpacing() :
+                caretBounds.getCenterY();
+        double xPos = x < 0d ? caretBounds.getMaxX() : x;
+        HitInfo hitInfo = textFlow.hitTest(new Point2D(xPos, nextRowPos));
+        return hitInfo.getInsertionIndex();
     }
 
     private static boolean isPrintableChar(char c) {
