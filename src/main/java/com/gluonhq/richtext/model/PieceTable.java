@@ -3,6 +3,7 @@ package com.gluonhq.richtext.model;
 import com.gluonhq.richtext.undo.AbstractCommand;
 import com.gluonhq.richtext.undo.CommandManager;
 
+import java.text.CharacterIterator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -22,14 +23,17 @@ public final class PieceTable extends AbstractTextBuffer {
     final List<Piece> pieces = new ArrayList<>();
     private final CommandManager<PieceTable> commander = new CommandManager<>(this);
 
+    private final PieceCharacterIterator pieceCharacterIterator;
+
     /**
      * Creates piece table using original text
      * @param originalText text to start with
      */
-    public PieceTable( String originalText ) {
+    public PieceTable(String originalText) {
         this.originalText = Objects.requireNonNull(originalText);
         pieces.add( piece( Piece.BufferType.ORIGINAL, 0, originalText.length()));
         textLengthProperty.set( pieces.stream().mapToInt(b -> b.length).sum() );
+        pieceCharacterIterator = new PieceCharacterIterator(this);
     }
 
     private Piece piece(Piece.BufferType bufferType, int start, int length ) {
@@ -75,6 +79,21 @@ public final class PieceTable extends AbstractTextBuffer {
         }
         return sb.substring(start, realEnd);
 
+    }
+
+    @Override
+    public CharacterIterator getCharacterIterator() {
+        return pieceCharacterIterator;
+    }
+
+    @Override
+    public char charAt(int pos) {
+        return pieceCharacterIterator.charAt(pos);
+    }
+
+    @Override
+    public void resetCharacterIterator() {
+        pieceCharacterIterator.reset();
     }
 
     // internal append
@@ -189,6 +208,137 @@ public final class PieceTable extends AbstractTextBuffer {
         return index >= start && index < start+length;
     }
 
+}
+
+class PieceCharacterIterator implements CharacterIterator {
+
+    private final PieceTable pt;
+    private int begin;
+    private int end;
+    private int pos;
+    private int[] posArray;
+
+    public PieceCharacterIterator(PieceTable pt) {
+        this.pt = Objects.requireNonNull(pt);
+        reset();
+    }
+
+    public void reset() {
+        this.begin = 0;
+        this.end = pt.getTextLength();
+        this.pos = 0;
+
+        posArray = new int[pt.pieces.size() + 1];
+        pt.walkPieces((p, i, tp) -> {
+            posArray[i] = tp;
+            return false;
+        });
+        posArray[pt.pieces.size()] = end;
+    }
+
+    public char charAt(int pos) {
+        if (pos < 0 || pos >= pt.getTextLength()) {
+            throw new IllegalArgumentException("Invalid pos value");
+        }
+        for (int i = 0; i < posArray.length; i++) {
+            if (posArray[i] <= pos && pos < posArray[i + 1]) {
+                return pt.pieces.get(i).getText().charAt(pos - posArray[i]);
+            }
+        }
+        return 0;
+    }
+
+    @Override
+    public char first() {
+        pos = begin;
+        return current();
+    }
+
+    @Override
+    public char last() {
+        if (end != begin) {
+            pos = end - 1;
+        } else {
+            pos = end;
+        }
+        return current();
+    }
+
+    @Override
+    public char current() {
+        if (pos >= begin && pos < end) {
+            return pt.charAt(pos);
+        } else {
+            return DONE;
+        }
+    }
+
+    @Override
+    public char next() {
+        if (pos < end - 1) {
+            pos++;
+            return pt.charAt(pos);
+        } else {
+            pos = end;
+            return DONE;
+        }
+    }
+
+    @Override
+    public char previous() {
+        if (pos > begin) {
+            pos--;
+            return pt.charAt(pos);
+        } else {
+            return DONE;
+        }
+    }
+
+    @Override
+    public char setIndex(int position) {
+        if (position < begin || position > end) {
+            throw new IllegalArgumentException("Invalid index");
+        }
+        pos = position;
+        return current();
+    }
+
+    @Override
+    public int getIndex() {
+        return pos;
+    }
+
+    @Override
+    public int getBeginIndex() {
+        return begin;
+    }
+
+    @Override
+    public int getEndIndex() {
+        return end;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PieceCharacterIterator that = (PieceCharacterIterator) o;
+        return begin == that.begin && end == that.end && pos == that.pos && Objects.equals(pt, that.pt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pt, begin, end, pos);
+    }
+
+    @Override
+    public Object clone() {
+        try {
+            return super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new IllegalArgumentException("Clone exception");
+        }
+    }
 }
 
 abstract class AbstractPTCmd extends AbstractCommand<PieceTable> {}
