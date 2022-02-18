@@ -45,6 +45,28 @@ public class TextDecoration {
         return new Builder();
     }
 
+    /**
+     * Returns a new instance of the current TextDecoration
+     * and normalizes properties based on the supplied decoration.
+     * FontWeight and FontPosture normalize into
+     * {@link FontWeight#NORMAL} and {@link FontPosture#REGULAR} respectively.
+     * @param decoration Decoration to compare and normalize
+     * @return New TextDecoration instance with properties normalized
+     */
+    public TextDecoration normalize(TextDecoration decoration) {
+        if (decoration == null) {
+            return this;
+        }
+        TextDecoration td = new TextDecoration();
+        td.foreground  = foreground;
+        td.background  = background;
+        td.fontFamily  = fontFamily;
+        td.fontSize    = fontSize;
+        td.fontWeight  = fontWeight == decoration.getFontWeight() ? FontWeight.NORMAL : fontWeight;
+        td.fontPosture = fontPosture == decoration.getFontPosture() ? FontPosture.REGULAR : fontPosture;
+        return td;
+    }
+
     public static class Builder {
 
         private Color foreground = Color.BLUE;
@@ -96,7 +118,6 @@ public class TextDecoration {
             this.fontPosture = Objects.requireNonNull(fontPosture);
             return this;
         }
-
     }
 
 }
