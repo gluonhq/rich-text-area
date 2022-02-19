@@ -10,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
@@ -30,6 +31,20 @@ public class Main extends Application {
            textLengthLabel.setText( "Text length: " + nv)
         );
 
+        ComboBox<String> fontFamilies = new ComboBox<>();
+        fontFamilies.getItems().setAll(Font.getFamilies());
+        fontFamilies.setOnAction( e -> {
+            String ff = fontFamilies.getSelectionModel().getSelectedItem();
+            Action action = editor.getActionFactory().decorateText(TextDecoration.builder().fontFamily(ff).build());
+            editor.execute(action);
+        } );
+
+        final ColorPicker fontForeground = new ColorPicker();
+        fontForeground.setOnAction(e -> {
+            Action action = editor.getActionFactory().decorateText(TextDecoration.builder().foreground(fontForeground.getValue()).build());
+            editor.execute(action);
+        });
+
         CheckBox editableProp = new CheckBox("Editable");
         editableProp.selectedProperty().bindBidirectional(editor.editableProperty());
 
@@ -39,8 +54,10 @@ public class Main extends Application {
                 actionButton(LineAwesomeSolid.COPY,  editor.getActionFactory().copy()),
                 actionButton(LineAwesomeSolid.PASTE, editor.getActionFactory().paste()),
                 new Separator(Orientation.VERTICAL),
+                fontFamilies,
                 actionButton(LineAwesomeSolid.BOLD, editor.getActionFactory().decorateText(TextDecoration.builder().fontWeight(FontWeight.BOLD).build())),
                 actionButton(LineAwesomeSolid.ITALIC, editor.getActionFactory().decorateText(TextDecoration.builder().fontPosture(FontPosture.ITALIC).build())),
+                fontForeground,
                 new Separator(Orientation.VERTICAL),
                 editableProp);
 
