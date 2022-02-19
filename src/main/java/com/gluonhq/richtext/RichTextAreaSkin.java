@@ -1,9 +1,9 @@
 package com.gluonhq.richtext;
 
+import com.gluonhq.richtext.viewmodel.*;
 import com.gluonhq.richtext.model.PieceTable;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
-import com.gluonhq.richtext.viewmodel.RichTextAreaViewModel;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.Observable;
@@ -26,32 +26,41 @@ import javafx.util.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static javafx.scene.input.KeyCode.*;
 import static javafx.scene.input.KeyCombination.*;
 import static java.util.Map.entry;
+import static com.gluonhq.richtext.viewmodel.RichTextAreaViewModel.*;
+import static javafx.scene.text.FontPosture.*;
+import static javafx.scene.text.FontWeight.*;
 
 class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
-    private static final Map<KeyCombination, EditorAction> INPUT_MAP = Map.ofEntries(
-        entry( new KeyCodeCombination(RIGHT, SHIFT_ANY, ALT_ANY, CONTROL_ANY, SHORTCUT_ANY), EditorAction.FORWARD),
-        entry( new KeyCodeCombination(LEFT,  SHIFT_ANY, ALT_ANY, CONTROL_ANY, SHORTCUT_ANY), EditorAction.BACK),
-        entry( new KeyCodeCombination(DOWN,  SHIFT_ANY),                                     EditorAction.DOWN),
-        entry( new KeyCodeCombination(UP,    SHIFT_ANY),                                     EditorAction.UP),
-        entry( new KeyCodeCombination(HOME,  SHIFT_ANY),                                     EditorAction.HOME),
-        entry( new KeyCodeCombination(END,   SHIFT_ANY),                                     EditorAction.END),
-        entry( new KeyCodeCombination(BACK_SPACE, SHIFT_ANY),                                EditorAction.BACKSPACE),
-        entry( new KeyCodeCombination(DELETE),                                               EditorAction.DELETE),
-        entry( new KeyCodeCombination(Z, SHORTCUT_DOWN),                                     EditorAction.UNDO),
-        entry( new KeyCodeCombination(Z, SHORTCUT_DOWN, SHIFT_DOWN),                         EditorAction.REDO),
-        entry( new KeyCodeCombination(ENTER, SHIFT_ANY),                                     EditorAction.ENTER),
-        entry( new KeyCodeCombination(C, SHORTCUT_DOWN),                                     EditorAction.COPY),
-        entry( new KeyCodeCombination(X, SHORTCUT_DOWN),                                     EditorAction.CUT),
-        entry( new KeyCodeCombination(V, SHORTCUT_DOWN),                                     EditorAction.PASTE),
-        entry( new KeyCodeCombination(B, SHORTCUT_DOWN),                                     EditorAction.DECORATE_WEIGHT),
-        entry( new KeyCodeCombination(I, SHORTCUT_DOWN),                                     EditorAction.DECORATE_POSTURE)
+    interface ActionBuilder extends Function<KeyEvent, Action>{}
+
+    private static final ActionFactory ACTION_FACTORY = new ActionFactory();
+
+    private static final Map<KeyCombination, ActionBuilder> INPUT_MAP2 = Map.ofEntries(
+        entry( new KeyCodeCombination(RIGHT, SHIFT_ANY, ALT_ANY, CONTROL_ANY, SHORTCUT_ANY), e -> new ActionCaretMove(Direction.FORWARD, e)),
+        entry( new KeyCodeCombination(LEFT,  SHIFT_ANY, ALT_ANY, CONTROL_ANY, SHORTCUT_ANY), e -> new ActionCaretMove(Direction.BACK, e)),
+        entry( new KeyCodeCombination(DOWN,  SHIFT_ANY),                                     e -> new ActionCaretMove(Direction.DOWN, e.isShiftDown(), false, false)),
+        entry( new KeyCodeCombination(UP,    SHIFT_ANY),                                     e -> new ActionCaretMove(Direction.UP, e.isShiftDown(), false, false)),
+        entry( new KeyCodeCombination(HOME,  SHIFT_ANY),                                     e -> new ActionCaretMove(Direction.FORWARD, e.isShiftDown(), false, true)),
+        entry( new KeyCodeCombination(END,   SHIFT_ANY),                                     e -> new ActionCaretMove(Direction.BACK, e.isShiftDown(), false, true)),
+        entry( new KeyCodeCombination(C, SHORTCUT_DOWN),                                     e -> ACTION_FACTORY.copy()),
+        entry( new KeyCodeCombination(X, SHORTCUT_DOWN),                                     e -> ACTION_FACTORY.cut()),
+        entry( new KeyCodeCombination(V, SHORTCUT_DOWN),                                     e -> ACTION_FACTORY.paste()),
+        entry( new KeyCodeCombination(Z, SHORTCUT_DOWN),                                     e -> ACTION_FACTORY.undo()),
+        entry( new KeyCodeCombination(Z, SHORTCUT_DOWN, SHIFT_DOWN),                         e -> ACTION_FACTORY.paste()),
+        entry( new KeyCodeCombination(ENTER, SHIFT_ANY),                                     e -> ACTION_FACTORY.insertText("\n")),
+        entry( new KeyCodeCombination(BACK_SPACE, SHIFT_ANY),                                e -> ACTION_FACTORY.removeText(-1)),
+        entry( new KeyCodeCombination(DELETE),                                               e -> ACTION_FACTORY.removeText(0)),
+        entry( new KeyCodeCombination(B, SHORTCUT_DOWN),                                     e -> ACTION_FACTORY.decorateText(TextDecoration.builder().fontWeight(BOLD).build())),
+        entry( new KeyCodeCombination(I, SHORTCUT_DOWN),                                     e -> ACTION_FACTORY.decorateText(TextDecoration.builder().fontPosture(ITALIC).build()))
     );
+
 
     private final RichTextAreaViewModel viewModel =
         new RichTextAreaViewModel(
@@ -295,19 +304,30 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
                !e.isAltDown();
     }
 
+    public void execute( Action action ) {
+        Objects.requireNonNull(action).apply(viewModel);
+    }
+
+    public static ActionFactory getActionFactory() {
+        return ACTION_FACTORY;
+    }
+
     private void keyPressedListener(KeyEvent e) {
+
         // Find an applicable action and execute it if found
-        for (KeyCombination kc : INPUT_MAP.keySet()) {
+        for (KeyCombination kc : INPUT_MAP2.keySet()) {
             if (kc.match(e)) {
-                viewModel.executeAction(INPUT_MAP.get(kc), e);
+                execute(INPUT_MAP2.get(kc).apply(e));
                 e.consume();
+                return;
             }
         }
+
     }
 
     private void keyTypedListener(KeyEvent e) {
         if ( isCharOnly(e) ) {
-            viewModel.executeAction(EditorAction.INSERT, e);
+            execute( ACTION_FACTORY.insertText(e.getCharacter()));
             e.consume();
         }
     }

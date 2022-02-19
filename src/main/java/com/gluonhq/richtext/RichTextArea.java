@@ -1,14 +1,13 @@
 package com.gluonhq.richtext;
 
 
+import com.gluonhq.richtext.viewmodel.ActionFactory;
 import javafx.beans.property.*;
-import javafx.scene.Node;
 import javafx.scene.control.Control;
 import javafx.scene.control.SkinBase;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.List;
 import java.util.Objects;
 
 public class RichTextArea extends Control {
@@ -62,21 +61,35 @@ public class RichTextArea extends Control {
         return textLengthProperty.get();
     }
 
-    // codecProperty
-    private final ObjectProperty<Codec> codecProperty = new SimpleObjectProperty<>(this, "codec");
-    public final ObjectProperty<Codec> codecProperty() {
-       return codecProperty;
-    }
-    public final Codec getCodec() {
-       return codecProperty.get();
-    }
-    public final void setCodec(Codec value) {
-        codecProperty.set(value);
+//    // codecProperty
+//    private final ObjectProperty<Codec> codecProperty = new SimpleObjectProperty<>(this, "codec");
+//    public final ObjectProperty<Codec> codecProperty() {
+//       return codecProperty;
+//    }
+//    public final Codec getCodec() {
+//       return codecProperty.get();
+//    }
+//    public final void setCodec(Codec value) {
+//        codecProperty.set(value);
+//    }
+//
+//    public interface Codec {
+//        OutputStream decode(List<Node> nodes);
+//        List<Node> encode(InputStream stream);
+//    }
+
+    public void execute( Action action ) {
+        if ( getSkin() instanceof RichTextAreaSkin ) {
+            RichTextAreaSkin rtaSkin  = (RichTextAreaSkin)getSkin();
+            rtaSkin.execute(Objects.requireNonNull(action));
+            requestFocus();
+        }
     }
 
-    public interface Codec {
-        OutputStream decode(List<Node> nodes);
-        List<Node> encode(InputStream stream);
+    public ActionFactory getActionFactory() {
+        return RichTextAreaSkin.getActionFactory();
     }
+
+
 }
 
