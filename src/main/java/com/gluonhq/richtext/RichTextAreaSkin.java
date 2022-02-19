@@ -42,7 +42,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private static final ActionFactory ACTION_FACTORY = new ActionFactory();
 
-    private static final Map<KeyCombination, ActionBuilder> INPUT_MAP2 = Map.ofEntries(
+    private static final Map<KeyCombination, ActionBuilder> INPUT_MAP = Map.ofEntries(
         entry( new KeyCodeCombination(RIGHT, SHIFT_ANY, ALT_ANY, CONTROL_ANY, SHORTCUT_ANY), e -> new ActionCaretMove(Direction.FORWARD, e)),
         entry( new KeyCodeCombination(LEFT,  SHIFT_ANY, ALT_ANY, CONTROL_ANY, SHORTCUT_ANY), e -> new ActionCaretMove(Direction.BACK, e)),
         entry( new KeyCodeCombination(DOWN,  SHIFT_ANY),                                     e -> new ActionCaretMove(Direction.DOWN, e.isShiftDown(), false, false)),
@@ -315,9 +315,9 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private void keyPressedListener(KeyEvent e) {
 
         // Find an applicable action and execute it if found
-        for (KeyCombination kc : INPUT_MAP2.keySet()) {
+        for (KeyCombination kc : INPUT_MAP.keySet()) {
             if (kc.match(e)) {
-                execute(INPUT_MAP2.get(kc).apply(e));
+                execute(INPUT_MAP.get(kc).apply(e));
                 e.consume();
                 return;
             }
