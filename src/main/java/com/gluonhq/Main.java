@@ -1,32 +1,65 @@
 package com.gluonhq;
 
+import com.gluonhq.richtext.Action;
 import com.gluonhq.richtext.RichTextArea;
+import com.gluonhq.richtext.model.TextDecoration;
 import javafx.application.Application;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import org.kordamp.ikonli.Ikon;
+import org.kordamp.ikonli.javafx.FontIcon;
+import org.kordamp.ikonli.lineawesome.LineAwesomeRegular;
+import org.kordamp.ikonli.lineawesome.LineAwesomeSolid;
 
 public class Main extends Application {
 
     private final Label textLengthLabel = new Label();
+    private final RichTextArea editor = new RichTextArea();
 
     @Override
     public void start(Stage stage) {
 
-        RichTextArea editor = new RichTextArea();
         editor.textLengthProperty().addListener( (o, ov, nv) ->
            textLengthLabel.setText( "Text length: " + nv)
         );
 
+        ComboBox<String> fontFamilies = new ComboBox<>();
+        fontFamilies.getItems().setAll(Font.getFamilies());
+        fontFamilies.setOnAction( e -> {
+            String ff = fontFamilies.getSelectionModel().getSelectedItem();
+            Action action = editor.getActionFactory().decorateText(TextDecoration.builder().fontFamily(ff).build());
+            editor.execute(action);
+        } );
+
+        final ColorPicker fontForeground = new ColorPicker();
+        fontForeground.setOnAction(e -> {
+            Action action = editor.getActionFactory().decorateText(TextDecoration.builder().foreground(fontForeground.getValue()).build());
+            editor.execute(action);
+        });
+
         CheckBox editableProp = new CheckBox("Editable");
         editableProp.selectedProperty().bindBidirectional(editor.editableProperty());
-        HBox toolbar = new HBox(editableProp);
-        toolbar.setStyle("-fx-padding: 10");
+
+        ToolBar toolbar = new ToolBar();
+        toolbar.getItems().setAll(
+                actionButton(LineAwesomeSolid.CUT,   editor.getActionFactory().cut()),
+                actionButton(LineAwesomeSolid.COPY,  editor.getActionFactory().copy()),
+                actionButton(LineAwesomeSolid.PASTE, editor.getActionFactory().paste()),
+                new Separator(Orientation.VERTICAL),
+                fontFamilies,
+                actionButton(LineAwesomeSolid.BOLD, editor.getActionFactory().decorateText(TextDecoration.builder().fontWeight(FontWeight.BOLD).build())),
+                actionButton(LineAwesomeSolid.ITALIC, editor.getActionFactory().decorateText(TextDecoration.builder().fontPosture(FontPosture.ITALIC).build())),
+                fontForeground,
+                new Separator(Orientation.VERTICAL),
+                editableProp);
 
         HBox statusBar = new HBox(10);
         statusBar.setAlignment(Pos.CENTER_RIGHT);
@@ -45,7 +78,20 @@ public class Main extends Application {
         editor.requestFocus();
     }
 
+    private Button actionButton(Ikon ikon, Action action) {
+        Button button = new Button();
+        FontIcon icon  = new FontIcon(ikon);
+        icon.setIconSize(20);
+        button.setGraphic( icon );
+        button.setOnAction(e->editor.execute(action));
+        return button;
+    }
+
+
     public static void main(String[] args) {
         launch(args);
     }
 }
+
+
+

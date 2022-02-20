@@ -89,7 +89,7 @@ public class TextDecoration {
             return decoration;
         }
 
-        Builder foreground(Color color) {
+        public Builder foreground(Color color) {
             this.foreground = Objects.requireNonNull(color);
             return this;
         }
@@ -99,7 +99,7 @@ public class TextDecoration {
             return this;
         }
 
-        Builder fontFamily(String fontFamily) {
+        public Builder fontFamily(String fontFamily) {
             this.fontFamily = Objects.requireNonNull(fontFamily);
             return this;
         }

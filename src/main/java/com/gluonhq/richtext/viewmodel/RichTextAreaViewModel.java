@@ -3,6 +3,7 @@ package com.gluonhq.richtext.viewmodel;
 import com.gluonhq.richtext.EditorAction;
 import com.gluonhq.richtext.Selection;
 import com.gluonhq.richtext.Tools;
+import com.gluonhq.richtext.Action;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.undo.CommandManager;
@@ -35,38 +36,6 @@ public class RichTextAreaViewModel {
     private final CommandManager<RichTextAreaViewModel> commandManager = new CommandManager<>(this);
     private BreakIterator wordIterator;
 
-    private final Map<EditorAction, Consumer<KeyEvent>> actionMap = Map.ofEntries(
-
-        entry( EditorAction.FORWARD,             e -> moveCaret(Direction.FORWARD, e.isShiftDown(), isWordSelection(e), isLineSelection(e))),
-        entry( EditorAction.BACK,                e -> moveCaret(Direction.BACK, e.isShiftDown(), isWordSelection(e), isLineSelection(e))),
-        entry( EditorAction.HOME,                e -> moveCaret(Direction.BACK, e.isShiftDown(), false, true)),
-        entry( EditorAction.END,                 e -> moveCaret(Direction.FORWARD, e.isShiftDown(), false, true)),
-        entry( EditorAction.DOWN,                e -> moveCaret(Direction.DOWN, e.isShiftDown(), false, false)),
-        entry( EditorAction.UP,                  e -> moveCaret(Direction.UP, e.isShiftDown(), false, false)),
-
-        entry( EditorAction.INSERT,              e -> commandManager.execute(new InsertTextCmd(e.getCharacter()))),
-        entry( EditorAction.BACKSPACE,           e -> commandManager.execute(new RemoveTextCmd(-1))),
-        entry( EditorAction.DELETE,              e -> commandManager.execute(new RemoveTextCmd(0))),
-        entry( EditorAction.ENTER,               e -> commandManager.execute(new InsertTextCmd("\n"))),
-        entry( EditorAction.DECORATE_WEIGHT,     e -> commandManager.execute(new DecorateTextCmd(TextDecoration.builder().fontWeight(BOLD).build()))),
-        entry( EditorAction.DECORATE_POSTURE,    e -> commandManager.execute(new DecorateTextCmd(TextDecoration.builder().fontPosture(ITALIC).build()))),
-
-        entry( EditorAction.UNDO,                e -> commandManager.undo()),
-        entry( EditorAction.REDO,                e -> commandManager.redo()),
-
-        entry( EditorAction.COPY,                e -> clipboardCopy(false)),
-        entry( EditorAction.CUT,                 e -> clipboardCopy(true)),
-        entry( EditorAction.PASTE,               e -> clipboardPaste())
-
-    );
-
-    private boolean isWordSelection(KeyEvent e) {
-        return Tools.MAC ? e.isAltDown() : e.isControlDown();
-    }
-
-    private boolean isLineSelection(KeyEvent e) {
-        return Tools.MAC && e.isShortcutDown();
-    }
 
     /// PROPERTIES ///////////////////////////////////////////////////////////////
 
@@ -115,7 +84,6 @@ public class RichTextAreaViewModel {
        return textBuffer.getTextLength();
     }
 
-
     public RichTextAreaViewModel(TextBuffer textBuffer, BiFunction<Double, Boolean, Integer> getNextRowPosition) {
         this.textBuffer = Objects.requireNonNull(textBuffer); // TODO convert to property
         this.getNextRowPosition = Objects.requireNonNull(getNextRowPosition);
@@ -127,6 +95,10 @@ public class RichTextAreaViewModel {
 
     public final void removeChangeListener(Consumer<TextBuffer.Event> listener) {
         this.textBuffer.removeChangeListener(listener);
+    }
+
+    CommandManager<RichTextAreaViewModel> getCommandManager() {
+        return commandManager;
     }
 
     void moveCaretPosition(final int charCount) {
@@ -214,10 +186,6 @@ public class RichTextAreaViewModel {
         }
     }
 
-    public void executeAction(EditorAction action, KeyEvent e) {
-        actionMap.get(Objects.requireNonNull(action)).accept(e);
-    }
-
     void moveCaret(Direction direction, boolean changeSelection, boolean wordSelection, boolean lineSelection) {
         Selection prevSelection = getSelection();
         int prevCaretPosition = getCaretPosition();
@@ -265,7 +233,7 @@ public class RichTextAreaViewModel {
         textBuffer.walkFragments(onFragment);
     }
 
-    public void undo() {
+    void undo() {
         this.textBuffer.undo();
     }
 
