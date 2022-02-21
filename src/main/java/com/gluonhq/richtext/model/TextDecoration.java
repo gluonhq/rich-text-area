@@ -58,23 +58,26 @@ public class TextDecoration {
             return this;
         }
         TextDecoration td = new TextDecoration();
-        td.foreground  = foreground;
-        td.background  = background;
-        td.fontFamily  = fontFamily;
-        td.fontSize    = fontSize;
-        td.fontWeight  = fontWeight == decoration.getFontWeight() ? FontWeight.NORMAL : fontWeight;
-        td.fontPosture = fontPosture == decoration.getFontPosture() ? FontPosture.REGULAR : fontPosture;
+        final double normalizedFontSize = this.fontSize < 1.0 ? decoration.getFontSize() : this.fontSize;
+        final FontWeight normalizedWeight = this.fontWeight == decoration.getFontWeight() ? FontWeight.NORMAL : this.fontWeight;
+        final FontPosture normalizedPosture = this.fontPosture == decoration.getFontPosture() ? FontPosture.REGULAR : this.fontPosture;
+        td.foreground  = Objects.requireNonNullElse(foreground, decoration.getForeground());
+        td.background  = Objects.requireNonNullElse(background, decoration.getBackground());
+        td.fontFamily  = Objects.requireNonNullElse(fontFamily, decoration.getFontFamily());
+        td.fontSize    = normalizedFontSize;
+        td.fontWeight  = Objects.requireNonNullElse(normalizedWeight, decoration.getFontWeight());
+        td.fontPosture = Objects.requireNonNullElse(normalizedPosture, decoration.getFontPosture());
         return td;
     }
 
     public static class Builder {
 
-        private Color foreground = Color.BLUE;
-        private Color background = Color.BLUE;
-        private String fontFamily = "Arial";
-        private double fontSize = 17.0;
-        private FontPosture fontPosture = FontPosture.REGULAR;
-        private FontWeight fontWeight = FontWeight.MEDIUM;
+        private Color foreground;
+        private Color background;
+        private String fontFamily;
+        private double fontSize;
+        private FontPosture fontPosture;
+        private FontWeight fontWeight;
 
         private Builder() {}
 
@@ -87,6 +90,16 @@ public class TextDecoration {
             decoration.fontWeight  = this.fontWeight;
             decoration.fontPosture = this.fontPosture;
             return decoration;
+        }
+
+        public Builder presets() {
+            foreground = Color.BLUE;
+            background = Color.BLUE;
+            fontFamily = "Arial";
+            fontSize = 17.0;
+            fontPosture = FontPosture.REGULAR;
+            fontWeight = FontWeight.MEDIUM;
+            return this;
         }
 
         public Builder foreground(Color color) {

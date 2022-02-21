@@ -14,7 +14,7 @@ public final class Piece {
     final TextDecoration decoration;
 
     public Piece(final PieceTable source, final BufferType bufferType, final int start, final int length) {
-        this(source, bufferType, start, length, TextDecoration.builder().build());
+        this(source, bufferType, start, length, null);
     }
 
     public Piece(final PieceTable source, final BufferType bufferType, final int start, final int length, TextDecoration decoration) {
@@ -23,7 +23,7 @@ public final class Piece {
         this.start = start;
         this.length = Math.max(length, 0);
         this.source = Objects.requireNonNull(source);
-        this.decoration = decoration == null ? TextDecoration.builder().build() : decoration;
+        this.decoration = decoration == null ? TextDecoration.builder().presets().build() : decoration;
 
 
         // find all the line stops
