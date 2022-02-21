@@ -81,11 +81,10 @@ public final class Piece {
 
     @Override
     public String toString() {
-        return "Piece{ " + getText() +
-                ", bufferType=" + bufferType +
-                ", start=" + start +
-                ", length=" + length +
-                ", decoration=" + decoration +
-                '}';
+        return "Piece{type=" + (bufferType == BufferType.ORIGINAL ? "O" : "A") +
+                ", [" + start +
+                ", " + length +
+                "], " + decoration +
+                ", \"" + getText().replaceAll("\n", "<n>") + "\"}";
     }
 }
