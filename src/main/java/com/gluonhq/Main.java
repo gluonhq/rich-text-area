@@ -82,6 +82,9 @@ public class Main extends Application {
                 actionButton(LineAwesomeSolid.COPY,  editor.getActionFactory().copy()),
                 actionButton(LineAwesomeSolid.PASTE, editor.getActionFactory().paste()),
                 new Separator(Orientation.VERTICAL),
+                actionButton(LineAwesomeSolid.UNDO,  editor.getActionFactory().undo()),
+                actionButton(LineAwesomeSolid.REDO, editor.getActionFactory().redo()),
+                new Separator(Orientation.VERTICAL),
                 fontFamilies,
                 fontSize,
                 actionButton(LineAwesomeSolid.BOLD, editor.getActionFactory().decorateText(TextDecoration.builder().fontWeight(FontWeight.BOLD).build())),
@@ -99,7 +102,7 @@ public class Main extends Application {
         root.setTop(toolbar);
         root.setBottom(statusBar);
 
-        Scene scene = new Scene( root, 640, 480);
+        Scene scene = new Scene(root, 800, 480);
         stage.setTitle("Rich Text Demo");
         stage.setScene(scene);
         stage.show();
