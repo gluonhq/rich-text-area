@@ -331,6 +331,28 @@ public class PieceTableTests {
     }
 
     @Test
+    @DisplayName("Same block multiple decoration across pieces")
+    public void sameBlockMultiDecorateSpanningMultiplePieces() {
+        PieceTable pt = new PieceTable(originalText + " One Two Three");
+        pt.decorate(14, 27, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
+        pt.decorate(18, 21, TextDecoration.builder().fontPosture(FontPosture.ITALIC).build());
+        Assertions.assertEquals("Original Text One Two Three", pt.getText());
+        Assertions.assertTrue(pt.pieces.stream()
+                .filter(piece -> piece.getText().equals("One "))
+                .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD)
+        );
+        Assertions.assertTrue(pt.pieces.stream()
+                .filter(piece -> piece.getText().equals("Two"))
+                .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD &&
+                        piece.getDecoration().getFontPosture() == FontPosture.ITALIC)
+        );
+        Assertions.assertTrue(pt.pieces.stream()
+                .filter(piece -> piece.getText().equals(" Three"))
+                .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD)
+        );
+    }
+
+    @Test
     @DisplayName("Multi block decorate")
     public void multiBlockDecorate() {
         PieceTable pt = new PieceTable(originalText);
@@ -360,6 +382,30 @@ public class PieceTableTests {
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("Bigger "))
                 .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD)
+        );
+        Assertions.assertTrue(pt.pieces.stream()
+                .filter(piece -> piece.getText().equals("Te"))
+                .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD)
+        );
+    }
+
+    @Test
+    @DisplayName("Multi block multiple decoration across pieces")
+    public void multiBlockMultiDecorateSpanningMultiplePieces() {
+        PieceTable pt = new PieceTable(originalText);
+        String insert = "Bigger ";
+        pt.insert(insert, 9); // 'Original Bigger Text'
+        pt.decorate(6, 18, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
+        pt.decorate(9, 15, TextDecoration.builder().fontPosture(FontPosture.ITALIC).build());
+        Assertions.assertEquals("Original Bigger Text", pt.getText());
+        Assertions.assertTrue(pt.pieces.stream()
+                .filter(piece -> piece.getText().equals("al "))
+                .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD)
+        );
+        Assertions.assertTrue(pt.pieces.stream()
+                .filter(piece -> piece.getText().equals("Bigger"))
+                .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD &&
+                                   piece.getDecoration().getFontPosture() == FontPosture.ITALIC)
         );
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("Te"))

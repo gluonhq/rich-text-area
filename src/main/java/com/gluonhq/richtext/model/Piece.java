@@ -60,7 +60,7 @@ public final class Piece {
     }
 
     Piece copy(int newStart, int newLength) {
-        return copy(newStart, newLength, decoration);
+        return new Piece(source, bufferType, newStart, newLength, decoration);
     }
 
     Piece copy(int newStart, int newLength, TextDecoration textDecoration) {
