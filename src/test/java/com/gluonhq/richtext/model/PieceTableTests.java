@@ -254,9 +254,11 @@ public class PieceTableTests {
         );
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("r"))
-                .anyMatch(piece -> piece.getDecoration().getFontPosture() == FontPosture.ITALIC)
+                .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD &&
+                                   piece.getDecoration().getFontPosture() == FontPosture.ITALIC)
+                
         );
-        Assertions.assertFalse(pt.pieces.stream()
+        Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("r"))
                 .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD)
         );
@@ -317,11 +319,8 @@ public class PieceTableTests {
                 pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("Bigger"))
-                .anyMatch(piece -> piece.getDecoration().getFontPosture() == FontPosture.ITALIC)
-        );
-        Assertions.assertFalse(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals("Bigger"))
-                .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD)
+                .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD &&
+                                   piece.getDecoration().getFontPosture() == FontPosture.ITALIC)
         );
     }
 
