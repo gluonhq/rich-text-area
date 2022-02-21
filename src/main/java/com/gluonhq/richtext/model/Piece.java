@@ -2,6 +2,8 @@ package com.gluonhq.richtext.model;
 
 import java.util.Objects;
 
+import static com.gluonhq.richtext.Tools.getFirstLetter;
+
 public final class Piece {
 
     public enum BufferType {ORIGINAL, ADDITION}
@@ -81,7 +83,7 @@ public final class Piece {
 
     @Override
     public String toString() {
-        return "Piece{type=" + (bufferType == BufferType.ORIGINAL ? "O" : "A") +
+        return "Piece{type=" + getFirstLetter(bufferType.name()) +
                 ", [" + start +
                 ", " + length +
                 "], " + decoration +
