@@ -61,22 +61,23 @@ public class RichTextArea extends Control {
         return textLengthProperty.get();
     }
 
-//    // codecProperty
-//    private final ObjectProperty<Codec> codecProperty = new SimpleObjectProperty<>(this, "codec");
-//    public final ObjectProperty<Codec> codecProperty() {
-//       return codecProperty;
-//    }
-//    public final Codec getCodec() {
-//       return codecProperty.get();
-//    }
-//    public final void setCodec(Codec value) {
-//        codecProperty.set(value);
-//    }
-//
-//    public interface Codec {
-//        OutputStream decode(List<Node> nodes);
-//        List<Node> encode(InputStream stream);
-//    }
+    // undoStackSizeProperty
+    final ReadOnlyIntegerWrapper undoStackSizeProperty = new ReadOnlyIntegerWrapper(this, "undoStackSize");
+    public ReadOnlyIntegerProperty undoStackSizeProperty() {
+        return undoStackSizeProperty.getReadOnlyProperty();
+    }
+    public int getUndoStackSize() {
+        return undoStackSizeProperty.get();
+    }
+
+    // redoStackSizeProperty
+    final ReadOnlyIntegerWrapper redoStackSizeProperty = new ReadOnlyIntegerWrapper(this, "redoStackSize");
+    public ReadOnlyIntegerProperty redoStackSizeProperty() {
+        return redoStackSizeProperty.getReadOnlyProperty();
+    }
+    public int getRedoStackSize() {
+        return redoStackSizeProperty.get();
+    }
 
     public void execute( Action action ) {
         if ( getSkin() instanceof RichTextAreaSkin ) {
@@ -89,7 +90,6 @@ public class RichTextArea extends Control {
     public ActionFactory getActionFactory() {
         return RichTextAreaSkin.getActionFactory();
     }
-
 
 }
 

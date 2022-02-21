@@ -34,6 +34,7 @@ public final class PieceTable extends AbstractTextBuffer {
         pieces.add( piece( Piece.BufferType.ORIGINAL, 0, originalText.length()));
         textLengthProperty.set( pieces.stream().mapToInt(b -> b.length).sum() );
         pieceCharacterIterator = new PieceCharacterIterator(this);
+        updateStackSize();
     }
 
     private Piece piece(Piece.BufferType bufferType, int start, int length ) {
@@ -109,13 +110,13 @@ public final class PieceTable extends AbstractTextBuffer {
      * @param text new text
      */
     @Override
-    public void append( String text ) {
-        commander.execute( new AppendCmd(text));
+    public void append(String text) {
+        commander.execute(new AppendCmd(text), this::updateStackSize);
     }
 
     @Override
     public void decorate(int start, int end, TextDecoration textDecoration) {
-        commander.execute(new TextDecorateCmd(start, end, textDecoration));
+        commander.execute(new TextDecorateCmd(start, end, textDecoration), this::updateStackSize);
     }
 
     /**
@@ -135,8 +136,8 @@ public final class PieceTable extends AbstractTextBuffer {
      * @throws IllegalArgumentException if insertPosition is not valid
      */
     @Override
-    public void insert( final String text, final int insertPosition ) {
-        commander.execute( new InsertCmd(text, insertPosition));
+    public void insert(final String text, final int insertPosition) {
+        commander.execute(new InsertCmd(text, insertPosition), this::updateStackSize);
     }
 
     /**
@@ -146,8 +147,8 @@ public final class PieceTable extends AbstractTextBuffer {
      * @throws IllegalArgumentException if deletePosition is not valid
      */
     @Override
-    public void delete( final int deletePosition, int length ) {
-        commander.execute( new DeleteCmd(deletePosition, length));
+    public void delete(final int deletePosition, int length) {
+        commander.execute(new DeleteCmd(deletePosition, length), this::updateStackSize);
     }
 
     /**
@@ -155,12 +156,18 @@ public final class PieceTable extends AbstractTextBuffer {
      */
     @Override
     public void undo() {
-        commander.undo();
+        commander.undo(this::updateStackSize);
+
     }
 
     @Override
     public void redo() {
-        commander.redo();
+        commander.redo(this::updateStackSize);
+    }
+
+    private void updateStackSize() {
+        undoStackSizeProperty.set(commander.getUndoStackSize());
+        redoStackSizeProperty.set(commander.getRedoStackSize());
     }
 
     /**

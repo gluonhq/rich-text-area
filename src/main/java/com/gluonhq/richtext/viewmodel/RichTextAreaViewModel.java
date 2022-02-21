@@ -84,6 +84,16 @@ public class RichTextAreaViewModel {
        return textBuffer.getTextLength();
     }
 
+    // undoStackSizeProperty
+    public final ReadOnlyIntegerProperty undoStackSizeProperty() {
+        return textBuffer.undoStackSizeProperty();
+    }
+
+    // redoStackSizeProperty
+    public final ReadOnlyIntegerProperty redoStackSizeProperty() {
+        return textBuffer.redoStackSizeProperty();
+    }
+
     public RichTextAreaViewModel(TextBuffer textBuffer, BiFunction<Double, Boolean, Integer> getNextRowPosition) {
         this.textBuffer = Objects.requireNonNull(textBuffer); // TODO convert to property
         this.getNextRowPosition = Objects.requireNonNull(getNextRowPosition);

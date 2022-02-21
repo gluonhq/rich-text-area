@@ -24,6 +24,8 @@ public interface TextBuffer {
 
     void undo();
     void redo();
+    ReadOnlyIntegerProperty undoStackSizeProperty();
+    ReadOnlyIntegerProperty redoStackSizeProperty();
 
     void walkFragments(BiConsumer<String, TextDecoration> onFragment);
 
