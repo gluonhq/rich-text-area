@@ -1,7 +1,9 @@
 package com.gluonhq.richtext.undo;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 import java.util.Objects;
 
 public class CommandManager<T> {
@@ -32,8 +34,11 @@ public class CommandManager<T> {
     public void redo() {
         if (!redoStack.isEmpty()) {
             var cmd = redoStack.pop();
+            List<AbstractCommand<T>> redoStackCopy = new ArrayList<>(redoStack);
+            redoStack.clear();
             cmd.redo(context);
             undoStack.push(cmd);
+            redoStack.addAll(redoStackCopy);
         }
     }
 
