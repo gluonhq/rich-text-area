@@ -6,19 +6,19 @@ import java.util.Objects;
 
 class DecorateTextCmd extends AbstractEditCmd {
 
-    private TextDecoration decoration;
+    private final TextDecoration decoration;
 
     public DecorateTextCmd(TextDecoration decoration) {
         this.decoration = decoration;
     }
 
     @Override
-    public void doRedo( RichTextAreaViewModel viewModel ) {
+    public void doRedo(RichTextAreaViewModel viewModel) {
         Objects.requireNonNull(viewModel).decorate(decoration);
     }
 
     @Override
-    public void doUndo( RichTextAreaViewModel viewModel ) {
-        Objects.requireNonNull(viewModel).undo();
+    public void doUndo(RichTextAreaViewModel viewModel) {
+        Objects.requireNonNull(viewModel).undoDecoration();
     }
 }

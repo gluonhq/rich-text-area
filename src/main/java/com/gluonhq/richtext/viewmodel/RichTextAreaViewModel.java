@@ -145,7 +145,12 @@ public class RichTextAreaViewModel {
     void decorate(TextDecoration decoration) {
         if (getSelection().isDefined()) {
             Selection selection = getSelection();
+            clearSelection();
+            int caretPosition = getCaretPosition();
+            setCaretPosition(-1);
             textBuffer.decorate(selection.getStart(), selection.getEnd(), decoration);
+            setCaretPosition(caretPosition);
+            setSelection(selection);
         }
     }
 
@@ -235,6 +240,16 @@ public class RichTextAreaViewModel {
 
     void undo() {
         this.textBuffer.undo();
+    }
+
+    void undoDecoration() {
+        Selection selection = getSelection();
+        clearSelection();
+        int caretPosition = getCaretPosition();
+        setCaretPosition(-1);
+        undo();
+        setCaretPosition(caretPosition);
+        setSelection(selection);
     }
 
     public void selectCurrentWord() {
