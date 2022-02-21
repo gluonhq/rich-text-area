@@ -133,6 +133,16 @@ public class TextDecoration {
         }
     }
 
+    @Override
+    public String toString() {
+        return "deco{" +
+                "color=" + foreground +
+                ", font['" + fontFamily + '\'' +
+                ", " + fontSize +
+                ", " + (fontPosture == FontPosture.REGULAR ? "R" : "I") +
+                ", " + (fontWeight == FontWeight.NORMAL ? "N" : "B") +
+                "]}";
+    }
 }
 
 

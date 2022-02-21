@@ -208,6 +208,14 @@ public final class PieceTable extends AbstractTextBuffer {
         return index >= start && index < start+length;
     }
 
+    @Override
+    public String toString() {
+        String p = pieces.stream().map(piece -> " - " + piece.toString()).collect(Collectors.joining("\n", "\n", ""));
+        return "PieceTable{\n O=\"" + originalText.replaceAll("\n", "<n>") + "\"" + ",\n A=\"" + additionBuffer.replaceAll("\n", "<n>") + "\"" +
+                ",\n L=" + getTextLength() +
+                ", pieces ->" + p +
+                "\n}";
+    }
 }
 
 class PieceCharacterIterator implements CharacterIterator {

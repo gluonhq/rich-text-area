@@ -231,6 +231,7 @@ public class RichTextAreaViewModel {
     public void walkFragments(BiConsumer<String, TextDecoration> onFragment) {
         textBuffer.resetCharacterIterator();
         textBuffer.walkFragments(onFragment);
+        System.out.println(textBuffer);
     }
 
     void undo() {
