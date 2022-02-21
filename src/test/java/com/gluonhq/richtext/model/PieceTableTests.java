@@ -17,7 +17,7 @@ public class PieceTableTests {
     @DisplayName("Original text is intact")
     public void originalTextIntact() {
         PieceTable pt = new PieceTable(originalText);
-        Assertions.assertEquals( originalText, pt.getText());
+        Assertions.assertEquals(originalText, pt.getText());
     }
 
     @Test
@@ -26,7 +26,7 @@ public class PieceTableTests {
         String appended = " and some";
         PieceTable pt = new PieceTable(originalText);
         pt.append(appended);
-        Assertions.assertEquals( originalText+appended, pt.getText());
+        Assertions.assertEquals(originalText+appended, pt.getText());
     }
 
     @Test
@@ -48,15 +48,15 @@ public class PieceTableTests {
         String insert = " and more";
         PieceTable pt = new PieceTable(originalText);
         pt.insert(insert, 13);
-        Assertions.assertEquals( originalText+insert, pt.getText());
+        Assertions.assertEquals(originalText+insert, pt.getText());
     }
 
     @Test
     @DisplayName("Text insert at wrong position throws exception")
     public void insertAtInvalidPositionFails() {
         PieceTable pt = new PieceTable(originalText);
-        Assertions.assertThrows( IllegalArgumentException.class, () -> pt.insert("xxx", 100));
-        Assertions.assertThrows( IllegalArgumentException.class, () -> pt.insert("xxx", -1));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> pt.insert("xxx", 100));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> pt.insert("xxx", -1));
     }
 
     @Test
@@ -64,7 +64,7 @@ public class PieceTableTests {
     public void sameBlockDelete() {
         String text = "Original Bigger Text";
         PieceTable pt = new PieceTable(text);
-        pt.delete(9,7);
+        pt.delete(9, 7);
         Assertions.assertEquals(
             new StringBuilder(text).delete(9, 9+7).toString(),
             pt.getText()
@@ -78,15 +78,15 @@ public class PieceTableTests {
         String append = "um";
         String insert = "Bigger ";
         pt.append(append); // 'Original Textum'
-        pt.insert( insert, 9); // 'Original Bigger Textum'
-        pt.insert( insert, 9); // 'Original Bigger Bigger Textum'
+        pt.insert(insert, 9); // 'Original Bigger Textum'
+        pt.insert(insert, 9); // 'Original Bigger Bigger Textum'
         pt.delete(9, 14);
         Assertions.assertEquals(
                 new StringBuilder(originalText)
                         .append(append)
                         .insert(9, insert)
                         .insert(9, insert)
-                        .delete( 9, 9+14)
+                        .delete(9, 9+14)
                         .toString(),
             pt.getText());
     }
@@ -99,7 +99,7 @@ public class PieceTableTests {
         PieceTable pt = new PieceTable(text);
         pt.delete(8,107);
         Assertions.assertEquals(
-                new StringBuilder(text).delete(8,8+107).toString(),
+                new StringBuilder(text).delete(8, 8+107).toString(),
                 pt.getText());
     }
 
@@ -107,7 +107,7 @@ public class PieceTableTests {
     @DisplayName("Text delete at wrong position throws exception")
     public void deleteAtInvalidPositionFails() {
         PieceTable pt = new PieceTable(originalText);
-        Assertions.assertThrows( IllegalArgumentException.class, () -> pt.delete(-1, 100));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> pt.delete(-1, 100));
     }
 
 //    @Test
@@ -115,7 +115,7 @@ public class PieceTableTests {
 //    public void lineStopsGeneratedCorrectly() {
 //        PieceTable pt = new PieceTable(originalText);
 //        Piece piece = pt.appendTextInternal(" \n \n \n   ");
-//        Assertions.assertArrayEquals( new int[]{1,3,5}, piece.lineStops );
+//        Assertions.assertArrayEquals(new int[]{1,3,5}, piece.lineStops );
 //    }
 
     @Test
@@ -127,9 +127,9 @@ public class PieceTableTests {
 
         final Consumer<TextBuffer.Event> changeListener = e -> {
 
-            if ( e instanceof TextBuffer.InsertEvent) {
+            if (e instanceof TextBuffer.InsertEvent) {
                 insertCount[0]++;
-            } else if ( e instanceof TextBuffer.DeleteEvent) {
+            } else if (e instanceof TextBuffer.DeleteEvent) {
                 deleteCount[0]++;
             }
         };
@@ -138,10 +138,10 @@ public class PieceTableTests {
         pt.addChangeListener(changeListener::accept);
         pt.addChangeListener(changeListener::accept);
 
-        pt.insert( "XXX", 9);
+        pt.insert("XXX", 9);
         pt.delete(9, 3);
 
-        Assertions.assertTrue( insertCount[0] == 2 && deleteCount[0] == 2 );
+        Assertions.assertTrue(insertCount[0] == 2 && deleteCount[0] == 2);
 
     }
 
@@ -154,22 +154,22 @@ public class PieceTableTests {
 
         final Consumer<TextBuffer.Event> changeListener = e -> {
 
-            if ( e instanceof TextBuffer.InsertEvent) {
+            if (e instanceof TextBuffer.InsertEvent) {
                 insertCount[0]++;
-            } else if ( e instanceof TextBuffer.DeleteEvent) {
+            } else if (e instanceof TextBuffer.DeleteEvent) {
                 deleteCount[0]++;
             }
         };
 
         PieceTable pt = new PieceTable(originalText);
         Consumer<TextBuffer.Event> listener = changeListener::accept;
-        pt.addChangeListener( listener );
-        pt.addChangeListener( changeListener::accept);
-        pt.insert( "XXX", 9);
+        pt.addChangeListener(listener);
+        pt.addChangeListener(changeListener::accept);
+        pt.insert("XXX", 9);
         pt.removeChangeListener(listener);
         pt.delete(9, 3);
 
-        Assertions.assertTrue( insertCount[0] == 2 && deleteCount[0] == 1 );
+        Assertions.assertTrue(insertCount[0] == 2 && deleteCount[0] == 1);
 
     }
 
@@ -177,7 +177,7 @@ public class PieceTableTests {
     @DisplayName("Partial text from one piece")
     public void getPartialTextFromOnePiece() {
         PieceTable pt = new PieceTable(originalText);
-        Assertions.assertEquals( "Text", pt.getText(9,13));
+        Assertions.assertEquals("Text", pt.getText(9,13));
     }
 
     @Test
@@ -191,7 +191,7 @@ public class PieceTableTests {
         System.out.println(pt.getText());
 //        "Even More Original Text"
 
-        Assertions.assertEquals( "More Original", pt.getText(5,18));
+        Assertions.assertEquals("More Original", pt.getText(5,18));
     }
 
     @Test
@@ -199,11 +199,8 @@ public class PieceTableTests {
     public void sameBlockDecorateWeight() {
         String text = "Original Bigger Text";
         PieceTable pt = new PieceTable(text);
-        pt.decorate(1,2, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
-        Assertions.assertEquals(
-                text,
-                pt.getText()
-        );
+        pt.decorate(1, 2, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
+        Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("r"))
                 .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD)
@@ -215,11 +212,8 @@ public class PieceTableTests {
     public void sameBlockDecoratePosture() {
         String text = "Original Bigger Text";
         PieceTable pt = new PieceTable(text);
-        pt.decorate(1,2, TextDecoration.builder().fontPosture(FontPosture.ITALIC).build());
-        Assertions.assertEquals(
-                text,
-                pt.getText()
-        );
+        pt.decorate(1, 2, TextDecoration.builder().fontPosture(FontPosture.ITALIC).build());
+        Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("r"))
                 .anyMatch(piece -> piece.getDecoration().getFontPosture() == FontPosture.ITALIC)
@@ -231,11 +225,8 @@ public class PieceTableTests {
     public void sameBlockDecorateForegroundColor() {
         String text = "Original Bigger Text";
         PieceTable pt = new PieceTable(text);
-        pt.decorate(1,2, TextDecoration.builder().foreground(Color.AQUA).build());
-        Assertions.assertEquals(
-                text,
-                pt.getText()
-        );
+        pt.decorate(1, 2, TextDecoration.builder().foreground(Color.AQUA).build());
+        Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("r"))
                 .anyMatch(piece -> piece.getDecoration().getForeground() == Color.AQUA)
@@ -247,11 +238,8 @@ public class PieceTableTests {
     public void sameBlockDecorateBackgroundColor() {
         String text = "Original Bigger Text";
         PieceTable pt = new PieceTable(text);
-        pt.decorate(1,2, TextDecoration.builder().background(Color.AQUA).build());
-        Assertions.assertEquals(
-                text,
-                pt.getText()
-        );
+        pt.decorate(1, 2, TextDecoration.builder().background(Color.AQUA).build());
+        Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("r"))
                 .anyMatch(piece -> piece.getDecoration().getBackground() == Color.AQUA)
@@ -263,11 +251,8 @@ public class PieceTableTests {
     public void sameBlockDecorateSize() {
         String text = "Original Bigger Text";
         PieceTable pt = new PieceTable(text);
-        pt.decorate(1,2, TextDecoration.builder().fontSize(10).build());
-        Assertions.assertEquals(
-                text,
-                pt.getText()
-        );
+        pt.decorate(1, 2, TextDecoration.builder().fontSize(10).build());
+        Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("r"))
                 .anyMatch(piece -> piece.getDecoration().getFontSize() == 10)
@@ -279,11 +264,8 @@ public class PieceTableTests {
     public void sameBlockDecorateFamily() {
         String text = "Original Bigger Text";
         PieceTable pt = new PieceTable(text);
-        pt.decorate(1,2, TextDecoration.builder().fontFamily("Serif").build());
-        Assertions.assertEquals(
-                text,
-                pt.getText()
-        );
+        pt.decorate(1, 2, TextDecoration.builder().fontFamily("Serif").build());
+        Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("r"))
                 .anyMatch(piece -> piece.getDecoration().getFontFamily().equals("Serif"))
@@ -295,11 +277,8 @@ public class PieceTableTests {
     public void sameBlockDecorateFirstCharacter() {
         String text = "Original Bigger Text";
         PieceTable pt = new PieceTable(text);
-        pt.decorate(0,1, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
-        Assertions.assertEquals(
-                text,
-                pt.getText()
-        );
+        pt.decorate(0, 1, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
+        Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("O"))
                 .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD)
@@ -312,10 +291,7 @@ public class PieceTableTests {
         String text = "Original Bigger Text";
         PieceTable pt = new PieceTable(text);
         pt.decorate(text.length() - 1, text.length(), TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
-        Assertions.assertEquals(
-                text,
-                pt.getText()
-        );
+        Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("t"))
                 .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD)
@@ -327,12 +303,9 @@ public class PieceTableTests {
     public void sameBlockDecorateWeightAndPosture() {
         String text = "Original Bigger Text";
         PieceTable pt = new PieceTable(text);
-        pt.decorate(1,2, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
-        pt.decorate(1,2, TextDecoration.builder().fontPosture(FontPosture.ITALIC).build());
-        Assertions.assertEquals(
-                text,
-                pt.getText()
-        );
+        pt.decorate(1, 2, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
+        pt.decorate(1, 2, TextDecoration.builder().fontPosture(FontPosture.ITALIC).build());
+        Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("r"))
                 .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD &&
@@ -346,12 +319,9 @@ public class PieceTableTests {
     public void sameBlockDecorateWeightAndSize() {
         String text = "Original Bigger Text";
         PieceTable pt = new PieceTable(text);
-        pt.decorate(1,2, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
-        pt.decorate(1,2, TextDecoration.builder().fontSize(20).build());
-        Assertions.assertEquals(
-                text,
-                pt.getText()
-        );
+        pt.decorate(1, 2, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
+        pt.decorate(1, 2, TextDecoration.builder().fontSize(20).build());
+        Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("r"))
                 .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD &&
@@ -365,12 +335,10 @@ public class PieceTableTests {
     public void multiBlockDecorate() {
         PieceTable pt = new PieceTable(originalText);
         String insert = "Bigger ";
-        pt.insert( insert, 9); // 'Original Bigger Text'
-        pt.insert( insert, 9); // 'Original Bigger Bigger Text'
+        pt.insert(insert, 9); // 'Original Bigger Text'
+        pt.insert(insert, 9); // 'Original Bigger Bigger Text'
         pt.decorate(9, 15, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
-        Assertions.assertEquals(
-                "Original Bigger Bigger Text",
-                pt.getText());
+        Assertions.assertEquals("Original Bigger Bigger Text", pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("Bigger"))
                 .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD)
@@ -382,11 +350,9 @@ public class PieceTableTests {
     public void multiBlockDecorateSpanningMultiplePieces() {
         PieceTable pt = new PieceTable(originalText);
         String insert = "Bigger ";
-        pt.insert( insert, 9); // 'Original Bigger Text'
+        pt.insert(insert, 9); // 'Original Bigger Text'
         pt.decorate(6, 18, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
-        Assertions.assertEquals(
-                "Original Bigger Text",
-                pt.getText());
+        Assertions.assertEquals("Original Bigger Text", pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("al "))
                 .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD)
@@ -406,13 +372,11 @@ public class PieceTableTests {
     public void multiBlockDecorateWeightAndPosture() {
         PieceTable pt = new PieceTable(originalText);
         String insert = "Bigger ";
-        pt.insert( insert, 9); // 'Original Bigger Text'
-        pt.insert( insert, 9); // 'Original Bigger Bigger Text'
+        pt.insert(insert, 9); // 'Original Bigger Text'
+        pt.insert(insert, 9); // 'Original Bigger Bigger Text'
         pt.decorate(9, 15, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
         pt.decorate(9, 15, TextDecoration.builder().fontPosture(FontPosture.ITALIC).build());
-        Assertions.assertEquals(
-                "Original Bigger Bigger Text",
-                pt.getText());
+        Assertions.assertEquals("Original Bigger Bigger Text", pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("Bigger"))
                 .anyMatch(piece -> piece.getDecoration().getFontWeight() == FontWeight.BOLD &&
@@ -425,13 +389,11 @@ public class PieceTableTests {
     public void multiBlockDecorateSizeAndColor() {
         PieceTable pt = new PieceTable(originalText);
         String insert = "Bigger ";
-        pt.insert( insert, 9); // 'Original Bigger Text'
-        pt.insert( insert, 9); // 'Original Bigger Bigger Text'
+        pt.insert(insert, 9); // 'Original Bigger Text'
+        pt.insert(insert, 9); // 'Original Bigger Bigger Text'
         pt.decorate(9, 15, TextDecoration.builder().fontSize(20).build());
         pt.decorate(9, 15, TextDecoration.builder().foreground(Color.AQUA).build());
-        Assertions.assertEquals(
-                "Original Bigger Bigger Text",
-                pt.getText());
+        Assertions.assertEquals("Original Bigger Bigger Text", pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("Bigger"))
                 .anyMatch(piece -> piece.getDecoration().getFontSize() == 20 &&
