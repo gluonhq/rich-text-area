@@ -14,10 +14,13 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 import org.kordamp.ikonli.Ikon;
 import org.kordamp.ikonli.javafx.FontIcon;
-import org.kordamp.ikonli.lineawesome.LineAwesomeRegular;
 import org.kordamp.ikonli.lineawesome.LineAwesomeSolid;
+
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Main extends Application {
 
@@ -33,11 +36,36 @@ public class Main extends Application {
 
         ComboBox<String> fontFamilies = new ComboBox<>();
         fontFamilies.getItems().setAll(Font.getFamilies());
-        fontFamilies.setOnAction( e -> {
+        fontFamilies.setValue("Arial");
+        fontFamilies.setOnAction(e -> {
             String ff = fontFamilies.getSelectionModel().getSelectedItem();
             Action action = editor.getActionFactory().decorateText(TextDecoration.builder().fontFamily(ff).build());
             editor.execute(action);
-        } );
+        });
+
+        final ComboBox<Double> fontSize = new ComboBox<>();
+        fontSize.setEditable(true);
+        fontSize.setPrefWidth(60);
+        fontSize.getItems().addAll(IntStream.range(1, 100)
+                .filter(i -> i % 2 == 0 || i < 10)
+                .asDoubleStream().boxed().collect(Collectors.toList()));
+        fontSize.setValue(17.0);
+        fontSize.setOnAction(e -> {
+            final Double fontSizeValue = fontSize.getValue();
+            final Action action = editor.getActionFactory().decorateText(TextDecoration.builder().fontSize(fontSizeValue).build());
+            editor.execute(action);
+        });
+        fontSize.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(Double aDouble) {
+                return Integer.toString(aDouble.intValue());
+            }
+
+            @Override
+            public Double fromString(String s) {
+                return Double.parseDouble(s);
+            }
+        });
 
         final ColorPicker fontForeground = new ColorPicker();
         fontForeground.setOnAction(e -> {
@@ -55,6 +83,7 @@ public class Main extends Application {
                 actionButton(LineAwesomeSolid.PASTE, editor.getActionFactory().paste()),
                 new Separator(Orientation.VERTICAL),
                 fontFamilies,
+                fontSize,
                 actionButton(LineAwesomeSolid.BOLD, editor.getActionFactory().decorateText(TextDecoration.builder().fontWeight(FontWeight.BOLD).build())),
                 actionButton(LineAwesomeSolid.ITALIC, editor.getActionFactory().decorateText(TextDecoration.builder().fontPosture(FontPosture.ITALIC).build())),
                 fontForeground,

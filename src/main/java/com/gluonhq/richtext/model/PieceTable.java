@@ -588,17 +588,17 @@ class TextDecorateCmd extends AbstractCommand<PieceTable> {
                     if (offset > 0) {
                         additions.add(piece.pieceBefore(offset));
                     }
-                    additions.add(piece.copy(piece.start + offset, length, decoration));
+                    additions.add(piece.copy(piece.start + offset, length, decoration.normalize(piece.getDecoration())));
                     if (end < textPosition + piece.length) {
                         additions.add(piece.pieceFrom(end - textPosition));
                     }
                     removals.add(piece);
                 }  else if (textPosition + piece.length <= end) { // entire piece is in selection
-                    additions.add(piece.copy(piece.start, piece.length, decoration));
+                    additions.add(piece.copy(piece.start, piece.length, decoration.normalize(piece.getDecoration())));
                     removals.add(piece);
                 } else if (textPosition < end) {
                     int offset = end - textPosition;
-                    additions.add(piece.copy(piece.start, offset, decoration));
+                    additions.add(piece.copy(piece.start, offset, decoration.normalize(piece.getDecoration())));
                     additions.add(piece.pieceFrom(offset));
                     removals.add(piece);
                 }
