@@ -23,7 +23,7 @@ public final class Piece {
         this.start = start;
         this.length = Math.max(length, 0);
         this.source = Objects.requireNonNull(source);
-        this.decoration = decoration == null ? TextDecoration.builder().buildDefault() : decoration;
+        this.decoration = decoration == null ? TextDecoration.builder().presets().build() : decoration;
 
 
         // find all the line stops

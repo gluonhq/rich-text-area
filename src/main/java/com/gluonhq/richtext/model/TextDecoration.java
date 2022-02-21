@@ -92,14 +92,14 @@ public class TextDecoration {
             return decoration;
         }
 
-        public TextDecoration buildDefault() {
+        public Builder presets() {
             foreground = Color.BLUE;
             background = Color.BLUE;
             fontFamily = "Arial";
             fontSize = 17.0;
             fontPosture = FontPosture.REGULAR;
             fontWeight = FontWeight.MEDIUM;
-            return build();
+            return this;
         }
 
         public Builder foreground(Color color) {
