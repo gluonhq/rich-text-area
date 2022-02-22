@@ -30,4 +30,11 @@ public class Tools {
         if (value > max) return max;
         return value;
     }
+
+    public static String getFirstLetter(String name) {
+        if (name == null || name.isEmpty()) {
+            return "-";
+        }
+        return name.substring(0, 1);
+    }
 }
