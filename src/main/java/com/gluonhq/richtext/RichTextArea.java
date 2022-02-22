@@ -2,11 +2,16 @@ package com.gluonhq.richtext;
 
 
 import com.gluonhq.richtext.viewmodel.ActionFactory;
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.ReadOnlyIntegerProperty;
+import javafx.beans.property.ReadOnlyIntegerWrapper;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.control.Control;
 import javafx.scene.control.SkinBase;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 
 import java.util.Objects;
 
@@ -62,21 +67,21 @@ public class RichTextArea extends Control {
     }
 
     // undoStackSizeProperty
-    final ReadOnlyIntegerWrapper undoStackSizeProperty = new ReadOnlyIntegerWrapper(this, "undoStackSize");
-    public ReadOnlyIntegerProperty undoStackSizeProperty() {
-        return undoStackSizeProperty.getReadOnlyProperty();
+    final ReadOnlyBooleanWrapper undoStackSizeEmptyProperty = new ReadOnlyBooleanWrapper(this, "undoStackEmpty");
+    public ReadOnlyBooleanProperty undoStackEmptyProperty() {
+        return undoStackSizeEmptyProperty.getReadOnlyProperty();
     }
-    public int getUndoStackSize() {
-        return undoStackSizeProperty.get();
+    public boolean isUndoStackEmpty() {
+        return undoStackSizeEmptyProperty.get();
     }
 
     // redoStackSizeProperty
-    final ReadOnlyIntegerWrapper redoStackSizeProperty = new ReadOnlyIntegerWrapper(this, "redoStackSize");
-    public ReadOnlyIntegerProperty redoStackSizeProperty() {
-        return redoStackSizeProperty.getReadOnlyProperty();
+    final ReadOnlyBooleanWrapper redoStackEmptyProperty = new ReadOnlyBooleanWrapper(this, "redoStackEmpty");
+    public ReadOnlyBooleanProperty redoStackEmptyProperty() {
+        return redoStackEmptyProperty.getReadOnlyProperty();
     }
-    public int getRedoStackSize() {
-        return redoStackSizeProperty.get();
+    public boolean isRedoStackEmpty() {
+        return redoStackEmptyProperty.get();
     }
 
     public void execute( Action action ) {

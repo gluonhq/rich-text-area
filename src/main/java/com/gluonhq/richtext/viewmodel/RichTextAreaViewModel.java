@@ -7,6 +7,8 @@ import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.undo.CommandManager;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -29,7 +31,7 @@ public class RichTextAreaViewModel {
     public enum Direction { FORWARD, BACK, UP, DOWN }
 
     private final TextBuffer textBuffer;
-    private final CommandManager<RichTextAreaViewModel> commandManager = new CommandManager<>(this);
+    private final CommandManager<RichTextAreaViewModel> commandManager = new CommandManager<>(this, this::updateStackSize);
     private BreakIterator wordIterator;
 
 
@@ -81,13 +83,21 @@ public class RichTextAreaViewModel {
     }
 
     // undoStackSizeProperty
-    public final ReadOnlyIntegerProperty undoStackSizeProperty() {
-        return textBuffer.undoStackSizeProperty();
+    final ReadOnlyBooleanWrapper undoStackEmptyProperty = new ReadOnlyBooleanWrapper(this, "undoStackEmpty", true);
+    public ReadOnlyBooleanProperty undoStackEmptyProperty() {
+        return undoStackEmptyProperty.getReadOnlyProperty();
+    }
+    public boolean isUndoStackEmpty() {
+        return undoStackEmptyProperty.get();
     }
 
     // redoStackSizeProperty
-    public final ReadOnlyIntegerProperty redoStackSizeProperty() {
-        return textBuffer.redoStackSizeProperty();
+    final ReadOnlyBooleanWrapper redoStackEmptyProperty = new ReadOnlyBooleanWrapper(this, "redoStackEmpty", true);
+    public ReadOnlyBooleanProperty redoStackEmptyProperty() {
+        return redoStackEmptyProperty.getReadOnlyProperty();
+    }
+    public boolean isRedoStackEmpty() {
+        return redoStackEmptyProperty.get();
     }
 
     public RichTextAreaViewModel(TextBuffer textBuffer, BiFunction<Double, Boolean, Integer> getNextRowPosition) {
@@ -322,5 +332,10 @@ public class RichTextAreaViewModel {
     private void lineEnd() {
         int pos = getNextRowPosition.apply(Double.MAX_VALUE, false);
         setCaretPosition(pos);
+    }
+
+    private void updateStackSize() {
+        undoStackEmptyProperty.set(commandManager.isUndoStackEmpty());
+        redoStackEmptyProperty.set(commandManager.isRedoStackEmpty());
     }
 }

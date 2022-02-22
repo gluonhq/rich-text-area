@@ -9,16 +9,18 @@ public class CommandManager<T> {
     final Deque<AbstractCommand<T>> undoStack = new ArrayDeque<>();
     final Deque<AbstractCommand<T>> redoStack = new ArrayDeque<>();
     final T context;
+    private final Runnable runnable;
 
     public CommandManager(T context) {
+        this(context, null);
+    }
+
+    public CommandManager(T context, Runnable runnable) {
         this.context = context;
+        this.runnable = runnable;
     }
 
     public void execute(AbstractCommand<T> cmd) {
-        execute(cmd, null);
-    }
-
-    public void execute(AbstractCommand<T> cmd, Runnable runnable) {
         Objects.requireNonNull(cmd).redo(context);
         undoStack.push(cmd);
         redoStack.clear();
@@ -28,10 +30,6 @@ public class CommandManager<T> {
     }
 
     public void undo() {
-        undo(null);
-    }
-
-    public void undo(Runnable runnable) {
         if (!undoStack.isEmpty()) {
             var cmd = undoStack.pop();
             cmd.undo(context);
@@ -43,10 +41,6 @@ public class CommandManager<T> {
     }
 
     public void redo() {
-        redo(null);
-    }
-
-    public void redo(Runnable runnable) {
         if (!redoStack.isEmpty()) {
             var cmd = redoStack.pop();
             cmd.redo(context);
@@ -57,12 +51,12 @@ public class CommandManager<T> {
         }
     }
 
-    public int getUndoStackSize() {
-        return undoStack.size();
+    public boolean isUndoStackEmpty() {
+        return undoStack.isEmpty();
     }
 
-    public int getRedoStackSize() {
-        return redoStack.size();
+    public boolean isRedoStackEmpty() {
+        return redoStack.isEmpty();
     }
 
 }

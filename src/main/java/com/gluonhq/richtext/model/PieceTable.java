@@ -34,7 +34,6 @@ public final class PieceTable extends AbstractTextBuffer {
         pieces.add( piece( Piece.BufferType.ORIGINAL, 0, originalText.length()));
         textLengthProperty.set( pieces.stream().mapToInt(b -> b.length).sum() );
         pieceCharacterIterator = new PieceCharacterIterator(this);
-        updateStackSize();
     }
 
     private Piece piece(Piece.BufferType bufferType, int start, int length ) {
@@ -111,12 +110,12 @@ public final class PieceTable extends AbstractTextBuffer {
      */
     @Override
     public void append(String text) {
-        commander.execute(new AppendCmd(text), this::updateStackSize);
+        commander.execute(new AppendCmd(text));
     }
 
     @Override
     public void decorate(int start, int end, TextDecoration textDecoration) {
-        commander.execute(new TextDecorateCmd(start, end, textDecoration), this::updateStackSize);
+        commander.execute(new TextDecorateCmd(start, end, textDecoration));
     }
 
     /**
@@ -137,7 +136,7 @@ public final class PieceTable extends AbstractTextBuffer {
      */
     @Override
     public void insert(final String text, final int insertPosition) {
-        commander.execute(new InsertCmd(text, insertPosition), this::updateStackSize);
+        commander.execute(new InsertCmd(text, insertPosition));
     }
 
     /**
@@ -148,7 +147,7 @@ public final class PieceTable extends AbstractTextBuffer {
      */
     @Override
     public void delete(final int deletePosition, int length) {
-        commander.execute(new DeleteCmd(deletePosition, length), this::updateStackSize);
+        commander.execute(new DeleteCmd(deletePosition, length));
     }
 
     /**
@@ -156,18 +155,13 @@ public final class PieceTable extends AbstractTextBuffer {
      */
     @Override
     public void undo() {
-        commander.undo(this::updateStackSize);
+        commander.undo();
 
     }
 
     @Override
     public void redo() {
-        commander.redo(this::updateStackSize);
-    }
-
-    private void updateStackSize() {
-        undoStackSizeProperty.set(commander.getUndoStackSize());
-        redoStackSizeProperty.set(commander.getRedoStackSize());
+        commander.redo();
     }
 
     /**

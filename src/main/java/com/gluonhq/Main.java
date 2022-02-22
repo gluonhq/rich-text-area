@@ -92,9 +92,9 @@ public class Main extends Application {
         editableProp.selectedProperty().bindBidirectional(editor.editableProperty());
 
         Button undoButton = actionButton(LineAwesomeSolid.UNDO, editor.getActionFactory().undo());
-        undoButton.disableProperty().bind(editor.undoStackSizeProperty().isEqualTo(0));
+        undoButton.disableProperty().bind(editor.undoStackEmptyProperty());
         Button redoButton = actionButton(LineAwesomeSolid.REDO, editor.getActionFactory().redo());
-        redoButton.disableProperty().bind(editor.redoStackSizeProperty().isEqualTo(0));
+        redoButton.disableProperty().bind(editor.redoStackEmptyProperty());
 
         ToolBar toolbar = new ToolBar();
         toolbar.getItems().setAll(
