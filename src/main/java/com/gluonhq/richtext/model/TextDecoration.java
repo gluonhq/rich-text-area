@@ -94,7 +94,7 @@ public class TextDecoration {
 
         public Builder presets() {
             foreground = Color.BLUE;
-            background = Color.BLUE;
+            background = Color.TRANSPARENT;
             fontFamily = "Arial";
             fontSize = 17.0;
             fontPosture = FontPosture.REGULAR;
@@ -107,7 +107,7 @@ public class TextDecoration {
             return this;
         }
 
-        Builder background(Color color) {
+        public Builder background(Color color) {
             this.background = Objects.requireNonNull(color);
             return this;
         }
@@ -136,7 +136,8 @@ public class TextDecoration {
     @Override
     public String toString() {
         return "deco{" +
-                "color=" + foreground +
+                "fcolor=" + foreground +
+                ", bcolor=" + background +
                 ", font['" + fontFamily + '\'' +
                 ", " + fontSize +
                 ", " + (fontPosture == FontPosture.REGULAR ? "R" : "I") +

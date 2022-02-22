@@ -1,9 +1,11 @@
 package com.gluonhq.richtext;
 
-import com.gluonhq.richtext.viewmodel.*;
 import com.gluonhq.richtext.model.PieceTable;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
+import com.gluonhq.richtext.viewmodel.ActionCaretMove;
+import com.gluonhq.richtext.viewmodel.ActionFactory;
+import com.gluonhq.richtext.viewmodel.RichTextAreaViewModel;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.Observable;
@@ -16,6 +18,7 @@ import javafx.scene.Group;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SkinBase;
 import javafx.scene.input.*;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
 import javafx.scene.text.Font;
 import javafx.scene.text.HitInfo;
@@ -25,16 +28,17 @@ import javafx.util.Duration;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.gluonhq.richtext.viewmodel.RichTextAreaViewModel.Direction;
+import static java.util.Map.entry;
 import static javafx.scene.input.KeyCode.*;
 import static javafx.scene.input.KeyCombination.*;
-import static java.util.Map.entry;
-import static com.gluonhq.richtext.viewmodel.RichTextAreaViewModel.*;
-import static javafx.scene.text.FontPosture.*;
-import static javafx.scene.text.FontWeight.*;
+import static javafx.scene.text.FontPosture.ITALIC;
+import static javafx.scene.text.FontWeight.BOLD;
 
 class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
@@ -72,6 +76,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final TextFlow textFlow = new TextFlow();
     private final Path caretShape = new Path();
     private final Path selectionShape = new Path();
+    private final Group layers;
 
     private final Timeline caretTimeline = new Timeline(
         new KeyFrame(Duration.ZERO        , e -> setCaretVisibility(false)),
@@ -97,7 +102,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
         selectionShape.getStyleClass().setAll("selection");
 
-        Group layers = new Group(selectionShape, caretShape, textFlow);
+        layers = new Group(selectionShape, caretShape, textFlow);
         caretTimeline.setCycleCount(Timeline.INDEFINITE);
 
         scrollPane = new ScrollPane(layers);
@@ -129,10 +134,10 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         });
 
         //TODO remove listener on viewModel change
-        viewModel.selectionProperty().addListener( (o, os, selection) -> {
+        viewModel.selectionProperty().addListener((o, os, selection) -> {
             selectionShape.getElements().clear();
             if (selection.isDefined()) {
-                selectionShape.getElements().setAll(textFlow.rangeShape( selection.getStart(), selection.getEnd() ));
+                selectionShape.getElements().setAll(textFlow.rangeShape(selection.getStart(), selection.getEnd()));
             }
         });
 
@@ -156,17 +161,47 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     /// PRIVATE METHODS /////////////////////////////////////////////////////////
 
-    //TODO Need more optimal way of rendering text fragments.
+    // TODO Need more optimal way of rendering text fragments.
     //  For now rebuilding the whole text flow
     private void refreshTextFlow() {
         fontCacheEvictionTimer.pause();
         try {
             var fragments = new ArrayList<Text>();
-            viewModel.walkFragments((text, decoration) -> fragments.add(buildText(text, decoration)));
+            var backgroundIndexRanges = new ArrayList<IndexRangeColor>();
+            var length = new AtomicInteger();
+            viewModel.walkFragments((text, decoration) -> {
+                final Text textNode = buildText(text, decoration);
+                fragments.add(textNode);
+
+                if (decoration.getBackground() != Color.TRANSPARENT) {
+                    final IndexRangeColor indexRangeColor = new IndexRangeColor(
+                            length.get(),
+                            length.get() + textNode.getText().length(),
+                            decoration.getBackground()
+                    );
+                    backgroundIndexRanges.add(indexRangeColor);
+                }
+                length.addAndGet(textNode.getText().length());
+            });
             textFlow.getChildren().setAll(fragments);
+            addBackgroundPathsToLayers(backgroundIndexRanges);
         } finally {
             fontCacheEvictionTimer.start();
         }
+    }
+
+    private void addBackgroundPathsToLayers(List<IndexRangeColor> backgroundIndexRanges) {
+        if (layers.getChildren().size() > 3) {
+            layers.getChildren().removeIf(node -> node.getStyleClass().contains("background"));
+        }
+        backgroundIndexRanges.forEach(indexRangeBackground -> {
+            final Path path = new Path(textFlow.rangeShape(indexRangeBackground.getStart(), indexRangeBackground.getEnd()));
+            path.setStrokeWidth(0);
+            path.setFill(indexRangeBackground.getColor());
+            path.getStyleClass().add("background");
+            // New background paths should be inserted before 'selectionShape' but after existing background paths
+            layers.getChildren().add(layers.getChildren().size() - 3, path);
+        });
     }
 
     private Text buildText(String content, TextDecoration decoration ) {
@@ -329,6 +364,31 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         if ( isCharOnly(e) ) {
             execute( ACTION_FACTORY.insertText(e.getCharacter()));
             e.consume();
+        }
+    }
+
+    private static class IndexRangeColor {
+
+        private final int start;
+        private final int end;
+        private final Color color;
+
+        public IndexRangeColor(int start, int end, Color color) {
+            this.start = start;
+            this.end = end;
+            this.color = color;
+        }
+
+        public int getStart() {
+            return start;
+        }
+
+        public int getEnd() {
+            return end;
+        }
+
+        public Color getColor() {
+            return color;
         }
     }
 
