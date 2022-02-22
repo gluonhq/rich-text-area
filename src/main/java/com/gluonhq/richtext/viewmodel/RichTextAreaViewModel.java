@@ -1,9 +1,7 @@
 package com.gluonhq.richtext.viewmodel;
 
-import com.gluonhq.richtext.EditorAction;
 import com.gluonhq.richtext.Selection;
 import com.gluonhq.richtext.Tools;
-import com.gluonhq.richtext.Action;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.undo.CommandManager;
@@ -14,21 +12,19 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.KeyEvent;
 
 import java.text.BreakIterator;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-
-import static java.util.Map.entry;
-import static javafx.scene.text.FontPosture.ITALIC;
-import static javafx.scene.text.FontWeight.BOLD;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class RichTextAreaViewModel {
+
+    public static final Logger LOGGER = Logger.getLogger(RichTextAreaViewModel.class.getName());
 
     public enum Direction { FORWARD, BACK, UP, DOWN }
 
@@ -236,7 +232,7 @@ public class RichTextAreaViewModel {
     public void walkFragments(BiConsumer<String, TextDecoration> onFragment) {
         textBuffer.resetCharacterIterator();
         textBuffer.walkFragments(onFragment);
-        System.out.println(textBuffer);
+        LOGGER.log(Level.FINE, textBuffer.toString());
     }
 
     void undo() {
