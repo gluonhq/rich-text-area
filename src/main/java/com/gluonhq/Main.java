@@ -19,10 +19,25 @@ import org.kordamp.ikonli.Ikon;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.lineawesome.LineAwesomeSolid;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Main extends Application {
+
+    static {
+        try (InputStream resourceAsStream = Main.class.getResourceAsStream("/logging.properties")) {
+            if (resourceAsStream != null) {
+                LogManager.getLogManager().readConfiguration(resourceAsStream);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, "Error opening logging.properties file", ex);
+        }
+    }
 
     private final Label textLengthLabel = new Label();
     private final RichTextArea editor = new RichTextArea();

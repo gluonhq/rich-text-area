@@ -6,6 +6,8 @@ import javafx.scene.text.FontWeight;
 
 import java.util.Objects;
 
+import static com.gluonhq.richtext.Tools.getFirstLetter;
+
 public class TextDecoration {
 
     private Color foreground;
@@ -98,7 +100,7 @@ public class TextDecoration {
             fontFamily = "Arial";
             fontSize = 17.0;
             fontPosture = FontPosture.REGULAR;
-            fontWeight = FontWeight.MEDIUM;
+            fontWeight = FontWeight.NORMAL;
             return this;
         }
 
@@ -139,8 +141,8 @@ public class TextDecoration {
                 "color=" + foreground +
                 ", font['" + fontFamily + '\'' +
                 ", " + fontSize +
-                ", " + (fontPosture == FontPosture.REGULAR ? "R" : "I") +
-                ", " + (fontWeight == FontWeight.NORMAL ? "N" : "B") +
+                ", " + getFirstLetter(fontPosture.name()) +
+                ", " + getFirstLetter(fontWeight.name()) +
                 "]}";
     }
 }
