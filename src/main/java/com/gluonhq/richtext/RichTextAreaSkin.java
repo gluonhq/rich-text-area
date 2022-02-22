@@ -192,16 +192,19 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private void addBackgroundPathsToLayers(List<IndexRangeColor> backgroundIndexRanges) {
         if (layers.getChildren().size() > 3) {
-            layers.getChildren().removeIf(node -> node.getStyleClass().contains("background"));
+            layers.getChildren().removeIf(node -> node.getId() != null && node.getId().equals("background"));
         }
-        backgroundIndexRanges.forEach(indexRangeBackground -> {
-            final Path path = new Path(textFlow.rangeShape(indexRangeBackground.getStart(), indexRangeBackground.getEnd()));
-            path.setStrokeWidth(0);
-            path.setFill(indexRangeBackground.getColor());
-            path.getStyleClass().add("background");
-            // New background paths should be inserted before 'selectionShape' but after existing background paths
-            layers.getChildren().add(layers.getChildren().size() - 3, path);
-        });
+        final List<Path> backgroundPaths = backgroundIndexRanges.stream()
+                .map(indexRangeBackground -> {
+                    final Path path = new Path(textFlow.rangeShape(indexRangeBackground.getStart(), indexRangeBackground.getEnd()));
+                    path.setStrokeWidth(0);
+                    path.setFill(indexRangeBackground.getColor());
+                    path.setId("background");
+                    return path;
+                })
+                .collect(Collectors.toList());
+        // New background paths should be inserted before 'selectionShape' but after existing background paths
+        layers.getChildren().addAll(layers.getChildren().size() - 3, backgroundPaths);
     }
 
     private Text buildText(String content, TextDecoration decoration ) {
