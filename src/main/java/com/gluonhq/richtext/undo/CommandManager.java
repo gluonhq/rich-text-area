@@ -24,9 +24,7 @@ public class CommandManager<T> {
         Objects.requireNonNull(cmd).redo(context);
         undoStack.push(cmd);
         redoStack.clear();
-        if (runnable != null) {
-            runnable.run();
-        }
+        end();
     }
 
     public void undo() {
@@ -34,9 +32,7 @@ public class CommandManager<T> {
             var cmd = undoStack.pop();
             cmd.undo(context);
             redoStack.push(cmd);
-            if (runnable != null) {
-                runnable.run();
-            }
+            end();
         }
     }
 
@@ -45,9 +41,7 @@ public class CommandManager<T> {
             var cmd = redoStack.pop();
             cmd.redo(context);
             undoStack.push(cmd);
-            if (runnable != null) {
-                runnable.run();
-            }
+            end();
         }
     }
 
@@ -59,4 +53,9 @@ public class CommandManager<T> {
         return redoStack.isEmpty();
     }
 
+    private void end() {
+        if (runnable != null) {
+            runnable.run();
+        }
+    }
 }

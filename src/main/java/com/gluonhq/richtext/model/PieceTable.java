@@ -156,7 +156,6 @@ public final class PieceTable extends AbstractTextBuffer {
     @Override
     public void undo() {
         commander.undo();
-
     }
 
     @Override

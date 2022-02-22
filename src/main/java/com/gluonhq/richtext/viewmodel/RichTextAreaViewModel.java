@@ -31,7 +31,7 @@ public class RichTextAreaViewModel {
     public enum Direction { FORWARD, BACK, UP, DOWN }
 
     private final TextBuffer textBuffer;
-    private final CommandManager<RichTextAreaViewModel> commandManager = new CommandManager<>(this, this::updateStackSize);
+    private final CommandManager<RichTextAreaViewModel> commandManager = new CommandManager<>(this, this::updateProperties);
     private BreakIterator wordIterator;
 
 
@@ -334,7 +334,7 @@ public class RichTextAreaViewModel {
         setCaretPosition(pos);
     }
 
-    private void updateStackSize() {
+    private void updateProperties() {
         undoStackEmptyProperty.set(commandManager.isUndoStackEmpty());
         redoStackEmptyProperty.set(commandManager.isRedoStackEmpty());
     }

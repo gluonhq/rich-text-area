@@ -114,7 +114,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         control.editableProperty().addListener(this::editableChangeListener);
         editableChangeListener(null); // sets up all related listeners
         control.textLengthProperty.bind(viewModel.textLengthProperty());
-        control.undoStackSizeEmptyProperty.bind(viewModel.undoStackEmptyProperty());
+        control.undoStackEmptyProperty.bind(viewModel.undoStackEmptyProperty());
         control.redoStackEmptyProperty.bind(viewModel.redoStackEmptyProperty());
 
         //TODO remove listener on viewModel change

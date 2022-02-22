@@ -67,12 +67,12 @@ public class RichTextArea extends Control {
     }
 
     // undoStackSizeProperty
-    final ReadOnlyBooleanWrapper undoStackSizeEmptyProperty = new ReadOnlyBooleanWrapper(this, "undoStackEmpty");
+    final ReadOnlyBooleanWrapper undoStackEmptyProperty = new ReadOnlyBooleanWrapper(this, "undoStackEmpty");
     public ReadOnlyBooleanProperty undoStackEmptyProperty() {
-        return undoStackSizeEmptyProperty.getReadOnlyProperty();
+        return undoStackEmptyProperty.getReadOnlyProperty();
     }
     public boolean isUndoStackEmpty() {
-        return undoStackSizeEmptyProperty.get();
+        return undoStackEmptyProperty.get();
     }
 
     // redoStackSizeProperty
