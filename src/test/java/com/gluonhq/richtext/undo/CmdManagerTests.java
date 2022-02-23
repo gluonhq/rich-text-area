@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class CmdManagerTests {
 
    @Test
@@ -52,6 +54,47 @@ public class CmdManagerTests {
 
     }
 
+    private CommandManager<StringBuilder> commander;
+    private AtomicBoolean emptyUndo;
+    private AtomicBoolean emptyRedo;
+
+    @Test
+    @DisplayName("Passes multiple redo rules")
+    public void multipleRedoRules() {
+        StringBuilder text = new StringBuilder("Text");
+        emptyUndo = new AtomicBoolean(true);
+        emptyRedo = new AtomicBoolean(true);
+        commander = new CommandManager<>(text, this::update);
+        Assertions.assertEquals("Text", commander.context.toString());
+        Assertions.assertTrue(emptyUndo.get());
+        Assertions.assertTrue(emptyRedo.get());
+        commander.execute(new TestCommand());
+        commander.execute(new TestCommand());
+        commander.execute(new TestCommand());
+        Assertions.assertEquals("Text-redo-redo-redo", commander.context.toString());
+        Assertions.assertEquals(3,  commander.undoStack.size());
+        Assertions.assertFalse(emptyUndo.get());
+        Assertions.assertTrue(emptyRedo.get());
+        commander.undo();
+        commander.undo();
+        commander.undo();
+        Assertions.assertEquals("Text", commander.context.toString());
+        Assertions.assertEquals(3, commander.redoStack.size());
+        Assertions.assertTrue(emptyUndo.get());
+        Assertions.assertFalse(emptyRedo.get());
+        commander.redo();
+        commander.redo();
+        commander.redo();
+        Assertions.assertEquals(3, commander.undoStack.size());
+        Assertions.assertFalse(emptyUndo.get());
+        Assertions.assertTrue(emptyRedo.get());
+        Assertions.assertEquals("Text-redo-redo-redo", commander.context.toString());
+    }
+
+    private void update() {
+        emptyUndo.set(commander.isUndoStackEmpty());
+        emptyRedo.set(commander.isRedoStackEmpty());
+    }
 }
 
 class TestCommand extends AbstractCommand<StringBuilder> {
