@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class CmdManagerTests {
 
@@ -147,15 +148,18 @@ public class CmdManagerTests {
     }
 
     @Test
-    @DisplayName("runnable called when redo is executed")
-    public void runnableIsCalledWhenRedoIsExecuted() {
+    @DisplayName("runnable called when commands are executed")
+    public void runnableIsCalledWhenCommandsAreExecuted() {
         StringBuilder text = new StringBuilder("Text");
-        AtomicBoolean aBoolean = new AtomicBoolean();
-        CommandManager<StringBuilder> commander = new CommandManager<>(text, () -> aBoolean.set(!aBoolean.get()));
+        AtomicInteger aInteger = new AtomicInteger();
+        CommandManager<StringBuilder> commander = new CommandManager<>(text, aInteger::incrementAndGet);
+        Assertions.assertEquals(0, aInteger.get());
         commander.execute(new TestCommand());
+        Assertions.assertEquals(1, aInteger.get());
         commander.undo();
+        Assertions.assertEquals(2, aInteger.get());
         commander.redo();
-        Assertions.assertTrue(aBoolean.get());
+        Assertions.assertEquals(3, aInteger.get());
     }
 }
 
