@@ -97,11 +97,11 @@ public final class PieceTable extends AbstractTextBuffer {
     }
 
     // internal append
-    Piece appendTextInternal(String text) {
+    Piece appendTextInternal(String text, TextDecoration decoration) {
         int pos = additionBuffer.length();
         additionBuffer += text;
         textLengthProperty.set(getTextLength() + text.length());
-        return piece(Piece.BufferType.ADDITION, pos, text.length());
+        return new Piece(this, Piece.BufferType.ADDITION, pos, text.length(), decoration);
     }
 
     /**
@@ -206,6 +206,10 @@ public final class PieceTable extends AbstractTextBuffer {
     // TODO is there standard APIs?
     static boolean inRange( int index, int start, int length ) {
         return index >= start && index < start+length;
+    }
+
+    TextDecoration previousPieceDecoration(int index) {
+        return pieces.isEmpty() ? TextDecoration.builder().presets().build() : pieces.get(index > 0 ? index - 1 : 0).getDecoration();
     }
 
     @Override
@@ -374,7 +378,7 @@ class AppendCmd extends AbstractPTCmd {
     protected void doRedo(PieceTable pt) {
         if (!text.isEmpty()) {
             int pos = pt.getTextLength();
-            newPiece = pt.appendTextInternal(text);
+            newPiece = pt.appendTextInternal(text, pt.previousPieceDecoration(pt.pieces.size()));
             pt.pieces.add(newPiece);
             pt.fire( new TextBuffer.InsertEvent(text, pos));
             execSuccess = true;
@@ -424,9 +428,9 @@ class InsertCmd extends AbstractCommand<PieceTable> {
             pt.walkPieces((piece, pieceIndex, textPosition) -> {
                 if ( PieceTable.inRange(insertPosition, textPosition, piece.length)) {
                     int pieceOffset = insertPosition - textPosition;
-                    newPieces = PieceTable.normalize( List.of(
+                    newPieces = PieceTable.normalize(List.of(
                             piece.pieceBefore(pieceOffset),
-                            pt.appendTextInternal(text),
+                            pt.appendTextInternal(text, pt.previousPieceDecoration(pieceIndex)),
                             piece.pieceFrom(pieceOffset)
                     ));
                     oldPiece = piece;
