@@ -447,4 +447,50 @@ public class PieceTableTests {
         );
     }
 
+    @Test
+    @DisplayName("Appended text should use existing decoration")
+    public void textAppendDecoration() {
+        String appended = " and some";
+        PieceTable pt = new PieceTable(originalText);
+        pt.decorate(0, originalText.length(), TextDecoration.builder().fontSize(20).build());
+        pt.append(appended);
+        Assertions.assertEquals(originalText+appended, pt.getText());
+        Assertions.assertTrue(pt.pieces.stream()
+                .filter(piece -> piece.getText().equals(appended))
+                .anyMatch(piece -> piece.getDecoration().getFontSize() == 20));
+    }
+
+    @Test
+    @DisplayName("Inserted text after decorated text")
+    public void textInsertAfterDecoration() {
+        String insert = "Bigger ";
+        PieceTable pt = new PieceTable(originalText);
+        pt.decorate(0, originalText.length(), TextDecoration.builder().fontSize(20).build());
+        pt.insert(insert, 9); // "Original Bigger Text"
+        Assertions.assertEquals(
+                new StringBuilder(originalText).insert(9, insert).toString(),
+                pt.getText()
+        );
+        Assertions.assertTrue(pt.pieces.stream()
+                .filter(piece -> piece.getText().equals(insert))
+                .anyMatch(piece -> piece.getDecoration().getFontSize() == 20));
+    }
+
+    @Test
+    @DisplayName("Inserted text after default decorated text")
+    public void textInsertAfterDefaultDecoratedText() {
+        String insert = "Bigger";
+        PieceTable pt = new PieceTable(originalText);
+        double defaultFontSize = TextDecoration.builder().presets().build().getFontSize();
+        pt.decorate(0, 8, TextDecoration.builder().fontSize(20).build());
+        pt.insert(insert, 11); // "Original TeBiggerxt"
+        Assertions.assertEquals(
+                new StringBuilder(originalText).insert(11, insert).toString(),
+                pt.getText()
+        );
+        Assertions.assertTrue(pt.pieces.stream()
+                .filter(piece -> piece.getText().equals(insert))
+                .anyMatch(piece -> piece.getDecoration().getFontSize() == defaultFontSize));
+    }
+
 }
