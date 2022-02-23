@@ -10,6 +10,9 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
+import javafx.collections.SetChangeListener;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
@@ -20,6 +23,7 @@ import javafx.scene.control.SkinBase;
 import javafx.scene.input.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
+import javafx.scene.shape.PathElement;
 import javafx.scene.text.Font;
 import javafx.scene.text.HitInfo;
 import javafx.scene.text.Text;
@@ -77,6 +81,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final Path caretShape = new Path();
     private final Path selectionShape = new Path();
     private final Group layers;
+    private final ObservableSet<Path> backgroundColorPaths = FXCollections.observableSet();
 
     private final Timeline caretTimeline = new Timeline(
         new KeyFrame(Duration.ZERO        , e -> setCaretVisibility(false)),
@@ -89,6 +94,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow();
     private final ChangeListener<Boolean> focusChangeListener;
+    final SetChangeListener<Path> textBackgroundColorChangeListener = change -> updateLayers(change);
 
     protected RichTextAreaSkin(final RichTextArea control) {
         super(control);
@@ -143,6 +149,8 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
 
         viewModel.addChangeListener(textChangeListener);
+        layers.getChildren().addAll(0, backgroundColorPaths);
+        backgroundColorPaths.addListener(textBackgroundColorChangeListener);
         refreshTextFlow();
 
     }
@@ -157,6 +165,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().setEditable(false); // removes all related listeners
         getSkinnable().editableProperty().removeListener(this::editableChangeListener);
         viewModel.removeChangeListener(textChangeListener);
+        backgroundColorPaths.removeListener(textBackgroundColorChangeListener);
     }
 
     /// PRIVATE METHODS /////////////////////////////////////////////////////////
@@ -191,20 +200,17 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     private void addBackgroundPathsToLayers(List<IndexRangeColor> backgroundIndexRanges) {
-        if (layers.getChildren().size() > 3) {
-            layers.getChildren().removeIf(node -> "background".equals(node.getId()));
-        }
         final List<Path> backgroundPaths = backgroundIndexRanges.stream()
                 .map(indexRangeBackground -> {
-                    final Path path = new Path(textFlow.rangeShape(indexRangeBackground.getStart(), indexRangeBackground.getEnd()));
+                    final Path path = new BackgroundColorPath(textFlow.rangeShape(indexRangeBackground.getStart(), indexRangeBackground.getEnd()));
                     path.setStrokeWidth(0);
                     path.setFill(indexRangeBackground.getColor());
                     path.setId("background");
                     return path;
                 })
                 .collect(Collectors.toList());
-        // New background paths should be inserted before 'selectionShape' but after existing background paths
-        layers.getChildren().addAll(layers.getChildren().size() - 3, backgroundPaths);
+        backgroundColorPaths.removeIf(path -> !backgroundPaths.contains(path));
+        backgroundColorPaths.addAll(backgroundPaths);
     }
 
     private Text buildText(String content, TextDecoration decoration ) {
@@ -263,6 +269,14 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         viewModel.setCaretPosition( editable? 0:-1 );
         textFlow.setCursor( editable? Cursor.TEXT: Cursor.DEFAULT);
 
+    }
+
+    private void updateLayers(SetChangeListener.Change<? extends Path> change) {
+        if (change.wasAdded()) {
+            layers.getChildren().add(0, change.getElementAdded());
+        } else if (change.wasRemoved()) {
+            layers.getChildren().remove(change.getElementRemoved());
+        }
     }
 
     private void setCaretVisibility(boolean on) {
@@ -392,6 +406,26 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
         public Color getColor() {
             return color;
+        }
+    }
+
+    private static class BackgroundColorPath extends Path {
+
+        public BackgroundColorPath(PathElement[] elements) {
+            super(elements);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            BackgroundColorPath that = (BackgroundColorPath) o;
+            return Objects.equals(getLayoutBounds(), that.getLayoutBounds()) && Objects.equals(getFill(), that.getFill());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getLayoutBounds(), getFill());
         }
     }
 
