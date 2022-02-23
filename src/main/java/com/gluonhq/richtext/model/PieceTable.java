@@ -426,19 +426,20 @@ class InsertCmd extends AbstractCommand<PieceTable> {
             pt.append(text);
         } else {
             pt.walkPieces((piece, pieceIndex, textPosition) -> {
-                if ( PieceTable.inRange(insertPosition, textPosition, piece.length)) {
+                if (PieceTable.inRange(insertPosition, textPosition, piece.length)) {
                     int pieceOffset = insertPosition - textPosition;
+                    final TextDecoration decoration = pieceOffset > 0 ? piece.getDecoration() : pt.previousPieceDecoration(pieceIndex);
                     newPieces = PieceTable.normalize(List.of(
                             piece.pieceBefore(pieceOffset),
-                            pt.appendTextInternal(text, pt.previousPieceDecoration(pieceIndex)),
+                            pt.appendTextInternal(text, decoration),
                             piece.pieceFrom(pieceOffset)
                     ));
                     oldPiece = piece;
-                    pt.pieces.addAll( pieceIndex, newPieces );
+                    pt.pieces.addAll(pieceIndex, newPieces);
                     pt.pieces.remove(oldPiece);
                     opPieceIndex = pieceIndex;
 
-                    pt.fire( new TextBuffer.InsertEvent(text, insertPosition));
+                    pt.fire(new TextBuffer.InsertEvent(text, insertPosition));
                     execSuccess = true;
                     return true;
                 }

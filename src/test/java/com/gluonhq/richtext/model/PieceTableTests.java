@@ -461,8 +461,8 @@ public class PieceTableTests {
     }
 
     @Test
-    @DisplayName("Inserted text should use existing decoration")
-    public void textInsertDecoration() {
+    @DisplayName("Inserted text after decorated text")
+    public void textInsertAfterDecoration() {
         String insert = "Bigger ";
         PieceTable pt = new PieceTable(originalText);
         pt.decorate(0, originalText.length(), TextDecoration.builder().fontSize(20).build());
@@ -474,6 +474,23 @@ public class PieceTableTests {
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals(insert))
                 .anyMatch(piece -> piece.getDecoration().getFontSize() == 20));
+    }
+
+    @Test
+    @DisplayName("Inserted text after undecorated text")
+    public void textInsertAfterUndecoratedText() {
+        String insert = "Bigger";
+        PieceTable pt = new PieceTable(originalText);
+        double defaultFontSize = TextDecoration.builder().presets().build().getFontSize();
+        pt.decorate(0, 8, TextDecoration.builder().fontSize(20).build());
+        pt.insert(insert, 11); // "Original TeBiggerxt"
+        Assertions.assertEquals(
+                new StringBuilder(originalText).insert(11, insert).toString(),
+                pt.getText()
+        );
+        Assertions.assertTrue(pt.pieces.stream()
+                .filter(piece -> piece.getText().equals(insert))
+                .anyMatch(piece -> piece.getDecoration().getFontSize() == defaultFontSize));
     }
 
 }
