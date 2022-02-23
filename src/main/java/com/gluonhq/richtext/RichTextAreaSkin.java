@@ -192,7 +192,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private void addBackgroundPathsToLayers(List<IndexRangeColor> backgroundIndexRanges) {
         if (layers.getChildren().size() > 3) {
-            layers.getChildren().removeIf(node -> node.getId() != null && node.getId().equals("background"));
+            layers.getChildren().removeIf(node -> "background".equals(node.getId()));
         }
         final List<Path> backgroundPaths = backgroundIndexRanges.stream()
                 .map(indexRangeBackground -> {
