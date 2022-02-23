@@ -477,8 +477,8 @@ public class PieceTableTests {
     }
 
     @Test
-    @DisplayName("Inserted text after undecorated text")
-    public void textInsertAfterUndecoratedText() {
+    @DisplayName("Inserted text after default decorated text")
+    public void textInsertAfterDefaultDecoratedText() {
         String insert = "Bigger";
         PieceTable pt = new PieceTable(originalText);
         double defaultFontSize = TextDecoration.builder().presets().build().getFontSize();
