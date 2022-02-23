@@ -8,24 +8,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CmdManagerTests {
 
-   @Test
-   @DisplayName("Passes command execution rules")
-   public void executionRules() {
+    @Test
+    @DisplayName("Passes command execution rules")
+    public void executionRules() {
 
-       StringBuilder text = new StringBuilder("Text");
-       CommandManager<StringBuilder> commander = new CommandManager<>(text);
-       Assertions.assertTrue(commander.isUndoStackEmpty());
-       Assertions.assertTrue(commander.isRedoStackEmpty());
+        StringBuilder text = new StringBuilder("Text");
+        CommandManager<StringBuilder> commander = new CommandManager<>(text);
+        commander.execute( new TestCommand());
 
-       commander.execute(new TestCommand());
+        Assertions.assertEquals( 1,  commander.undoStack.size());
+        Assertions.assertEquals( 0,  commander.redoStack.size());
+        Assertions.assertEquals( "Text-redo",  commander.context.toString());
 
-       Assertions.assertEquals(1, commander.undoStack.size());
-       Assertions.assertEquals(0, commander.redoStack.size());
-       Assertions.assertFalse(commander.isUndoStackEmpty());
-       Assertions.assertTrue(commander.isRedoStackEmpty());
-       Assertions.assertEquals("Text-redo", commander.context.toString());
-
-   }
+    }
 
     @Test
     @DisplayName("Passes undo rules")
@@ -35,14 +30,12 @@ public class CmdManagerTests {
         CommandManager<StringBuilder> commander = new CommandManager<>(text);
 
         commander.execute( new TestCommand());
-        Assertions.assertEquals(1, commander.undoStack.size());
+        Assertions.assertEquals( 1,  commander.undoStack.size());
 
         commander.undo();
-        Assertions.assertEquals(0, commander.undoStack.size());
-        Assertions.assertEquals(1, commander.redoStack.size());
-        Assertions.assertTrue(commander.isUndoStackEmpty());
-        Assertions.assertFalse(commander.isRedoStackEmpty());
-        Assertions.assertEquals("Text", commander.context.toString());
+        Assertions.assertEquals( 0,  commander.undoStack.size());
+        Assertions.assertEquals( 1,  commander.redoStack.size());
+        Assertions.assertEquals( "Text",  commander.context.toString());
 
     }
 
@@ -55,72 +48,114 @@ public class CmdManagerTests {
         commander.execute(new TestCommand());
         commander.undo();
         commander.redo();
-        Assertions.assertEquals(1, commander.undoStack.size());
-        Assertions.assertEquals(0, commander.redoStack.size());
-        Assertions.assertFalse(commander.isUndoStackEmpty());
-        Assertions.assertTrue(commander.isRedoStackEmpty());
-        Assertions.assertEquals("Text-redo", commander.context.toString());
+        Assertions.assertEquals( 1,  commander.undoStack.size());
+        Assertions.assertEquals( 0,  commander.redoStack.size());
+        Assertions.assertEquals( "Text-redo",  commander.context.toString());
 
     }
 
     @Test
-    @DisplayName("Passes multiple redo rules")
-    public void multipleRedoRules() {
+    @DisplayName("undo and redo stack must be empty initially")
+    public void undoAndRedoStackEmpty() {
         StringBuilder text = new StringBuilder("Text");
         CommandManager<StringBuilder> commander = new CommandManager<>(text);
-        Assertions.assertEquals("Text",  commander.context.toString());
-        Assertions.assertTrue(commander.isUndoStackEmpty());
-        Assertions.assertTrue(commander.isRedoStackEmpty());
-        commander.execute(new TestCommand());
-        commander.execute(new TestCommand());
-        commander.execute(new TestCommand());
-        Assertions.assertEquals( "Text-redo-redo-redo",  commander.context.toString());
-        Assertions.assertEquals( 3,  commander.undoStack.size());
-        Assertions.assertFalse(commander.isUndoStackEmpty());
-        Assertions.assertTrue(commander.isRedoStackEmpty());
-        commander.undo();
-        commander.undo();
-        commander.undo();
-        Assertions.assertEquals( "Text",  commander.context.toString());
-        Assertions.assertEquals( 3,  commander.redoStack.size());
-        Assertions.assertTrue(commander.isUndoStackEmpty());
-        Assertions.assertFalse(commander.isRedoStackEmpty());
-        commander.redo();
-        commander.redo();
-        commander.redo();
-        Assertions.assertEquals( 3,  commander.undoStack.size());
-        Assertions.assertFalse(commander.isUndoStackEmpty());
-        Assertions.assertTrue(commander.isRedoStackEmpty());
-        Assertions.assertEquals( "Text-redo-redo-redo",  commander.context.toString());
+        Assertions.assertAll(
+                () -> Assertions.assertTrue(commander.isUndoStackEmpty()),
+                () -> Assertions.assertTrue(commander.isRedoStackEmpty())
+        );
     }
-
-    private CommandManager<StringBuilder> commander;
-    private AtomicBoolean emptyUndo;
-    private AtomicBoolean emptyRedo;
 
     @Test
-    @DisplayName("Passes redo rules with runnable")
-    public void redoRulesWithRunnable() {
+    @DisplayName("undo stack must not be empty after a command execution")
+    public void undoStackNotEmptyAfterCommandExecution() {
         StringBuilder text = new StringBuilder("Text");
-        emptyUndo = new AtomicBoolean(true);
-        emptyRedo = new AtomicBoolean(true);
-        commander = new CommandManager<>(text, this::update);
-        Assertions.assertTrue(emptyUndo.get());
-        Assertions.assertTrue(emptyRedo.get());
+        CommandManager<StringBuilder> commander = new CommandManager<>(text);
         commander.execute(new TestCommand());
-        Assertions.assertFalse(emptyUndo.get());
-        Assertions.assertTrue(emptyRedo.get());
-        commander.undo();
-        Assertions.assertTrue(emptyUndo.get());
-        Assertions.assertFalse(emptyRedo.get());
-        commander.redo();
-        Assertions.assertFalse(emptyUndo.get());
-        Assertions.assertTrue(emptyRedo.get());
+        Assertions.assertFalse(commander.isUndoStackEmpty());
     }
 
-    private void update() {
-        emptyUndo.set(commander.isUndoStackEmpty());
-        emptyRedo.set(commander.isRedoStackEmpty());
+    @Test
+    @DisplayName("redo stack must be empty after a command execution")
+    public void redoStackEmptyAfterCommandExecution() {
+        StringBuilder text = new StringBuilder("Text");
+        CommandManager<StringBuilder> commander = new CommandManager<>(text);
+        commander.execute(new TestCommand());
+        Assertions.assertTrue(commander.isRedoStackEmpty());
+    }
+
+    @Test
+    @DisplayName("undo stack must be empty after a undo operation")
+    public void undoStackEmptyAfterUndoExecution() {
+        StringBuilder text = new StringBuilder("Text");
+        CommandManager<StringBuilder> commander = new CommandManager<>(text);
+        commander.execute(new TestCommand());
+        commander.undo();
+        Assertions.assertTrue(commander.isUndoStackEmpty());
+    }
+
+    @Test
+    @DisplayName("redo stack must not be empty after undo operation")
+    public void redoStackNotEmptyAfterUndoOperation() {
+        StringBuilder text = new StringBuilder("Text");
+        CommandManager<StringBuilder> commander = new CommandManager<>(text);
+        commander.execute(new TestCommand());
+        commander.undo();
+        Assertions.assertFalse(commander.isRedoStackEmpty());
+    }
+
+    @Test
+    @DisplayName("redo stack must be empty after redo operation")
+    public void redoStackEmptyAfterRedoOperation() {
+        StringBuilder text = new StringBuilder("Text");
+        CommandManager<StringBuilder> commander = new CommandManager<>(text);
+        commander.execute(new TestCommand());
+        commander.undo();
+        commander.redo();
+        Assertions.assertTrue(commander.isRedoStackEmpty());
+    }
+
+    @Test
+    @DisplayName("undo stack must be not empty after redo operation")
+    public void undoStackNotEmptyAfterRedoOperation() {
+        StringBuilder text = new StringBuilder("Text");
+        CommandManager<StringBuilder> commander = new CommandManager<>(text);
+        commander.execute(new TestCommand());
+        commander.undo();
+        commander.redo();
+        Assertions.assertFalse(commander.isUndoStackEmpty());
+    }
+
+    @Test
+    @DisplayName("runnable called when command executed")
+    public void runnableIsCalledWhenCommandIsExecuted() {
+        StringBuilder text = new StringBuilder("Text");
+        AtomicBoolean aBoolean = new AtomicBoolean();
+        CommandManager<StringBuilder> commander = new CommandManager<>(text, () -> aBoolean.set(!aBoolean.get()));
+        commander.execute(new TestCommand());
+        Assertions.assertTrue(aBoolean.get());
+    }
+
+    @Test
+    @DisplayName("runnable called when undo is executed")
+    public void runnableIsCalledWhenUndoIsExecuted() {
+        StringBuilder text = new StringBuilder("Text");
+        AtomicBoolean aBoolean = new AtomicBoolean();
+        CommandManager<StringBuilder> commander = new CommandManager<>(text, () -> aBoolean.set(!aBoolean.get()));
+        commander.execute(new TestCommand());
+        commander.undo();
+        Assertions.assertFalse(aBoolean.get());
+    }
+
+    @Test
+    @DisplayName("runnable called when redo is executed")
+    public void runnableIsCalledWhenRedoIsExecuted() {
+        StringBuilder text = new StringBuilder("Text");
+        AtomicBoolean aBoolean = new AtomicBoolean();
+        CommandManager<StringBuilder> commander = new CommandManager<>(text, () -> aBoolean.set(!aBoolean.get()));
+        commander.execute(new TestCommand());
+        commander.undo();
+        commander.redo();
+        Assertions.assertTrue(aBoolean.get());
     }
 }
 
@@ -131,7 +166,7 @@ class TestCommand extends AbstractCommand<StringBuilder> {
 
     @Override
     protected void doUndo(StringBuilder context) {
-        context.delete( pos, pos+length);
+        context.delete(pos, pos+length);
     }
 
     @Override
