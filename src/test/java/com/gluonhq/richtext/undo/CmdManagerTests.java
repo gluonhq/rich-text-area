@@ -14,11 +14,16 @@ public class CmdManagerTests {
 
        StringBuilder text = new StringBuilder("Text");
        CommandManager<StringBuilder> commander = new CommandManager<>(text);
-       commander.execute( new TestCommand());
+       Assertions.assertTrue(commander.isUndoStackEmpty());
+       Assertions.assertTrue(commander.isRedoStackEmpty());
 
-       Assertions.assertEquals( 1,  commander.undoStack.size());
-       Assertions.assertEquals( 0,  commander.redoStack.size());
-       Assertions.assertEquals( "Text-redo",  commander.context.toString());
+       commander.execute(new TestCommand());
+
+       Assertions.assertEquals(1, commander.undoStack.size());
+       Assertions.assertEquals(0, commander.redoStack.size());
+       Assertions.assertFalse(commander.isUndoStackEmpty());
+       Assertions.assertTrue(commander.isRedoStackEmpty());
+       Assertions.assertEquals("Text-redo", commander.context.toString());
 
    }
 
@@ -30,12 +35,14 @@ public class CmdManagerTests {
         CommandManager<StringBuilder> commander = new CommandManager<>(text);
 
         commander.execute( new TestCommand());
-        Assertions.assertEquals( 1,  commander.undoStack.size());
+        Assertions.assertEquals(1, commander.undoStack.size());
 
         commander.undo();
-        Assertions.assertEquals( 0,  commander.undoStack.size());
-        Assertions.assertEquals( 1,  commander.redoStack.size());
-        Assertions.assertEquals( "Text",  commander.context.toString());
+        Assertions.assertEquals(0, commander.undoStack.size());
+        Assertions.assertEquals(1, commander.redoStack.size());
+        Assertions.assertTrue(commander.isUndoStackEmpty());
+        Assertions.assertFalse(commander.isRedoStackEmpty());
+        Assertions.assertEquals("Text", commander.context.toString());
 
     }
 
@@ -45,13 +52,46 @@ public class CmdManagerTests {
 
         StringBuilder text = new StringBuilder("Text");
         CommandManager<StringBuilder> commander = new CommandManager<>(text);
-        commander.execute( new TestCommand());
+        commander.execute(new TestCommand());
         commander.undo();
         commander.redo();
-        Assertions.assertEquals( 1,  commander.undoStack.size());
-        Assertions.assertEquals( 0,  commander.redoStack.size());
-        Assertions.assertEquals( "Text-redo",  commander.context.toString());
+        Assertions.assertEquals(1, commander.undoStack.size());
+        Assertions.assertEquals(0, commander.redoStack.size());
+        Assertions.assertFalse(commander.isUndoStackEmpty());
+        Assertions.assertTrue(commander.isRedoStackEmpty());
+        Assertions.assertEquals("Text-redo", commander.context.toString());
 
+    }
+
+    @Test
+    @DisplayName("Passes multiple redo rules")
+    public void multipleRedoRules() {
+        StringBuilder text = new StringBuilder("Text");
+        CommandManager<StringBuilder> commander = new CommandManager<>(text);
+        Assertions.assertEquals("Text",  commander.context.toString());
+        Assertions.assertTrue(commander.isUndoStackEmpty());
+        Assertions.assertTrue(commander.isRedoStackEmpty());
+        commander.execute(new TestCommand());
+        commander.execute(new TestCommand());
+        commander.execute(new TestCommand());
+        Assertions.assertEquals( "Text-redo-redo-redo",  commander.context.toString());
+        Assertions.assertEquals( 3,  commander.undoStack.size());
+        Assertions.assertFalse(commander.isUndoStackEmpty());
+        Assertions.assertTrue(commander.isRedoStackEmpty());
+        commander.undo();
+        commander.undo();
+        commander.undo();
+        Assertions.assertEquals( "Text",  commander.context.toString());
+        Assertions.assertEquals( 3,  commander.redoStack.size());
+        Assertions.assertTrue(commander.isUndoStackEmpty());
+        Assertions.assertFalse(commander.isRedoStackEmpty());
+        commander.redo();
+        commander.redo();
+        commander.redo();
+        Assertions.assertEquals( 3,  commander.undoStack.size());
+        Assertions.assertFalse(commander.isUndoStackEmpty());
+        Assertions.assertTrue(commander.isRedoStackEmpty());
+        Assertions.assertEquals( "Text-redo-redo-redo",  commander.context.toString());
     }
 
     private CommandManager<StringBuilder> commander;
@@ -59,36 +99,23 @@ public class CmdManagerTests {
     private AtomicBoolean emptyRedo;
 
     @Test
-    @DisplayName("Passes multiple redo rules")
-    public void multipleRedoRules() {
+    @DisplayName("Passes redo rules with runnable")
+    public void redoRulesWithRunnable() {
         StringBuilder text = new StringBuilder("Text");
         emptyUndo = new AtomicBoolean(true);
         emptyRedo = new AtomicBoolean(true);
         commander = new CommandManager<>(text, this::update);
-        Assertions.assertEquals("Text", commander.context.toString());
         Assertions.assertTrue(emptyUndo.get());
         Assertions.assertTrue(emptyRedo.get());
         commander.execute(new TestCommand());
-        commander.execute(new TestCommand());
-        commander.execute(new TestCommand());
-        Assertions.assertEquals("Text-redo-redo-redo", commander.context.toString());
-        Assertions.assertEquals(3,  commander.undoStack.size());
         Assertions.assertFalse(emptyUndo.get());
         Assertions.assertTrue(emptyRedo.get());
         commander.undo();
-        commander.undo();
-        commander.undo();
-        Assertions.assertEquals("Text", commander.context.toString());
-        Assertions.assertEquals(3, commander.redoStack.size());
         Assertions.assertTrue(emptyUndo.get());
         Assertions.assertFalse(emptyRedo.get());
         commander.redo();
-        commander.redo();
-        commander.redo();
-        Assertions.assertEquals(3, commander.undoStack.size());
         Assertions.assertFalse(emptyUndo.get());
         Assertions.assertTrue(emptyRedo.get());
-        Assertions.assertEquals("Text-redo-redo-redo", commander.context.toString());
     }
 
     private void update() {
