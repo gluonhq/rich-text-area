@@ -1,9 +1,11 @@
 package com.gluonhq.richtext;
 
-import com.gluonhq.richtext.viewmodel.*;
 import com.gluonhq.richtext.model.PieceTable;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
+import com.gluonhq.richtext.viewmodel.ActionCaretMove;
+import com.gluonhq.richtext.viewmodel.ActionFactory;
+import com.gluonhq.richtext.viewmodel.RichTextAreaViewModel;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.Observable;
@@ -15,7 +17,12 @@ import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SkinBase;
-import javafx.scene.input.*;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.shape.LineTo;
 import javafx.scene.shape.Path;
 import javafx.scene.text.Font;
 import javafx.scene.text.HitInfo;
@@ -23,7 +30,11 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -62,11 +73,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     );
 
 
-    private final RichTextAreaViewModel viewModel =
-        new RichTextAreaViewModel(
-            new PieceTable("Simple text one two three\nExtra line text"),
-            this::getNextRowPosition // TODO need to find a better way to find next row caret position
-        );
+    private RichTextAreaViewModel viewModel;
 
     private final ScrollPane scrollPane;
     private final TextFlow textFlow = new TextFlow();
@@ -84,6 +91,30 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow();
     private final ChangeListener<Boolean> focusChangeListener;
+
+    //TODO remove listener on viewModel change
+    private final ChangeListener<Number> caretPositionListener = (o, ocp, p) -> {
+        int caretPosition = p.intValue();
+        caretShape.getElements().clear();
+        if (caretPosition < 0) {
+            caretTimeline.stop();
+        } else {
+            var pathElements = textFlow.caretShape(caretPosition, true);
+            caretShape.getElements().addAll(pathElements);
+            if (caretShape.getLayoutBounds().getHeight() < 3) {
+                caretShape.getElements().add(new LineTo(0, 20));
+            }
+            caretTimeline.play();
+        }
+    };
+
+    //TODO remove listener on viewModel change
+    private final ChangeListener<Selection> selectionListener = (o, os, selection) -> {
+        selectionShape.getElements().clear();
+        if (selection.isDefined()) {
+            selectionShape.getElements().setAll(textFlow.rangeShape(selection.getStart(), selection.getEnd()));
+        }
+    };
 
     protected RichTextAreaSkin(final RichTextArea control) {
         super(control);
@@ -111,37 +142,32 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getChildren().add(scrollPane);
 
         // all listeners have to be removed within dispose method
-        control.editableProperty().addListener(this::editableChangeListener);
-        editableChangeListener(null); // sets up all related listeners
-        control.textLengthProperty.bind(viewModel.textLengthProperty());
-
-        //TODO remove listener on viewModel change
-        viewModel.caretPositionProperty().addListener( (o,ocp, p) -> {
-            int caretPosition = p.intValue();
-            caretShape.getElements().clear();
-            if (caretPosition < 0 ) {
-                caretTimeline.stop();
-            } else {
-                var pathElements = textFlow.caretShape(caretPosition, true);
-                caretShape.getElements().addAll(pathElements);
-                caretTimeline.play();
+        control.faceModelProperty().addListener((obs, ov, nv) -> {
+            if (ov != null) {
+                dispose();
             }
+            setup(nv);
         });
-
-        //TODO remove listener on viewModel change
-        viewModel.selectionProperty().addListener( (o, os, selection) -> {
-            selectionShape.getElements().clear();
-            if (selection.isDefined()) {
-                selectionShape.getElements().setAll(textFlow.rangeShape( selection.getStart(), selection.getEnd() ));
-            }
-        });
-
-
-        viewModel.addChangeListener(textChangeListener);
-        refreshTextFlow();
-
+        setup(control.getFaceModel());
     }
 
+    private void setup(FaceModel faceModel) {
+        if (faceModel == null) {
+            return;
+        }
+        viewModel = new RichTextAreaViewModel(
+                new PieceTable(faceModel),
+                this::getNextRowPosition // TODO need to find a better way to find next row caret position
+        );
+        getSkinnable().textLengthProperty.bind(viewModel.textLengthProperty());
+        viewModel.caretPositionProperty().addListener(caretPositionListener);
+        viewModel.selectionProperty().addListener(selectionListener);
+        viewModel.addChangeListener(textChangeListener);
+        getSkinnable().editableProperty().addListener(this::editableChangeListener);
+        editableChangeListener(null); // sets up all related listeners
+        refreshTextFlow();
+        viewModel.setCaretPosition(faceModel.getCaretPosition());
+    }
     /// PROPERTIES ///////////////////////////////////////////////////////////////
 
 
@@ -149,9 +175,14 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     @Override
     public void dispose() {
-        getSkinnable().setEditable(false); // removes all related listeners
         getSkinnable().editableProperty().removeListener(this::editableChangeListener);
-        viewModel.removeChangeListener(textChangeListener);
+        getSkinnable().textLengthProperty.unbind();
+        if (viewModel != null) {
+            viewModel.clearSelection();
+            viewModel.caretPositionProperty().removeListener(caretPositionListener);
+            viewModel.selectionProperty().removeListener(selectionListener);
+            viewModel.removeChangeListener(textChangeListener);
+        }
     }
 
     /// PRIVATE METHODS /////////////////////////////////////////////////////////
@@ -159,6 +190,9 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     //TODO Need more optimal way of rendering text fragments.
     //  For now rebuilding the whole text flow
     private void refreshTextFlow() {
+        if (viewModel == null) {
+            return;
+        }
         fontCacheEvictionTimer.pause();
         try {
             var fragments = new ArrayList<Text>();
@@ -205,7 +239,9 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     private void editableChangeListener(Observable o) {
-
+        if (viewModel == null) {
+            return;
+        }
         boolean editable = getSkinnable().isEditable();
 
         viewModel.clearSelection();

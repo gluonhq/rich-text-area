@@ -2,11 +2,16 @@ package com.gluonhq.richtext;
 
 
 import com.gluonhq.richtext.viewmodel.ActionFactory;
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyIntegerProperty;
+import javafx.beans.property.ReadOnlyIntegerWrapper;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.Control;
 import javafx.scene.control.SkinBase;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 
 import java.util.Objects;
 
@@ -25,6 +30,18 @@ public class RichTextArea extends Control {
 
     @Override public String getUserAgentStylesheet() {
         return getClass().getResource("rich-text-area.css").toExternalForm();
+    }
+
+    // faceModelProperty
+    private final ObjectProperty<FaceModel> faceModelProperty = new SimpleObjectProperty<>(this, "faceModel", new FaceModel());
+    public final ObjectProperty<FaceModel> faceModelProperty() {
+       return faceModelProperty;
+    }
+    public final FaceModel getFaceModel() {
+       return faceModelProperty.get();
+    }
+    public final void setFaceModel(FaceModel value) {
+        faceModelProperty.set(value);
     }
 
     // editableProperty
@@ -60,23 +77,6 @@ public class RichTextArea extends Control {
     public final int getTextLength() {
         return textLengthProperty.get();
     }
-
-//    // codecProperty
-//    private final ObjectProperty<Codec> codecProperty = new SimpleObjectProperty<>(this, "codec");
-//    public final ObjectProperty<Codec> codecProperty() {
-//       return codecProperty;
-//    }
-//    public final Codec getCodec() {
-//       return codecProperty.get();
-//    }
-//    public final void setCodec(Codec value) {
-//        codecProperty.set(value);
-//    }
-//
-//    public interface Codec {
-//        OutputStream decode(List<Node> nodes);
-//        List<Node> encode(InputStream stream);
-//    }
 
     public void execute( Action action ) {
         if ( getSkin() instanceof RichTextAreaSkin ) {
