@@ -130,26 +130,29 @@ public class CmdManagerTests {
     @DisplayName("runnable called when command executed")
     public void runnableIsCalledWhenCommandIsExecuted() {
         StringBuilder text = new StringBuilder("Text");
-        AtomicBoolean aBoolean = new AtomicBoolean();
-        CommandManager<StringBuilder> commander = new CommandManager<>(text, () -> aBoolean.set(!aBoolean.get()));
+        AtomicInteger aInteger = new AtomicInteger();
+        CommandManager<StringBuilder> commander = new CommandManager<>(text, aInteger::incrementAndGet);
+        Assertions.assertEquals(0, aInteger.get());
         commander.execute(new TestCommand());
-        Assertions.assertTrue(aBoolean.get());
+        Assertions.assertEquals(1, aInteger.get());
     }
 
     @Test
     @DisplayName("runnable called when undo is executed")
     public void runnableIsCalledWhenUndoIsExecuted() {
         StringBuilder text = new StringBuilder("Text");
-        AtomicBoolean aBoolean = new AtomicBoolean();
-        CommandManager<StringBuilder> commander = new CommandManager<>(text, () -> aBoolean.set(!aBoolean.get()));
+        AtomicInteger aInteger = new AtomicInteger();
+        CommandManager<StringBuilder> commander = new CommandManager<>(text, aInteger::incrementAndGet);
+        Assertions.assertEquals(0, aInteger.get());
         commander.execute(new TestCommand());
+        Assertions.assertEquals(1, aInteger.get());
         commander.undo();
-        Assertions.assertFalse(aBoolean.get());
+        Assertions.assertEquals(2, aInteger.get());
     }
 
     @Test
-    @DisplayName("runnable called when commands are executed")
-    public void runnableIsCalledWhenCommandsAreExecuted() {
+    @DisplayName("runnable called when redo is executed")
+    public void runnableIsCalledWhenRedoIsExecuted() {
         StringBuilder text = new StringBuilder("Text");
         AtomicInteger aInteger = new AtomicInteger();
         CommandManager<StringBuilder> commander = new CommandManager<>(text, aInteger::incrementAndGet);
