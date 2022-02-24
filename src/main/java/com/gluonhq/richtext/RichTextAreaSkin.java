@@ -61,7 +61,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         entry( new KeyCodeCombination(X, SHORTCUT_DOWN),                                     e -> ACTION_FACTORY.cut()),
         entry( new KeyCodeCombination(V, SHORTCUT_DOWN),                                     e -> ACTION_FACTORY.paste()),
         entry( new KeyCodeCombination(Z, SHORTCUT_DOWN),                                     e -> ACTION_FACTORY.undo()),
-        entry( new KeyCodeCombination(Z, SHORTCUT_DOWN, SHIFT_DOWN),                         e -> ACTION_FACTORY.paste()),
+        entry( new KeyCodeCombination(Z, SHORTCUT_DOWN, SHIFT_DOWN),                         e -> ACTION_FACTORY.redo()),
         entry( new KeyCodeCombination(ENTER, SHIFT_ANY),                                     e -> ACTION_FACTORY.insertText("\n")),
         entry( new KeyCodeCombination(BACK_SPACE, SHIFT_ANY),                                e -> ACTION_FACTORY.removeText(-1)),
         entry( new KeyCodeCombination(DELETE),                                               e -> ACTION_FACTORY.removeText(0)),
@@ -125,6 +125,8 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         control.editableProperty().addListener(this::editableChangeListener);
         editableChangeListener(null); // sets up all related listeners
         control.textLengthProperty.bind(viewModel.textLengthProperty());
+        control.undoStackEmptyProperty.bind(viewModel.undoStackEmptyProperty());
+        control.redoStackEmptyProperty.bind(viewModel.redoStackEmptyProperty());
 
         //TODO remove listener on viewModel change
         viewModel.caretPositionProperty().addListener( (o,ocp, p) -> {

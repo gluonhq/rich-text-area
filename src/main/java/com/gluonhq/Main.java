@@ -103,14 +103,19 @@ public class Main extends Application {
         CheckBox editableProp = new CheckBox("Editable");
         editableProp.selectedProperty().bindBidirectional(editor.editableProperty());
 
+        Button undoButton = actionButton(LineAwesomeSolid.UNDO, editor.getActionFactory().undo());
+        undoButton.disableProperty().bind(editor.undoStackEmptyProperty());
+        Button redoButton = actionButton(LineAwesomeSolid.REDO, editor.getActionFactory().redo());
+        redoButton.disableProperty().bind(editor.redoStackEmptyProperty());
+
         ToolBar toolbar = new ToolBar();
         toolbar.getItems().setAll(
                 actionButton(LineAwesomeSolid.CUT,   editor.getActionFactory().cut()),
                 actionButton(LineAwesomeSolid.COPY,  editor.getActionFactory().copy()),
                 actionButton(LineAwesomeSolid.PASTE, editor.getActionFactory().paste()),
                 new Separator(Orientation.VERTICAL),
-                actionButton(LineAwesomeSolid.UNDO,  editor.getActionFactory().undo()),
-                actionButton(LineAwesomeSolid.REDO, editor.getActionFactory().redo()),
+                undoButton,
+                redoButton,
                 new Separator(Orientation.VERTICAL),
                 fontFamilies,
                 fontSize,

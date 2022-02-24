@@ -2,11 +2,16 @@ package com.gluonhq.richtext;
 
 
 import com.gluonhq.richtext.viewmodel.ActionFactory;
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.ReadOnlyIntegerProperty;
+import javafx.beans.property.ReadOnlyIntegerWrapper;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.control.Control;
 import javafx.scene.control.SkinBase;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 
 import java.util.Objects;
 
@@ -61,22 +66,23 @@ public class RichTextArea extends Control {
         return textLengthProperty.get();
     }
 
-//    // codecProperty
-//    private final ObjectProperty<Codec> codecProperty = new SimpleObjectProperty<>(this, "codec");
-//    public final ObjectProperty<Codec> codecProperty() {
-//       return codecProperty;
-//    }
-//    public final Codec getCodec() {
-//       return codecProperty.get();
-//    }
-//    public final void setCodec(Codec value) {
-//        codecProperty.set(value);
-//    }
-//
-//    public interface Codec {
-//        OutputStream decode(List<Node> nodes);
-//        List<Node> encode(InputStream stream);
-//    }
+    // undoStackSizeProperty
+    final ReadOnlyBooleanWrapper undoStackEmptyProperty = new ReadOnlyBooleanWrapper(this, "undoStackEmpty");
+    public ReadOnlyBooleanProperty undoStackEmptyProperty() {
+        return undoStackEmptyProperty.getReadOnlyProperty();
+    }
+    public boolean isUndoStackEmpty() {
+        return undoStackEmptyProperty.get();
+    }
+
+    // redoStackSizeProperty
+    final ReadOnlyBooleanWrapper redoStackEmptyProperty = new ReadOnlyBooleanWrapper(this, "redoStackEmpty");
+    public ReadOnlyBooleanProperty redoStackEmptyProperty() {
+        return redoStackEmptyProperty.getReadOnlyProperty();
+    }
+    public boolean isRedoStackEmpty() {
+        return redoStackEmptyProperty.get();
+    }
 
     public void execute( Action action ) {
         if ( getSkin() instanceof RichTextAreaSkin ) {
@@ -89,7 +95,6 @@ public class RichTextArea extends Control {
     public ActionFactory getActionFactory() {
         return RichTextAreaSkin.getActionFactory();
     }
-
 
 }
 
