@@ -21,6 +21,13 @@ public interface TextBuffer {
     void insert( String text, int insertPosition );
     void append( String text );
     void delete( final int deletePosition, int length );
+
+    /**
+     * Adds decoration to Text in the specified range.
+     * @param start index to start, inclusive.
+     * @param end index to end, exclusive.
+     * @param textDecoration decoration to apply.
+     */
     void decorate(int start, int end, TextDecoration textDecoration);
 
     void undo();

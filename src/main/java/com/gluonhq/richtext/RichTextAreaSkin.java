@@ -10,6 +10,9 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
+import javafx.collections.SetChangeListener;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
@@ -23,7 +26,9 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.LineTo;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
+import javafx.scene.shape.PathElement;
 import javafx.scene.text.Font;
 import javafx.scene.text.HitInfo;
 import javafx.scene.text.Text;
@@ -36,16 +41,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.gluonhq.richtext.viewmodel.RichTextAreaViewModel.Direction;
+import static java.util.Map.entry;
 import static javafx.scene.input.KeyCode.*;
 import static javafx.scene.input.KeyCombination.*;
-import static java.util.Map.entry;
-import static com.gluonhq.richtext.viewmodel.RichTextAreaViewModel.*;
-import static javafx.scene.text.FontPosture.*;
-import static javafx.scene.text.FontWeight.*;
+import static javafx.scene.text.FontPosture.ITALIC;
+import static javafx.scene.text.FontWeight.BOLD;
 
 class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
@@ -79,6 +85,8 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final TextFlow textFlow = new TextFlow();
     private final Path caretShape = new Path();
     private final Path selectionShape = new Path();
+    private final Group layers;
+    private final ObservableSet<Path> textBackgroundColorPaths = FXCollections.observableSet();
 
     private final Timeline caretTimeline = new Timeline(
         new KeyFrame(Duration.ZERO        , e -> setCaretVisibility(false)),
@@ -91,6 +99,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow();
     private final ChangeListener<Boolean> focusChangeListener;
+    private final SetChangeListener<Path> textBackgroundColorPathsChangeListener = this::updateLayers;
 
     //TODO remove listener on viewModel change
     private final ChangeListener<Number> caretPositionListener = (o, ocp, p) -> {
@@ -128,7 +137,8 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
         selectionShape.getStyleClass().setAll("selection");
 
-        Group layers = new Group(selectionShape, caretShape, textFlow);
+        layers = new Group(selectionShape, caretShape, textFlow);
+        layers.getChildren().addAll(0, textBackgroundColorPaths);
         caretTimeline.setCycleCount(Timeline.INDEFINITE);
 
         scrollPane = new ScrollPane(layers);
@@ -162,6 +172,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         viewModel.addChangeListener(textChangeListener);
         getSkinnable().editableProperty().addListener(this::editableChangeListener);
         editableChangeListener(null); // sets up all related listeners
+        textBackgroundColorPaths.addListener(textBackgroundColorPathsChangeListener);
         refreshTextFlow();
         viewModel.setCaretPosition(faceModel.getCaretPosition());
     }
@@ -178,21 +189,51 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         viewModel.caretPositionProperty().removeListener(caretPositionListener);
         viewModel.selectionProperty().removeListener(selectionListener);
         viewModel.removeChangeListener(textChangeListener);
+        textBackgroundColorPaths.removeListener(textBackgroundColorPathsChangeListener);
     }
 
     /// PRIVATE METHODS /////////////////////////////////////////////////////////
 
-    //TODO Need more optimal way of rendering text fragments.
+    // TODO Need more optimal way of rendering text fragments.
     //  For now rebuilding the whole text flow
     private void refreshTextFlow() {
         fontCacheEvictionTimer.pause();
         try {
             var fragments = new ArrayList<Text>();
-            viewModel.walkFragments((text, decoration) -> fragments.add(buildText(text, decoration)));
+            var backgroundIndexRanges = new ArrayList<IndexRangeColor>();
+            var length = new AtomicInteger();
+            viewModel.walkFragments((text, decoration) -> {
+                final Text textNode = buildText(text, decoration);
+                fragments.add(textNode);
+
+                if (decoration.getBackground() != Color.TRANSPARENT) {
+                    final IndexRangeColor indexRangeColor = new IndexRangeColor(
+                            length.get(),
+                            length.get() + textNode.getText().length(),
+                            decoration.getBackground()
+                    );
+                    backgroundIndexRanges.add(indexRangeColor);
+                }
+                length.addAndGet(textNode.getText().length());
+            });
             textFlow.getChildren().setAll(fragments);
+            addBackgroundPathsToLayers(backgroundIndexRanges);
         } finally {
             fontCacheEvictionTimer.start();
         }
+    }
+
+    private void addBackgroundPathsToLayers(List<IndexRangeColor> backgroundIndexRanges) {
+        final List<Path> backgroundPaths = backgroundIndexRanges.stream()
+                .map(indexRangeBackground -> {
+                    final Path path = new BackgroundColorPath(textFlow.rangeShape(indexRangeBackground.getStart(), indexRangeBackground.getEnd()));
+                    path.setStrokeWidth(0);
+                    path.setFill(indexRangeBackground.getColor());
+                    return path;
+                })
+                .collect(Collectors.toList());
+        textBackgroundColorPaths.removeIf(path -> !backgroundPaths.contains(path));
+        textBackgroundColorPaths.addAll(backgroundPaths);
     }
 
     private Text buildText(String content, TextDecoration decoration ) {
@@ -250,6 +291,14 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         viewModel.setCaretPosition( editable? 0:-1 );
         textFlow.setCursor( editable? Cursor.TEXT: Cursor.DEFAULT);
 
+    }
+
+    private void updateLayers(SetChangeListener.Change<? extends Path> change) {
+        if (change.wasAdded()) {
+            layers.getChildren().add(0, change.getElementAdded());
+        } else if (change.wasRemoved()) {
+            layers.getChildren().remove(change.getElementRemoved());
+        }
     }
 
     private void setCaretVisibility(boolean on) {
@@ -354,6 +403,51 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         if ( isCharOnly(e) ) {
             execute( ACTION_FACTORY.insertText(e.getCharacter()));
             e.consume();
+        }
+    }
+
+    private static class IndexRangeColor {
+
+        private final int start;
+        private final int end;
+        private final Color color;
+
+        public IndexRangeColor(int start, int end, Color color) {
+            this.start = start;
+            this.end = end;
+            this.color = color;
+        }
+
+        public int getStart() {
+            return start;
+        }
+
+        public int getEnd() {
+            return end;
+        }
+
+        public Color getColor() {
+            return color;
+        }
+    }
+
+    private static class BackgroundColorPath extends Path {
+
+        public BackgroundColorPath(PathElement[] elements) {
+            super(elements);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            BackgroundColorPath that = (BackgroundColorPath) o;
+            return Objects.equals(getLayoutBounds(), that.getLayoutBounds()) && Objects.equals(getFill(), that.getFill());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getLayoutBounds(), getFill());
         }
     }
 

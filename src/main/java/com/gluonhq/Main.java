@@ -95,9 +95,21 @@ public class Main extends Application {
             }
         });
 
-        final ColorPicker fontForeground = new ColorPicker();
-        fontForeground.setOnAction(e -> {
-            Action action = editor.getActionFactory().decorateText(TextDecoration.builder().foreground(fontForeground.getValue()).build());
+        final ColorPicker textForeground = new ColorPicker();
+        textForeground.getStyleClass().add("foreground");
+        textForeground.setOnAction(e -> {
+            Action action = editor.getActionFactory().decorateText(TextDecoration.builder()
+                    .foreground(textForeground.getValue())
+                    .build());
+            editor.execute(action);
+        });
+
+        final ColorPicker textBackground = new ColorPicker();
+        textBackground.getStyleClass().add("background");
+        textBackground.setOnAction(e -> {
+            Action action = editor.getActionFactory().decorateText(TextDecoration.builder()
+                    .background(textBackground.getValue())
+                    .build());
             editor.execute(action);
         });
 
@@ -122,14 +134,15 @@ public class Main extends Application {
                 fontSize,
                 actionButton(LineAwesomeSolid.BOLD, editor.getActionFactory().decorateText(TextDecoration.builder().fontWeight(FontWeight.BOLD).build())),
                 actionButton(LineAwesomeSolid.ITALIC, editor.getActionFactory().decorateText(TextDecoration.builder().fontPosture(FontPosture.ITALIC).build())),
-                fontForeground,
+                textForeground,
+                textBackground,
                 new Separator(Orientation.VERTICAL),
                 editableProp);
 
         HBox statusBar = new HBox(10);
+        statusBar.getStyleClass().add("status-bar");
         statusBar.setAlignment(Pos.CENTER_RIGHT);
         statusBar.getChildren().setAll(textLengthLabel);
-        statusBar.setStyle("-fx-padding: 10");
 
         MenuItem newFileMenu = new MenuItem("New Text");
         newFileMenu.setOnAction(e -> editor.setFaceModel(new FaceModel()));
@@ -147,6 +160,7 @@ public class Main extends Application {
         root.setBottom(statusBar);
 
         Scene scene = new Scene(root, 800, 480);
+        scene.getStylesheets().add(Main.class.getResource("main.css").toExternalForm());
         stage.setTitle("Rich Text Demo");
         stage.setScene(scene);
         stage.show();
