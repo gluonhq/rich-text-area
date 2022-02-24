@@ -1,9 +1,7 @@
 package com.gluonhq.richtext.viewmodel;
 
-import com.gluonhq.richtext.FaceModel;
 import com.gluonhq.richtext.Selection;
 import com.gluonhq.richtext.Tools;
-import com.gluonhq.richtext.model.PieceTable;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.undo.CommandManager;
@@ -32,24 +30,22 @@ public class RichTextAreaViewModel {
 
     public enum Direction { FORWARD, BACK, UP, DOWN }
 
-    private TextBuffer textBuffer;
     private final CommandManager<RichTextAreaViewModel> commandManager = new CommandManager<>(this, this::updateProperties);
     private BreakIterator wordIterator;
 
     /// PROPERTIES ///////////////////////////////////////////////////////////////
 
     // textBufferProperty
-    private final ObjectProperty<TextBuffer> textBufferProperty = new SimpleObjectProperty<>(this, "textBuffer") {
-        @Override
-        protected void invalidated() {
-            textBuffer = get();
-        }
-    };
+    private final ObjectProperty<TextBuffer> textBufferProperty = new SimpleObjectProperty<>(this, "textBuffer");
     public final ObjectProperty<TextBuffer> textBufferProperty() {
         return textBufferProperty;
     }
     public final TextBuffer getTextBuffer() {
-        return textBufferProperty.get();
+        TextBuffer textBuffer = textBufferProperty.get();
+        if (textBuffer == null) {
+            throw new RuntimeException("Fatal error: TextBuffer was null");
+        }
+        return textBuffer;
     }
     public final void setTextBuffer(TextBuffer value) {
         textBufferProperty.set(value);
@@ -94,10 +90,10 @@ public class RichTextAreaViewModel {
 
     // textLengthProperty
     public final ReadOnlyIntegerProperty textLengthProperty() {
-       return textBuffer.textLengthProperty();
+       return getTextBuffer().textLengthProperty();
     }
     public final int getTextLength() {
-       return textBuffer.getTextLength();
+       return getTextBuffer().getTextLength();
     }
 
     // undoStackSizeProperty
@@ -120,15 +116,14 @@ public class RichTextAreaViewModel {
 
     public RichTextAreaViewModel(BiFunction<Double, Boolean, Integer> getNextRowPosition) {
         this.getNextRowPosition = Objects.requireNonNull(getNextRowPosition);
-        setTextBuffer(new PieceTable(new FaceModel()));
     }
 
     public final void addChangeListener(Consumer<TextBuffer.Event> listener) {
-        this.textBuffer.addChangeListener(listener);
+        this.getTextBuffer().addChangeListener(listener);
     }
 
     public final void removeChangeListener(Consumer<TextBuffer.Event> listener) {
-        this.textBuffer.removeChangeListener(listener);
+        this.getTextBuffer().removeChangeListener(listener);
     }
 
     CommandManager<RichTextAreaViewModel> getCommandManager() {
@@ -159,9 +154,9 @@ public class RichTextAreaViewModel {
         removeSelection();
         int caretPosition = getCaretPosition();
         if (caretPosition >= getTextLength()) {
-            textBuffer.append(text);
+            getTextBuffer().append(text);
         } else {
-            textBuffer.insert(text, caretPosition);
+            getTextBuffer().insert(text, caretPosition);
         }
         moveCaretPosition(text.length());
     }
@@ -170,7 +165,7 @@ public class RichTextAreaViewModel {
         if (!removeSelection()) {
             int position = getCaretPosition() + caretOffset;
             if (position >= 0 && position <= getTextLength()) {
-                textBuffer.delete(position, 1);
+                getTextBuffer().delete(position, 1);
                 setCaretPosition(position);
             }
         }
@@ -182,7 +177,7 @@ public class RichTextAreaViewModel {
             clearSelection();
             int caretPosition = getCaretPosition();
             setCaretPosition(-1);
-            textBuffer.decorate(selection.getStart(), selection.getEnd(), decoration);
+            getTextBuffer().decorate(selection.getStart(), selection.getEnd(), decoration);
             setCaretPosition(caretPosition);
             setSelection(selection);
         }
@@ -194,7 +189,7 @@ public class RichTextAreaViewModel {
     private boolean removeSelection() {
         if (hasSelection()) {
             Selection selection = getSelection();
-            textBuffer.delete(selection.getStart(), selection.getLength() );
+            getTextBuffer().delete(selection.getStart(), selection.getLength() );
             clearSelection();
             setCaretPosition(selection.getStart());
             return true;
@@ -205,7 +200,7 @@ public class RichTextAreaViewModel {
     void clipboardCopy(final boolean cutText) {
         Selection selection = getSelection();
         if (selection.isDefined()) {
-            String selectedText = textBuffer.getText(selection.getStart(), selection.getEnd());
+            String selectedText = getTextBuffer().getText(selection.getStart(), selection.getEnd());
             final ClipboardContent content = new ClipboardContent();
             content.putString(selectedText);
             if (cutText) {
@@ -268,13 +263,13 @@ public class RichTextAreaViewModel {
     }
 
     public void walkFragments(BiConsumer<String, TextDecoration> onFragment) {
-        textBuffer.resetCharacterIterator();
-        textBuffer.walkFragments(onFragment);
-        LOGGER.log(Level.FINE, textBuffer.toString());
+        getTextBuffer().resetCharacterIterator();
+        getTextBuffer().walkFragments(onFragment);
+        LOGGER.log(Level.FINE, getTextBuffer().toString());
     }
 
     void undo() {
-        this.textBuffer.undo();
+        this.getTextBuffer().undo();
     }
 
     void undoDecoration() {
@@ -307,12 +302,12 @@ public class RichTextAreaViewModel {
         if (wordIterator == null) {
             wordIterator = BreakIterator.getWordInstance();
         }
-        wordIterator.setText(textBuffer.getCharacterIterator());
+        wordIterator.setText(getTextBuffer().getCharacterIterator());
 
         int prevCaretPosition = getCaretPosition();
         int position = wordIterator.preceding(Tools.clamp(0, prevCaretPosition, textLength));
         while (position != BreakIterator.DONE &&
-                !Character.isLetterOrDigit(textBuffer.charAt(Tools.clamp(0, position, textLength - 1)))) {
+                !Character.isLetterOrDigit(getTextBuffer().charAt(Tools.clamp(0, position, textLength - 1)))) {
             position = wordIterator.preceding(Tools.clamp(0, position, textLength));
         }
         setCaretPosition(Tools.clamp(0, position, textLength));
@@ -323,14 +318,14 @@ public class RichTextAreaViewModel {
         if (wordIterator == null) {
             wordIterator = BreakIterator.getWordInstance();
         }
-        wordIterator.setText(textBuffer.getCharacterIterator());
+        wordIterator.setText(getTextBuffer().getCharacterIterator());
 
         int prevCaretPosition = getCaretPosition();
         int last = wordIterator.following(Tools.clamp(0, prevCaretPosition, textLength - 1));
         int current = wordIterator.next();
         while (current != BreakIterator.DONE) {
             for (int i = last; i <= current; i++) {
-                char c = textBuffer.charAt(Tools.clamp(0, i, textLength - 1));
+                char c = getTextBuffer().charAt(Tools.clamp(0, i, textLength - 1));
                 if (filter.test(c)) {
                     setCaretPosition(Tools.clamp(0, i, textLength));
                     return;
