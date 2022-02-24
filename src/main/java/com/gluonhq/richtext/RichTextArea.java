@@ -4,6 +4,8 @@ package com.gluonhq.richtext;
 import com.gluonhq.richtext.viewmodel.ActionFactory;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -78,6 +80,24 @@ public class RichTextArea extends Control {
         return textLengthProperty.get();
     }
 
+    // undoStackSizeProperty
+    final ReadOnlyBooleanWrapper undoStackEmptyProperty = new ReadOnlyBooleanWrapper(this, "undoStackEmpty");
+    public ReadOnlyBooleanProperty undoStackEmptyProperty() {
+        return undoStackEmptyProperty.getReadOnlyProperty();
+    }
+    public boolean isUndoStackEmpty() {
+        return undoStackEmptyProperty.get();
+    }
+
+    // redoStackSizeProperty
+    final ReadOnlyBooleanWrapper redoStackEmptyProperty = new ReadOnlyBooleanWrapper(this, "redoStackEmpty");
+    public ReadOnlyBooleanProperty redoStackEmptyProperty() {
+        return redoStackEmptyProperty.getReadOnlyProperty();
+    }
+    public boolean isRedoStackEmpty() {
+        return redoStackEmptyProperty.get();
+    }
+
     public void execute( Action action ) {
         if ( getSkin() instanceof RichTextAreaSkin ) {
             RichTextAreaSkin rtaSkin  = (RichTextAreaSkin)getSkin();
@@ -89,7 +109,6 @@ public class RichTextArea extends Control {
     public ActionFactory getActionFactory() {
         return RichTextAreaSkin.getActionFactory();
     }
-
 
 }
 

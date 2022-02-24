@@ -115,8 +115,8 @@ public final class PieceTable extends AbstractTextBuffer {
      * @param text new text
      */
     @Override
-    public void append( String text ) {
-        commander.execute( new AppendCmd(text));
+    public void append(String text) {
+        commander.execute(new AppendCmd(text));
     }
 
     @Override
@@ -141,8 +141,8 @@ public final class PieceTable extends AbstractTextBuffer {
      * @throws IllegalArgumentException if insertPosition is not valid
      */
     @Override
-    public void insert( final String text, final int insertPosition ) {
-        commander.execute( new InsertCmd(text, insertPosition));
+    public void insert(final String text, final int insertPosition) {
+        commander.execute(new InsertCmd(text, insertPosition));
     }
 
     /**
@@ -152,8 +152,8 @@ public final class PieceTable extends AbstractTextBuffer {
      * @throws IllegalArgumentException if deletePosition is not valid
      */
     @Override
-    public void delete( final int deletePosition, int length ) {
-        commander.execute( new DeleteCmd(deletePosition, length));
+    public void delete(final int deletePosition, int length) {
+        commander.execute(new DeleteCmd(deletePosition, length));
     }
 
     /**

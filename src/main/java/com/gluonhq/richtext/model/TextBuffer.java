@@ -1,5 +1,6 @@
 package com.gluonhq.richtext.model;
 
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyIntegerProperty;
 
 import java.text.CharacterIterator;

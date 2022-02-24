@@ -64,7 +64,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         entry( new KeyCodeCombination(X, SHORTCUT_DOWN),                                     e -> ACTION_FACTORY.cut()),
         entry( new KeyCodeCombination(V, SHORTCUT_DOWN),                                     e -> ACTION_FACTORY.paste()),
         entry( new KeyCodeCombination(Z, SHORTCUT_DOWN),                                     e -> ACTION_FACTORY.undo()),
-        entry( new KeyCodeCombination(Z, SHORTCUT_DOWN, SHIFT_DOWN),                         e -> ACTION_FACTORY.paste()),
+        entry( new KeyCodeCombination(Z, SHORTCUT_DOWN, SHIFT_DOWN),                         e -> ACTION_FACTORY.redo()),
         entry( new KeyCodeCombination(ENTER, SHIFT_ANY),                                     e -> ACTION_FACTORY.insertText("\n")),
         entry( new KeyCodeCombination(BACK_SPACE, SHIFT_ANY),                                e -> ACTION_FACTORY.removeText(-1)),
         entry( new KeyCodeCombination(DELETE),                                               e -> ACTION_FACTORY.removeText(0)),
