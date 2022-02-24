@@ -207,7 +207,6 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
                     final Path path = new BackgroundColorPath(textFlow.rangeShape(indexRangeBackground.getStart(), indexRangeBackground.getEnd()));
                     path.setStrokeWidth(0);
                     path.setFill(indexRangeBackground.getColor());
-                    path.setId("background");
                     return path;
                 })
                 .collect(Collectors.toList());
