@@ -132,7 +132,6 @@ public class CmdManagerTests {
         StringBuilder text = new StringBuilder("Text");
         AtomicInteger aInteger = new AtomicInteger();
         CommandManager<StringBuilder> commander = new CommandManager<>(text, aInteger::incrementAndGet);
-        Assertions.assertEquals(0, aInteger.get());
         commander.execute(new TestCommand());
         Assertions.assertEquals(1, aInteger.get());
     }
@@ -143,9 +142,7 @@ public class CmdManagerTests {
         StringBuilder text = new StringBuilder("Text");
         AtomicInteger aInteger = new AtomicInteger();
         CommandManager<StringBuilder> commander = new CommandManager<>(text, aInteger::incrementAndGet);
-        Assertions.assertEquals(0, aInteger.get());
         commander.execute(new TestCommand());
-        Assertions.assertEquals(1, aInteger.get());
         commander.undo();
         Assertions.assertEquals(2, aInteger.get());
     }
@@ -156,11 +153,8 @@ public class CmdManagerTests {
         StringBuilder text = new StringBuilder("Text");
         AtomicInteger aInteger = new AtomicInteger();
         CommandManager<StringBuilder> commander = new CommandManager<>(text, aInteger::incrementAndGet);
-        Assertions.assertEquals(0, aInteger.get());
         commander.execute(new TestCommand());
-        Assertions.assertEquals(1, aInteger.get());
         commander.undo();
-        Assertions.assertEquals(2, aInteger.get());
         commander.redo();
         Assertions.assertEquals(3, aInteger.get());
     }
