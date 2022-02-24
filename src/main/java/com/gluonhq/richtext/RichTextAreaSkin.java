@@ -72,8 +72,8 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         entry( new KeyCodeCombination(I, SHORTCUT_DOWN),                                     e -> ACTION_FACTORY.decorateText(TextDecoration.builder().fontPosture(ITALIC).build()))
     );
 
-
-    private RichTextAreaViewModel viewModel;
+    // TODO need to find a better way to find next row caret position
+    private final RichTextAreaViewModel viewModel = new RichTextAreaViewModel(this::getNextRowPosition);
 
     private final ScrollPane scrollPane;
     private final TextFlow textFlow = new TextFlow();
@@ -155,10 +155,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         if (faceModel == null) {
             return;
         }
-        viewModel = new RichTextAreaViewModel(
-                new PieceTable(faceModel),
-                this::getNextRowPosition // TODO need to find a better way to find next row caret position
-        );
+        viewModel.setTextBuffer(new PieceTable(faceModel));
         getSkinnable().textLengthProperty.bind(viewModel.textLengthProperty());
         viewModel.caretPositionProperty().addListener(caretPositionListener);
         viewModel.selectionProperty().addListener(selectionListener);
@@ -177,12 +174,10 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     public void dispose() {
         getSkinnable().editableProperty().removeListener(this::editableChangeListener);
         getSkinnable().textLengthProperty.unbind();
-        if (viewModel != null) {
-            viewModel.clearSelection();
-            viewModel.caretPositionProperty().removeListener(caretPositionListener);
-            viewModel.selectionProperty().removeListener(selectionListener);
-            viewModel.removeChangeListener(textChangeListener);
-        }
+        viewModel.clearSelection();
+        viewModel.caretPositionProperty().removeListener(caretPositionListener);
+        viewModel.selectionProperty().removeListener(selectionListener);
+        viewModel.removeChangeListener(textChangeListener);
     }
 
     /// PRIVATE METHODS /////////////////////////////////////////////////////////
@@ -190,9 +185,6 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     //TODO Need more optimal way of rendering text fragments.
     //  For now rebuilding the whole text flow
     private void refreshTextFlow() {
-        if (viewModel == null) {
-            return;
-        }
         fontCacheEvictionTimer.pause();
         try {
             var fragments = new ArrayList<Text>();
@@ -239,9 +231,6 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     private void editableChangeListener(Observable o) {
-        if (viewModel == null) {
-            return;
-        }
         boolean editable = getSkinnable().isEditable();
 
         viewModel.clearSelection();

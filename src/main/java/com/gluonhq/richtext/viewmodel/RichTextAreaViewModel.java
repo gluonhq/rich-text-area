@@ -1,7 +1,9 @@
 package com.gluonhq.richtext.viewmodel;
 
+import com.gluonhq.richtext.FaceModel;
 import com.gluonhq.richtext.Selection;
 import com.gluonhq.richtext.Tools;
+import com.gluonhq.richtext.model.PieceTable;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.undo.CommandManager;
@@ -30,12 +32,28 @@ public class RichTextAreaViewModel {
 
     public enum Direction { FORWARD, BACK, UP, DOWN }
 
-    private final TextBuffer textBuffer;
+    private TextBuffer textBuffer;
     private final CommandManager<RichTextAreaViewModel> commandManager = new CommandManager<>(this, this::updateProperties);
     private BreakIterator wordIterator;
 
-
     /// PROPERTIES ///////////////////////////////////////////////////////////////
+
+    // textBufferProperty
+    private final ObjectProperty<TextBuffer> textBufferProperty = new SimpleObjectProperty<>(this, "textBuffer") {
+        @Override
+        protected void invalidated() {
+            textBuffer = get();
+        }
+    };
+    public final ObjectProperty<TextBuffer> textBufferProperty() {
+        return textBufferProperty;
+    }
+    public final TextBuffer getTextBuffer() {
+        return textBufferProperty.get();
+    }
+    public final void setTextBuffer(TextBuffer value) {
+        textBufferProperty.set(value);
+    }
 
     // caretPositionProperty
     private final IntegerProperty caretPositionProperty = new SimpleIntegerProperty(this, "caretPosition", -1);
@@ -100,9 +118,9 @@ public class RichTextAreaViewModel {
         return redoStackEmptyProperty.get();
     }
 
-    public RichTextAreaViewModel(TextBuffer textBuffer, BiFunction<Double, Boolean, Integer> getNextRowPosition) {
-        this.textBuffer = Objects.requireNonNull(textBuffer); // TODO convert to property
+    public RichTextAreaViewModel(BiFunction<Double, Boolean, Integer> getNextRowPosition) {
         this.getNextRowPosition = Objects.requireNonNull(getNextRowPosition);
+        setTextBuffer(new PieceTable(new FaceModel()));
     }
 
     public final void addChangeListener(Consumer<TextBuffer.Event> listener) {
@@ -137,10 +155,10 @@ public class RichTextAreaViewModel {
      * Smart enough to distinguish between append and insert operations
      * @param text text to insert
      */
-    void insert( String text ) {
+    void insert(String text) {
         removeSelection();
-        int caretPosition =  getCaretPosition();
-        if ( caretPosition >= getTextLength()) {
+        int caretPosition = getCaretPosition();
+        if (caretPosition >= getTextLength()) {
             textBuffer.append(text);
         } else {
             textBuffer.insert(text, caretPosition);
@@ -151,7 +169,7 @@ public class RichTextAreaViewModel {
     void remove(int caretOffset) {
         if (!removeSelection()) {
             int position = getCaretPosition() + caretOffset;
-            if (position >= 0 && position <= getTextLength() ) {
+            if (position >= 0 && position <= getTextLength()) {
                 textBuffer.delete(position, 1);
                 setCaretPosition(position);
             }
@@ -174,7 +192,7 @@ public class RichTextAreaViewModel {
      * Deletes selection if exists and sets caret to the start position of the deleted selection
      */
     private boolean removeSelection() {
-        if ( hasSelection() ) {
+        if (hasSelection()) {
             Selection selection = getSelection();
             textBuffer.delete(selection.getStart(), selection.getLength() );
             clearSelection();
@@ -184,7 +202,7 @@ public class RichTextAreaViewModel {
         return false;
     }
 
-    void clipboardCopy( final boolean cutText ) {
+    void clipboardCopy(final boolean cutText) {
         Selection selection = getSelection();
         if (selection.isDefined()) {
             String selectedText = textBuffer.getText(selection.getStart(), selection.getEnd());
