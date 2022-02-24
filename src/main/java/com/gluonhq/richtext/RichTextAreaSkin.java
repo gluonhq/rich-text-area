@@ -81,7 +81,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final Path caretShape = new Path();
     private final Path selectionShape = new Path();
     private final Group layers;
-    private final ObservableSet<Path> backgroundColorPaths = FXCollections.observableSet();
+    private final ObservableSet<Path> textBackgroundColorPaths = FXCollections.observableSet();
 
     private final Timeline caretTimeline = new Timeline(
         new KeyFrame(Duration.ZERO        , e -> setCaretVisibility(false)),
@@ -94,7 +94,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow();
     private final ChangeListener<Boolean> focusChangeListener;
-    final SetChangeListener<Path> textBackgroundColorChangeListener = change -> updateLayers(change);
+    final SetChangeListener<Path> textBackgroundColorPathsChangeListener = change -> updateLayers(change);
 
     protected RichTextAreaSkin(final RichTextArea control) {
         super(control);
@@ -149,8 +149,8 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
 
         viewModel.addChangeListener(textChangeListener);
-        layers.getChildren().addAll(0, backgroundColorPaths);
-        backgroundColorPaths.addListener(textBackgroundColorChangeListener);
+        layers.getChildren().addAll(0, textBackgroundColorPaths);
+        textBackgroundColorPaths.addListener(textBackgroundColorPathsChangeListener);
         refreshTextFlow();
 
     }
@@ -165,7 +165,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().setEditable(false); // removes all related listeners
         getSkinnable().editableProperty().removeListener(this::editableChangeListener);
         viewModel.removeChangeListener(textChangeListener);
-        backgroundColorPaths.removeListener(textBackgroundColorChangeListener);
+        textBackgroundColorPaths.removeListener(textBackgroundColorPathsChangeListener);
     }
 
     /// PRIVATE METHODS /////////////////////////////////////////////////////////
@@ -209,8 +209,8 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
                     return path;
                 })
                 .collect(Collectors.toList());
-        backgroundColorPaths.removeIf(path -> !backgroundPaths.contains(path));
-        backgroundColorPaths.addAll(backgroundPaths);
+        textBackgroundColorPaths.removeIf(path -> !backgroundPaths.contains(path));
+        textBackgroundColorPaths.addAll(backgroundPaths);
     }
 
     private Text buildText(String content, TextDecoration decoration ) {
