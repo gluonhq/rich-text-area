@@ -81,7 +81,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final Path caretShape = new Path();
     private final Path selectionShape = new Path();
     private final Group layers;
-    private final ObservableSet<Path> backgroundColorPaths = FXCollections.observableSet();
+    private final ObservableSet<IndexRangeColor> textBackgroundIndexRangeColors = FXCollections.observableSet();
 
     private final Timeline caretTimeline = new Timeline(
         new KeyFrame(Duration.ZERO        , e -> setCaretVisibility(false)),
@@ -94,7 +94,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow();
     private final ChangeListener<Boolean> focusChangeListener;
-    final SetChangeListener<Path> textBackgroundColorChangeListener = change -> updateLayers(change);
+    final SetChangeListener<IndexRangeColor> textBackgroundIndexRangeColorsChangeListener = change -> updateLayers(change);
 
     protected RichTextAreaSkin(final RichTextArea control) {
         super(control);
@@ -149,8 +149,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
 
         viewModel.addChangeListener(textChangeListener);
-        layers.getChildren().addAll(0, backgroundColorPaths);
-        backgroundColorPaths.addListener(textBackgroundColorChangeListener);
+        textBackgroundIndexRangeColors.addListener(textBackgroundIndexRangeColorsChangeListener);
         refreshTextFlow();
 
     }
@@ -165,7 +164,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().setEditable(false); // removes all related listeners
         getSkinnable().editableProperty().removeListener(this::editableChangeListener);
         viewModel.removeChangeListener(textChangeListener);
-        backgroundColorPaths.removeListener(textBackgroundColorChangeListener);
+        textBackgroundIndexRangeColors.removeListener(textBackgroundIndexRangeColorsChangeListener);
     }
 
     /// PRIVATE METHODS /////////////////////////////////////////////////////////
@@ -176,7 +175,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         fontCacheEvictionTimer.pause();
         try {
             var fragments = new ArrayList<Text>();
-            var backgroundIndexRanges = new ArrayList<IndexRangeColor>();
+            var bir = new ArrayList<IndexRangeColor>();
             var length = new AtomicInteger();
             viewModel.walkFragments((text, decoration) -> {
                 final Text textNode = buildText(text, decoration);
@@ -188,29 +187,16 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
                             length.get() + textNode.getText().length(),
                             decoration.getBackground()
                     );
-                    backgroundIndexRanges.add(indexRangeColor);
+                    bir.add(indexRangeColor);
                 }
                 length.addAndGet(textNode.getText().length());
             });
             textFlow.getChildren().setAll(fragments);
-            addBackgroundPathsToLayers(backgroundIndexRanges);
+            textBackgroundIndexRangeColors.removeIf(irc -> !bir.contains(irc));
+            textBackgroundIndexRangeColors.addAll(bir);
         } finally {
             fontCacheEvictionTimer.start();
         }
-    }
-
-    private void addBackgroundPathsToLayers(List<IndexRangeColor> backgroundIndexRanges) {
-        final List<Path> backgroundPaths = backgroundIndexRanges.stream()
-                .map(indexRangeBackground -> {
-                    final Path path = new BackgroundColorPath(textFlow.rangeShape(indexRangeBackground.getStart(), indexRangeBackground.getEnd()));
-                    path.setStrokeWidth(0);
-                    path.setFill(indexRangeBackground.getColor());
-                    path.setId("background");
-                    return path;
-                })
-                .collect(Collectors.toList());
-        backgroundColorPaths.removeIf(path -> !backgroundPaths.contains(path));
-        backgroundColorPaths.addAll(backgroundPaths);
     }
 
     private Text buildText(String content, TextDecoration decoration ) {
@@ -271,12 +257,19 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     }
 
-    private void updateLayers(SetChangeListener.Change<? extends Path> change) {
+    private void updateLayers(SetChangeListener.Change<? extends IndexRangeColor> change) {
         if (change.wasAdded()) {
-            layers.getChildren().add(0, change.getElementAdded());
+            layers.getChildren().add(0, createIndexRangeColorPath(change.getElementAdded()));
         } else if (change.wasRemoved()) {
-            layers.getChildren().remove(change.getElementRemoved());
+            layers.getChildren().remove(createIndexRangeColorPath(change.getElementRemoved()));
         }
+    }
+
+    private Path createIndexRangeColorPath(IndexRangeColor indexRangeColor) {
+        final Path path = new IndexRangeColorPath(indexRangeColor, textFlow.rangeShape(indexRangeColor.getStart(), indexRangeColor.getEnd()));
+        path.setStrokeWidth(0);
+        path.setFill(indexRangeColor.getColor());
+        return path;
     }
 
     private void setCaretVisibility(boolean on) {
@@ -407,25 +400,45 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         public Color getColor() {
             return color;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            IndexRangeColor that = (IndexRangeColor) o;
+            return start == that.start && end == that.end && Objects.equals(color, that.color);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(start, end, color);
+        }
     }
 
-    private static class BackgroundColorPath extends Path {
+    /**
+     * A custom path which measures equality depending on
+     * its {@link IndexRangeColor} property.
+     */
+    private static class IndexRangeColorPath extends Path {
 
-        public BackgroundColorPath(PathElement[] elements) {
+        private final IndexRangeColor indexRangeColor;
+
+        public IndexRangeColorPath(IndexRangeColor indexRangeColor, PathElement[] elements) {
             super(elements);
+            this.indexRangeColor = indexRangeColor;
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            BackgroundColorPath that = (BackgroundColorPath) o;
-            return Objects.equals(getLayoutBounds(), that.getLayoutBounds()) && Objects.equals(getFill(), that.getFill());
+            IndexRangeColorPath that = (IndexRangeColorPath) o;
+            return Objects.equals(indexRangeColor, that.indexRangeColor);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(getLayoutBounds(), getFill());
+            return Objects.hash(indexRangeColor);
         }
     }
 
