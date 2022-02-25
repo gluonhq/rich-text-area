@@ -36,7 +36,15 @@ public class RichTextAreaViewModel {
     /// PROPERTIES ///////////////////////////////////////////////////////////////
 
     // textBufferProperty
-    private final ObjectProperty<TextBuffer> textBufferProperty = new SimpleObjectProperty<>(this, "textBuffer");
+    private final ObjectProperty<TextBuffer> textBufferProperty = new SimpleObjectProperty<>(this, "textBuffer") {
+        @Override
+        protected void invalidated() {
+            // invalidate undo/redo stack
+            commandManager.clearStacks();
+            undoStackEmptyProperty.set(true);
+            redoStackEmptyProperty.set(true);
+        }
+    };
     public final ObjectProperty<TextBuffer> textBufferProperty() {
         return textBufferProperty;
     }

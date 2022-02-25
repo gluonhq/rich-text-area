@@ -53,6 +53,11 @@ public class CommandManager<T> {
         return redoStack.isEmpty();
     }
 
+    public void clearStacks() {
+        undoStack.clear();
+        redoStack.clear();
+    }
+
     private void end() {
         if (runnable != null) {
             runnable.run();
