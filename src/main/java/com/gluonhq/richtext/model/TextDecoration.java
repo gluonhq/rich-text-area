@@ -142,8 +142,8 @@ public class TextDecoration {
                 ", bcolor=" + background +
                 ", font['" + fontFamily + '\'' +
                 ", " + fontSize +
-                ", " + getFirstLetter(fontPosture.name()) +
-                ", " + getFirstLetter(fontWeight.name()) +
+                ", " + (fontPosture != null ? getFirstLetter(fontPosture.name()) : "-") +
+                ", " + (fontWeight != null ? getFirstLetter(fontWeight.name()) : "-") +
                 "]}";
     }
 }

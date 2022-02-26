@@ -1,12 +1,10 @@
 package com.gluonhq.richtext.viewmodel;
 
-import com.gluonhq.richtext.Action;
-
-class ActionInsertText implements Action {
+class ActionCmdInsertText implements ActionCmd {
 
     private final String text;
 
-    public ActionInsertText(String text ) {
+    public ActionCmdInsertText(String text) {
         this.text = text;
     }
 

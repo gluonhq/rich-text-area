@@ -1,8 +1,7 @@
 package com.gluonhq.richtext.viewmodel;
 
-import com.gluonhq.richtext.Action;
+class ActionCmdPaste implements ActionCmd {
 
-class ActionPaste implements Action {
     @Override
     public void apply(RichTextAreaViewModel viewModel) {
         viewModel.clipboardPaste();
