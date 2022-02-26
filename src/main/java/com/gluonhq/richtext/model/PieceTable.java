@@ -1,5 +1,6 @@
 package com.gluonhq.richtext.model;
 
+import com.gluonhq.richtext.FaceModel;
 import com.gluonhq.richtext.undo.AbstractCommand;
 import com.gluonhq.richtext.undo.CommandManager;
 
@@ -27,12 +28,17 @@ public final class PieceTable extends AbstractTextBuffer {
 
     /**
      * Creates piece table using original text
-     * @param originalText text to start with
+     * @param faceModel model with decorated text to start with
      */
-    public PieceTable(String originalText) {
-        this.originalText = Objects.requireNonNull(originalText);
-        pieces.add( piece( Piece.BufferType.ORIGINAL, 0, originalText.length()));
-        textLengthProperty.set( pieces.stream().mapToInt(b -> b.length).sum() );
+     public PieceTable(FaceModel faceModel) {
+        this.originalText = Objects.requireNonNull(Objects.requireNonNull(faceModel).getText());
+        if (faceModel.getDecorationList() == null) {
+            pieces.add(piece(Piece.BufferType.ORIGINAL, 0, originalText.length()));
+        } else {
+            faceModel.getDecorationList().forEach(d ->
+                    pieces.add(new Piece(PieceTable.this, Piece.BufferType.ORIGINAL, d.getStart(), d.getLength(), d.getTextDecoration())));
+        }
+        textLengthProperty.set(pieces.stream().mapToInt(b -> b.length).sum());
         pieceCharacterIterator = new PieceCharacterIterator(this);
     }
 

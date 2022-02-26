@@ -2,6 +2,7 @@ package com.gluonhq;
 
 import com.gluonhq.richtext.Action;
 import com.gluonhq.richtext.RichTextArea;
+import com.gluonhq.richtext.FaceModel;
 import com.gluonhq.richtext.model.TextDecoration;
 import javafx.application.Application;
 import javafx.geometry.Orientation;
@@ -10,6 +11,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
@@ -21,6 +24,7 @@ import org.kordamp.ikonli.lineawesome.LineAwesomeSolid;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -38,6 +42,15 @@ public class Main extends Application {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, "Error opening logging.properties file", ex);
         }
     }
+
+    private final List<FaceModel.Decoration> decorations = List.of(
+                new FaceModel.Decoration(0, 12, TextDecoration.builder().presets().build()),
+                new FaceModel.Decoration(12, 3, TextDecoration.builder().presets().fontWeight(FontWeight.BOLD).build()),
+                new FaceModel.Decoration(15, 11, TextDecoration.builder().presets().fontPosture(FontPosture.ITALIC).build()),
+                new FaceModel.Decoration(26, 15, TextDecoration.builder().presets().foreground(Color.RED).build())
+        );
+
+    private final FaceModel faceModel = new FaceModel("Simple text one two three\nExtra line text", decorations, 41);
 
     private final Label textLengthLabel = new Label();
     private final RichTextArea editor = new RichTextArea();
@@ -131,8 +144,19 @@ public class Main extends Application {
         statusBar.setAlignment(Pos.CENTER_RIGHT);
         statusBar.getChildren().setAll(textLengthLabel);
 
+        MenuItem newFileMenu = new MenuItem("New Text");
+        newFileMenu.setOnAction(e -> editor.setFaceModel(new FaceModel()));
+        MenuItem openFileMenu = new MenuItem("Open Text");
+        // For now, just load a decorated text
+        openFileMenu.setOnAction(e -> editor.setFaceModel(faceModel));
+
+        Menu fileMenu = new Menu("File");
+        fileMenu.getItems().addAll(newFileMenu, openFileMenu);
+        MenuBar menuBar = new MenuBar(fileMenu);
+        menuBar.setUseSystemMenuBar(true);
+
         BorderPane root = new BorderPane(editor);
-        root.setTop(toolbar);
+        root.setTop(new VBox(menuBar, toolbar));
         root.setBottom(statusBar);
 
         Scene scene = new Scene(root, 800, 480);

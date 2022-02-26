@@ -3,6 +3,7 @@ package com.gluonhq.richtext;
 
 import com.gluonhq.richtext.viewmodel.ActionFactory;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyIntegerProperty;
@@ -10,6 +11,7 @@ import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.Control;
 import javafx.scene.control.SkinBase;
 
@@ -30,6 +32,18 @@ public class RichTextArea extends Control {
 
     @Override public String getUserAgentStylesheet() {
         return getClass().getResource("rich-text-area.css").toExternalForm();
+    }
+
+    // faceModelProperty
+    private final ObjectProperty<FaceModel> faceModelProperty = new SimpleObjectProperty<>(this, "faceModel", new FaceModel());
+    public final ObjectProperty<FaceModel> faceModelProperty() {
+       return faceModelProperty;
+    }
+    public final FaceModel getFaceModel() {
+       return faceModelProperty.get();
+    }
+    public final void setFaceModel(FaceModel value) {
+        faceModelProperty.set(value);
     }
 
     // editableProperty
