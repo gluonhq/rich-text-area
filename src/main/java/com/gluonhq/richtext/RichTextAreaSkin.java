@@ -14,6 +14,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
@@ -128,6 +129,7 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         super(control);
 
         textFlow.setFocusTraversable(false);
+        textFlow.setPadding(new Insets(-1));
         textFlow.getStyleClass().setAll("text-flow");
 
         caretShape.setFocusTraversable(false);
@@ -140,8 +142,6 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         caretTimeline.setCycleCount(Timeline.INDEFINITE);
 
         scrollPane = new ScrollPane(layers);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setFitToHeight(true);
         scrollPane.setFocusTraversable(false);
         focusChangeListener = (obs, ov, nv) -> {
             if (nv) {
@@ -278,18 +278,18 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         if (editable) {
             getSkinnable().setOnKeyPressed(this::keyPressedListener);
             getSkinnable().setOnKeyTyped(this::keyTypedListener);
-            layers.setOnMousePressed(this::mousePressedListener);
-            layers.setOnMouseDragged(this::mouseDraggedListener);
+            textFlow.setOnMousePressed(this::mousePressedListener);
+            textFlow.setOnMouseDragged(this::mouseDraggedListener);
         } else {
             getSkinnable().setOnKeyPressed(null);
             getSkinnable().setOnKeyTyped(null);
             scrollPane.focusedProperty().removeListener(focusChangeListener);
-            layers.setOnMousePressed(null);
-            layers.setOnMouseDragged(null);
+            textFlow.setOnMousePressed(null);
+            textFlow.setOnMouseDragged(null);
         }
 
         viewModel.setCaretPosition( editable? 0:-1 );
-        layers.setCursor( editable? Cursor.TEXT: Cursor.DEFAULT);
+        textFlow.setCursor( editable? Cursor.TEXT: Cursor.DEFAULT);
 
     }
 
