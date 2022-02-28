@@ -42,6 +42,17 @@
             <version>5.8.2</version>
             <scope>test</scope>
         </dependency>
+        <!-- Move to demo module -->
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-lineawesome-pack</artifactId>
+            <version>12.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-javafx</artifactId>
+            <version>12.2.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -70,6 +81,23 @@
                 <configuration>
                     <mainClass>${main.class}</mainClass>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>run</id>
+                        <configuration>
+                            <mainClass>${main.class}</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>debug</id>
+                        <configuration>
+                            <mainClass>${main.class}</mainClass>
+                            <options>
+                                <option>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:8000</option>
+                            </options>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>com.gluonhq</groupId>

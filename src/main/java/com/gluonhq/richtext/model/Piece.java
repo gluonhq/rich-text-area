@@ -2,6 +2,8 @@ package com.gluonhq.richtext.model;
 
 import java.util.Objects;
 
+import static com.gluonhq.richtext.Tools.getFirstLetter;
+
 public final class Piece {
 
     public enum BufferType {ORIGINAL, ADDITION}
@@ -14,16 +16,16 @@ public final class Piece {
     final TextDecoration decoration;
 
     public Piece(final PieceTable source, final BufferType bufferType, final int start, final int length) {
-        this(source, bufferType, start, length, TextDecoration.builder().build() );
+        this(source, bufferType, start, length, null);
     }
 
-    public Piece(final PieceTable source, final BufferType bufferType, final int start, final int length, TextDecoration decoration ) {
+    public Piece(final PieceTable source, final BufferType bufferType, final int start, final int length, TextDecoration decoration) {
 
         this.bufferType = bufferType;
         this.start = start;
         this.length = Math.max(length, 0);
         this.source = Objects.requireNonNull(source);
-        this.decoration = decoration == null? TextDecoration.builder().build(): decoration;
+        this.decoration = decoration == null ? TextDecoration.builder().presets().build() : decoration;
 
 
         // find all the line stops
@@ -60,7 +62,11 @@ public final class Piece {
     }
 
     Piece copy(int newStart, int newLength) {
-        return new Piece(source, bufferType, newStart, newLength);
+        return new Piece(source, bufferType, newStart, newLength, decoration);
+    }
+
+    Piece copy(int newStart, int newLength, TextDecoration textDecoration) {
+        return new Piece(source, bufferType, newStart, newLength, textDecoration.normalize(decoration));
     }
 
     // excludes char at offset
@@ -75,4 +81,12 @@ public final class Piece {
         return copy(start + offset, length - offset);
     }
 
+    @Override
+    public String toString() {
+        return "Piece{type=" + getFirstLetter(bufferType.name()) +
+                ", [" + start +
+                ", " + length +
+                "], " + decoration +
+                ", \"" + getText().replaceAll("\n", "<n>") + "\"}";
+    }
 }

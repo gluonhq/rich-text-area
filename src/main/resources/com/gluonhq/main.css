@@ -1,0 +1,17 @@
+.color-picker.foreground {
+    -fx-color-label-visible: false;
+    -fx-color-rect-width: 6;
+    -fx-color-rect-height: 6;
+    -fx-graphic: url("HTMLEditor-Text-Color.png");
+}
+
+.color-picker.background {
+    -fx-color-label-visible: false;
+    -fx-color-rect-width: 6;
+    -fx-color-rect-height: 6;
+    -fx-graphic: url("HTMLEditor-Background-Color.png");
+}
+
+.status-bar {
+    -fx-padding: 10;
+}

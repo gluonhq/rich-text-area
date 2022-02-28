@@ -6,6 +6,8 @@ import javafx.scene.text.FontWeight;
 
 import java.util.Objects;
 
+import static com.gluonhq.richtext.Tools.getFirstLetter;
+
 public class TextDecoration {
 
     private Color foreground;
@@ -45,18 +47,43 @@ public class TextDecoration {
         return new Builder();
     }
 
-    static class Builder {
+    /**
+     * Returns a new instance of the current TextDecoration
+     * and normalizes properties based on the supplied decoration.
+     * FontWeight and FontPosture normalize into
+     * {@link FontWeight#NORMAL} and {@link FontPosture#REGULAR} respectively.
+     * @param decoration Decoration to compare and normalize
+     * @return New TextDecoration instance with properties normalized
+     */
+    public TextDecoration normalize(TextDecoration decoration) {
+        if (decoration == null) {
+            return this;
+        }
+        TextDecoration td = new TextDecoration();
+        final double normalizedFontSize = this.fontSize < 1.0 ? decoration.getFontSize() : this.fontSize;
+        final FontWeight normalizedWeight = this.fontWeight == decoration.getFontWeight() ? FontWeight.NORMAL : this.fontWeight;
+        final FontPosture normalizedPosture = this.fontPosture == decoration.getFontPosture() ? FontPosture.REGULAR : this.fontPosture;
+        td.foreground  = Objects.requireNonNullElse(foreground, decoration.getForeground());
+        td.background  = Objects.requireNonNullElse(background, decoration.getBackground());
+        td.fontFamily  = Objects.requireNonNullElse(fontFamily, decoration.getFontFamily());
+        td.fontSize    = normalizedFontSize;
+        td.fontWeight  = Objects.requireNonNullElse(normalizedWeight, decoration.getFontWeight());
+        td.fontPosture = Objects.requireNonNullElse(normalizedPosture, decoration.getFontPosture());
+        return td;
+    }
 
-        private Color foreground = Color.BLUE;
-        private Color background = Color.BLUE;
-        private String fontFamily = "Arial";
-        private double fontSize = 17.0;
-        private FontPosture fontPosture = FontPosture.REGULAR;
-        private FontWeight fontWeight = FontWeight.MEDIUM;
+    public static class Builder {
+
+        private Color foreground;
+        private Color background;
+        private String fontFamily;
+        private double fontSize;
+        private FontPosture fontPosture;
+        private FontWeight fontWeight;
 
         private Builder() {}
 
-        TextDecoration build() {
+        public TextDecoration build() {
             TextDecoration decoration = new TextDecoration();
             decoration.foreground  = this.foreground;
             decoration.background  = this.background;
@@ -67,38 +94,58 @@ public class TextDecoration {
             return decoration;
         }
 
-        Builder foreground(Color color) {
+        public Builder presets() {
+            foreground = Color.BLUE;
+            background = Color.TRANSPARENT;
+            fontFamily = "Arial";
+            fontSize = 17.0;
+            fontPosture = FontPosture.REGULAR;
+            fontWeight = FontWeight.NORMAL;
+            return this;
+        }
+
+        public Builder foreground(Color color) {
             this.foreground = Objects.requireNonNull(color);
             return this;
         }
 
-        Builder background(Color color) {
+        public Builder background(Color color) {
             this.background = Objects.requireNonNull(color);
             return this;
         }
 
-        Builder fontFamily(String fontFamily) {
+        public Builder fontFamily(String fontFamily) {
             this.fontFamily = Objects.requireNonNull(fontFamily);
             return this;
         }
 
-        Builder fontSize(double fontSize) {
+        public Builder fontSize(double fontSize) {
             this.fontSize = fontSize;
             return this;
         }
 
-        Builder fontWeight(FontWeight fontWeight) {
+        public Builder fontWeight(FontWeight fontWeight) {
             this.fontWeight = Objects.requireNonNull(fontWeight);
             return this;
         }
 
-        Builder fontPosture(FontPosture fontPosture) {
+        public Builder fontPosture(FontPosture fontPosture) {
             this.fontPosture = Objects.requireNonNull(fontPosture);
             return this;
         }
-
     }
 
+    @Override
+    public String toString() {
+        return "deco{" +
+                "fcolor=" + foreground +
+                ", bcolor=" + background +
+                ", font['" + fontFamily + '\'' +
+                ", " + fontSize +
+                ", " + getFirstLetter(fontPosture.name()) +
+                ", " + getFirstLetter(fontWeight.name()) +
+                "]}";
+    }
 }
 
 

@@ -3,22 +3,31 @@ package com.gluonhq.richtext;
 import com.gluonhq.richtext.model.PieceTable;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
+import com.gluonhq.richtext.viewmodel.ActionCaretMove;
+import com.gluonhq.richtext.viewmodel.ActionFactory;
 import com.gluonhq.richtext.viewmodel.RichTextAreaViewModel;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
+import javafx.collections.SetChangeListener;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
+import javafx.scene.Group;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SkinBase;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
+import javafx.scene.shape.LineTo;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
+import javafx.scene.shape.PathElement;
 import javafx.scene.text.Font;
 import javafx.scene.text.HitInfo;
 import javafx.scene.text.Text;
@@ -31,41 +40,52 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.gluonhq.richtext.viewmodel.RichTextAreaViewModel.Direction;
+import static java.util.Map.entry;
 import static javafx.scene.input.KeyCode.*;
 import static javafx.scene.input.KeyCombination.*;
-import static java.util.Map.entry;
+import static javafx.scene.text.FontPosture.ITALIC;
+import static javafx.scene.text.FontWeight.BOLD;
 
 class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
-    private static final Map<KeyCombination, EditorAction> INPUT_MAP = Map.ofEntries(
-        entry( new KeyCodeCombination(RIGHT, SHIFT_ANY),      EditorAction.FORWARD),
-        entry( new KeyCodeCombination(LEFT,  SHIFT_ANY),      EditorAction.BACK),
-        entry( new KeyCodeCombination(DOWN,  SHIFT_ANY),      EditorAction.DOWN),
-        entry( new KeyCodeCombination(UP,    SHIFT_ANY),      EditorAction.UP),
-        entry( new KeyCodeCombination(BACK_SPACE, SHIFT_ANY), EditorAction.BACKSPACE),
-        entry( new KeyCodeCombination(DELETE),                EditorAction.DELETE),
-        entry( new KeyCodeCombination(Z, SHORTCUT_DOWN),      EditorAction.UNDO),
-        entry( new KeyCodeCombination(Z, SHORTCUT_DOWN, SHIFT_DOWN), EditorAction.REDO),
-        entry( new KeyCodeCombination(ENTER, SHIFT_ANY),      EditorAction.ENTER),
-        entry( new KeyCodeCombination(C, SHORTCUT_DOWN),      EditorAction.COPY),
-        entry( new KeyCodeCombination(X, SHORTCUT_DOWN),      EditorAction.CUT),
-        entry( new KeyCodeCombination(V, SHORTCUT_DOWN),      EditorAction.PASTE)
+    interface ActionBuilder extends Function<KeyEvent, Action>{}
+
+    private static final ActionFactory ACTION_FACTORY = new ActionFactory();
+
+    private static final Map<KeyCombination, ActionBuilder> INPUT_MAP = Map.ofEntries(
+        entry( new KeyCodeCombination(RIGHT, SHIFT_ANY, ALT_ANY, CONTROL_ANY, SHORTCUT_ANY), e -> new ActionCaretMove(Direction.FORWARD, e)),
+        entry( new KeyCodeCombination(LEFT,  SHIFT_ANY, ALT_ANY, CONTROL_ANY, SHORTCUT_ANY), e -> new ActionCaretMove(Direction.BACK, e)),
+        entry( new KeyCodeCombination(DOWN,  SHIFT_ANY),                                     e -> new ActionCaretMove(Direction.DOWN, e.isShiftDown(), false, false)),
+        entry( new KeyCodeCombination(UP,    SHIFT_ANY),                                     e -> new ActionCaretMove(Direction.UP, e.isShiftDown(), false, false)),
+        entry( new KeyCodeCombination(HOME,  SHIFT_ANY),                                     e -> new ActionCaretMove(Direction.FORWARD, e.isShiftDown(), false, true)),
+        entry( new KeyCodeCombination(END,   SHIFT_ANY),                                     e -> new ActionCaretMove(Direction.BACK, e.isShiftDown(), false, true)),
+        entry( new KeyCodeCombination(C, SHORTCUT_DOWN),                                     e -> ACTION_FACTORY.copy()),
+        entry( new KeyCodeCombination(X, SHORTCUT_DOWN),                                     e -> ACTION_FACTORY.cut()),
+        entry( new KeyCodeCombination(V, SHORTCUT_DOWN),                                     e -> ACTION_FACTORY.paste()),
+        entry( new KeyCodeCombination(Z, SHORTCUT_DOWN),                                     e -> ACTION_FACTORY.undo()),
+        entry( new KeyCodeCombination(Z, SHORTCUT_DOWN, SHIFT_DOWN),                         e -> ACTION_FACTORY.redo()),
+        entry( new KeyCodeCombination(ENTER, SHIFT_ANY),                                     e -> ACTION_FACTORY.insertText("\n")),
+        entry( new KeyCodeCombination(BACK_SPACE, SHIFT_ANY),                                e -> ACTION_FACTORY.removeText(-1)),
+        entry( new KeyCodeCombination(DELETE),                                               e -> ACTION_FACTORY.removeText(0)),
+        entry( new KeyCodeCombination(B, SHORTCUT_DOWN),                                     e -> ACTION_FACTORY.decorateText(TextDecoration.builder().fontWeight(BOLD).build())),
+        entry( new KeyCodeCombination(I, SHORTCUT_DOWN),                                     e -> ACTION_FACTORY.decorateText(TextDecoration.builder().fontPosture(ITALIC).build()))
     );
 
-    private final RichTextAreaViewModel viewModel =
-        new RichTextAreaViewModel(
-            new PieceTable("Simple text text text"),
-            this::getNextRowPosition // TODO need to find a better way to find next row caret position
-        );
+    // TODO need to find a better way to find next row caret position
+    private final RichTextAreaViewModel viewModel = new RichTextAreaViewModel(this::getNextRowPosition);
 
     private final ScrollPane scrollPane;
-    private final Pane layers;
     private final TextFlow textFlow = new TextFlow();
     private final Path caretShape = new Path();
     private final Path selectionShape = new Path();
+    private final Group layers;
+    private final ObservableSet<Path> textBackgroundColorPaths = FXCollections.observableSet();
 
     private final Timeline caretTimeline = new Timeline(
         new KeyFrame(Duration.ZERO        , e -> setCaretVisibility(false)),
@@ -78,6 +98,31 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow();
     private final ChangeListener<Boolean> focusChangeListener;
+    private final SetChangeListener<Path> textBackgroundColorPathsChangeListener = this::updateLayers;
+
+    //TODO remove listener on viewModel change
+    private final ChangeListener<Number> caretPositionListener = (o, ocp, p) -> {
+        int caretPosition = p.intValue();
+        caretShape.getElements().clear();
+        if (caretPosition < 0) {
+            caretTimeline.stop();
+        } else {
+            var pathElements = textFlow.caretShape(caretPosition, true);
+            caretShape.getElements().addAll(pathElements);
+            if (caretShape.getLayoutBounds().getHeight() < 3) {
+                caretShape.getElements().add(new LineTo(0, 20));
+            }
+            caretTimeline.play();
+        }
+    };
+
+    //TODO remove listener on viewModel change
+    private final ChangeListener<Selection> selectionListener = (o, os, selection) -> {
+        selectionShape.getElements().clear();
+        if (selection.isDefined()) {
+            selectionShape.getElements().setAll(textFlow.rangeShape(selection.getStart(), selection.getEnd()));
+        }
+    };
 
     protected RichTextAreaSkin(final RichTextArea control) {
         super(control);
@@ -90,8 +135,8 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
         selectionShape.getStyleClass().setAll("selection");
 
-        layers = new Pane(selectionShape, caretShape, textFlow);
-        textFlow.prefWidthProperty().bind(layers.widthProperty());
+        layers = new Group(selectionShape, caretShape, textFlow);
+        layers.getChildren().addAll(0, textBackgroundColorPaths);
         caretTimeline.setCycleCount(Timeline.INDEFINITE);
 
         scrollPane = new ScrollPane(layers);
@@ -107,37 +152,30 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getChildren().add(scrollPane);
 
         // all listeners have to be removed within dispose method
-        control.editableProperty().addListener(this::editableChangeListener);
-        editableChangeListener(null); // sets up all related listeners
-        control.textLengthProperty.bind(viewModel.textLengthProperty());
-
-        //TODO remove listener on viewModel change
-        viewModel.caretPositionProperty().addListener( (o,ocp, p) -> {
-            int caretPosition = p.intValue();
-            caretShape.getElements().clear();
-            if (caretPosition < 0 ) {
-                caretTimeline.stop();
-            } else {
-                var pathElements = textFlow.caretShape(caretPosition, true);
-                caretShape.getElements().addAll(pathElements);
-                caretTimeline.play();
+        control.faceModelProperty().addListener((obs, ov, nv) -> {
+            if (ov != null) {
+                dispose();
             }
+            setup(nv);
         });
-
-        //TODO remove listener on viewModel change
-        viewModel.selectionProperty().addListener( (o, os, selection) -> {
-            selectionShape.getElements().clear();
-            if (selection.isDefined()) {
-                selectionShape.getElements().setAll(textFlow.rangeShape( selection.getStart(), selection.getEnd() ));
-            }
-        });
-
-
-        viewModel.addChangeListener(textChangeListener);
-        refreshTextFlow();
-
+        setup(control.getFaceModel());
     }
 
+    private void setup(FaceModel faceModel) {
+        if (faceModel == null) {
+            return;
+        }
+        viewModel.setTextBuffer(new PieceTable(faceModel));
+        getSkinnable().textLengthProperty.bind(viewModel.textLengthProperty());
+        viewModel.caretPositionProperty().addListener(caretPositionListener);
+        viewModel.selectionProperty().addListener(selectionListener);
+        viewModel.addChangeListener(textChangeListener);
+        getSkinnable().editableProperty().addListener(this::editableChangeListener);
+        editableChangeListener(null); // sets up all related listeners
+        textBackgroundColorPaths.addListener(textBackgroundColorPathsChangeListener);
+        refreshTextFlow();
+        viewModel.setCaretPosition(faceModel.getCaretPosition());
+    }
     /// PROPERTIES ///////////////////////////////////////////////////////////////
 
 
@@ -145,24 +183,57 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     @Override
     public void dispose() {
-        getSkinnable().setEditable(false); // removes all related listeners
         getSkinnable().editableProperty().removeListener(this::editableChangeListener);
+        getSkinnable().textLengthProperty.unbind();
+        viewModel.clearSelection();
+        viewModel.caretPositionProperty().removeListener(caretPositionListener);
+        viewModel.selectionProperty().removeListener(selectionListener);
         viewModel.removeChangeListener(textChangeListener);
+        textBackgroundColorPaths.removeListener(textBackgroundColorPathsChangeListener);
     }
 
     /// PRIVATE METHODS /////////////////////////////////////////////////////////
 
-    //TODO Need more optimal way of rendering text fragments.
+    // TODO Need more optimal way of rendering text fragments.
     //  For now rebuilding the whole text flow
     private void refreshTextFlow() {
         fontCacheEvictionTimer.pause();
         try {
             var fragments = new ArrayList<Text>();
-            viewModel.walkFragments((text, decoration) -> fragments.add(buildText(text, decoration)));
+            var backgroundIndexRanges = new ArrayList<IndexRangeColor>();
+            var length = new AtomicInteger();
+            viewModel.walkFragments((text, decoration) -> {
+                final Text textNode = buildText(text, decoration);
+                fragments.add(textNode);
+
+                if (decoration.getBackground() != Color.TRANSPARENT) {
+                    final IndexRangeColor indexRangeColor = new IndexRangeColor(
+                            length.get(),
+                            length.get() + textNode.getText().length(),
+                            decoration.getBackground()
+                    );
+                    backgroundIndexRanges.add(indexRangeColor);
+                }
+                length.addAndGet(textNode.getText().length());
+            });
             textFlow.getChildren().setAll(fragments);
+            addBackgroundPathsToLayers(backgroundIndexRanges);
         } finally {
             fontCacheEvictionTimer.start();
         }
+    }
+
+    private void addBackgroundPathsToLayers(List<IndexRangeColor> backgroundIndexRanges) {
+        final List<Path> backgroundPaths = backgroundIndexRanges.stream()
+                .map(indexRangeBackground -> {
+                    final Path path = new BackgroundColorPath(textFlow.rangeShape(indexRangeBackground.getStart(), indexRangeBackground.getEnd()));
+                    path.setStrokeWidth(0);
+                    path.setFill(indexRangeBackground.getColor());
+                    return path;
+                })
+                .collect(Collectors.toList());
+        textBackgroundColorPaths.removeIf(path -> !backgroundPaths.contains(path));
+        textBackgroundColorPaths.addAll(backgroundPaths);
     }
 
     private Text buildText(String content, TextDecoration decoration ) {
@@ -201,7 +272,6 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     private void editableChangeListener(Observable o) {
-
         boolean editable = getSkinnable().isEditable();
 
         viewModel.clearSelection();
@@ -223,6 +293,14 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     }
 
+    private void updateLayers(SetChangeListener.Change<? extends Path> change) {
+        if (change.wasAdded()) {
+            layers.getChildren().add(0, change.getElementAdded());
+        } else if (change.wasRemoved()) {
+            layers.getChildren().remove(change.getElementRemoved());
+        }
+    }
+
     private void setCaretVisibility(boolean on) {
         if (caretShape.getElements().size() > 0) {
             // Opacity is used since we don't want the changing caret bounds to affect the layout
@@ -234,14 +312,30 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private int dragStart = -1;
 
     private void mousePressedListener(MouseEvent e) {
-        HitInfo hitInfo = textFlow.hitTest(new Point2D(e.getX(), e.getY()));
-        if (hitInfo.getInsertionIndex() >= 0) {
-            viewModel.setCaretPosition(hitInfo.getInsertionIndex());
-            dragStart = viewModel.getCaretPosition();
+        if (e.getButton() == MouseButton.PRIMARY && !(e.isMiddleButtonDown() || e.isSecondaryButtonDown())) {
+            HitInfo hitInfo = textFlow.hitTest(new Point2D(e.getX(), e.getY()));
+            int prevCaretPosition = viewModel.getCaretPosition();
+            if (hitInfo.getInsertionIndex() >= 0) {
+                if (!(e.isControlDown() || e.isAltDown() || e.isShiftDown() || e.isMetaDown() || e.isShortcutDown())) {
+                    viewModel.setCaretPosition(hitInfo.getInsertionIndex());
+                    if (e.getClickCount() == 2) {
+                        viewModel.selectCurrentWord();
+                    } else if (e.getClickCount() == 3) {
+                        viewModel.selectCurrentLine();
+                    } else {
+                        dragStart = prevCaretPosition;
+                        viewModel.clearSelection();
+                    }
+                } else if (e.isShiftDown() && e.getClickCount() == 1 && !(e.isControlDown() || e.isAltDown() || e.isMetaDown() || e.isShortcutDown())) {
+                    viewModel.setSelection(new Selection(prevCaretPosition, hitInfo.getInsertionIndex()));
+                    viewModel.setCaretPosition(hitInfo.getInsertionIndex());
+                }
+            }
+            getSkinnable().requestFocus();
+            e.consume();
+        } else {
+            // TODO Add support for ContextMenu
         }
-        viewModel.clearSelection();
-        getSkinnable().requestFocus();
-        e.consume();
     }
 
     private void mouseDraggedListener(MouseEvent e) {
@@ -257,12 +351,16 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     // So far the only way to find prev/next row location is to use the size of the caret,
     // which always has the height of the row. Adding line spacing to it allows us to find a point which
     // belongs to the desired row. Then using the `hitTest` we can find the related caret position.
-    private int getNextRowPosition( boolean down ) {
-        Bounds caretBounds = caretShape.getBoundsInLocal();
-        double nextRowPos =  down? caretBounds.getMaxY() + textFlow.getLineSpacing():
-                caretBounds.getMinY() - textFlow.getLineSpacing();
-        HitInfo hitInfo = textFlow.hitTest(new Point2D( caretBounds.getMinX(), nextRowPos));
-        return hitInfo.getCharIndex();
+    private int getNextRowPosition(double x, boolean down) {
+        Bounds caretBounds = caretShape.getLayoutBounds();
+        double nextRowPos = x < 0d ?
+                down ?
+                    caretBounds.getMaxY() + textFlow.getLineSpacing() :
+                    caretBounds.getMinY() - textFlow.getLineSpacing() :
+                caretBounds.getCenterY();
+        double xPos = x < 0d ? caretBounds.getMaxX() : x;
+        HitInfo hitInfo = textFlow.hitTest(new Point2D(xPos, nextRowPos));
+        return hitInfo.getInsertionIndex();
     }
 
     private static boolean isPrintableChar(char c) {
@@ -280,20 +378,76 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
                !e.isAltDown();
     }
 
+    public void execute( Action action ) {
+        Objects.requireNonNull(action).apply(viewModel);
+    }
+
+    public static ActionFactory getActionFactory() {
+        return ACTION_FACTORY;
+    }
+
     private void keyPressedListener(KeyEvent e) {
+
         // Find an applicable action and execute it if found
         for (KeyCombination kc : INPUT_MAP.keySet()) {
             if (kc.match(e)) {
-                viewModel.executeAction(INPUT_MAP.get(kc), e);
+                execute(INPUT_MAP.get(kc).apply(e));
                 e.consume();
+                return;
             }
         }
+
     }
 
     private void keyTypedListener(KeyEvent e) {
         if ( isCharOnly(e) ) {
-            viewModel.executeAction(EditorAction.INSERT, e);
+            execute( ACTION_FACTORY.insertText(e.getCharacter()));
             e.consume();
+        }
+    }
+
+    private static class IndexRangeColor {
+
+        private final int start;
+        private final int end;
+        private final Color color;
+
+        public IndexRangeColor(int start, int end, Color color) {
+            this.start = start;
+            this.end = end;
+            this.color = color;
+        }
+
+        public int getStart() {
+            return start;
+        }
+
+        public int getEnd() {
+            return end;
+        }
+
+        public Color getColor() {
+            return color;
+        }
+    }
+
+    private static class BackgroundColorPath extends Path {
+
+        public BackgroundColorPath(PathElement[] elements) {
+            super(elements);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            BackgroundColorPath that = (BackgroundColorPath) o;
+            return Objects.equals(getLayoutBounds(), that.getLayoutBounds()) && Objects.equals(getFill(), that.getFill());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getLayoutBounds(), getFill());
         }
     }
 

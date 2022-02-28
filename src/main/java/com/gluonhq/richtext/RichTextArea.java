@@ -1,14 +1,20 @@
 package com.gluonhq.richtext;
 
 
-import javafx.beans.property.*;
-import javafx.scene.Node;
+import com.gluonhq.richtext.viewmodel.ActionFactory;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.ReadOnlyIntegerProperty;
+import javafx.beans.property.ReadOnlyIntegerWrapper;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.Control;
 import javafx.scene.control.SkinBase;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.List;
 import java.util.Objects;
 
 public class RichTextArea extends Control {
@@ -26,6 +32,18 @@ public class RichTextArea extends Control {
 
     @Override public String getUserAgentStylesheet() {
         return getClass().getResource("rich-text-area.css").toExternalForm();
+    }
+
+    // faceModelProperty
+    private final ObjectProperty<FaceModel> faceModelProperty = new SimpleObjectProperty<>(this, "faceModel", new FaceModel());
+    public final ObjectProperty<FaceModel> faceModelProperty() {
+       return faceModelProperty;
+    }
+    public final FaceModel getFaceModel() {
+       return faceModelProperty.get();
+    }
+    public final void setFaceModel(FaceModel value) {
+        faceModelProperty.set(value);
     }
 
     // editableProperty
@@ -62,22 +80,35 @@ public class RichTextArea extends Control {
         return textLengthProperty.get();
     }
 
-    // codecProperty
-    private final ObjectProperty<Codec> codecProperty = new SimpleObjectProperty<>(this, "codec");
-    public final ObjectProperty<Codec> codecProperty() {
-       return codecProperty;
+    // undoStackSizeProperty
+    final ReadOnlyBooleanWrapper undoStackEmptyProperty = new ReadOnlyBooleanWrapper(this, "undoStackEmpty");
+    public ReadOnlyBooleanProperty undoStackEmptyProperty() {
+        return undoStackEmptyProperty.getReadOnlyProperty();
     }
-    public final Codec getCodec() {
-       return codecProperty.get();
-    }
-    public final void setCodec(Codec value) {
-        codecProperty.set(value);
+    public boolean isUndoStackEmpty() {
+        return undoStackEmptyProperty.get();
     }
 
-
-    public interface Codec {
-        OutputStream decode(List<Node> nodes);
-        List<Node> encode(InputStream stream);
+    // redoStackSizeProperty
+    final ReadOnlyBooleanWrapper redoStackEmptyProperty = new ReadOnlyBooleanWrapper(this, "redoStackEmpty");
+    public ReadOnlyBooleanProperty redoStackEmptyProperty() {
+        return redoStackEmptyProperty.getReadOnlyProperty();
     }
+    public boolean isRedoStackEmpty() {
+        return redoStackEmptyProperty.get();
+    }
+
+    public void execute( Action action ) {
+        if ( getSkin() instanceof RichTextAreaSkin ) {
+            RichTextAreaSkin rtaSkin  = (RichTextAreaSkin)getSkin();
+            rtaSkin.execute(Objects.requireNonNull(action));
+            requestFocus();
+        }
+    }
+
+    public ActionFactory getActionFactory() {
+        return RichTextAreaSkin.getActionFactory();
+    }
+
 }
 
