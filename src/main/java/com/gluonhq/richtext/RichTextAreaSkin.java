@@ -9,6 +9,9 @@ import com.gluonhq.richtext.viewmodel.RichTextAreaViewModel;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.DoubleBinding;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
@@ -102,27 +105,18 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final SetChangeListener<Path> textBackgroundColorPathsChangeListener = this::updateLayers;
 
     //TODO remove listener on viewModel change
-    private final ChangeListener<Number> caretPositionListener = (o, ocp, p) -> {
-        int caretPosition = p.intValue();
-        caretShape.getElements().clear();
-        if (caretPosition < 0) {
-            caretTimeline.stop();
-        } else {
-            var pathElements = textFlow.caretShape(caretPosition, true);
-            caretShape.getElements().addAll(pathElements);
-            if (caretShape.getLayoutBounds().getHeight() < 3) {
-                caretShape.getElements().add(new LineTo(0, 20));
-            }
-            caretTimeline.play();
-        }
-    };
+    private final ChangeListener<Number> caretPositionListener = (o, ocp, p) -> updateCaretPosition(p.intValue());
 
     //TODO remove listener on viewModel change
-    private final ChangeListener<Selection> selectionListener = (o, os, selection) -> {
-        selectionShape.getElements().clear();
-        if (selection.isDefined()) {
-            selectionShape.getElements().setAll(textFlow.rangeShape(selection.getStart(), selection.getEnd()));
-        }
+    private final ChangeListener<Selection> selectionListener = (o, os, selection) -> updateSelection(selection);
+
+    private final ObjectBinding<ScrollPane.ScrollBarPolicy> hbarPolicyBinding;
+    private final DoubleBinding prefWidthBinding;
+    private final DoubleBinding prefHeightBinding;
+    private final ChangeListener<Number> textFlowPrefWidthListener = (obs, ov, nv) -> {
+        refreshTextFlow();
+        updateSelection(viewModel.getSelection());
+        updateCaretPosition(viewModel.getCaretPosition());
     };
 
     protected RichTextAreaSkin(final RichTextArea control) {
@@ -148,8 +142,18 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 getSkinnable().requestFocus();
             }
         };
-        scrollPane.focusedProperty().addListener(focusChangeListener);
         getChildren().add(scrollPane);
+
+        prefWidthBinding = Bindings.createDoubleBinding(() ->
+                        getSkinnable().getContentAreaWidth() > 0 ?
+                                getSkinnable().getContentAreaWidth() : scrollPane.getViewportBounds().getWidth() - 1,
+                getSkinnable().contentAreaWidthProperty(), scrollPane.viewportBoundsProperty());
+        prefHeightBinding = Bindings.createDoubleBinding(() -> scrollPane.getViewportBounds().getHeight() - 1,
+                scrollPane.viewportBoundsProperty());
+
+        hbarPolicyBinding = Bindings.createObjectBinding(
+                () -> getSkinnable().getContentAreaWidth() == 0 ? ScrollPane.ScrollBarPolicy.NEVER : ScrollPane.ScrollBarPolicy.AS_NEEDED,
+                getSkinnable().contentAreaWidthProperty());
 
         // all listeners have to be removed within dispose method
         control.faceModelProperty().addListener((obs, ov, nv) -> {
@@ -175,6 +179,11 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         textBackgroundColorPaths.addListener(textBackgroundColorPathsChangeListener);
         refreshTextFlow();
         viewModel.setCaretPosition(faceModel.getCaretPosition());
+        textFlow.prefWidthProperty().bind(prefWidthBinding);
+        textFlow.prefHeightProperty().bind(prefHeightBinding);
+        textFlow.prefWidthProperty().addListener(textFlowPrefWidthListener);
+        scrollPane.focusedProperty().addListener(focusChangeListener);
+        scrollPane.hbarPolicyProperty().bind(hbarPolicyBinding);
     }
     /// PROPERTIES ///////////////////////////////////////////////////////////////
 
@@ -190,6 +199,11 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         viewModel.selectionProperty().removeListener(selectionListener);
         viewModel.removeChangeListener(textChangeListener);
         textBackgroundColorPaths.removeListener(textBackgroundColorPathsChangeListener);
+        textFlow.prefWidthProperty().unbind();
+        textFlow.prefHeightProperty().unbind();
+        textFlow.prefWidthProperty().removeListener(textFlowPrefWidthListener);
+        scrollPane.focusedProperty().removeListener(focusChangeListener);
+        scrollPane.hbarPolicyProperty().unbind();
     }
 
     /// PRIVATE METHODS /////////////////////////////////////////////////////////
@@ -283,7 +297,6 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
         } else {
             getSkinnable().setOnKeyPressed(null);
             getSkinnable().setOnKeyTyped(null);
-            scrollPane.focusedProperty().removeListener(focusChangeListener);
             textFlow.setOnMousePressed(null);
             textFlow.setOnMouseDragged(null);
         }
@@ -298,6 +311,27 @@ class RichTextAreaSkin extends SkinBase<RichTextArea> {
             layers.getChildren().add(0, change.getElementAdded());
         } else if (change.wasRemoved()) {
             layers.getChildren().remove(change.getElementRemoved());
+        }
+    }
+
+    private void updateSelection(Selection selection) {
+        selectionShape.getElements().clear();
+        if (selection.isDefined()) {
+            selectionShape.getElements().setAll(textFlow.rangeShape(selection.getStart(), selection.getEnd()));
+        }
+    }
+
+    private void updateCaretPosition(int caretPosition) {
+        caretShape.getElements().clear();
+        if (caretPosition < 0) {
+            caretTimeline.stop();
+        } else {
+            var pathElements = textFlow.caretShape(caretPosition, true);
+            caretShape.getElements().addAll(pathElements);
+            if (caretShape.getLayoutBounds().getHeight() < 3) {
+                caretShape.getElements().add(new LineTo(0, 20));
+            }
+            caretTimeline.play();
         }
     }
 

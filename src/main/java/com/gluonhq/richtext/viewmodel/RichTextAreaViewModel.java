@@ -291,6 +291,9 @@ public class RichTextAreaViewModel {
     }
 
     public void selectCurrentWord() {
+        if (getTextLength() <= 0) {
+            return;
+        }
         moveCaret(Direction.BACK, false, true, false);
         int prevCaretPosition = getCaretPosition();
         nextWord(c -> !Character.isLetterOrDigit(c));
@@ -298,6 +301,9 @@ public class RichTextAreaViewModel {
     }
 
     public void selectCurrentLine() {
+        if (getTextLength() <= 0) {
+            return;
+        }
         moveCaret(Direction.BACK, false, false, true);
         moveCaret(Direction.FORWARD, true, false, true);
     }
