@@ -1,6 +1,6 @@
 package com.gluonhq;
 
-import com.gluonhq.richtext.Action;
+import com.gluonhq.richtext.action.Action;
 import com.gluonhq.richtext.RichTextArea;
 import com.gluonhq.richtext.FaceModel;
 import com.gluonhq.richtext.model.TextDecoration;
@@ -65,11 +65,8 @@ public class Main extends Application {
         ComboBox<String> fontFamilies = new ComboBox<>();
         fontFamilies.getItems().setAll(Font.getFamilies());
         fontFamilies.setValue("Arial");
-        fontFamilies.setOnAction(e -> {
-            String ff = fontFamilies.getSelectionModel().getSelectedItem();
-            Action action = editor.getActionFactory().decorateText(TextDecoration.builder().fontFamily(ff).build());
-            editor.execute(action);
-        });
+        fontFamilies.setOnAction(e -> editor.getActionFactory().decorate(
+                TextDecoration.builder().fontFamily(fontFamilies.getSelectionModel().getSelectedItem()).build()).execute(e));
 
         final ComboBox<Double> fontSize = new ComboBox<>();
         fontSize.setEditable(true);
@@ -78,11 +75,8 @@ public class Main extends Application {
                 .filter(i -> i % 2 == 0 || i < 10)
                 .asDoubleStream().boxed().collect(Collectors.toList()));
         fontSize.setValue(17.0);
-        fontSize.setOnAction(e -> {
-            final Double fontSizeValue = fontSize.getValue();
-            final Action action = editor.getActionFactory().decorateText(TextDecoration.builder().fontSize(fontSizeValue).build());
-            editor.execute(action);
-        });
+        fontSize.setOnAction(e -> editor.getActionFactory().decorate(
+                TextDecoration.builder().fontSize(fontSize.getValue()).build()).execute(e));
         fontSize.setConverter(new StringConverter<>() {
             @Override
             public String toString(Double aDouble) {
@@ -97,29 +91,16 @@ public class Main extends Application {
 
         final ColorPicker textForeground = new ColorPicker();
         textForeground.getStyleClass().add("foreground");
-        textForeground.setOnAction(e -> {
-            Action action = editor.getActionFactory().decorateText(TextDecoration.builder()
-                    .foreground(textForeground.getValue())
-                    .build());
-            editor.execute(action);
-        });
+        textForeground.setOnAction(e -> editor.getActionFactory().decorate(
+                TextDecoration.builder().foreground(textForeground.getValue()).build()).execute(e));
 
         final ColorPicker textBackground = new ColorPicker();
         textBackground.getStyleClass().add("background");
-        textBackground.setOnAction(e -> {
-            Action action = editor.getActionFactory().decorateText(TextDecoration.builder()
-                    .background(textBackground.getValue())
-                    .build());
-            editor.execute(action);
-        });
+        textBackground.setOnAction(e -> editor.getActionFactory().decorate(
+                TextDecoration.builder().background(textBackground.getValue()).build()).execute(e));
 
         CheckBox editableProp = new CheckBox("Editable");
         editableProp.selectedProperty().bindBidirectional(editor.editableProperty());
-
-        Button undoButton = actionButton(LineAwesomeSolid.UNDO, editor.getActionFactory().undo());
-        undoButton.disableProperty().bind(editor.undoStackEmptyProperty());
-        Button redoButton = actionButton(LineAwesomeSolid.REDO, editor.getActionFactory().redo());
-        redoButton.disableProperty().bind(editor.redoStackEmptyProperty());
 
         ToolBar toolbar = new ToolBar();
         toolbar.getItems().setAll(
@@ -127,13 +108,13 @@ public class Main extends Application {
                 actionButton(LineAwesomeSolid.COPY,  editor.getActionFactory().copy()),
                 actionButton(LineAwesomeSolid.PASTE, editor.getActionFactory().paste()),
                 new Separator(Orientation.VERTICAL),
-                undoButton,
-                redoButton,
+                actionButton(LineAwesomeSolid.UNDO, editor.getActionFactory().undo()),
+                actionButton(LineAwesomeSolid.REDO, editor.getActionFactory().redo()),
                 new Separator(Orientation.VERTICAL),
                 fontFamilies,
                 fontSize,
-                actionButton(LineAwesomeSolid.BOLD, editor.getActionFactory().decorateText(TextDecoration.builder().fontWeight(FontWeight.BOLD).build())),
-                actionButton(LineAwesomeSolid.ITALIC, editor.getActionFactory().decorateText(TextDecoration.builder().fontPosture(FontPosture.ITALIC).build())),
+                actionButton(LineAwesomeSolid.BOLD, editor.getActionFactory().decorate(TextDecoration.builder().fontWeight(FontWeight.BOLD).build())),
+                actionButton(LineAwesomeSolid.ITALIC, editor.getActionFactory().decorate(TextDecoration.builder().fontPosture(FontPosture.ITALIC).build())),
                 textForeground,
                 textBackground,
                 new Separator(Orientation.VERTICAL),
@@ -152,8 +133,16 @@ public class Main extends Application {
 
         Menu fileMenu = new Menu("File");
         fileMenu.getItems().addAll(newFileMenu, openFileMenu);
-        MenuBar menuBar = new MenuBar(fileMenu);
-        menuBar.setUseSystemMenuBar(true);
+        Menu editMenu = new Menu("Edit");
+        editMenu.getItems().addAll(
+                actionMenuItem("Undo", LineAwesomeSolid.UNDO, editor.getActionFactory().undo()),
+                actionMenuItem("Redo", LineAwesomeSolid.REDO, editor.getActionFactory().redo()),
+                new SeparatorMenuItem(),
+                actionMenuItem("Copy", LineAwesomeSolid.COPY, editor.getActionFactory().copy()),
+                actionMenuItem("Cut", LineAwesomeSolid.CUT, editor.getActionFactory().cut()),
+                actionMenuItem("Paste", LineAwesomeSolid.PASTE, editor.getActionFactory().paste()));
+        MenuBar menuBar = new MenuBar(fileMenu, editMenu);
+//        menuBar.setUseSystemMenuBar(true);
 
         BorderPane root = new BorderPane(editor);
         root.setTop(new VBox(menuBar, toolbar));
@@ -170,13 +159,22 @@ public class Main extends Application {
 
     private Button actionButton(Ikon ikon, Action action) {
         Button button = new Button();
-        FontIcon icon  = new FontIcon(ikon);
+        FontIcon icon = new FontIcon(ikon);
         icon.setIconSize(20);
-        button.setGraphic( icon );
-        button.setOnAction(e->editor.execute(action));
+        button.setGraphic(icon);
+        button.disableProperty().bind(action.disabledProperty());
+        button.setOnAction(action::execute);
         return button;
     }
 
+    private MenuItem actionMenuItem(String text, Ikon ikon, Action action) {
+        FontIcon icon = new FontIcon(ikon);
+        icon.setIconSize(16);
+        MenuItem menuItem = new MenuItem(text, icon);
+        menuItem.disableProperty().bind(action.disabledProperty());
+        menuItem.setOnAction(action::execute);
+        return menuItem;
+    }
 
     public static void main(String[] args) {
         launch(args);

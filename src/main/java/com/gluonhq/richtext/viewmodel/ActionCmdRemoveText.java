@@ -1,12 +1,10 @@
 package com.gluonhq.richtext.viewmodel;
 
-import com.gluonhq.richtext.Action;
-
-class ActionRemoveText implements Action {
+class ActionCmdRemoveText implements ActionCmd {
 
     private final int caretOffset;
 
-    public ActionRemoveText( int caretOffset) {
+    public ActionCmdRemoveText(int caretOffset) {
         this.caretOffset = caretOffset;
     }
 
@@ -14,4 +12,5 @@ class ActionRemoveText implements Action {
     public void apply(RichTextAreaViewModel viewModel) {
         viewModel.getCommandManager().execute(new RemoveTextCmd(caretOffset));
     }
+
 }
