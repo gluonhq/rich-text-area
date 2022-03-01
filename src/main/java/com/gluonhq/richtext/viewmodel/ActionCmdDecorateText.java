@@ -16,11 +16,13 @@ class ActionCmdDecorateText implements ActionCmd {
 
     @Override
     public void apply(RichTextAreaViewModel viewModel) {
-        viewModel.getCommandManager().execute(new DecorateTextCmd(Objects.requireNonNull(decoration)));
+        if (viewModel.isEditable()) {
+            viewModel.getCommandManager().execute(new DecorateTextCmd(Objects.requireNonNull(decoration)));
+        }
     }
 
     @Override
     public BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
-        return viewModel.selectionProperty().isEqualTo(Selection.UNDEFINED);
+        return viewModel.selectionProperty().isEqualTo(Selection.UNDEFINED).or(viewModel.editableProperty().not());
     }
 }

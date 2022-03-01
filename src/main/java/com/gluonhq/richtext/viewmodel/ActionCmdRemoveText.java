@@ -1,5 +1,7 @@
 package com.gluonhq.richtext.viewmodel;
 
+import javafx.beans.binding.BooleanBinding;
+
 class ActionCmdRemoveText implements ActionCmd {
 
     private final int caretOffset;
@@ -10,7 +12,13 @@ class ActionCmdRemoveText implements ActionCmd {
 
     @Override
     public void apply(RichTextAreaViewModel viewModel) {
-        viewModel.getCommandManager().execute(new RemoveTextCmd(caretOffset));
+        if (viewModel.isEditable()) {
+            viewModel.getCommandManager().execute(new RemoveTextCmd(caretOffset));
+        }
     }
 
+    @Override
+    public BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
+        return viewModel.editableProperty().not();
+    }
 }

@@ -5,11 +5,13 @@ import com.gluonhq.richtext.Tools;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.undo.CommandManager;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyIntegerProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.input.Clipboard;
@@ -98,7 +100,7 @@ public class RichTextAreaViewModel {
 
     // textLengthProperty
     public final ReadOnlyIntegerProperty textLengthProperty() {
-       return getTextBuffer().textLengthProperty();
+        return getTextBuffer().textLengthProperty();
     }
     public final int getTextLength() {
        return getTextBuffer().getTextLength();
@@ -106,20 +108,32 @@ public class RichTextAreaViewModel {
 
     // undoStackSizeProperty
     final ReadOnlyBooleanWrapper undoStackEmptyProperty = new ReadOnlyBooleanWrapper(this, "undoStackEmpty", true);
-    public ReadOnlyBooleanProperty undoStackEmptyProperty() {
+    ReadOnlyBooleanProperty undoStackEmptyProperty() {
         return undoStackEmptyProperty.getReadOnlyProperty();
     }
-    public boolean isUndoStackEmpty() {
+    boolean isUndoStackEmpty() {
         return undoStackEmptyProperty.get();
     }
 
     // redoStackSizeProperty
     final ReadOnlyBooleanWrapper redoStackEmptyProperty = new ReadOnlyBooleanWrapper(this, "redoStackEmpty", true);
-    public ReadOnlyBooleanProperty redoStackEmptyProperty() {
+    ReadOnlyBooleanProperty redoStackEmptyProperty() {
         return redoStackEmptyProperty.getReadOnlyProperty();
     }
-    public boolean isRedoStackEmpty() {
+    boolean isRedoStackEmpty() {
         return redoStackEmptyProperty.get();
+    }
+
+    // editableProperty
+    private final BooleanProperty editableProperty = new SimpleBooleanProperty(this, "editable");
+    final BooleanProperty editableProperty() {
+       return editableProperty;
+    }
+    final boolean isEditable() {
+       return editableProperty.get();
+    }
+    public final void setEditable(boolean value) {
+        editableProperty.set(value);
     }
 
     public RichTextAreaViewModel(BiFunction<Double, Boolean, Integer> getNextRowPosition) {
@@ -218,10 +232,13 @@ public class RichTextAreaViewModel {
         }
     }
 
+    boolean clipboardHasString() {
+        return Clipboard.getSystemClipboard().hasString();
+    }
+
     void clipboardPaste() {
-        final Clipboard clipboard = Clipboard.getSystemClipboard();
-        if (clipboard.hasString()) {
-            final String text = clipboard.getString();
+        if (clipboardHasString()) {
+            final String text =  Clipboard.getSystemClipboard().getString();
             if (text != null) {
                 commandManager.execute(new InsertTextCmd(text));
             }
