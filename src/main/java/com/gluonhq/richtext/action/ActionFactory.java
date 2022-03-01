@@ -2,10 +2,11 @@ package com.gluonhq.richtext.action;
 
 import com.gluonhq.richtext.RichTextArea;
 import com.gluonhq.richtext.model.TextDecoration;
-import com.gluonhq.richtext.viewmodel.ActionCmd;
+import com.gluonhq.richtext.viewmodel.ActionCmdFactory;
 
 public class ActionFactory {
 
+    private static final ActionCmdFactory ACTION_CMD_FACTORY = new ActionCmdFactory();
     private final RichTextArea control;
 
     public ActionFactory(RichTextArea control) {
@@ -56,49 +57,39 @@ public class ActionFactory {
         return new DecorateAction(control, decoration);
     }
 
-    static class UndoAction extends AbstractAction {
+    static class UndoAction extends BasicAction {
         public UndoAction(RichTextArea control) {
-            super(control, ActionType.UNDO);
+            super(control, action -> ACTION_CMD_FACTORY.undo());
         }
     }
 
-    static class RedoAction extends AbstractAction {
+    static class RedoAction extends BasicAction {
         public RedoAction(RichTextArea control) {
-            super(control, ActionType.REDO);
+            super(control, action -> ACTION_CMD_FACTORY.redo());
         }
     }
 
-    static class CopyAction extends AbstractAction {
+    static class CopyAction extends BasicAction {
         public CopyAction(RichTextArea control) {
-            super(control, ActionType.COPY);
+            super(control, action -> ACTION_CMD_FACTORY.copy());
         }
     }
 
-    static class CutAction extends AbstractAction {
+    static class CutAction extends BasicAction {
         public CutAction(RichTextArea control) {
-            super(control, ActionType.CUT);
+            super(control, action -> ACTION_CMD_FACTORY.cut());
         }
     }
 
-    static class PasteAction extends AbstractAction {
+    static class PasteAction extends BasicAction {
         public PasteAction(RichTextArea control) {
-            super(control, ActionType.PASTE);
+            super(control, action -> ACTION_CMD_FACTORY.paste());
         }
     }
 
-    static class DecorateAction extends AbstractAction {
-
-        private final TextDecoration decoration;
-
+    static class DecorateAction extends BasicAction {
         public DecorateAction(RichTextArea control, TextDecoration decoration) {
-            super(control, ActionType.DECORATE);
-            this.decoration = decoration;
+            super(control, action -> ACTION_CMD_FACTORY.decorateText(decoration));
         }
-
-        @Override
-        protected ActionCmd getActionCmd() {
-            return ACTION_CMD_FACTORY.decorateText(decoration);
-        }
-
     }
 }

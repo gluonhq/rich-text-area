@@ -66,7 +66,7 @@ public class Main extends Application {
         fontFamilies.getItems().setAll(Font.getFamilies());
         fontFamilies.setValue("Arial");
         fontFamilies.setOnAction(e -> editor.getActionFactory().decorate(
-                TextDecoration.builder().fontFamily(fontFamilies.getSelectionModel().getSelectedItem()).build()).apply(e));
+                TextDecoration.builder().fontFamily(fontFamilies.getSelectionModel().getSelectedItem()).build()).execute(e));
 
         final ComboBox<Double> fontSize = new ComboBox<>();
         fontSize.setEditable(true);
@@ -76,7 +76,7 @@ public class Main extends Application {
                 .asDoubleStream().boxed().collect(Collectors.toList()));
         fontSize.setValue(17.0);
         fontSize.setOnAction(e -> editor.getActionFactory().decorate(
-                TextDecoration.builder().fontSize(fontSize.getValue()).build()).apply(e));
+                TextDecoration.builder().fontSize(fontSize.getValue()).build()).execute(e));
         fontSize.setConverter(new StringConverter<>() {
             @Override
             public String toString(Double aDouble) {
@@ -92,12 +92,12 @@ public class Main extends Application {
         final ColorPicker textForeground = new ColorPicker();
         textForeground.getStyleClass().add("foreground");
         textForeground.setOnAction(e -> editor.getActionFactory().decorate(
-                TextDecoration.builder().foreground(textForeground.getValue()).build()).apply(e));
+                TextDecoration.builder().foreground(textForeground.getValue()).build()).execute(e));
 
         final ColorPicker textBackground = new ColorPicker();
         textBackground.getStyleClass().add("background");
         textBackground.setOnAction(e -> editor.getActionFactory().decorate(
-                TextDecoration.builder().background(textBackground.getValue()).build()).apply(e));
+                TextDecoration.builder().background(textBackground.getValue()).build()).execute(e));
 
         CheckBox editableProp = new CheckBox("Editable");
         editableProp.selectedProperty().bindBidirectional(editor.editableProperty());
@@ -163,7 +163,7 @@ public class Main extends Application {
         icon.setIconSize(20);
         button.setGraphic(icon);
         button.disableProperty().bind(action.disabledProperty());
-        button.setOnAction(action::apply);
+        button.setOnAction(action::execute);
         return button;
     }
 
@@ -172,7 +172,7 @@ public class Main extends Application {
         icon.setIconSize(16);
         MenuItem menuItem = new MenuItem(text, icon);
         menuItem.disableProperty().bind(action.disabledProperty());
-        menuItem.setOnAction(action::apply);
+        menuItem.setOnAction(action::execute);
         return menuItem;
     }
 

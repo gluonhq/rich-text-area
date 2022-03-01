@@ -3,7 +3,6 @@ package com.gluonhq.richtext.action;
 import com.gluonhq.richtext.RichTextArea;
 import com.gluonhq.richtext.RichTextAreaSkin;
 import com.gluonhq.richtext.viewmodel.ActionCmd;
-import com.gluonhq.richtext.viewmodel.ActionCmdFactory;
 import com.gluonhq.richtext.viewmodel.RichTextAreaViewModel;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -14,29 +13,18 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Skin;
 
-import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
-import static java.util.Map.entry;
+class BasicAction implements Action {
 
-abstract class AbstractAction implements Action {
-
-    protected static final ActionCmdFactory ACTION_CMD_FACTORY = new ActionCmdFactory();
-    private static final Map<ActionType, Function<AbstractAction, ActionCmd>> ACTION_MAP = Map.ofEntries(
-            entry(ActionType.COPY,  action -> ACTION_CMD_FACTORY.copy()),
-            entry(ActionType.CUT,   action -> ACTION_CMD_FACTORY.cut()),
-            entry(ActionType.PASTE, action -> ACTION_CMD_FACTORY.paste()),
-            entry(ActionType.UNDO,  action -> ACTION_CMD_FACTORY.undo()),
-            entry(ActionType.REDO,  action -> ACTION_CMD_FACTORY.redo())
-    );
-
-    private final ActionType actionType;
     private RichTextAreaViewModel viewModel;
+    private final Function<Action, ActionCmd> actionCmdFunction;
 
     private final BooleanProperty disabledImplProperty = new SimpleBooleanProperty(this, "disabledImpl", false);
 
-    public AbstractAction(RichTextArea control, ActionType actionType) {
-        this.actionType = actionType;
+    public BasicAction(RichTextArea control, Function<Action, ActionCmd> actionCmdFunction) {
+        this.actionCmdFunction = Objects.requireNonNull(actionCmdFunction);
         if (control.getSkin() != null) {
             initialize(control.getSkin());
         } else {
@@ -63,12 +51,12 @@ abstract class AbstractAction implements Action {
         }
     }
 
-    protected ActionCmd getActionCmd() {
-        return ACTION_MAP.get(actionType).apply(this);
+    private ActionCmd getActionCmd() {
+        return actionCmdFunction.apply(this);
     }
 
     @Override
-    public void apply(ActionEvent event) {
+    public void execute(ActionEvent event) {
         getActionCmd().apply(viewModel);
     }
 

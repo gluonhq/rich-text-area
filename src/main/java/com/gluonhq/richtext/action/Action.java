@@ -5,13 +5,7 @@ import javafx.event.ActionEvent;
 
 public interface Action {
 
-    enum ActionType {
-        UNDO, REDO,
-        COPY, CUT, PASTE,
-        DECORATE
-    }
-
-    void apply(ActionEvent event);
+    void execute(ActionEvent event);
 
     ReadOnlyBooleanProperty disabledProperty();
 
