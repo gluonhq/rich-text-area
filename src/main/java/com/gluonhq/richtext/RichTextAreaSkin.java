@@ -115,12 +115,13 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow();
     private final ChangeListener<Boolean> focusChangeListener;
     private final SetChangeListener<Path> textBackgroundColorPathsChangeListener = this::updateLayers;
+    private int lastValidCaretPosition = -1;
 
     //TODO remove listener on viewModel change
     private final ChangeListener<Number> caretPositionListener = (o, ocp, p) -> {
         int caretPosition = p.intValue();
         caretShape.getElements().clear();
-        if (caretPosition < 0) {
+        if (caretPosition < 0 || !getSkinnable().isEditable()) {
             caretTimeline.stop();
         } else {
             var pathElements = textFlow.caretShape(caretPosition, true);
@@ -128,6 +129,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             if (caretShape.getLayoutBounds().getHeight() < 3) {
                 caretShape.getElements().add(new LineTo(0, 20));
             }
+            lastValidCaretPosition = caretPosition;
             caretTimeline.play();
         }
     };
@@ -186,6 +188,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         viewModel.caretPositionProperty().removeListener(caretPositionListener);
         viewModel.selectionProperty().removeListener(selectionListener);
         viewModel.removeChangeListener(textChangeListener);
+        lastValidCaretPosition = -1;
         getSkinnable().editableProperty().removeListener(this::editableChangeListener);
         getSkinnable().textLengthProperty.unbind();
         textBackgroundColorPaths.removeListener(textBackgroundColorPathsChangeListener);
@@ -195,7 +198,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         contextMenu.getItems().clear();
         editableContextMenuItems = null;
         nonEditableContextMenuItems = null;
-
     }
 
     public RichTextAreaViewModel getViewModel() {
@@ -212,16 +214,16 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         viewModel.caretPositionProperty().addListener(caretPositionListener);
         viewModel.selectionProperty().addListener(selectionListener);
         viewModel.addChangeListener(textChangeListener);
-        viewModel.setCaretPosition(faceModel.getCaretPosition());
+        lastValidCaretPosition = faceModel.getCaretPosition();
         getSkinnable().textLengthProperty.bind(viewModel.textLengthProperty());
         getSkinnable().setOnContextMenuRequested(contextMenuEventEventHandler);
         getSkinnable().editableProperty().addListener(this::editableChangeListener);
-        editableChangeListener(null); // sets up all related listeners
         textBackgroundColorPaths.addListener(textBackgroundColorPathsChangeListener);
         scrollPane.focusedProperty().addListener(focusChangeListener);
         textFlow.setOnMousePressed(this::mousePressedListener);
         textFlow.setOnMouseDragged(this::mouseDraggedListener);
         refreshTextFlow();
+        editableChangeListener(null); // sets up all related listeners
     }
 
     // TODO Need more optimal way of rendering text fragments.
@@ -304,7 +306,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private void editableChangeListener(Observable o) {
         boolean editable = getSkinnable().isEditable();
 
-        viewModel.clearSelection();
         if (editable) {
             getSkinnable().setOnKeyPressed(this::keyPressedListener);
             getSkinnable().setOnKeyTyped(this::keyTypedListener);
@@ -314,7 +315,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         }
 
         viewModel.setEditable(editable);
-        viewModel.setCaretPosition(editable ? 0 : -1);
+        viewModel.setCaretPosition(editable ? lastValidCaretPosition : -1);
         textFlow.setCursor(editable ? Cursor.TEXT : Cursor.DEFAULT);
 
         populateContextMenu(editable);
