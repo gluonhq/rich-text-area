@@ -11,15 +11,22 @@ import javafx.animation.Timeline;
 import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
+import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SkinBase;
+import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
@@ -88,6 +95,14 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final Group layers;
     private final ObservableSet<Path> textBackgroundColorPaths = FXCollections.observableSet();
 
+    private final ContextMenu contextMenu = new ContextMenu();
+    private ObservableList<MenuItem> editableContextMenuItems;
+    private ObservableList<MenuItem> nonEditableContextMenuItems;
+    private final EventHandler<ContextMenuEvent> contextMenuEventEventHandler = e -> {
+        contextMenu.show((Node) e.getSource(), e.getScreenX(), e.getScreenY());
+        e.consume();
+    };
+
     private final Timeline caretTimeline = new Timeline(
         new KeyFrame(Duration.ZERO        , e -> setCaretVisibility(false)),
         new KeyFrame(Duration.seconds(0.5), e -> setCaretVisibility(true)),
@@ -100,12 +115,13 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow();
     private final ChangeListener<Boolean> focusChangeListener;
     private final SetChangeListener<Path> textBackgroundColorPathsChangeListener = this::updateLayers;
+    private int lastValidCaretPosition = -1;
 
     //TODO remove listener on viewModel change
     private final ChangeListener<Number> caretPositionListener = (o, ocp, p) -> {
         int caretPosition = p.intValue();
         caretShape.getElements().clear();
-        if (caretPosition < 0) {
+        if (caretPosition < 0 || !getSkinnable().isEditable()) {
             caretTimeline.stop();
         } else {
             var pathElements = textFlow.caretShape(caretPosition, true);
@@ -113,6 +129,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             if (caretShape.getLayoutBounds().getHeight() < 3) {
                 caretShape.getElements().add(new LineTo(0, 20));
             }
+            lastValidCaretPosition = caretPosition;
             caretTimeline.play();
         }
     };
@@ -148,7 +165,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 getSkinnable().requestFocus();
             }
         };
-        scrollPane.focusedProperty().addListener(focusChangeListener);
         getChildren().add(scrollPane);
 
         // all listeners have to be removed within dispose method
@@ -161,21 +177,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         setup(control.getFaceModel());
     }
 
-    private void setup(FaceModel faceModel) {
-        if (faceModel == null) {
-            return;
-        }
-        viewModel.setTextBuffer(new PieceTable(faceModel));
-        getSkinnable().textLengthProperty.bind(viewModel.textLengthProperty());
-        viewModel.caretPositionProperty().addListener(caretPositionListener);
-        viewModel.selectionProperty().addListener(selectionListener);
-        viewModel.addChangeListener(textChangeListener);
-        getSkinnable().editableProperty().addListener(this::editableChangeListener);
-        editableChangeListener(null); // sets up all related listeners
-        textBackgroundColorPaths.addListener(textBackgroundColorPathsChangeListener);
-        refreshTextFlow();
-        viewModel.setCaretPosition(faceModel.getCaretPosition());
-    }
     /// PROPERTIES ///////////////////////////////////////////////////////////////
 
 
@@ -183,13 +184,20 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     @Override
     public void dispose() {
-        getSkinnable().editableProperty().removeListener(this::editableChangeListener);
-        getSkinnable().textLengthProperty.unbind();
         viewModel.clearSelection();
         viewModel.caretPositionProperty().removeListener(caretPositionListener);
         viewModel.selectionProperty().removeListener(selectionListener);
         viewModel.removeChangeListener(textChangeListener);
+        lastValidCaretPosition = -1;
+        getSkinnable().editableProperty().removeListener(this::editableChangeListener);
+        getSkinnable().textLengthProperty.unbind();
         textBackgroundColorPaths.removeListener(textBackgroundColorPathsChangeListener);
+        scrollPane.focusedProperty().removeListener(focusChangeListener);
+        textFlow.setOnMousePressed(null);
+        textFlow.setOnMouseDragged(null);
+        contextMenu.getItems().clear();
+        editableContextMenuItems = null;
+        nonEditableContextMenuItems = null;
     }
 
     public RichTextAreaViewModel getViewModel() {
@@ -197,6 +205,26 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     /// PRIVATE METHODS /////////////////////////////////////////////////////////
+
+    private void setup(FaceModel faceModel) {
+        if (faceModel == null) {
+            return;
+        }
+        viewModel.setTextBuffer(new PieceTable(faceModel));
+        viewModel.caretPositionProperty().addListener(caretPositionListener);
+        viewModel.selectionProperty().addListener(selectionListener);
+        viewModel.addChangeListener(textChangeListener);
+        lastValidCaretPosition = faceModel.getCaretPosition();
+        getSkinnable().textLengthProperty.bind(viewModel.textLengthProperty());
+        getSkinnable().setOnContextMenuRequested(contextMenuEventEventHandler);
+        getSkinnable().editableProperty().addListener(this::editableChangeListener);
+        textBackgroundColorPaths.addListener(textBackgroundColorPathsChangeListener);
+        scrollPane.focusedProperty().addListener(focusChangeListener);
+        textFlow.setOnMousePressed(this::mousePressedListener);
+        textFlow.setOnMouseDragged(this::mouseDraggedListener);
+        refreshTextFlow();
+        editableChangeListener(null); // sets up all related listeners
+    }
 
     // TODO Need more optimal way of rendering text fragments.
     //  For now rebuilding the whole text flow
@@ -278,23 +306,19 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private void editableChangeListener(Observable o) {
         boolean editable = getSkinnable().isEditable();
 
-        viewModel.clearSelection();
         if (editable) {
             getSkinnable().setOnKeyPressed(this::keyPressedListener);
             getSkinnable().setOnKeyTyped(this::keyTypedListener);
-            textFlow.setOnMousePressed(this::mousePressedListener);
-            textFlow.setOnMouseDragged(this::mouseDraggedListener);
         } else {
             getSkinnable().setOnKeyPressed(null);
             getSkinnable().setOnKeyTyped(null);
-            scrollPane.focusedProperty().removeListener(focusChangeListener);
-            textFlow.setOnMousePressed(null);
-            textFlow.setOnMouseDragged(null);
         }
 
-        viewModel.setCaretPosition( editable? 0:-1 );
-        textFlow.setCursor( editable? Cursor.TEXT: Cursor.DEFAULT);
+        viewModel.setEditable(editable);
+        viewModel.setCaretPosition(editable ? lastValidCaretPosition : -1);
+        textFlow.setCursor(editable ? Cursor.TEXT : Cursor.DEFAULT);
 
+        populateContextMenu(editable);
     }
 
     private void updateLayers(SetChangeListener.Change<? extends Path> change) {
@@ -316,6 +340,9 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private int dragStart = -1;
 
     private void mousePressedListener(MouseEvent e) {
+        if (getSkinnable().isDisabled()) {
+            return;
+        }
         if (e.getButton() == MouseButton.PRIMARY && !(e.isMiddleButtonDown() || e.isSecondaryButtonDown())) {
             HitInfo hitInfo = textFlow.hitTest(new Point2D(e.getX(), e.getY()));
             int prevCaretPosition = viewModel.getCaretPosition();
@@ -337,8 +364,9 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             }
             getSkinnable().requestFocus();
             e.consume();
-        } else {
-            // TODO Add support for ContextMenu
+        }
+        if (contextMenu.isShowing()) {
+            contextMenu.hide();
         }
     }
 
@@ -387,7 +415,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     private void keyPressedListener(KeyEvent e) {
-
         // Find an applicable action and execute it if found
         for (KeyCombination kc : INPUT_MAP.keySet()) {
             if (kc.match(e)) {
@@ -396,7 +423,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 return;
             }
         }
-
     }
 
     private void keyTypedListener(KeyEvent e) {
@@ -404,6 +430,29 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             execute(ACTION_CMD_FACTORY.insertText(e.getCharacter()));
             e.consume();
         }
+    }
+
+    private void populateContextMenu(boolean isEditable) {
+        if (isEditable && editableContextMenuItems == null) {
+            editableContextMenuItems = FXCollections.observableArrayList(
+                    createMenuItem("undo", ACTION_CMD_FACTORY.undo()),
+                    createMenuItem("redo", ACTION_CMD_FACTORY.redo()),
+                    new SeparatorMenuItem(),
+                    createMenuItem("copy", ACTION_CMD_FACTORY.copy()),
+                    createMenuItem("cut", ACTION_CMD_FACTORY.cut()),
+                    createMenuItem("paste", ACTION_CMD_FACTORY.paste()));
+        } else if (!isEditable && nonEditableContextMenuItems == null) {
+            nonEditableContextMenuItems = FXCollections.singletonObservableList(
+                    createMenuItem("copy", ACTION_CMD_FACTORY.copy()));
+        }
+        contextMenu.getItems().setAll(isEditable ? editableContextMenuItems : nonEditableContextMenuItems);
+    }
+
+    private MenuItem createMenuItem(String text, ActionCmd actionCmd) {
+        MenuItem menuItem = new MenuItem(text);
+        menuItem.disableProperty().bind(actionCmd.getDisabledBinding(viewModel));
+        menuItem.setOnAction(e -> actionCmd.apply(viewModel));
+        return menuItem;
     }
 
     private static class IndexRangeColor {

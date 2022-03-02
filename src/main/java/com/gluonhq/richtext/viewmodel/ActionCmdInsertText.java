@@ -1,5 +1,7 @@
 package com.gluonhq.richtext.viewmodel;
 
+import javafx.beans.binding.BooleanBinding;
+
 class ActionCmdInsertText implements ActionCmd {
 
     private final String text;
@@ -10,6 +12,13 @@ class ActionCmdInsertText implements ActionCmd {
 
     @Override
     public void apply(RichTextAreaViewModel viewModel) {
-        viewModel.getCommandManager().execute(new InsertTextCmd(text));
+        if (viewModel.isEditable()) {
+            viewModel.getCommandManager().execute(new InsertTextCmd(text));
+        }
+    }
+
+    @Override
+    public BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
+        return viewModel.editableProperty().not();
     }
 }

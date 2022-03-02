@@ -7,11 +7,14 @@ class ActionCmdUndo implements ActionCmd {
 
     @Override
     public void apply(RichTextAreaViewModel viewModel) {
-        viewModel.getCommandManager().undo();
+        if (viewModel.isEditable()) {
+            viewModel.getCommandManager().undo();
+        }
     }
 
     @Override
     public BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
-        return Bindings.createBooleanBinding(viewModel::isUndoStackEmpty, viewModel.undoStackEmptyProperty());
+        return Bindings.createBooleanBinding(() -> viewModel.isUndoStackEmpty() || !viewModel.isEditable(),
+                viewModel.undoStackEmptyProperty(), viewModel.editableProperty());
     }
 }
