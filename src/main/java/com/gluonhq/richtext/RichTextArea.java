@@ -85,7 +85,7 @@ public class RichTextArea extends Control {
      * Defines a width constraint for the content area of the rich text control,
      * in user space coordinates, where text can be added.
      * The width is measured in pixels (and not glyph or character count).
-     * If the value is {@code == 0}, the content area extends to the whole viewport of control
+     * If the value is {@code <= 0}, the content area extends to the whole viewport of control
      * and will change whenever the viewport gets resized.
      * If the value is {@code > 0}, the content area is exactly set to this value,
      * and the control will provide a horizontal scrollbar if needed.

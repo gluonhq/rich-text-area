@@ -29,7 +29,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.shape.LineTo;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.PathElement;
@@ -161,7 +160,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 scrollPane.viewportBoundsProperty());
 
         hbarPolicyBinding = Bindings.createObjectBinding(
-                () -> getSkinnable().getContentAreaWidth() == 0 ? ScrollPane.ScrollBarPolicy.NEVER : ScrollPane.ScrollBarPolicy.AS_NEEDED,
+                () -> getSkinnable().getContentAreaWidth() > 0 ? ScrollPane.ScrollBarPolicy.AS_NEEDED : ScrollPane.ScrollBarPolicy.NEVER,
                 getSkinnable().contentAreaWidthProperty());
 
         // all listeners have to be removed within dispose method
@@ -351,9 +350,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         } else {
             var pathElements = textFlow.caretShape(caretPosition, true);
             caretShape.getElements().addAll(pathElements);
-            if (caretShape.getLayoutBounds().getHeight() < 3) {
-                caretShape.getElements().add(new LineTo(0, 20));
-            }
             caretTimeline.play();
         }
         caretShape.setLayoutX(textFlowLayoutX);
