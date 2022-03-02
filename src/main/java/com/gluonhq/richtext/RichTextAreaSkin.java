@@ -9,6 +9,9 @@ import com.gluonhq.richtext.viewmodel.RichTextAreaViewModel;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.DoubleBinding;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -32,7 +35,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.shape.LineTo;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.PathElement;
@@ -93,6 +96,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final Path caretShape = new Path();
     private final Path selectionShape = new Path();
     private final Group layers;
+    private final Pane root;
     private final ObservableSet<Path> textBackgroundColorPaths = FXCollections.observableSet();
 
     private final ContextMenu contextMenu = new ContextMenu();
@@ -118,35 +122,29 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private int lastValidCaretPosition = -1;
 
     //TODO remove listener on viewModel change
-    private final ChangeListener<Number> caretPositionListener = (o, ocp, p) -> {
-        int caretPosition = p.intValue();
-        caretShape.getElements().clear();
-        if (caretPosition < 0 || !getSkinnable().isEditable()) {
-            caretTimeline.stop();
-        } else {
-            var pathElements = textFlow.caretShape(caretPosition, true);
-            caretShape.getElements().addAll(pathElements);
-            if (caretShape.getLayoutBounds().getHeight() < 3) {
-                caretShape.getElements().add(new LineTo(0, 20));
-            }
-            lastValidCaretPosition = caretPosition;
-            caretTimeline.play();
-        }
-    };
+    private final ChangeListener<Number> caretPositionListener = (o, ocp, p) -> updateCaretPosition(p.intValue());
 
     //TODO remove listener on viewModel change
-    private final ChangeListener<Selection> selectionListener = (o, os, selection) -> {
-        selectionShape.getElements().clear();
-        if (selection.isDefined()) {
-            selectionShape.getElements().setAll(textFlow.rangeShape(selection.getStart(), selection.getEnd()));
-        }
+    private final ChangeListener<Selection> selectionListener = (o, os, selection) -> updateSelection(selection);
+
+    private final ObjectBinding<ScrollPane.ScrollBarPolicy> hbarPolicyBinding;
+    private final DoubleBinding prefWidthBinding;
+    private final DoubleBinding prefHeightBinding;
+    private final ChangeListener<Number> textFlowPrefWidthListener = (obs, ov, nv) -> {
+        refreshTextFlow();
+        updateSelection(viewModel.getSelection());
+        updateCaretPosition(viewModel.getCaretPosition());
+    };
+    private double textFlowLayoutX = 0d, textFlowLayoutY = 0d;
+    private final ChangeListener<Insets> insetsChangeListener = (obs, ov, nv) -> {
+        textFlowLayoutX = nv.getLeft();
+        textFlowLayoutY = nv.getTop();
     };
 
     protected RichTextAreaSkin(final RichTextArea control) {
         super(control);
 
         textFlow.setFocusTraversable(false);
-        textFlow.setPadding(new Insets(-1));
         textFlow.getStyleClass().setAll("text-flow");
 
         caretShape.setFocusTraversable(false);
@@ -155,10 +153,13 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         selectionShape.getStyleClass().setAll("selection");
 
         layers = new Group(selectionShape, caretShape, textFlow);
+        layers.getStyleClass().add("layers");
+        root = new Pane(layers);
+        root.getStyleClass().setAll("content-area");
         layers.getChildren().addAll(0, textBackgroundColorPaths);
         caretTimeline.setCycleCount(Timeline.INDEFINITE);
 
-        scrollPane = new ScrollPane(layers);
+        scrollPane = new ScrollPane(root);
         scrollPane.setFocusTraversable(false);
         focusChangeListener = (obs, ov, nv) -> {
             if (nv) {
@@ -166,6 +167,17 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             }
         };
         getChildren().add(scrollPane);
+
+        prefWidthBinding = Bindings.createDoubleBinding(() ->
+                        getSkinnable().getContentAreaWidth() > 0 ?
+                                getSkinnable().getContentAreaWidth() : scrollPane.getViewportBounds().getWidth() - 1,
+                getSkinnable().contentAreaWidthProperty(), scrollPane.viewportBoundsProperty());
+        prefHeightBinding = Bindings.createDoubleBinding(() -> scrollPane.getViewportBounds().getHeight() - 1,
+                scrollPane.viewportBoundsProperty());
+
+        hbarPolicyBinding = Bindings.createObjectBinding(
+                () -> getSkinnable().getContentAreaWidth() > 0 ? ScrollPane.ScrollBarPolicy.AS_NEEDED : ScrollPane.ScrollBarPolicy.NEVER,
+                getSkinnable().contentAreaWidthProperty());
 
         // all listeners have to be removed within dispose method
         control.faceModelProperty().addListener((obs, ov, nv) -> {
@@ -192,9 +204,16 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().editableProperty().removeListener(this::editableChangeListener);
         getSkinnable().textLengthProperty.unbind();
         textBackgroundColorPaths.removeListener(textBackgroundColorPathsChangeListener);
-        scrollPane.focusedProperty().removeListener(focusChangeListener);
         textFlow.setOnMousePressed(null);
         textFlow.setOnMouseDragged(null);
+        textFlow.prefWidthProperty().unbind();
+        textFlow.prefHeightProperty().unbind();
+        textFlow.prefWidthProperty().removeListener(textFlowPrefWidthListener);
+        textFlow.paddingProperty().removeListener(insetsChangeListener);
+        root.prefWidthProperty().unbind();
+        root.prefHeightProperty().unbind();
+        scrollPane.focusedProperty().removeListener(focusChangeListener);
+        scrollPane.hbarPolicyProperty().unbind();
         contextMenu.getItems().clear();
         editableContextMenuItems = null;
         nonEditableContextMenuItems = null;
@@ -220,8 +239,15 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().editableProperty().addListener(this::editableChangeListener);
         textBackgroundColorPaths.addListener(textBackgroundColorPathsChangeListener);
         scrollPane.focusedProperty().addListener(focusChangeListener);
+        scrollPane.hbarPolicyProperty().bind(hbarPolicyBinding);
         textFlow.setOnMousePressed(this::mousePressedListener);
         textFlow.setOnMouseDragged(this::mouseDraggedListener);
+        textFlow.prefWidthProperty().bind(prefWidthBinding);
+        textFlow.prefHeightProperty().bind(prefHeightBinding);
+        textFlow.prefWidthProperty().addListener(textFlowPrefWidthListener);
+        textFlow.paddingProperty().addListener(insetsChangeListener);
+        root.prefWidthProperty().bind(textFlow.widthProperty());
+        root.prefHeightProperty().bind(textFlow.heightProperty());
         refreshTextFlow();
         editableChangeListener(null); // sets up all related listeners
     }
@@ -261,6 +287,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                     final Path path = new BackgroundColorPath(textFlow.rangeShape(indexRangeBackground.getStart(), indexRangeBackground.getEnd()));
                     path.setStrokeWidth(0);
                     path.setFill(indexRangeBackground.getColor());
+                    path.setLayoutX(textFlowLayoutX);
+                    path.setLayoutY(textFlowLayoutY);
                     return path;
                 })
                 .collect(Collectors.toList());
@@ -329,6 +357,29 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         }
     }
 
+    private void updateSelection(Selection selection) {
+        selectionShape.getElements().clear();
+        if (selection.isDefined()) {
+            selectionShape.getElements().setAll(textFlow.rangeShape(selection.getStart(), selection.getEnd()));
+        }
+        selectionShape.setLayoutX(textFlowLayoutX);
+        selectionShape.setLayoutY(textFlowLayoutY);
+    }
+
+    private void updateCaretPosition(int caretPosition) {
+        caretShape.getElements().clear();
+        if (caretPosition < 0 || !getSkinnable().isEditable()) {
+            caretTimeline.stop();
+        } else {
+            var pathElements = textFlow.caretShape(caretPosition, true);
+            caretShape.getElements().addAll(pathElements);
+            lastValidCaretPosition = caretPosition;
+            caretTimeline.play();
+        }
+        caretShape.setLayoutX(textFlowLayoutX);
+        caretShape.setLayoutY(textFlowLayoutY);
+    }
+
     private void setCaretVisibility(boolean on) {
         if (caretShape.getElements().size() > 0) {
             // Opacity is used since we don't want the changing caret bounds to affect the layout
@@ -344,7 +395,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             return;
         }
         if (e.getButton() == MouseButton.PRIMARY && !(e.isMiddleButtonDown() || e.isSecondaryButtonDown())) {
-            HitInfo hitInfo = textFlow.hitTest(new Point2D(e.getX(), e.getY()));
+            HitInfo hitInfo = textFlow.hitTest(new Point2D(e.getX() - textFlowLayoutX, e.getY() - textFlowLayoutY));
             int prevCaretPosition = viewModel.getCaretPosition();
             if (hitInfo.getInsertionIndex() >= 0) {
                 if (!(e.isControlDown() || e.isAltDown() || e.isShiftDown() || e.isMetaDown() || e.isShortcutDown())) {
@@ -371,7 +422,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     private void mouseDraggedListener(MouseEvent e) {
-        HitInfo hitInfo = textFlow.hitTest(new Point2D(e.getX(), e.getY()));
+        HitInfo hitInfo = textFlow.hitTest(new Point2D(e.getX() - textFlowLayoutX, e.getY() - textFlowLayoutY));
         if (hitInfo.getInsertionIndex() >= 0) {
             int dragEnd = hitInfo.getInsertionIndex();
             viewModel.setSelection( new Selection(dragStart, dragEnd));

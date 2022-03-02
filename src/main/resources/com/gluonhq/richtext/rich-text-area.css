@@ -2,7 +2,11 @@
     -fx-padding: 5;
 }
 
-.rich-text .text-flow {
+.rich-text .content-area {
+}
+
+.rich-text .content-area > .layers > .text-flow {
+    -fx-padding: 10;
 }
 
 .rich-text .caret {

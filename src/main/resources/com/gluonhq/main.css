@@ -15,3 +15,16 @@
 .status-bar {
     -fx-padding: 10;
 }
+
+.rich-text > .scroll-pane {
+    -fx-padding: 20;
+}
+
+.rich-text .content-area {
+    -fx-background-color: white;
+    -fx-border-color: black;
+}
+
+.rich-text .content-area > .layers > .text-flow {
+    -fx-padding: 10;
+}
