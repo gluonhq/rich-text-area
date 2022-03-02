@@ -3,6 +3,10 @@ package com.gluonhq.richtext.action;
 import com.gluonhq.richtext.RichTextArea;
 import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.viewmodel.ActionCmdFactory;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.event.ActionEvent;
+import javafx.scene.text.TextAlignment;
 
 public class ActionFactory {
 
@@ -55,5 +59,20 @@ public class ActionFactory {
 
     public Action decorate(TextDecoration decoration) {
         return new BasicAction(control, action -> ACTION_CMD_FACTORY.decorateText(decoration));
+    }
+
+    public Action align(TextAlignment alignment) {
+
+        return new Action() {
+            @Override
+            public void execute(ActionEvent event) {
+                control.setTextAlignment(alignment);
+            }
+
+            @Override
+            public ReadOnlyBooleanProperty disabledProperty() {
+                return new SimpleBooleanProperty(false);
+            }
+        };
     }
 }

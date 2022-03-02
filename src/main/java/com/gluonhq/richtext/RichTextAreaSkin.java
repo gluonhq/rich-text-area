@@ -42,6 +42,7 @@ import javafx.scene.shape.PathElement;
 import javafx.scene.text.Font;
 import javafx.scene.text.HitInfo;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
@@ -130,15 +131,16 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final ObjectBinding<ScrollPane.ScrollBarPolicy> hbarPolicyBinding;
     private final DoubleBinding prefWidthBinding;
     private final DoubleBinding prefHeightBinding;
-    private final ChangeListener<Number> textFlowPrefWidthListener = (obs, ov, nv) -> {
-        refreshTextFlow();
-        updateSelection(viewModel.getSelection());
-        updateCaretPosition(viewModel.getCaretPosition());
-    };
+    private final ChangeListener<Number> textFlowPrefWidthListener = (obs, ov, nv) -> updatePaths();
+
     private double textFlowLayoutX = 0d, textFlowLayoutY = 0d;
     private final ChangeListener<Insets> insetsChangeListener = (obs, ov, nv) -> {
         textFlowLayoutX = nv.getLeft();
         textFlowLayoutY = nv.getTop();
+    };
+    private final ChangeListener<TextAlignment> textAlignmentChangeListener = (obs, ob, nv) -> {
+        textFlow.setTextAlignment(nv);
+        updatePaths();
     };
 
     protected RichTextAreaSkin(final RichTextArea control) {
@@ -203,6 +205,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         lastValidCaretPosition = -1;
         getSkinnable().editableProperty().removeListener(this::editableChangeListener);
         getSkinnable().textLengthProperty.unbind();
+        getSkinnable().textAlignmentProperty().removeListener(textAlignmentChangeListener);
         textBackgroundColorPaths.removeListener(textBackgroundColorPathsChangeListener);
         textFlow.setOnMousePressed(null);
         textFlow.setOnMouseDragged(null);
@@ -237,6 +240,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().textLengthProperty.bind(viewModel.textLengthProperty());
         getSkinnable().setOnContextMenuRequested(contextMenuEventEventHandler);
         getSkinnable().editableProperty().addListener(this::editableChangeListener);
+        getSkinnable().textAlignmentProperty().addListener(textAlignmentChangeListener);
         textBackgroundColorPaths.addListener(textBackgroundColorPathsChangeListener);
         scrollPane.focusedProperty().addListener(focusChangeListener);
         scrollPane.hbarPolicyProperty().bind(hbarPolicyBinding);
@@ -258,27 +262,36 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         fontCacheEvictionTimer.pause();
         try {
             var fragments = new ArrayList<Text>();
-            var backgroundIndexRanges = new ArrayList<IndexRangeColor>();
-            var length = new AtomicInteger();
-            viewModel.walkFragments((text, decoration) -> {
-                final Text textNode = buildText(text, decoration);
-                fragments.add(textNode);
-
-                if (decoration.getBackground() != Color.TRANSPARENT) {
-                    final IndexRangeColor indexRangeColor = new IndexRangeColor(
-                            length.get(),
-                            length.get() + textNode.getText().length(),
-                            decoration.getBackground()
-                    );
-                    backgroundIndexRanges.add(indexRangeColor);
-                }
-                length.addAndGet(textNode.getText().length());
-            });
+            viewModel.walkFragments((text, decoration) ->
+                    fragments.add(buildText(text, decoration)));
             textFlow.getChildren().setAll(fragments);
-            addBackgroundPathsToLayers(backgroundIndexRanges);
+            updateBackgroundPaths();
         } finally {
             fontCacheEvictionTimer.start();
         }
+    }
+
+    private void updatePaths() {
+        updateBackgroundPaths();
+        updateSelection(viewModel.getSelection());
+        updateCaretPosition(viewModel.getCaretPosition());
+    }
+
+    private void updateBackgroundPaths() {
+        var backgroundIndexRanges = new ArrayList<IndexRangeColor>();
+        var length = new AtomicInteger();
+        viewModel.walkFragments((text, decoration) -> {
+            if (decoration.getBackground() != Color.TRANSPARENT) {
+                final IndexRangeColor indexRangeColor = new IndexRangeColor(
+                        length.get(),
+                        length.get() + text.length(),
+                        decoration.getBackground()
+                );
+                backgroundIndexRanges.add(indexRangeColor);
+            }
+            length.addAndGet(text.length());
+        });
+        addBackgroundPathsToLayers(backgroundIndexRanges);
     }
 
     private void addBackgroundPathsToLayers(List<IndexRangeColor> backgroundIndexRanges) {

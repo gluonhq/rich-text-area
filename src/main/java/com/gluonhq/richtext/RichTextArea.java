@@ -13,6 +13,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.Control;
 import javafx.scene.control.SkinBase;
+import javafx.scene.text.TextAlignment;
 
 import java.util.Objects;
 
@@ -107,6 +108,18 @@ public class RichTextArea extends Control {
 
     public final ActionFactory getActionFactory() {
         return actionFactory;
+    }
+
+    // textAlignmentProperty
+    private final ObjectProperty<TextAlignment> textAlignmentProperty = new SimpleObjectProperty<>(this, "textAlignment", TextAlignment.LEFT);
+    public final ObjectProperty<TextAlignment> textAlignmentProperty() {
+       return textAlignmentProperty;
+    }
+    public final TextAlignment getTextAlignment() {
+       return textAlignmentProperty.get();
+    }
+    public final void setTextAlignment(TextAlignment value) {
+        textAlignmentProperty.set(value);
     }
 
 }
