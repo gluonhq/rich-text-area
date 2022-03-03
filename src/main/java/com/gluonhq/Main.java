@@ -1,10 +1,11 @@
 package com.gluonhq;
 
-import com.gluonhq.richtext.action.Action;
-import com.gluonhq.richtext.RichTextArea;
 import com.gluonhq.richtext.FaceModel;
+import com.gluonhq.richtext.RichTextArea;
+import com.gluonhq.richtext.action.Action;
 import com.gluonhq.richtext.model.TextDecoration;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -25,6 +26,7 @@ import org.kordamp.ikonli.lineawesome.LineAwesomeSolid;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -115,6 +117,8 @@ public class Main extends Application {
                 fontSize,
                 actionButton(LineAwesomeSolid.BOLD, editor.getActionFactory().decorate(TextDecoration.builder().fontWeight(FontWeight.BOLD).build())),
                 actionButton(LineAwesomeSolid.ITALIC, editor.getActionFactory().decorate(TextDecoration.builder().fontPosture(FontPosture.ITALIC).build())),
+                actionToggleButton(LineAwesomeSolid.STRIKETHROUGH, a -> editor.getActionFactory().decorate(TextDecoration.builder().strikethrough(a).build())), 
+                actionToggleButton(LineAwesomeSolid.UNDERLINE, a -> editor.getActionFactory().decorate(TextDecoration.builder().underline(a).build())),
                 textForeground,
                 textBackground,
                 new Separator(Orientation.VERTICAL),
@@ -164,6 +168,15 @@ public class Main extends Application {
         button.setGraphic(icon);
         button.disableProperty().bind(action.disabledProperty());
         button.setOnAction(action::execute);
+        return button;
+    }
+
+    private ToggleButton actionToggleButton(Ikon ikon, Function<Boolean, Action> action) {
+        ToggleButton button = new ToggleButton();
+        FontIcon icon = new FontIcon(ikon);
+        icon.setIconSize(20);
+        button.setGraphic(icon);
+        button.selectedProperty().addListener((o, ov, nv) -> action.apply(nv).execute(new ActionEvent()));
         return button;
     }
 
