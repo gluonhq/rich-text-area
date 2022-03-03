@@ -285,6 +285,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             addBackgroundPathsToLayers(backgroundIndexRanges);
         } finally {
             if (updateText) {
+                fragments = null;
                 fontCacheEvictionTimer.start();
             }
         }
