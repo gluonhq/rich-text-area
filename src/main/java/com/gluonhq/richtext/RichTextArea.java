@@ -18,7 +18,7 @@ import java.util.Objects;
 
 public class RichTextArea extends Control {
 
-    public static final String STYLE_CLASS = "rich-text";
+    public static final String STYLE_CLASS = "rich-text-area";
 
     private final ActionFactory actionFactory = new ActionFactory(this);
 
