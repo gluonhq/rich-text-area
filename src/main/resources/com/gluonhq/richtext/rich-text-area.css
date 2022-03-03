@@ -1,19 +1,19 @@
-.rich-text > .scroll-pane {
+.rich-text-area > .scroll-pane {
     -fx-padding: 5;
 }
 
-.rich-text .content-area {
+.rich-text-area .content-area {
 }
 
-.rich-text .content-area > .layers > .text-flow {
+.rich-text-area .content-area > .layers > .text-flow {
     -fx-padding: 10;
 }
 
-.rich-text .caret {
+.rich-text-area .caret {
     -fx-stroke: rgba(71, 145, 245, 0.9);
 }
 
-.rich-text .selection {
+.rich-text-area .selection {
     -fx-stroke: transparent;
     -fx-fill: rgba(71, 145, 245, 0.3);
 }
