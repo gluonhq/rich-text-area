@@ -168,7 +168,7 @@
             <!-- Publish the versioned snapshots here -->
             <id>gluon-nexus</id>
             <name>Gluon Snapshots</name>
-            <url>https://nexus.gluonhq.com/nexus/content/repositories/snapshots/</url>
+            <url>https://nexus.gluonhq.com/nexus/content/repositories/public-snapshots/</url>
         </snapshotRepository>
 
         <repository>
