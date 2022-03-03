@@ -117,7 +117,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final Map<Integer, Font> fontCache = new ConcurrentHashMap<>();
     private final SmartTimer fontCacheEvictionTimer = new SmartTimer( this::evictUnusedFonts, 1000, 60000);
 
-    private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow();
+    private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow(true);
     private final ChangeListener<Boolean> focusChangeListener;
     private final SetChangeListener<Path> textBackgroundColorPathsChangeListener = this::updateLayers;
     private int lastValidCaretPosition = -1;
@@ -252,46 +252,48 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         textFlow.paddingProperty().addListener(insetsChangeListener);
         root.prefWidthProperty().bind(textFlow.widthProperty());
         root.prefHeightProperty().bind(textFlow.heightProperty());
-        refreshTextFlow();
+        refreshTextFlow(true);
         editableChangeListener(null); // sets up all related listeners
     }
 
     // TODO Need more optimal way of rendering text fragments.
     //  For now rebuilding the whole text flow
-    private void refreshTextFlow() {
-        fontCacheEvictionTimer.pause();
+    private List<Text> fragments = null;
+    private void refreshTextFlow(boolean updateText) {
+        if (updateText) {
+            fontCacheEvictionTimer.pause();
+            fragments = new ArrayList<>();
+        }
         try {
-            var fragments = new ArrayList<Text>();
-            viewModel.walkFragments((text, decoration) ->
-                    fragments.add(buildText(text, decoration)));
-            textFlow.getChildren().setAll(fragments);
-            updateBackgroundPaths();
+            var backgroundIndexRanges = new ArrayList<IndexRangeColor>();
+            var length = new AtomicInteger();
+            viewModel.walkFragments((text, decoration) -> {
+                if (updateText) {
+                    final Text textNode = buildText(text, decoration);
+                    fragments.add(textNode);
+                }
+
+                if (decoration.getBackground() != Color.TRANSPARENT) {
+                    backgroundIndexRanges.add(new IndexRangeColor(
+                            length.get(), length.get() + text.length(), decoration.getBackground()));
+                }
+                length.addAndGet(text.length());
+            });
+            if (updateText) {
+                textFlow.getChildren().setAll(fragments);
+            }
+            addBackgroundPathsToLayers(backgroundIndexRanges);
         } finally {
-            fontCacheEvictionTimer.start();
+            if (updateText) {
+                fontCacheEvictionTimer.start();
+            }
         }
     }
 
     private void updatePaths() {
-        updateBackgroundPaths();
+        refreshTextFlow(false);
         updateSelection(viewModel.getSelection());
         updateCaretPosition(viewModel.getCaretPosition());
-    }
-
-    private void updateBackgroundPaths() {
-        var backgroundIndexRanges = new ArrayList<IndexRangeColor>();
-        var length = new AtomicInteger();
-        viewModel.walkFragments((text, decoration) -> {
-            if (decoration.getBackground() != Color.TRANSPARENT) {
-                final IndexRangeColor indexRangeColor = new IndexRangeColor(
-                        length.get(),
-                        length.get() + text.length(),
-                        decoration.getBackground()
-                );
-                backgroundIndexRanges.add(indexRangeColor);
-            }
-            length.addAndGet(text.length());
-        });
-        addBackgroundPathsToLayers(backgroundIndexRanges);
     }
 
     private void addBackgroundPathsToLayers(List<IndexRangeColor> backgroundIndexRanges) {
