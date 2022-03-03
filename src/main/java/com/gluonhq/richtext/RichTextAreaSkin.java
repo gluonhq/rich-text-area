@@ -285,8 +285,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     private void addBackgroundPathsToLayers(List<IndexRangeColor> backgroundIndexRanges) {
-        Map<Paint, Path> fillPathMap = new HashMap<>();
-        backgroundIndexRanges.stream()
+        Map<Paint, Path> fillPathMap = backgroundIndexRanges.stream()
                 .map(indexRangeBackground -> {
                     final Path path = new BackgroundColorPath(textFlow.rangeShape(indexRangeBackground.getStart(), indexRangeBackground.getEnd()));
                     path.setStrokeWidth(0);
@@ -295,7 +294,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                     path.setLayoutY(textFlowLayoutY);
                     return path;
                 })
-                .forEach(path -> fillPathMap.merge(path.getFill(), path, (p1, p2) -> {
+                .collect(Collectors.toMap(Path::getFill, Function.identity(), (p1, p2) -> {
                     Path union = (Path) Shape.union(p1, p2);
                     union.setFill(p1.getFill());
                     return union;
