@@ -285,8 +285,9 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         final List<Path> backgroundPaths = backgroundIndexRanges.stream()
                 .map(indexRangeBackground -> {
                     final Path path = new BackgroundColorPath(textFlow.rangeShape(indexRangeBackground.getStart(), indexRangeBackground.getEnd()));
-                    path.setStrokeWidth(0);
-                    path.setFill(indexRangeBackground.getColor());
+                    final Color color = indexRangeBackground.getColor();
+                    path.setStroke(color);
+                    path.setFill(color);
                     path.setLayoutX(textFlowLayoutX);
                     path.setLayoutY(textFlowLayoutY);
                     return path;
