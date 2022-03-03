@@ -11,6 +11,7 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.css.PseudoClass;
 import javafx.scene.control.Control;
 import javafx.scene.control.SkinBase;
 
@@ -19,6 +20,7 @@ import java.util.Objects;
 public class RichTextArea extends Control {
 
     public static final String STYLE_CLASS = "rich-text-area";
+    private static final PseudoClass READ_ONLY_PSEUDOCLASS_STATE = PseudoClass.getPseudoClass("readonly");
 
     private final ActionFactory actionFactory = new ActionFactory(this);
 
@@ -48,7 +50,12 @@ public class RichTextArea extends Control {
     }
 
     // editableProperty
-    private final BooleanProperty editableProperty = new SimpleBooleanProperty(this, "editable", true);
+    private final BooleanProperty editableProperty = new SimpleBooleanProperty(this, "editable", true) {
+        @Override
+        protected void invalidated() {
+            pseudoClassStateChanged(READ_ONLY_PSEUDOCLASS_STATE, !get());
+        }
+    };
     public final BooleanProperty editableProperty() {
        return editableProperty;
     }
