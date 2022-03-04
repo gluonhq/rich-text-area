@@ -25,6 +25,11 @@
     -fx-border-color: black;
 }
 
+.rich-text-area:readonly .content-area {
+    -fx-background-color: lightblue;
+    -fx-border-color: darkgray;
+}
+
 .rich-text-area .content-area > .layers > .text-flow {
     -fx-padding: 10;
 }
