@@ -37,8 +37,10 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.PathElement;
+import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.HitInfo;
 import javafx.scene.text.Text;
@@ -46,6 +48,7 @@ import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -282,7 +285,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     private void addBackgroundPathsToLayers(List<IndexRangeColor> backgroundIndexRanges) {
-        final List<Path> backgroundPaths = backgroundIndexRanges.stream()
+        Map<Paint, Path> fillPathMap = backgroundIndexRanges.stream()
                 .map(indexRangeBackground -> {
                     final Path path = new BackgroundColorPath(textFlow.rangeShape(indexRangeBackground.getStart(), indexRangeBackground.getEnd()));
                     path.setStrokeWidth(0);
@@ -291,9 +294,13 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                     path.setLayoutY(textFlowLayoutY);
                     return path;
                 })
-                .collect(Collectors.toList());
-        textBackgroundColorPaths.removeIf(path -> !backgroundPaths.contains(path));
-        textBackgroundColorPaths.addAll(backgroundPaths);
+                .collect(Collectors.toMap(Path::getFill, Function.identity(), (p1, p2) -> {
+                    Path union = (Path) Shape.union(p1, p2);
+                    union.setFill(p1.getFill());
+                    return union;
+                }));
+        textBackgroundColorPaths.removeIf(path -> !fillPathMap.containsValue(path));
+        textBackgroundColorPaths.addAll(fillPathMap.values());
     }
 
     private Text buildText(String content, TextDecoration decoration ) {
