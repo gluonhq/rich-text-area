@@ -17,7 +17,7 @@ class ActionCmdDecorateText implements ActionCmd {
     @Override
     public void apply(RichTextAreaViewModel viewModel) {
         if (viewModel.isEditable()) {
-            viewModel.getCommandManager().execute(new DecorateTextCmd(Objects.requireNonNull(decoration)));
+            viewModel.getCommandManager().execute(new DecorateCmd(Objects.requireNonNull(decoration)));
         }
     }
 

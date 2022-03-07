@@ -1,6 +1,7 @@
 package com.gluonhq.richtext;
 
 import com.gluonhq.richtext.action.ActionFactory;
+import com.gluonhq.richtext.model.FaceModel;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;

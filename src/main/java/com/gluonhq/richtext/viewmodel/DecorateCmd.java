@@ -1,14 +1,14 @@
 package com.gluonhq.richtext.viewmodel;
 
-import com.gluonhq.richtext.model.TextDecoration;
+import com.gluonhq.richtext.model.Decoration;
 
 import java.util.Objects;
 
-class DecorateTextCmd extends AbstractEditCmd {
+class DecorateCmd extends AbstractEditCmd {
 
-    private final TextDecoration decoration;
+    private final Decoration decoration;
 
-    public DecorateTextCmd(TextDecoration decoration) {
+    public DecorateCmd(Decoration decoration) {
         this.decoration = decoration;
     }
 

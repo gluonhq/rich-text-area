@@ -1,5 +1,7 @@
 package com.gluonhq.richtext;
 
+import com.gluonhq.richtext.model.FaceModel;
+import com.gluonhq.richtext.model.ImageDecoration;
 import com.gluonhq.richtext.model.PieceTable;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
@@ -29,6 +31,8 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SkinBase;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -48,7 +52,6 @@ import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -260,25 +263,28 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private void refreshTextFlow() {
         fontCacheEvictionTimer.pause();
         try {
-            var fragments = new ArrayList<Text>();
+            var fragments = new ArrayList<Node>();
             var backgroundIndexRanges = new ArrayList<IndexRangeColor>();
             var length = new AtomicInteger();
             viewModel.walkFragments((text, decoration) -> {
-                final Text textNode = buildText(text, decoration);
-                fragments.add(textNode);
-
-                if (decoration.getBackground() != Color.TRANSPARENT) {
-                    final IndexRangeColor indexRangeColor = new IndexRangeColor(
-                            length.get(),
-                            length.get() + textNode.getText().length(),
-                            decoration.getBackground()
-                    );
-                    backgroundIndexRanges.add(indexRangeColor);
+                if (decoration instanceof TextDecoration) {
+                    final Text textNode = buildText(text, (TextDecoration) decoration);
+                    fragments.add(textNode);
+                    Color background = ((TextDecoration) decoration).getBackground();
+                    if (background != Color.TRANSPARENT) {
+                        backgroundIndexRanges.add(new IndexRangeColor(
+                                length.get(), length.get() + textNode.getText().length(), background));
+                    }
+                    length.addAndGet(textNode.getText().length());
+                } else if (decoration instanceof ImageDecoration) {
+                    fragments.add(buildImage((ImageDecoration) decoration));
+                    length.incrementAndGet();
                 }
-                length.addAndGet(textNode.getText().length());
             });
             textFlow.getChildren().setAll(fragments);
             addBackgroundPathsToLayers(backgroundIndexRanges);
+            getSkinnable().requestLayout();
+            getSkinnable().requestFocus();
         } finally {
             fontCacheEvictionTimer.start();
         }
@@ -324,6 +330,22 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
         text.setFont(font);
         return text;
+    }
+
+    private ImageView buildImage(ImageDecoration imageDecoration) {
+        // TODO Add cache of images
+        Image image = new Image(imageDecoration.getUrl());
+        final ImageView imageView = new ImageView(image);
+        // TODO Create resizable ImageView
+        if (imageDecoration.getWidth() > -1 && imageDecoration.getHeight() > -1) {
+            imageView.setFitWidth(imageDecoration.getWidth());
+            imageView.setFitHeight(imageDecoration.getHeight());
+        }
+        // TODO Clip imageView if wider than contentArea
+        if (imageDecoration.getLink() != null) {
+            // TODO Add action to open link on mouseClick
+        }
+        return imageView;
     }
 
     private void evictUnusedFonts() {

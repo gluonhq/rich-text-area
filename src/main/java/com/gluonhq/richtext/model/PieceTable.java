@@ -1,6 +1,5 @@
 package com.gluonhq.richtext.model;
 
-import com.gluonhq.richtext.FaceModel;
 import com.gluonhq.richtext.undo.AbstractCommand;
 import com.gluonhq.richtext.undo.CommandManager;
 
@@ -12,11 +11,15 @@ import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
+import static com.gluonhq.richtext.model.PieceTable.ZERO_WIDTH_TEXT;
+
 /**
  * Piece table implementation.<br>
  * More info at  https://en.wikipedia.org/wiki/Piece_table
  */
 public final class PieceTable extends AbstractTextBuffer {
+
+    static final String ZERO_WIDTH_TEXT = "\u200b";
 
     final String originalText;
     String additionBuffer = "";
@@ -36,7 +39,7 @@ public final class PieceTable extends AbstractTextBuffer {
             pieces.add(piece(Piece.BufferType.ORIGINAL, 0, originalText.length()));
         } else {
             faceModel.getDecorationList().forEach(d ->
-                    pieces.add(new Piece(PieceTable.this, Piece.BufferType.ORIGINAL, d.getStart(), d.getLength(), d.getTextDecoration())));
+                    pieces.add(new Piece(PieceTable.this, Piece.BufferType.ORIGINAL, d.getStart(), d.getLength(), d.getDecoration())));
         }
         textLengthProperty.set(pieces.stream().mapToInt(b -> b.length).sum());
         pieceCharacterIterator = new PieceCharacterIterator(this);
@@ -103,7 +106,7 @@ public final class PieceTable extends AbstractTextBuffer {
     }
 
     // internal append
-    Piece appendTextInternal(String text, TextDecoration decoration) {
+    Piece appendTextInternal(String text, Decoration decoration) {
         int pos = additionBuffer.length();
         additionBuffer += text;
         textLengthProperty.set(getTextLength() + text.length());
@@ -120,8 +123,14 @@ public final class PieceTable extends AbstractTextBuffer {
     }
 
     @Override
-    public void decorate(int start, int end, TextDecoration textDecoration) {
-        commander.execute(new TextDecorateCmd(start, end, textDecoration));
+    public void decorate(int start, int end, Decoration decoration) {
+        if (decoration instanceof TextDecoration) {
+            commander.execute(new TextDecorateCmd(start, end, decoration));
+        } else if (decoration instanceof ImageDecoration) {
+            commander.execute(new ImageDecorateCmd((ImageDecoration) decoration, start));
+        } else {
+            throw new IllegalArgumentException("Decoration type not supported: " + decoration);
+        }
     }
 
     /**
@@ -129,10 +138,9 @@ public final class PieceTable extends AbstractTextBuffer {
      * @param onFragment callback to get fragment info
      */
     @Override
-    public void walkFragments(BiConsumer<String, TextDecoration> onFragment) {
-        pieces.forEach( p -> onFragment.accept( p.getText(), p.getDecoration()));
+    public void walkFragments(BiConsumer<String, Decoration> onFragment) {
+        pieces.forEach(p -> onFragment.accept(p.getText(), p.getDecoration()));
     }
-
 
     /**
      * Inserts text at insertPosition
@@ -214,14 +222,16 @@ public final class PieceTable extends AbstractTextBuffer {
         return index >= start && index < start+length;
     }
 
-    TextDecoration previousPieceDecoration(int index) {
-        return pieces.isEmpty() ? TextDecoration.builder().presets().build() : pieces.get(index > 0 ? index - 1 : 0).getDecoration();
+    Decoration previousPieceDecoration(int index) {
+        return pieces.isEmpty() || !(pieces.get(index > 0 ? index - 1 : 0).getDecoration() instanceof TextDecoration) ?
+                TextDecoration.builder().presets().build() : pieces.get(index > 0 ? index - 1 : 0).getDecoration();
     }
 
     @Override
     public String toString() {
         String p = pieces.stream().map(piece -> " - " + piece.toString()).collect(Collectors.joining("\n", "\n", ""));
-        return "PieceTable{\n O=\"" + originalText.replaceAll("\n", "<n>") + "\"" + ",\n A=\"" + additionBuffer.replaceAll("\n", "<n>") + "\"" +
+        return "PieceTable{\n O=\"" + originalText.replaceAll("\n", "<n>").replaceAll(ZERO_WIDTH_TEXT, "<a>") + "\"" + "" +
+                ",\n A=\"" + additionBuffer.replaceAll("\n", "<n>").replaceAll(ZERO_WIDTH_TEXT, "<a>") + "\"" +
                 ",\n L=" + getTextLength() +
                 ", pieces ->" + p +
                 "\n}";
@@ -386,7 +396,7 @@ class AppendCmd extends AbstractPTCmd {
             int pos = pt.getTextLength();
             newPiece = pt.appendTextInternal(text, pt.previousPieceDecoration(pt.pieces.size()));
             pt.pieces.add(newPiece);
-            pt.fire( new TextBuffer.InsertEvent(text, pos));
+            pt.fire(new TextBuffer.InsertEvent(text, pos));
             execSuccess = true;
         }
     }
@@ -402,7 +412,7 @@ class InsertCmd extends AbstractCommand<PieceTable> {
     private int opPieceIndex;
     private boolean execSuccess = false;
 
-    InsertCmd( String text, int insertPosition )  {
+    InsertCmd(String text, int insertPosition) {
         this.text = Objects.requireNonNull(text);
         this.insertPosition = insertPosition;
     }
@@ -420,11 +430,11 @@ class InsertCmd extends AbstractCommand<PieceTable> {
     @Override
     protected void doRedo(PieceTable pt) {
 
-        if ( text.isEmpty() ) {
+        if (text.isEmpty()) {
             return; // no need to insert empty text
         }
 
-        if ( insertPosition < 0 || insertPosition > pt.getTextLength() ) {
+        if (insertPosition < 0 || insertPosition > pt.getTextLength()) {
             throw new IllegalArgumentException("Position is outside text bounds");
         }
 
@@ -434,7 +444,7 @@ class InsertCmd extends AbstractCommand<PieceTable> {
             pt.walkPieces((piece, pieceIndex, textPosition) -> {
                 if (PieceTable.inRange(insertPosition, textPosition, piece.length)) {
                     int pieceOffset = insertPosition - textPosition;
-                    final TextDecoration decoration = pieceOffset > 0 ? piece.getDecoration() : pt.previousPieceDecoration(pieceIndex);
+                    final Decoration decoration = pieceOffset > 0 ? (TextDecoration) piece.getDecoration() : pt.previousPieceDecoration(pieceIndex);
                     newPieces = PieceTable.normalize(List.of(
                             piece.pieceBefore(pieceOffset),
                             pt.appendTextInternal(text, decoration),
@@ -492,9 +502,8 @@ class DeleteCmd extends AbstractCommand<PieceTable> {
 
     @Override
     protected void doRedo(PieceTable pt) {
-
-        if (!PieceTable.inRange(deletePosition, 0, pt.getTextLength())) {
-            throw new IllegalArgumentException("Position is outside of text bounds");
+        if (deletePosition < 0 || deletePosition > pt.getTextLength()) {
+            throw new IllegalArgumentException("Position " + deletePosition + " is outside of text bounds [0," + pt.getTextLength() +"]");
         }
 
         //  Accept length larger than actual and adjust it to actual
@@ -540,6 +549,79 @@ class DeleteCmd extends AbstractCommand<PieceTable> {
             execSuccess = true;
         }
     }
+}
+
+class ImageDecorateCmd extends AbstractCommand<PieceTable> {
+
+    private final ImageDecoration decoration;
+    private final int insertPosition;
+
+    private boolean execSuccess = false;
+    private Piece newPiece;
+    private Piece oldPiece;
+    private int opPieceIndex;
+    private Collection<Piece> newPieces = new ArrayList<>();
+
+    /**
+     * Inserts an image at the given insertion point
+     * @param decoration the image decoration
+     * @param insertPosition index of the character to decorate
+     */
+    ImageDecorateCmd(ImageDecoration decoration, int insertPosition) {
+        this.decoration = decoration;
+        this.insertPosition = insertPosition;
+    }
+
+    @Override
+    protected void doUndo(PieceTable pt) {
+        if (execSuccess) {
+            if (insertPosition == pt.getTextLength()) {
+                pt.pieces.remove(newPiece);
+                pt.fire(new TextBuffer.DeleteEvent(pt.getTextLength() - 1, 1));
+            } else {
+                pt.pieces.add(opPieceIndex, oldPiece);
+                pt.pieces.removeAll(newPieces);
+                pt.fire(new TextBuffer.DeleteEvent(insertPosition, 1));
+            }
+            pt.textLengthProperty.set(pt.getTextLength() - 1);
+        }
+    }
+
+    @Override
+    protected void doRedo(PieceTable pt) {
+        if (insertPosition < 0 || insertPosition > pt.getTextLength()) {
+            throw new IllegalArgumentException("Position " + insertPosition + " is outside of text bounds [0, " + pt.getTextLength() + "]");
+        }
+
+        if (insertPosition == pt.getTextLength()) {
+            int pos = pt.getTextLength();
+            newPiece = pt.appendTextInternal(ZERO_WIDTH_TEXT, decoration);
+            pt.pieces.add(newPiece);
+            pt.fire(new TextBuffer.InsertEvent(ZERO_WIDTH_TEXT, pos));
+            execSuccess = true;
+        } else {
+            pt.walkPieces((piece, pieceIndex, textPosition) -> {
+                if (PieceTable.inRange(insertPosition, textPosition, piece.length)) {
+                    int pieceOffset = insertPosition - textPosition;
+                    newPieces = PieceTable.normalize(List.of(
+                            piece.pieceBefore(pieceOffset),
+                            pt.appendTextInternal(ZERO_WIDTH_TEXT, decoration),
+                            piece.pieceFrom(pieceOffset)
+                    ));
+                    oldPiece = piece;
+                    pt.pieces.addAll(pieceIndex, newPieces);
+                    pt.pieces.remove(oldPiece);
+                    opPieceIndex = pieceIndex;
+
+                    pt.fire(new TextBuffer.InsertEvent(ZERO_WIDTH_TEXT, insertPosition));
+                    execSuccess = true;
+                    return true;
+                }
+                return false;
+            });
+        }
+
+    }
 
 }
 
@@ -547,7 +629,7 @@ class TextDecorateCmd extends AbstractCommand<PieceTable> {
 
     private int start;
     private int end;
-    private final TextDecoration decoration;
+    private final Decoration decoration;
 
     private boolean execSuccess = false;
     private int pieceIndex = -1;
@@ -560,7 +642,7 @@ class TextDecorateCmd extends AbstractCommand<PieceTable> {
      * @param end index of the last character to decorate
      * @param decoration Decorations to apply on the selected text
      */
-    TextDecorateCmd(int start, int end, TextDecoration decoration) {
+    TextDecorateCmd(int start, int end, Decoration decoration) {
         this.start = start;
         this.end = end;
         this.decoration = decoration;
@@ -581,7 +663,7 @@ class TextDecorateCmd extends AbstractCommand<PieceTable> {
     @Override
     protected void doRedo(PieceTable pt) {
         if (!PieceTable.inRange(start, 0, pt.getTextLength())) {
-            throw new IllegalArgumentException("Position is outside of text bounds");
+            throw new IllegalArgumentException("Position " + start + " is outside of text bounds [0, " + pt.getTextLength() + ")");
         }
 
         //  Accept length larger than actual and adjust it to actual

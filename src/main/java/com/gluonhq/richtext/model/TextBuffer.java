@@ -1,6 +1,5 @@
 package com.gluonhq.richtext.model;
 
-import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyIntegerProperty;
 
 import java.text.CharacterIterator;
@@ -18,22 +17,22 @@ public interface TextBuffer {
     char charAt(int pos);
     void resetCharacterIterator();
 
-    void insert( String text, int insertPosition );
-    void append( String text );
-    void delete( final int deletePosition, int length );
+    void insert(String text, int insertPosition);
+    void append(String text);
+    void delete(final int deletePosition, int length);
 
     /**
      * Adds decoration to Text in the specified range.
      * @param start index to start, inclusive.
      * @param end index to end, exclusive.
-     * @param textDecoration decoration to apply.
+     * @param decoration decoration to apply.
      */
-    void decorate(int start, int end, TextDecoration textDecoration);
+    void decorate(int start, int end, Decoration decoration);
 
     void undo();
     void redo();
 
-    void walkFragments(BiConsumer<String, TextDecoration> onFragment);
+    void walkFragments(BiConsumer<String, Decoration> onFragment);
 
     void addChangeListener(Consumer<TextBuffer.Event> listener);
     void removeChangeListener(Consumer<TextBuffer.Event> listener);
@@ -46,7 +45,7 @@ public interface TextBuffer {
         private final String text;
         private final int position;
 
-        InsertEvent(String text, int position ) {
+        InsertEvent(String text, int position) {
             this.text = text;
             this.position = position;
         }
@@ -65,7 +64,7 @@ public interface TextBuffer {
         private final int position;
         private final int length;
 
-        DeleteEvent(int position, int length ) {
+        DeleteEvent(int position, int length) {
             this.position = position;
             this.length = length;
         }
@@ -83,9 +82,9 @@ public interface TextBuffer {
 
         private final int start;
         private final int end;
-        private final TextDecoration decoration;
+        private final Decoration decoration;
 
-        DecorateEvent(int start, int end, TextDecoration decoration) {
+        DecorateEvent(int start, int end, Decoration decoration) {
             this.start = start;
             this.end = end;
             this.decoration = decoration;
@@ -99,7 +98,7 @@ public interface TextBuffer {
             return end;
         }
 
-        public TextDecoration getDecoration() {
+        public Decoration getDecoration() {
             return decoration;
         }
     }

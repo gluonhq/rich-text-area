@@ -13,13 +13,13 @@ public final class Piece {
     final int start;                // start position with the buffer
     final int length;               // text length
 //    final int[] lineStops;          // array if line stop indexes
-    final TextDecoration decoration;
+    final Decoration decoration;
 
     public Piece(final PieceTable source, final BufferType bufferType, final int start, final int length) {
         this(source, bufferType, start, length, null);
     }
 
-    public Piece(final PieceTable source, final BufferType bufferType, final int start, final int length, TextDecoration decoration) {
+    public Piece(final PieceTable source, final BufferType bufferType, final int start, final int length, Decoration decoration) {
 
         this.bufferType = bufferType;
         this.start = start;
@@ -57,7 +57,7 @@ public final class Piece {
         return length == 0 ? "" : buffer.substring(start, start + length);
     }
 
-    public TextDecoration getDecoration() {
+    public Decoration getDecoration() {
         return decoration;
     }
 
@@ -65,8 +65,14 @@ public final class Piece {
         return new Piece(source, bufferType, newStart, newLength, decoration);
     }
 
-    Piece copy(int newStart, int newLength, TextDecoration textDecoration) {
-        return new Piece(source, bufferType, newStart, newLength, textDecoration.normalize(decoration));
+    Piece copy(int newStart, int newLength, Decoration newDecoration) {
+        if (decoration instanceof TextDecoration) {
+            return new Piece(source, bufferType, newStart, newLength,
+                    newDecoration instanceof TextDecoration ?
+                            ((TextDecoration) newDecoration).normalize((TextDecoration) decoration) : newDecoration);
+        } else {
+            return new Piece(source, bufferType, newStart, newLength, decoration);
+        }
     }
 
     // excludes char at offset
@@ -87,6 +93,6 @@ public final class Piece {
                 ", [" + start +
                 ", " + length +
                 "], " + decoration +
-                ", \"" + getText().replaceAll("\n", "<n>") + "\"}";
+                ", \"" + getText().replaceAll("\n", "<n>").replaceAll(PieceTable.ZERO_WIDTH_TEXT, "<a>") + "\"}";
     }
 }

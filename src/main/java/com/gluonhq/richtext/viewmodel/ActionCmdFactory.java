@@ -1,5 +1,6 @@
 package com.gluonhq.richtext.viewmodel;
 
+import com.gluonhq.richtext.model.ImageDecoration;
 import com.gluonhq.richtext.model.TextDecoration;
 import javafx.scene.input.KeyEvent;
 
@@ -42,6 +43,10 @@ public final class ActionCmdFactory {
 
     public ActionCmd decorateText(TextDecoration decoration) {
         return new ActionCmdDecorateText(decoration);
+    }
+
+    public ActionCmd decorateImage(ImageDecoration decoration) {
+        return new ActionCmdDecorateImage(decoration);
     }
 
     public ActionCmd caretMove(RichTextAreaViewModel.Direction direction, KeyEvent event) {

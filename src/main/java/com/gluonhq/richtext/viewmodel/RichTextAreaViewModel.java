@@ -2,6 +2,8 @@ package com.gluonhq.richtext.viewmodel;
 
 import com.gluonhq.richtext.Selection;
 import com.gluonhq.richtext.Tools;
+import com.gluonhq.richtext.model.Decoration;
+import com.gluonhq.richtext.model.ImageDecoration;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.undo.CommandManager;
@@ -193,15 +195,22 @@ public class RichTextAreaViewModel {
         }
     }
 
-    void decorate(TextDecoration decoration) {
-        if (getSelection().isDefined()) {
-            Selection selection = getSelection();
-            clearSelection();
+    void decorate(Decoration decoration) {
+        if (decoration instanceof TextDecoration) {
+            if (getSelection().isDefined()) {
+                Selection selection = getSelection();
+                clearSelection();
+                int caretPosition = getCaretPosition();
+                setCaretPosition(-1);
+                getTextBuffer().decorate(selection.getStart(), selection.getEnd(), decoration);
+                setCaretPosition(caretPosition);
+                setSelection(selection);
+            }
+        } else if (decoration instanceof ImageDecoration) {
             int caretPosition = getCaretPosition();
             setCaretPosition(-1);
-            getTextBuffer().decorate(selection.getStart(), selection.getEnd(), decoration);
-            setCaretPosition(caretPosition);
-            setSelection(selection);
+            getTextBuffer().decorate(caretPosition, 1, decoration);
+            setCaretPosition(caretPosition + 1);
         }
     }
 
@@ -238,7 +247,7 @@ public class RichTextAreaViewModel {
 
     void clipboardPaste() {
         if (clipboardHasString()) {
-            final String text =  Clipboard.getSystemClipboard().getString();
+            final String text = Clipboard.getSystemClipboard().getString();
             if (text != null) {
                 commandManager.execute(new InsertTextCmd(text));
             }
@@ -287,7 +296,7 @@ public class RichTextAreaViewModel {
 
     }
 
-    public void walkFragments(BiConsumer<String, TextDecoration> onFragment) {
+    public void walkFragments(BiConsumer<String, Decoration> onFragment) {
         getTextBuffer().resetCharacterIterator();
         getTextBuffer().walkFragments(onFragment);
         LOGGER.log(Level.FINE, getTextBuffer().toString());
