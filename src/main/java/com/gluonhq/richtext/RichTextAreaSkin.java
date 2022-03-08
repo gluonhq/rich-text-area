@@ -120,7 +120,9 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     );
 
     private final Map<Integer, Font> fontCache = new ConcurrentHashMap<>();
-    private final SmartTimer fontCacheEvictionTimer = new SmartTimer( this::evictUnusedFonts, 1000, 60000);
+    private final Map<String, Image> imageCache = new ConcurrentHashMap<>();
+    private final SmartTimer fontCacheEvictionTimer = new SmartTimer(this::evictUnusedFonts, 1000, 60000);
+    private final SmartTimer imageCacheEvictionTimer = new SmartTimer(this::evictUnusedImages, 1000, 60000);
 
     private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow();
     private final ChangeListener<Boolean> focusChangeListener;
@@ -262,6 +264,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     //  For now rebuilding the whole text flow
     private void refreshTextFlow() {
         fontCacheEvictionTimer.pause();
+        imageCacheEvictionTimer.pause();
         try {
             var fragments = new ArrayList<Node>();
             var backgroundIndexRanges = new ArrayList<IndexRangeColor>();
@@ -287,6 +290,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             getSkinnable().requestFocus();
         } finally {
             fontCacheEvictionTimer.start();
+            imageCacheEvictionTimer.start();
         }
     }
 
@@ -321,7 +325,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 decoration.getFontPosture(),
                 decoration.getFontSize());
 
-        Font font = fontCache.computeIfAbsent( hash,
+        Font font = fontCache.computeIfAbsent(hash,
             h -> Font.font(
                     decoration.getFontFamily(),
                     decoration.getFontWeight(),
@@ -333,8 +337,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     private ImageView buildImage(ImageDecoration imageDecoration) {
-        // TODO Add cache of images
-        Image image = new Image(imageDecoration.getUrl());
+        Image image = imageCache.computeIfAbsent(imageDecoration.getUrl(), Image::new);
         final ImageView imageView = new ImageView(image);
         // TODO Create resizable ImageView
         if (imageDecoration.getWidth() > -1 && imageDecoration.getHeight() > -1) {
@@ -352,12 +355,24 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         Set<Font> usedFonts =  textFlow.getChildren()
                 .stream()
                 .filter(Text.class::isInstance)
-                .map( t -> ((Text)t).getFont())
+                .map(t -> ((Text) t).getFont())
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         List<Font> cachedFonts = new ArrayList<>(fontCache.values());
         cachedFonts.removeAll(usedFonts);
         fontCache.values().removeAll(cachedFonts);
+    }
+
+    private void evictUnusedImages() {
+        Set<Image> usedImages =  textFlow.getChildren()
+                .stream()
+                .filter(ImageView.class::isInstance)
+                .map(t -> ((ImageView) t).getImage())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        List<Image> cachedImages = new ArrayList<>(imageCache.values());
+        cachedImages.removeAll(usedImages);
+        imageCache.values().removeAll(cachedImages);
     }
 
     private void editableChangeListener(Observable o) {
