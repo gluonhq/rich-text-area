@@ -3,6 +3,9 @@ package com.gluonhq;
 import com.gluonhq.richtext.action.Action;
 import com.gluonhq.richtext.RichTextArea;
 import com.gluonhq.richtext.FaceModel;
+import com.gluonhq.richtext.action.DecorateAction;
+import com.gluonhq.richtext.action.FontSizeDecorateAction;
+import com.gluonhq.richtext.action.ForegroundDecorateAction;
 import com.gluonhq.richtext.model.TextDecoration;
 import javafx.application.Application;
 import javafx.geometry.Orientation;
@@ -72,11 +75,9 @@ public class Main extends Application {
         fontSize.setEditable(true);
         fontSize.setPrefWidth(60);
         fontSize.getItems().addAll(IntStream.range(1, 100)
-                .filter(i -> i % 2 == 0 || i < 10)
+                .filter(i -> i % 2 == 0 || i < 18)
                 .asDoubleStream().boxed().collect(Collectors.toList()));
-        fontSize.setValue(17.0);
-        fontSize.setOnAction(e -> editor.getActionFactory().decorate(
-                TextDecoration.builder().fontSize(fontSize.getValue()).build()).execute(e));
+        new FontSizeDecorateAction(editor, fontSize.valueProperty());
         fontSize.setConverter(new StringConverter<>() {
             @Override
             public String toString(Double aDouble) {
@@ -88,11 +89,12 @@ public class Main extends Application {
                 return Double.parseDouble(s);
             }
         });
+        fontSize.setValue(17.0);
 
         final ColorPicker textForeground = new ColorPicker();
         textForeground.getStyleClass().add("foreground");
-        textForeground.setOnAction(e -> editor.getActionFactory().decorate(
-                TextDecoration.builder().foreground(textForeground.getValue()).build()).execute(e));
+        new ForegroundDecorateAction(editor, textForeground.valueProperty());
+        textForeground.setValue(Color.BLUE);
 
         final ColorPicker textBackground = new ColorPicker();
         textBackground.getStyleClass().add("background");

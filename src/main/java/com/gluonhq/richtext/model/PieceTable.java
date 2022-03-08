@@ -25,6 +25,7 @@ public final class PieceTable extends AbstractTextBuffer {
     private final CommandManager<PieceTable> commander = new CommandManager<>(this);
 
     private final PieceCharacterIterator pieceCharacterIterator;
+    TextDecoration decorationAtCaret;
 
     /**
      * Creates piece table using original text
@@ -133,6 +134,24 @@ public final class PieceTable extends AbstractTextBuffer {
         pieces.forEach( p -> onFragment.accept( p.getText(), p.getDecoration()));
     }
 
+    @Override
+    public TextDecoration getDecorationAtCaret(int caretPosition) {
+        int textPosition = 0;
+        int index = 0;
+        for (; index < pieces.size(); index++) {
+            Piece piece = pieces.get(index);
+            if (textPosition <= caretPosition && caretPosition < textPosition + piece.length) {
+                return piece.getDecoration();
+            }
+            textPosition += piece.length;
+        }
+        return previousPieceDecoration(index);
+    }
+
+    @Override
+    public void setDecorationAtCaret(TextDecoration decoration) {
+        this.decorationAtCaret = decoration;
+    }
 
     /**
      * Inserts text at insertPosition
@@ -384,7 +403,8 @@ class AppendCmd extends AbstractPTCmd {
     protected void doRedo(PieceTable pt) {
         if (!text.isEmpty()) {
             int pos = pt.getTextLength();
-            newPiece = pt.appendTextInternal(text, pt.previousPieceDecoration(pt.pieces.size()));
+            newPiece = pt.appendTextInternal(text, pt.decorationAtCaret != null ?
+                    pt.decorationAtCaret : pt.previousPieceDecoration(pt.pieces.size()));
             pt.pieces.add(newPiece);
             pt.fire( new TextBuffer.InsertEvent(text, pos));
             execSuccess = true;

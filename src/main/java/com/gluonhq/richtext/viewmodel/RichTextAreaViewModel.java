@@ -62,7 +62,12 @@ public class RichTextAreaViewModel {
     }
 
     // caretPositionProperty
-    private final IntegerProperty caretPositionProperty = new SimpleIntegerProperty(this, "caretPosition", -1);
+    private final IntegerProperty caretPositionProperty = new SimpleIntegerProperty(this, "caretPosition", -1) {
+        @Override
+        protected void invalidated() {
+            setTextDecoration(getTextBuffer().getDecorationAtCaret(get()));
+        }
+    };
     private final BiFunction<Double, Boolean, Integer> getNextRowPosition;
 
     public final IntegerProperty caretPositionProperty() {
@@ -134,6 +139,23 @@ public class RichTextAreaViewModel {
     }
     public final void setEditable(boolean value) {
         editableProperty.set(value);
+    }
+
+    // textDecorationProperty
+    private final ObjectProperty<TextDecoration> textDecorationProperty = new SimpleObjectProperty<>(this, "textDecoration") {
+        @Override
+        protected void invalidated() {
+            getTextBuffer().setDecorationAtCaret(get());
+        }
+    };
+    public final ObjectProperty<TextDecoration> textDecorationProperty() {
+       return textDecorationProperty;
+    }
+    public final TextDecoration getTextDecoration() {
+       return textDecorationProperty.get();
+    }
+    public final void setTextDecoration(TextDecoration value) {
+        textDecorationProperty.set(value);
     }
 
     public RichTextAreaViewModel(BiFunction<Double, Boolean, Integer> getNextRowPosition) {

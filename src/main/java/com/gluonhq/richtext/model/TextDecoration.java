@@ -104,6 +104,16 @@ public class TextDecoration {
             return this;
         }
 
+        public Builder fromDecoration(TextDecoration decoration) {
+            foreground = decoration.foreground;
+            background = decoration.background;
+            fontFamily = decoration.fontFamily;
+            fontSize = decoration.fontSize;
+            fontPosture = decoration.fontPosture;
+            fontWeight = decoration.fontWeight;
+            return this;
+        }
+
         public Builder foreground(Color color) {
             this.foreground = Objects.requireNonNull(color);
             return this;
