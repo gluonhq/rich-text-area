@@ -485,6 +485,9 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private void keyTypedListener(KeyEvent e) {
         if (isCharOnly(e)) {
+            if (viewModel.getSelection().isDefined()) {
+                execute(ACTION_CMD_FACTORY.removeText(-1));
+            }
             execute(ACTION_CMD_FACTORY.insertText(e.getCharacter()));
             e.consume();
         }
