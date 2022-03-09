@@ -24,6 +24,6 @@ class DecorateCmd extends AbstractEditCmd {
 
     @Override
     public String toString() {
-        return "DecorateTextCmd[" + decoration + "]";
+        return "DecorateCmd[" + decoration + "]";
     }
 }

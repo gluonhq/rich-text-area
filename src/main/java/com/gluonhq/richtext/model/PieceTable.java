@@ -591,7 +591,7 @@ class ImageDecorateCmd extends AbstractCommand<PieceTable> {
     @Override
     protected void doUndo(PieceTable pt) {
         if (execSuccess) {
-            if (insertPosition == pt.getTextLength()) {
+            if (newPiece != null) {
                 pt.pieces.remove(newPiece);
                 pt.fire(new TextBuffer.DeleteEvent(pt.getTextLength() - 1, 1));
             } else {
