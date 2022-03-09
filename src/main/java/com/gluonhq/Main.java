@@ -1,8 +1,11 @@
 package com.gluonhq;
 
-import com.gluonhq.richtext.action.*;
+import com.gluonhq.richtext.action.Action;
 import com.gluonhq.richtext.RichTextArea;
 import com.gluonhq.richtext.FaceModel;
+import com.gluonhq.richtext.action.DecorateBackgroundAction;
+import com.gluonhq.richtext.action.FontSizeDecorateAction;
+import com.gluonhq.richtext.action.DecorateForegroundAction;
 import com.gluonhq.richtext.model.TextDecoration;
 import javafx.application.Application;
 import javafx.geometry.Orientation;
@@ -25,7 +28,6 @@ import org.kordamp.ikonli.lineawesome.LineAwesomeSolid;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -75,8 +77,7 @@ public class Main extends Application {
         fontSize.getItems().addAll(IntStream.range(1, 100)
                 .filter(i -> i % 2 == 0 || i < 18)
                 .asDoubleStream().boxed().collect(Collectors.toList()));
-        // new FontSizeDecorateAction(editor, fontSize.valueProperty());
-        new GenericDecorateAction<>(editor, fontSize.valueProperty(), TextDecoration::getFontSize, (builder, fs) -> builder.fontSize(fs).build());
+        new FontSizeDecorateAction(editor, fontSize.valueProperty());
         fontSize.setConverter(new StringConverter<>() {
             @Override
             public String toString(Double aDouble) {
@@ -92,14 +93,12 @@ public class Main extends Application {
 
         final ColorPicker textForeground = new ColorPicker();
         textForeground.getStyleClass().add("foreground");
-        // new DecorateForegroundAction(editor, textForeground.valueProperty());
-        new GenericDecorateAction<>(editor, textForeground.valueProperty(), TextDecoration::getForeground, (builder, fs) -> builder.foreground(fs).build());
+        new DecorateForegroundAction(editor, textForeground.valueProperty());
         textForeground.setValue(Color.BLUE);
 
         final ColorPicker textBackground = new ColorPicker();
         textBackground.getStyleClass().add("background");
-        // new DecorateBackgroundAction(editor, textBackground.valueProperty());
-        new GenericDecorateAction<>(editor, textForeground.valueProperty(), TextDecoration::getBackground, (builder, fs) -> builder.background(fs).build());
+        new DecorateBackgroundAction(editor, textBackground.valueProperty());
         textBackground.setValue(Color.TRANSPARENT);
 
         CheckBox editableProp = new CheckBox("Editable");

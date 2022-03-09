@@ -27,6 +27,10 @@ public class FontSizeDecorateAction extends DecorateAction<Double> {
         };
         valueProperty.addListener(fontSizeChangeListener);
         textDecorationChangeListener = (obs, ov, nv) -> {
+            System.out.println("FontSizeDecorateAction.bind");
+            System.out.println("textdecoration listener");
+            System.out.println("nv: " + nv);
+            System.out.println("updating: " + updating);
             if (!updating && nv != null && !nv.equals(ov) && nv.getFontSize() != ov.getFontSize()) {
                 updating = true;
                 valueProperty.set(nv.getFontSize());
