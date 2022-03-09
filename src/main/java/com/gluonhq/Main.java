@@ -1,13 +1,11 @@
 package com.gluonhq;
 
-import com.gluonhq.richtext.action.Action;
-import com.gluonhq.richtext.RichTextArea;
 import com.gluonhq.richtext.FaceModel;
-import com.gluonhq.richtext.action.DecorateBackgroundAction;
-import com.gluonhq.richtext.action.FontSizeDecorateAction;
-import com.gluonhq.richtext.action.DecorateForegroundAction;
+import com.gluonhq.richtext.RichTextArea;
+import com.gluonhq.richtext.action.*;
 import com.gluonhq.richtext.model.TextDecoration;
 import javafx.application.Application;
+import javafx.beans.property.ObjectProperty;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -28,6 +26,7 @@ import org.kordamp.ikonli.lineawesome.LineAwesomeSolid;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -115,8 +114,8 @@ public class Main extends Application {
                 new Separator(Orientation.VERTICAL),
                 fontFamilies,
                 fontSize,
-                actionButton(LineAwesomeSolid.BOLD, editor.getActionFactory().decorate(TextDecoration.builder().fontWeight(FontWeight.BOLD).build())),
-                actionButton(LineAwesomeSolid.ITALIC, editor.getActionFactory().decorate(TextDecoration.builder().fontPosture(FontPosture.ITALIC).build())),
+                createToggleButton(LineAwesomeSolid.BOLD, property -> new DecorateFontWeightAction(editor, property)),
+                createToggleButton(LineAwesomeSolid.ITALIC, property -> new DecorateFontPostureAction(editor, property)),
                 textForeground,
                 textBackground,
                 new Separator(Orientation.VERTICAL),
@@ -167,6 +166,15 @@ public class Main extends Application {
         button.disableProperty().bind(action.disabledProperty());
         button.setOnAction(action::execute);
         return button;
+    }
+
+    private ToggleButton createToggleButton(Ikon ikon, Function<ObjectProperty<Boolean>, DecorateAction<Boolean>> function) {
+        final ToggleButton fontWeight = new ToggleButton();
+        FontIcon icon = new FontIcon(ikon);
+        icon.setIconSize(20);
+        fontWeight.setGraphic(icon);
+        function.apply(fontWeight.selectedProperty().asObject());
+        return fontWeight;
     }
 
     private MenuItem actionMenuItem(String text, Ikon ikon, Action action) {
