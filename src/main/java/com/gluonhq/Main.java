@@ -67,8 +67,7 @@ public class Main extends Application {
         ComboBox<String> fontFamilies = new ComboBox<>();
         fontFamilies.getItems().setAll(Font.getFamilies());
         fontFamilies.setValue("Arial");
-        fontFamilies.setOnAction(e -> editor.getActionFactory().decorate(
-                TextDecoration.builder().fontFamily(fontFamilies.getSelectionModel().getSelectedItem()).build()).execute(e));
+        new DecorateFontFamilyAction(editor, fontFamilies.valueProperty());
 
         final ComboBox<Double> fontSize = new ComboBox<>();
         fontSize.setEditable(true);
