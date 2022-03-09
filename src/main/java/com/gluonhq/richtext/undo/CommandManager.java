@@ -3,8 +3,12 @@ package com.gluonhq.richtext.undo;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CommandManager<T> {
+
+    public static final Logger LOGGER = Logger.getLogger(CommandManager.class.getName());
 
     final Deque<AbstractCommand<T>> undoStack = new ArrayDeque<>();
     final Deque<AbstractCommand<T>> redoStack = new ArrayDeque<>();
@@ -25,6 +29,7 @@ public class CommandManager<T> {
         undoStack.push(cmd);
         redoStack.clear();
         end();
+        LOGGER.log(Level.FINE, "Execute: " + this);
     }
 
     public void undo() {
@@ -33,6 +38,7 @@ public class CommandManager<T> {
             cmd.undo(context);
             redoStack.push(cmd);
             end();
+            LOGGER.log(Level.FINE, "Undo: " + this);
         }
     }
 
@@ -42,6 +48,7 @@ public class CommandManager<T> {
             cmd.redo(context);
             undoStack.push(cmd);
             end();
+            LOGGER.log(Level.FINE, "Redo: " + this);
         }
     }
 
@@ -62,5 +69,13 @@ public class CommandManager<T> {
         if (runnable != null) {
             runnable.run();
         }
+    }
+
+    @Override
+    public String toString() {
+        return "CommandManager<" + context.getClass().getSimpleName() + ">{\n" +
+                " - undoStack=" + undoStack +
+                "\n - redoStack=" + redoStack +
+                "\n}";
     }
 }
