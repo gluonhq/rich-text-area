@@ -559,6 +559,12 @@ class DeleteCmd extends AbstractCommand<PieceTable> {
             execSuccess = true;
         }
     }
+
+    @Override
+    public String toString() {
+        return "DeleteCmd[" + deletePosition + " x " + length + "]";
+    }
+
 }
 
 class ImageDecorateCmd extends AbstractCommand<PieceTable> {
@@ -635,7 +641,7 @@ class ImageDecorateCmd extends AbstractCommand<PieceTable> {
 
     @Override
     public String toString() {
-        return "DeleteCmd[" + deletePosition + " x " + length + "]";
+        return "ImageDecorateCmd[" + decoration + " at " + insertPosition + "]";
     }
 }
 
