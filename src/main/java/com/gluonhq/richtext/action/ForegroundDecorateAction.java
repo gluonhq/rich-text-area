@@ -29,11 +29,7 @@ public class ForegroundDecorateAction extends DecorateAction<Color> {
         };
         valueProperty.addListener(colorChangeListener);
         textDecorationChangeListener = (obs, ov, nv) -> {
-            System.out.println("ForegroundDecorateAction.bind");
-            System.out.println("textdecoration listener");
-            System.out.println("nv: " + nv);
-            System.out.println("updating: " + updating);
-            if (nv != null && !updating) {
+            if (!updating && nv != null && !nv.equals(ov) && !nv.getForeground().equals(ov.getForeground())) {
                 updating = true;
                 valueProperty.set(nv.getForeground());
                 updating = false;

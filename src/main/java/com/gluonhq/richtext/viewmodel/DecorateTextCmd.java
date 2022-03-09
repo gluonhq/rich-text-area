@@ -7,6 +7,7 @@ import java.util.Objects;
 class DecorateTextCmd extends AbstractEditCmd {
 
     private final TextDecoration decoration;
+    private TextDecoration prevDecoration;
 
     public DecorateTextCmd(TextDecoration decoration) {
         this.decoration = decoration;
@@ -17,6 +18,7 @@ class DecorateTextCmd extends AbstractEditCmd {
         if (selection.isDefined()) {
             Objects.requireNonNull(viewModel).decorate(decoration);
         } else {
+            prevDecoration = Objects.requireNonNull(viewModel).getTextDecoration();
             Objects.requireNonNull(viewModel).setTextDecoration(decoration);
         }
     }
@@ -26,7 +28,9 @@ class DecorateTextCmd extends AbstractEditCmd {
         if (selection.isDefined()) {
             Objects.requireNonNull(viewModel).undoDecoration();
         } else {
-            Objects.requireNonNull(viewModel).setTextDecoration(decoration);
+            if (prevDecoration != null) {
+                Objects.requireNonNull(viewModel).setTextDecoration(prevDecoration);
+            }
         }
     }
 
