@@ -21,16 +21,18 @@ public class ForegroundDecorateAction extends DecorateAction<Color> {
             if (nv != null && !updating) {
                 updating = true;
                 TextDecoration newTextDecoration = TextDecoration.builder().fromDecoration(viewModel.getTextDecoration()).foreground(nv).build();
-                viewModel.setTextDecoration(newTextDecoration);
-                if (viewModel.getSelection().isDefined()) {
-                    ACTION_CMD_FACTORY.decorateText(newTextDecoration).apply(viewModel);
-                }
+                // viewModel.setTextDecoration(newTextDecoration);
+                ACTION_CMD_FACTORY.decorateText(newTextDecoration).apply(viewModel);
                 control.requestFocus();
                 updating = false;
             }
         };
         valueProperty.addListener(colorChangeListener);
         textDecorationChangeListener = (obs, ov, nv) -> {
+            System.out.println("ForegroundDecorateAction.bind");
+            System.out.println("textdecoration listener");
+            System.out.println("nv: " + nv);
+            System.out.println("updating: " + updating);
             if (nv != null && !updating) {
                 updating = true;
                 valueProperty.set(nv.getForeground());

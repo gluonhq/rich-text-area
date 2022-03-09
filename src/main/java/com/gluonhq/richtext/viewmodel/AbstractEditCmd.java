@@ -12,7 +12,7 @@ import java.util.Objects;
 abstract class AbstractEditCmd extends com.gluonhq.richtext.undo.AbstractCommand<RichTextAreaViewModel> {
 
     private int caretPosition;
-    private Selection selection;
+    Selection selection;
 
 
     protected void storeContext( RichTextAreaViewModel viewModel ) {

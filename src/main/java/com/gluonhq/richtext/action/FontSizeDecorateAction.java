@@ -20,16 +20,20 @@ public class FontSizeDecorateAction extends DecorateAction<Double> {
             if (nv != null && !updating) {
                 updating = true;
                 TextDecoration newTextDecoration = TextDecoration.builder().fromDecoration(viewModel.getTextDecoration()).fontSize(nv).build();
-                viewModel.setTextDecoration(newTextDecoration);
-                if (viewModel.getSelection().isDefined()) {
-                    ACTION_CMD_FACTORY.decorateText(newTextDecoration).apply(viewModel);
-                }
+                /*viewModel.setTextDecoration(newTextDecoration);
+                if (viewModel.getSelection().isDefined()) {*/
+                ACTION_CMD_FACTORY.decorateText(newTextDecoration).apply(viewModel);
+                //}
                 control.requestFocus();
                 updating = false;
             }
         };
         valueProperty.addListener(fontSizeChangeListener);
         textDecorationChangeListener = (obs, ov, nv) -> {
+            System.out.println("FontSizeDecorateAction.bind");
+            System.out.println("textdecoration listener");
+            System.out.println("nv: " + nv);
+            System.out.println("updating: " + updating);
             if (nv != null && !updating) {
                 updating = true;
                 valueProperty.set(nv.getFontSize());
