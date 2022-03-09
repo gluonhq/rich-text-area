@@ -18,15 +18,15 @@ public class ActionCmdCaretMove implements ActionCmd {
         this.lineSelection = lineSelection;
     }
 
-    public ActionCmdCaretMove(RichTextAreaViewModel.Direction direction, KeyEvent event ) {
-        this( direction,
+    public ActionCmdCaretMove(RichTextAreaViewModel.Direction direction, KeyEvent event) {
+        this(direction,
               event.isShiftDown(),
               Tools.MAC ? event.isAltDown() : event.isControlDown(),
               Tools.MAC && event.isShortcutDown());
     }
 
     public void apply(RichTextAreaViewModel viewModel) {
-        viewModel.moveCaret(direction,changeSelection, wordSelection, lineSelection);
+        viewModel.moveCaret(direction, changeSelection, wordSelection, lineSelection);
     }
 
 }

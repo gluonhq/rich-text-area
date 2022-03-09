@@ -12,6 +12,8 @@ public final class ActionCmdFactory {
     private final ActionCmd undo = new ActionCmdUndo();
     private final ActionCmd redo = new ActionCmdRedo();
 
+    private final ActionCmd selectAll = new ActionCmdSelectAll();
+
     public ActionCmd copy() {
         return copy;
     }
@@ -30,6 +32,10 @@ public final class ActionCmdFactory {
 
     public ActionCmd redo() {
         return redo;
+    }
+
+    public ActionCmd selectAll() {
+        return selectAll;
     }
 
     public ActionCmd insertText(String text) {

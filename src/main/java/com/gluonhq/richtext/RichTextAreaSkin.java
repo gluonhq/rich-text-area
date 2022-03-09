@@ -79,6 +79,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         entry( new KeyCodeCombination(UP,    SHIFT_ANY),                                     e -> ACTION_CMD_FACTORY.caretMove(Direction.UP, e.isShiftDown(), false, false)),
         entry( new KeyCodeCombination(HOME,  SHIFT_ANY),                                     e -> ACTION_CMD_FACTORY.caretMove(Direction.FORWARD, e.isShiftDown(), false, true)),
         entry( new KeyCodeCombination(END,   SHIFT_ANY),                                     e -> ACTION_CMD_FACTORY.caretMove(Direction.BACK, e.isShiftDown(), false, true)),
+        entry( new KeyCodeCombination(A, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.selectAll()),
         entry( new KeyCodeCombination(C, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.copy()),
         entry( new KeyCodeCombination(X, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.cut()),
         entry( new KeyCodeCombination(V, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.paste()),
@@ -206,6 +207,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         lastValidCaretPosition = -1;
         getSkinnable().editableProperty().removeListener(this::editableChangeListener);
         getSkinnable().textLengthProperty.unbind();
+        getSkinnable().setOnKeyPressed(null);
+        getSkinnable().setOnKeyTyped(null);
         textBackgroundColorPaths.removeListener(textBackgroundColorPathsChangeListener);
         textFlow.setOnMousePressed(null);
         textFlow.setOnMouseDragged(null);
@@ -240,6 +243,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().textLengthProperty.bind(viewModel.textLengthProperty());
         getSkinnable().setOnContextMenuRequested(contextMenuEventEventHandler);
         getSkinnable().editableProperty().addListener(this::editableChangeListener);
+        getSkinnable().setOnKeyPressed(this::keyPressedListener);
+        getSkinnable().setOnKeyTyped(this::keyTypedListener);
         textBackgroundColorPaths.addListener(textBackgroundColorPathsChangeListener);
         scrollPane.focusedProperty().addListener(focusChangeListener);
         scrollPane.hbarPolicyProperty().bind(hbarPolicyBinding);
@@ -340,15 +345,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private void editableChangeListener(Observable o) {
         boolean editable = getSkinnable().isEditable();
-
-        if (editable) {
-            getSkinnable().setOnKeyPressed(this::keyPressedListener);
-            getSkinnable().setOnKeyTyped(this::keyTypedListener);
-        } else {
-            getSkinnable().setOnKeyPressed(null);
-            getSkinnable().setOnKeyTyped(null);
-        }
-
         viewModel.setEditable(editable);
         viewModel.setCaretPosition(editable ? lastValidCaretPosition : -1);
         textFlow.setCursor(editable ? Cursor.TEXT : Cursor.DEFAULT);
@@ -496,15 +492,19 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private void populateContextMenu(boolean isEditable) {
         if (isEditable && editableContextMenuItems == null) {
             editableContextMenuItems = FXCollections.observableArrayList(
-                    createMenuItem("undo", ACTION_CMD_FACTORY.undo()),
-                    createMenuItem("redo", ACTION_CMD_FACTORY.redo()),
+                    createMenuItem("Undo", ACTION_CMD_FACTORY.undo()),
+                    createMenuItem("Redo", ACTION_CMD_FACTORY.redo()),
                     new SeparatorMenuItem(),
-                    createMenuItem("copy", ACTION_CMD_FACTORY.copy()),
-                    createMenuItem("cut", ACTION_CMD_FACTORY.cut()),
-                    createMenuItem("paste", ACTION_CMD_FACTORY.paste()));
+                    createMenuItem("Copy", ACTION_CMD_FACTORY.copy()),
+                    createMenuItem("Cut", ACTION_CMD_FACTORY.cut()),
+                    createMenuItem("Paste", ACTION_CMD_FACTORY.paste()),
+                    new SeparatorMenuItem(),
+                    createMenuItem("Select All", ACTION_CMD_FACTORY.selectAll()));
         } else if (!isEditable && nonEditableContextMenuItems == null) {
-            nonEditableContextMenuItems = FXCollections.singletonObservableList(
-                    createMenuItem("copy", ACTION_CMD_FACTORY.copy()));
+            nonEditableContextMenuItems = FXCollections.observableArrayList(
+                    createMenuItem("Copy", ACTION_CMD_FACTORY.copy()),
+                    new SeparatorMenuItem(),
+                    createMenuItem("Select All", ACTION_CMD_FACTORY.selectAll()));
         }
         contextMenu.getItems().setAll(isEditable ? editableContextMenuItems : nonEditableContextMenuItems);
     }
