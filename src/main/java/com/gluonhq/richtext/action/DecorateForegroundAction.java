@@ -6,12 +6,12 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.paint.Color;
 
-public class ForegroundDecorateAction extends DecorateAction<Color> {
+public class DecorateForegroundAction extends DecorateAction<Color> {
 
     private ChangeListener<Color> colorChangeListener;
     private ChangeListener<TextDecoration> textDecorationChangeListener;
 
-    public ForegroundDecorateAction(RichTextArea control, ObjectProperty<Color> valueProperty) {
+    public DecorateForegroundAction(RichTextArea control, ObjectProperty<Color> valueProperty) {
         super(control, valueProperty);
     }
 

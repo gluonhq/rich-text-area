@@ -3,9 +3,9 @@ package com.gluonhq;
 import com.gluonhq.richtext.action.Action;
 import com.gluonhq.richtext.RichTextArea;
 import com.gluonhq.richtext.FaceModel;
-import com.gluonhq.richtext.action.DecorateAction;
+import com.gluonhq.richtext.action.DecorateBackgroundAction;
 import com.gluonhq.richtext.action.FontSizeDecorateAction;
-import com.gluonhq.richtext.action.ForegroundDecorateAction;
+import com.gluonhq.richtext.action.DecorateForegroundAction;
 import com.gluonhq.richtext.model.TextDecoration;
 import javafx.application.Application;
 import javafx.geometry.Orientation;
@@ -93,13 +93,13 @@ public class Main extends Application {
 
         final ColorPicker textForeground = new ColorPicker();
         textForeground.getStyleClass().add("foreground");
-        new ForegroundDecorateAction(editor, textForeground.valueProperty());
+        new DecorateForegroundAction(editor, textForeground.valueProperty());
         textForeground.setValue(Color.BLUE);
 
         final ColorPicker textBackground = new ColorPicker();
         textBackground.getStyleClass().add("background");
-        textBackground.setOnAction(e -> editor.getActionFactory().decorate(
-                TextDecoration.builder().background(textBackground.getValue()).build()).execute(e));
+        new DecorateBackgroundAction(editor, textBackground.valueProperty());
+        textBackground.setValue(Color.TRANSPARENT);
 
         CheckBox editableProp = new CheckBox("Editable");
         editableProp.selectedProperty().bindBidirectional(editor.editableProperty());
