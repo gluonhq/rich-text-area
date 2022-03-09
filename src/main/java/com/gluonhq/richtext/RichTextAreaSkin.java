@@ -141,14 +141,14 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final DoubleBinding prefHeightBinding;
     private final ChangeListener<Number> textFlowPrefWidthListener = (obs, ov, nv) -> {
         refreshTextFlow();
-        updateSelection(viewModel.getSelection());
-        updateCaretPosition(viewModel.getCaretPosition());
+        requestLayout();
     };
     private double textFlowLayoutX = 0d, textFlowLayoutY = 0d;
     private final ChangeListener<Insets> insetsChangeListener = (obs, ov, nv) -> {
         textFlowLayoutX = nv.getLeft();
         textFlowLayoutY = nv.getTop();
     };
+    private int nonTextNodesCount;
 
     protected RichTextAreaSkin(final RichTextArea control) {
         super(control);
@@ -274,6 +274,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             var fragments = new ArrayList<Node>();
             var backgroundIndexRanges = new ArrayList<IndexRangeColor>();
             var length = new AtomicInteger();
+            var nonTextNodes = new AtomicInteger();
             viewModel.walkFragments((text, decoration) -> {
                 if (decoration instanceof TextDecoration) {
                     final Text textNode = buildText(text, (TextDecoration) decoration);
@@ -281,17 +282,21 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                     Color background = ((TextDecoration) decoration).getBackground();
                     if (background != Color.TRANSPARENT) {
                         backgroundIndexRanges.add(new IndexRangeColor(
-                                length.get(), length.get() + textNode.getText().length(), background));
+                                length.get(), length.get() + text.length(), background));
                     }
-                    length.addAndGet(textNode.getText().length());
+                    length.addAndGet(text.length());
                 } else if (decoration instanceof ImageDecoration) {
                     fragments.add(buildImage((ImageDecoration) decoration));
                     length.incrementAndGet();
+                    nonTextNodes.incrementAndGet();
                 }
             });
             textFlow.getChildren().setAll(fragments);
             addBackgroundPathsToLayers(backgroundIndexRanges);
-            getSkinnable().requestLayout();
+            if (nonTextNodesCount != nonTextNodes.get()) {
+                requestLayout();
+                nonTextNodesCount = nonTextNodes.get();
+            }
             getSkinnable().requestFocus();
         } finally {
             fontCacheEvictionTimer.start();
@@ -426,6 +431,12 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             // Otherwise text appears to be jumping
             caretShape.setOpacity( on? 1: 0 );
         }
+    }
+
+    private void requestLayout() {
+        updateSelection(viewModel.getSelection());
+        updateCaretPosition(viewModel.getCaretPosition());
+        getSkinnable().requestLayout();
     }
 
     private int dragStart = -1;
