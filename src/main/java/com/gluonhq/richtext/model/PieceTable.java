@@ -410,6 +410,11 @@ class AppendCmd extends AbstractPTCmd {
             execSuccess = true;
         }
     }
+
+    @Override
+    public String toString() {
+        return "AppendCmd[\"" + text + "\"]";
+    }
 }
 
 class InsertCmd extends AbstractCommand<PieceTable> {
@@ -472,6 +477,11 @@ class InsertCmd extends AbstractCommand<PieceTable> {
                 return false;
             });
         }
+    }
+
+    @Override
+    public String toString() {
+        return "InsertCmd[\"" + text + "\" at " + insertPosition + "]";
     }
 }
 
@@ -561,6 +571,10 @@ class DeleteCmd extends AbstractCommand<PieceTable> {
         }
     }
 
+    @Override
+    public String toString() {
+        return "DeleteCmd[" + deletePosition + " x " + length + "]";
+    }
 }
 
 class TextDecorateCmd extends AbstractCommand<PieceTable> {
@@ -659,6 +673,12 @@ class TextDecorateCmd extends AbstractCommand<PieceTable> {
     private boolean isPieceInSelection(Piece piece, int textPosition) {
         int pieceEndPosition = textPosition + piece.length - 1;
         return start <= pieceEndPosition && (end >= pieceEndPosition || end >= textPosition);
+    }
+
+    @Override
+    public String toString() {
+        return "TextDecorateCmd[" + start +
+                " x " + end + "]";
     }
 }
 
