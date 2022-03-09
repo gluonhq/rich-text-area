@@ -21,7 +21,6 @@ public class DecorateForegroundAction extends DecorateAction<Color> {
             if (nv != null && !updating) {
                 updating = true;
                 TextDecoration newTextDecoration = TextDecoration.builder().fromDecoration(viewModel.getTextDecoration()).foreground(nv).build();
-                // viewModel.setTextDecoration(newTextDecoration);
                 ACTION_CMD_FACTORY.decorateText(newTextDecoration).apply(viewModel);
                 control.requestFocus();
                 updating = false;
