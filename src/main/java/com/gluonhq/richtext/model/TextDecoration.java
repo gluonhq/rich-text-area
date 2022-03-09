@@ -16,6 +16,8 @@ public class TextDecoration {
     private double fontSize;
     private FontPosture fontPosture;
     private FontWeight fontWeight;
+    private boolean strikethrough;
+    private boolean underline;
 
     private TextDecoration() {}
 
@@ -41,6 +43,14 @@ public class TextDecoration {
 
     public FontWeight getFontWeight() {
         return fontWeight;
+    }
+
+    public boolean isStrikethrough() {
+        return strikethrough;
+    }
+
+    public boolean isUnderline() {
+        return underline;
     }
 
     public static Builder builder() {
@@ -69,6 +79,8 @@ public class TextDecoration {
         td.fontSize    = normalizedFontSize;
         td.fontWeight  = Objects.requireNonNullElse(normalizedWeight, decoration.getFontWeight());
         td.fontPosture = Objects.requireNonNullElse(normalizedPosture, decoration.getFontPosture());
+        td.strikethrough = strikethrough || decoration.strikethrough;
+        td.underline = underline || decoration.underline;
         return td;
     }
 
@@ -80,6 +92,8 @@ public class TextDecoration {
         private double fontSize;
         private FontPosture fontPosture;
         private FontWeight fontWeight;
+        private boolean strikethrough;
+        private boolean underline;
 
         private Builder() {}
 
@@ -91,6 +105,8 @@ public class TextDecoration {
             decoration.fontSize    = this.fontSize;
             decoration.fontWeight  = this.fontWeight;
             decoration.fontPosture = this.fontPosture;
+            decoration.strikethrough = this.strikethrough;
+            decoration.underline = this.underline;
             return decoration;
         }
 
@@ -111,6 +127,8 @@ public class TextDecoration {
             fontSize = decoration.fontSize;
             fontPosture = decoration.fontPosture;
             fontWeight = decoration.fontWeight;
+            strikethrough = decoration.strikethrough;
+            underline = decoration.underline;
             return this;
         }
 
@@ -143,6 +161,16 @@ public class TextDecoration {
             this.fontPosture = Objects.requireNonNull(fontPosture);
             return this;
         }
+
+        public Builder strikethrough(boolean strikethrough) {
+            this.strikethrough = strikethrough;
+            return this;
+        }
+
+        public Builder underline(boolean underline) {
+            this.underline = underline;
+            return this;
+        }
     }
 
     @Override
@@ -154,7 +182,10 @@ public class TextDecoration {
                 ", " + fontSize +
                 ", " + (fontPosture != null ? getFirstLetter(fontPosture.name()) : "-") +
                 ", " + (fontWeight != null ? getFirstLetter(fontWeight.name()) : "-") +
-                "]}";
+                "]" +
+                ", strikethrough=" + strikethrough +
+                ", underline=" + underline +
+                "}";
     }
 }
 

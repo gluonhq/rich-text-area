@@ -5,31 +5,31 @@ import com.gluonhq.richtext.model.TextDecoration;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 
-public class FontSizeDecorateAction extends DecorateAction<Double> {
+public class DecorateUnderlineAction extends DecorateAction<Boolean> {
 
-    private ChangeListener<Double> fontSizeChangeListener;
+    private ChangeListener<Boolean> underlineChangeListener;
     private ChangeListener<TextDecoration> textDecorationChangeListener;
 
-    public FontSizeDecorateAction(RichTextArea control, ObjectProperty<Double> valueProperty) {
+    public DecorateUnderlineAction(RichTextArea control, ObjectProperty<Boolean> valueProperty) {
         super(control, valueProperty);
     }
 
     @Override
     protected void bind() {
-        fontSizeChangeListener = (obs, ov, nv) -> {
+        underlineChangeListener = (obs, ov, nv) -> {
             if (nv != null && !updating) {
                 updating = true;
-                TextDecoration newTextDecoration = TextDecoration.builder().fromDecoration(viewModel.getTextDecoration()).fontSize(nv).build();
+                TextDecoration newTextDecoration = TextDecoration.builder().fromDecoration(viewModel.getTextDecoration()).underline(nv).build();
                 ACTION_CMD_FACTORY.decorateText(newTextDecoration).apply(viewModel);
                 control.requestFocus();
                 updating = false;
             }
         };
-        valueProperty.addListener(fontSizeChangeListener);
+        valueProperty.addListener(underlineChangeListener);
         textDecorationChangeListener = (obs, ov, nv) -> {
-            if (!updating && nv != null && !nv.equals(ov) && nv.getFontSize() != ov.getFontSize()) {
+            if (!updating && nv != null && !nv.equals(ov) && nv.isUnderline() != ov.isUnderline()) {
                 updating = true;
-                valueProperty.set(nv.getFontSize());
+                valueProperty.set(nv.isUnderline());
                 updating = false;
             }
         };
@@ -38,7 +38,7 @@ public class FontSizeDecorateAction extends DecorateAction<Double> {
 
     @Override
     protected void unbind() {
-        valueProperty.removeListener(fontSizeChangeListener);
+        valueProperty.removeListener(underlineChangeListener);
         viewModel.textDecorationProperty().removeListener(textDecorationChangeListener);
     }
 }

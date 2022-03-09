@@ -116,6 +116,8 @@ public class Main extends Application {
                 fontSize,
                 createToggleButton(LineAwesomeSolid.BOLD, property -> new DecorateFontWeightAction(editor, property)),
                 createToggleButton(LineAwesomeSolid.ITALIC, property -> new DecorateFontPostureAction(editor, property)),
+                createToggleButton(LineAwesomeSolid.STRIKETHROUGH, property -> new DecorateStrikethroughAction(editor, property)),
+                createToggleButton(LineAwesomeSolid.UNDERLINE, property -> new DecorateUnderlineAction(editor, property)),
                 textForeground,
                 textBackground,
                 new Separator(Orientation.VERTICAL),

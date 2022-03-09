@@ -30,7 +30,7 @@ public class DecorateFontPostureAction extends DecorateAction<Boolean> {
         };
         valueProperty.addListener(fontPostureChangeListener);
         textDecorationChangeListener = (obs, ov, nv) -> {
-            if (!updating && nv != null && !nv.equals(ov) && !nv.getFontWeight().equals(ov.getFontWeight())) {
+            if (!updating && nv != null && !nv.equals(ov) && !nv.getFontPosture().equals(ov.getFontPosture())) {
                 updating = true;
                 valueProperty.set(nv.getFontPosture() == ITALIC);
                 updating = false;

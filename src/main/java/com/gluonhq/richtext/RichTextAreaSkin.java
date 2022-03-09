@@ -312,6 +312,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         Objects.requireNonNull(decoration);
         Text text = new Text(Objects.requireNonNull(content));
         text.setFill(decoration.getForeground());
+        text.setStrikethrough(decoration.isStrikethrough());
+        text.setUnderline(decoration.isUnderline());
 
         // Cashing fonts, assuming their reuse, especially for default one
         int hash = Objects.hash(
