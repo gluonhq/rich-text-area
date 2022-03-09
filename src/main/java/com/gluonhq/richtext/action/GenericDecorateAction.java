@@ -5,31 +5,39 @@ import com.gluonhq.richtext.model.TextDecoration;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 
-public class FontSizeDecorateAction extends DecorateAction<Double> {
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
-    private ChangeListener<Double> fontSizeChangeListener;
+public class GenericDecorateAction<T> extends DecorateAction<T> {
+
+    private ChangeListener<T> valuePropertyChangeListener;
     private ChangeListener<TextDecoration> textDecorationChangeListener;
+    private Function<TextDecoration, T> function;
+    private BiFunction<TextDecoration.Builder, T, TextDecoration> builderTFunction;
 
-    public FontSizeDecorateAction(RichTextArea control, ObjectProperty<Double> valueProperty) {
+    public GenericDecorateAction(RichTextArea control, ObjectProperty<T> valueProperty, Function<TextDecoration, T> valueFunction, BiFunction<TextDecoration.Builder, T, TextDecoration> builderTFunction) {
         super(control, valueProperty);
+        this.function = valueFunction;
+        this.builderTFunction = builderTFunction;
     }
 
     @Override
     protected void bind() {
-        fontSizeChangeListener = (obs, ov, nv) -> {
+        valuePropertyChangeListener = (obs, ov, nv) -> {
             if (nv != null && !updating) {
                 updating = true;
-                TextDecoration newTextDecoration = TextDecoration.builder().fromDecoration(viewModel.getTextDecoration()).fontSize(nv).build();
+                TextDecoration.Builder builder = TextDecoration.builder().fromDecoration(viewModel.getTextDecoration());
+                TextDecoration newTextDecoration = builderTFunction.apply(builder, nv);
                 ACTION_CMD_FACTORY.decorateText(newTextDecoration).apply(viewModel);
                 control.requestFocus();
                 updating = false;
             }
         };
-        valueProperty.addListener(fontSizeChangeListener);
+        valueProperty.addListener(valuePropertyChangeListener);
         textDecorationChangeListener = (obs, ov, nv) -> {
             if (!updating && nv != null && !nv.equals(ov) && nv.getFontSize() != ov.getFontSize()) {
                 updating = true;
-                valueProperty.set(nv.getFontSize());
+                valueProperty.set(function.apply(nv));
                 updating = false;
             }
         };
@@ -38,7 +46,7 @@ public class FontSizeDecorateAction extends DecorateAction<Double> {
 
     @Override
     protected void unbind() {
-        valueProperty.removeListener(fontSizeChangeListener);
+        valueProperty.removeListener(valuePropertyChangeListener);
         viewModel.textDecorationProperty().removeListener(textDecorationChangeListener);
     }
 }
