@@ -19,4 +19,9 @@ class InsertTextCmd extends AbstractEditCmd {
     public void doUndo( RichTextAreaViewModel viewModel ) {
         Objects.requireNonNull(viewModel).undo();
     }
+
+    @Override
+    public String toString() {
+        return "InsertTextCmd[" + content + "]";
+    }
 }

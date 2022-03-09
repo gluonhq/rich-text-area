@@ -21,4 +21,9 @@ class RemoveTextCmd extends AbstractEditCmd {
         Objects.requireNonNull(viewModel);
         viewModel.undo();
     }
+
+    @Override
+    public String toString() {
+        return "RemoveTextCmd[" + caretOffset + "]";
+    }
 }
