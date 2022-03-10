@@ -16,6 +16,7 @@ import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 
@@ -241,12 +242,24 @@ public class RichTextAreaViewModel {
         }
     }
 
+    boolean clipboardHasImage() {
+        return Clipboard.getSystemClipboard().hasImage();
+    }
+
     boolean clipboardHasString() {
         return Clipboard.getSystemClipboard().hasString();
     }
 
     void clipboardPaste() {
-        if (clipboardHasString()) {
+        if (clipboardHasImage()) {
+            final Image image = Clipboard.getSystemClipboard().getImage();
+            if (image != null) {
+                String url = image.getUrl() != null ? image.getUrl() : Clipboard.getSystemClipboard().getUrl();
+                if (url != null) {
+                    commandManager.execute(new DecorateCmd(new ImageDecoration(url)));
+                }
+            }
+        } else if (clipboardHasString()) {
             final String text = Clipboard.getSystemClipboard().getString();
             if (text != null) {
                 commandManager.execute(new InsertTextCmd(text));
