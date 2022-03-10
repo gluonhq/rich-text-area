@@ -66,7 +66,7 @@ public class RichTextAreaViewModel {
     private final IntegerProperty caretPositionProperty = new SimpleIntegerProperty(this, "caretPosition", -1) {
         @Override
         protected void invalidated() {
-            if (!decorationUpdating) {
+            if (!decorationUpdating && !hasSelection()) {
                 setTextDecoration(getTextBuffer().getDecorationAtCaret(get()));
             }
         }
