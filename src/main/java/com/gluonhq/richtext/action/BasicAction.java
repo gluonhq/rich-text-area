@@ -4,6 +4,7 @@ import com.gluonhq.richtext.RichTextArea;
 import com.gluonhq.richtext.RichTextAreaSkin;
 import com.gluonhq.richtext.viewmodel.ActionCmd;
 import com.gluonhq.richtext.viewmodel.RichTextAreaViewModel;
+import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.BooleanBinding;
@@ -57,7 +58,7 @@ class BasicAction implements Action {
 
     @Override
     public void execute(ActionEvent event) {
-        getActionCmd().apply(viewModel);
+        Platform.runLater(() -> getActionCmd().apply(viewModel));
     }
 
     @Override
