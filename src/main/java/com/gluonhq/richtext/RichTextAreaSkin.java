@@ -70,9 +70,12 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     interface ActionBuilder extends Function<KeyEvent, ActionCmd>{}
 
+    // TODO need to find a better way to find next row caret position
+    private final RichTextAreaViewModel viewModel = new RichTextAreaViewModel(this::getNextRowPosition);
+
     private static final ActionCmdFactory ACTION_CMD_FACTORY = new ActionCmdFactory();
 
-    private static final Map<KeyCombination, ActionBuilder> INPUT_MAP = Map.ofEntries(
+    private final Map<KeyCombination, ActionBuilder> INPUT_MAP = Map.ofEntries(
         entry( new KeyCodeCombination(RIGHT, SHIFT_ANY, ALT_ANY, CONTROL_ANY, SHORTCUT_ANY), e -> ACTION_CMD_FACTORY.caretMove(Direction.FORWARD, e)),
         entry( new KeyCodeCombination(LEFT,  SHIFT_ANY, ALT_ANY, CONTROL_ANY, SHORTCUT_ANY), e -> ACTION_CMD_FACTORY.caretMove(Direction.BACK, e)),
         entry( new KeyCodeCombination(DOWN,  SHIFT_ANY),                                     e -> ACTION_CMD_FACTORY.caretMove(Direction.DOWN, e.isShiftDown(), false, false)),
@@ -88,12 +91,9 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         entry( new KeyCodeCombination(ENTER, SHIFT_ANY),                                     e -> ACTION_CMD_FACTORY.insertText("\n")),
         entry( new KeyCodeCombination(BACK_SPACE, SHIFT_ANY),                                e -> ACTION_CMD_FACTORY.removeText(-1)),
         entry( new KeyCodeCombination(DELETE),                                               e -> ACTION_CMD_FACTORY.removeText(0)),
-        entry( new KeyCodeCombination(B, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().fontWeight(BOLD).build())),
-        entry( new KeyCodeCombination(I, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().fontPosture(ITALIC).build()))
+        entry( new KeyCodeCombination(B, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().fromDecoration(viewModel.getTextDecoration()).fontWeight(BOLD).build())),
+        entry( new KeyCodeCombination(I, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().fromDecoration(viewModel.getTextDecoration()).fontPosture(ITALIC).build()))
     );
-
-    // TODO need to find a better way to find next row caret position
-    private final RichTextAreaViewModel viewModel = new RichTextAreaViewModel(this::getNextRowPosition);
 
     private final ScrollPane scrollPane;
     private final TextFlow textFlow = new TextFlow();

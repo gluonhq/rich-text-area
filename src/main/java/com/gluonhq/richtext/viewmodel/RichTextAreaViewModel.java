@@ -34,6 +34,7 @@ public class RichTextAreaViewModel {
 
     private final CommandManager<RichTextAreaViewModel> commandManager = new CommandManager<>(this, this::updateProperties);
     private BreakIterator wordIterator;
+    private boolean decorationUpdating;
 
     /// PROPERTIES ///////////////////////////////////////////////////////////////
 
@@ -65,7 +66,9 @@ public class RichTextAreaViewModel {
     private final IntegerProperty caretPositionProperty = new SimpleIntegerProperty(this, "caretPosition", -1) {
         @Override
         protected void invalidated() {
-            setTextDecoration(getTextBuffer().getDecorationAtCaret(get()));
+            if (!decorationUpdating) {
+                setTextDecoration(getTextBuffer().getDecorationAtCaret(get()));
+            }
         }
     };
     private final BiFunction<Double, Boolean, Integer> getNextRowPosition;
@@ -145,7 +148,13 @@ public class RichTextAreaViewModel {
     private final ObjectProperty<TextDecoration> textDecorationProperty = new SimpleObjectProperty<>(this, "textDecoration") {
         @Override
         protected void invalidated() {
-            getTextBuffer().setDecorationAtCaret(get());
+            if (getSelection().isDefined()) {
+                decorationUpdating = true;
+                decorate(get());
+                decorationUpdating = false;
+            } else {
+                getTextBuffer().setDecorationAtCaret(get());
+            }
         }
     };
     public final ObjectProperty<TextDecoration> textDecorationProperty() {

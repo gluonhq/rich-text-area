@@ -15,17 +15,15 @@ class DecorateTextCmd extends AbstractEditCmd {
 
     @Override
     public void doRedo(RichTextAreaViewModel viewModel) {
-        if (selection.isDefined()) {
-            Objects.requireNonNull(viewModel).decorate(decoration);
-        } else {
+        if (!selection.isDefined()) {
             prevDecoration = Objects.requireNonNull(viewModel).getTextDecoration();
-            Objects.requireNonNull(viewModel).setTextDecoration(decoration);
         }
+        Objects.requireNonNull(viewModel).setTextDecoration(decoration);
     }
 
     @Override
     public void doUndo(RichTextAreaViewModel viewModel) {
-        if (selection.isDefined()) {
+        if (!selection.isDefined()) {
             Objects.requireNonNull(viewModel).undoDecoration();
         } else {
             if (prevDecoration != null) {

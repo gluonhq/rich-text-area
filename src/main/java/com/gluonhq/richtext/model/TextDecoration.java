@@ -57,33 +57,6 @@ public class TextDecoration {
         return new Builder();
     }
 
-    /**
-     * Returns a new instance of the current TextDecoration
-     * and normalizes properties based on the supplied decoration.
-     * FontWeight and FontPosture normalize into
-     * {@link FontWeight#NORMAL} and {@link FontPosture#REGULAR} respectively.
-     * @param decoration Decoration to compare and normalize
-     * @return New TextDecoration instance with properties normalized
-     */
-    public TextDecoration normalize(TextDecoration decoration) {
-        if (decoration == null) {
-            return this;
-        }
-        TextDecoration td = new TextDecoration();
-        final double normalizedFontSize = this.fontSize < 1.0 ? decoration.getFontSize() : this.fontSize;
-        final FontWeight normalizedWeight = this.fontWeight == decoration.getFontWeight() ? FontWeight.NORMAL : this.fontWeight;
-        final FontPosture normalizedPosture = this.fontPosture == decoration.getFontPosture() ? FontPosture.REGULAR : this.fontPosture;
-        td.foreground  = Objects.requireNonNullElse(foreground, decoration.getForeground());
-        td.background  = Objects.requireNonNullElse(background, decoration.getBackground());
-        td.fontFamily  = Objects.requireNonNullElse(fontFamily, decoration.getFontFamily());
-        td.fontSize    = normalizedFontSize;
-        td.fontWeight  = Objects.requireNonNullElse(normalizedWeight, decoration.getFontWeight());
-        td.fontPosture = Objects.requireNonNullElse(normalizedPosture, decoration.getFontPosture());
-        td.strikethrough = strikethrough || decoration.strikethrough;
-        td.underline = underline || decoration.underline;
-        return td;
-    }
-
     public static class Builder {
 
         private Color foreground;
