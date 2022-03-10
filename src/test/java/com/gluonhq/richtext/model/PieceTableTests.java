@@ -303,8 +303,8 @@ public class PieceTableTests {
     public void sameBlockDecorateWeightAndPosture() {
         String text = "Original Bigger Text";
         PieceTable pt = new PieceTable(new FaceModel(text));
-        TextDecoration textDecoration = TextDecoration.builder().fontWeight(FontWeight.BOLD).fontPosture(FontPosture.ITALIC).build();
-        pt.decorate(1, 2, textDecoration);
+        pt.decorate(1, 2, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
+        pt.decorate(1, 2, TextDecoration.builder().fontPosture(FontPosture.ITALIC).build());
         Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("r"))
@@ -319,7 +319,8 @@ public class PieceTableTests {
     public void sameBlockDecorateWeightAndSize() {
         String text = "Original Bigger Text";
         PieceTable pt = new PieceTable(new FaceModel(text));
-        pt.decorate(1, 2, TextDecoration.builder().fontWeight(FontWeight.BOLD).fontSize(20).build());
+        pt.decorate(1, 2, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
+        pt.decorate(1, 2, TextDecoration.builder().fontSize(20).build());
         Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("r"))
@@ -333,9 +334,8 @@ public class PieceTableTests {
     @DisplayName("Same block multiple decoration across pieces")
     public void sameBlockMultiDecorateSpanningMultiplePieces() {
         PieceTable pt = new PieceTable(new FaceModel(FACE_MODEL.getText() + " One Two Three"));
-        TextDecoration textDecoration = TextDecoration.builder().fontWeight(FontWeight.BOLD).build();
-        pt.decorate(14, 27, textDecoration);
-        pt.decorate(18, 21, TextDecoration.builder().fromDecoration(textDecoration).fontPosture(FontPosture.ITALIC).build());
+        pt.decorate(14, 27, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
+        pt.decorate(18, 21, TextDecoration.builder().fontPosture(FontPosture.ITALIC).build());
         Assertions.assertEquals("Original Text One Two Three", pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("One "))
@@ -395,9 +395,8 @@ public class PieceTableTests {
         PieceTable pt = new PieceTable(FACE_MODEL);
         String insert = "Bigger ";
         pt.insert(insert, 9); // 'Original Bigger Text'
-        TextDecoration textDecoration = TextDecoration.builder().fontWeight(FontWeight.BOLD).build();
-        pt.decorate(6, 18, textDecoration);
-        pt.decorate(9, 15, TextDecoration.builder().fromDecoration(textDecoration).fontPosture(FontPosture.ITALIC).build());
+        pt.decorate(6, 18, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
+        pt.decorate(9, 15, TextDecoration.builder().fontPosture(FontPosture.ITALIC).build());
         Assertions.assertEquals("Original Bigger Text", pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("al "))
@@ -421,7 +420,8 @@ public class PieceTableTests {
         String insert = "Bigger ";
         pt.insert(insert, 9); // 'Original Bigger Text'
         pt.insert(insert, 9); // 'Original Bigger Bigger Text'
-        pt.decorate(9, 15, TextDecoration.builder().fontWeight(FontWeight.BOLD).fontPosture(FontPosture.ITALIC).build());
+        pt.decorate(9, 15, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
+        pt.decorate(9, 15, TextDecoration.builder().fontPosture(FontPosture.ITALIC).build());
         Assertions.assertEquals("Original Bigger Bigger Text", pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("Bigger"))
@@ -437,7 +437,8 @@ public class PieceTableTests {
         String insert = "Bigger ";
         pt.insert(insert, 9); // 'Original Bigger Text'
         pt.insert(insert, 9); // 'Original Bigger Bigger Text'
-        pt.decorate(9, 15, TextDecoration.builder().fontSize(20).foreground(Color.AQUA).build());
+        pt.decorate(9, 15, TextDecoration.builder().fontSize(20).build());
+        pt.decorate(9, 15, TextDecoration.builder().foreground(Color.AQUA).build());
         Assertions.assertEquals("Original Bigger Bigger Text", pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getText().equals("Bigger"))
