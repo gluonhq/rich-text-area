@@ -315,7 +315,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         text.setStrikethrough(decoration.isStrikethrough());
         text.setUnderline(decoration.isUnderline());
 
-        // Cashing fonts, assuming their reuse, especially for default one
+        // Caching fonts, assuming their reuse, especially for default one
         int hash = Objects.hash(
                 decoration.getFontFamily(),
                 decoration.getFontWeight(),

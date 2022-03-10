@@ -1,6 +1,7 @@
 package com.gluonhq.richtext.action;
 
 import com.gluonhq.richtext.RichTextArea;
+import com.gluonhq.richtext.Selection;
 import com.gluonhq.richtext.model.TextDecoration;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -22,7 +23,12 @@ public class DecorateFontPostureAction extends DecorateAction<Boolean> {
         fontPostureChangeListener = (obs, ov, nv) -> {
             if (nv != null && !updating) {
                 updating = true;
-                TextDecoration newTextDecoration = TextDecoration.builder().fromDecoration(viewModel.getTextDecoration()).fontPosture(nv ? ITALIC:REGULAR).build();
+                TextDecoration newTextDecoration;
+                if (viewModel.getSelection() == Selection.UNDEFINED) {
+                    newTextDecoration = TextDecoration.builder().fromDecoration(viewModel.getTextDecoration()).fontPosture(nv ? ITALIC:REGULAR).build();
+                } else {
+                    newTextDecoration = TextDecoration.builder().fontPosture(nv ? ITALIC:REGULAR).build();
+                }
                 ACTION_CMD_FACTORY.decorateText(newTextDecoration).apply(viewModel);
                 control.requestFocus();
                 updating = false;
@@ -30,7 +36,7 @@ public class DecorateFontPostureAction extends DecorateAction<Boolean> {
         };
         valueProperty.addListener(fontPostureChangeListener);
         textDecorationChangeListener = (obs, ov, nv) -> {
-            if (!updating && nv != null && !nv.equals(ov) && !nv.getFontPosture().equals(ov.getFontPosture())) {
+            if (!updating && nv != null && !nv.equals(ov) && nv.getFontPosture() != null && !nv.getFontPosture().equals(ov.getFontPosture())) {
                 updating = true;
                 valueProperty.set(nv.getFontPosture() == ITALIC);
                 updating = false;

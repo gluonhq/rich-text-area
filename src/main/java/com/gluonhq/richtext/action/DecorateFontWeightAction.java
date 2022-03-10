@@ -1,6 +1,7 @@
 package com.gluonhq.richtext.action;
 
 import com.gluonhq.richtext.RichTextArea;
+import com.gluonhq.richtext.Selection;
 import com.gluonhq.richtext.model.TextDecoration;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -22,7 +23,12 @@ public class DecorateFontWeightAction extends DecorateAction<Boolean> {
         fontWeightChangeListener = (obs, ov, nv) -> {
             if (nv != null && !updating) {
                 updating = true;
-                TextDecoration newTextDecoration = TextDecoration.builder().fromDecoration(viewModel.getTextDecoration()).fontWeight(nv ? BOLD:NORMAL).build();
+                TextDecoration newTextDecoration;
+                if (viewModel.getSelection() == Selection.UNDEFINED) {
+                    newTextDecoration = TextDecoration.builder().fromDecoration(viewModel.getTextDecoration()).fontWeight(nv ? BOLD:NORMAL).build();
+                } else {
+                    newTextDecoration = TextDecoration.builder().fontWeight(nv ? BOLD:NORMAL).build();
+                }
                 ACTION_CMD_FACTORY.decorateText(newTextDecoration).apply(viewModel);
                 control.requestFocus();
                 updating = false;
@@ -30,7 +36,7 @@ public class DecorateFontWeightAction extends DecorateAction<Boolean> {
         };
         valueProperty.addListener(fontWeightChangeListener);
         textDecorationChangeListener = (obs, ov, nv) -> {
-            if (!updating && nv != null && !nv.equals(ov) && !nv.getFontWeight().equals(ov.getFontWeight())) {
+            if (!updating && nv != null && !nv.equals(ov) && nv.getFontWeight() != null && !nv.getFontWeight().equals(ov.getFontWeight())) {
                 updating = true;
                 valueProperty.set(nv.getFontWeight() == BOLD);
                 updating = false;

@@ -3,6 +3,8 @@ package com.gluonhq.richtext.model;
 import com.gluonhq.richtext.FaceModel;
 import com.gluonhq.richtext.undo.AbstractCommand;
 import com.gluonhq.richtext.undo.CommandManager;
+import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
 
 import java.text.CharacterIterator;
 import java.util.ArrayList;
@@ -131,8 +133,24 @@ public final class PieceTable extends AbstractTextBuffer {
      */
     @Override
     public void walkFragments(BiConsumer<String, TextDecoration> onFragment) {
-        pieces.forEach( p -> onFragment.accept( p.getText(), p.getDecoration()));
+        pieces.forEach(p -> onFragment.accept( p.getText(), p.getDecoration()));
     }
+
+    /*@Override
+    public TextDecoration getDecorationForSelection(int startPos, int endPos) {
+        int textPosition = 0;
+        for (Piece piece : pieces) {
+            if (startPos >= textPosition && endPos < textPosition+endPos) {
+                return piece.getDecoration();
+            }
+            textPosition += piece.length;
+        }
+        return TextDecoration.builder()
+                .fontWeight(FontWeight.NORMAL)
+                .fontPosture(FontPosture.REGULAR)
+                .strikethrough(false)
+                .underline(false).build();
+    }*/
 
     @Override
     public TextDecoration getDecorationAtCaret(int caretPosition) {

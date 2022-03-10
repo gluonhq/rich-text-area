@@ -75,7 +75,7 @@ public class Main extends Application {
         fontSize.getItems().addAll(IntStream.range(1, 100)
                 .filter(i -> i % 2 == 0 || i < 18)
                 .asDoubleStream().boxed().collect(Collectors.toList()));
-        new FontSizeDecorateAction(editor, fontSize.valueProperty());
+        new DecorateFontSizeAction(editor, fontSize.valueProperty());
         fontSize.setConverter(new StringConverter<>() {
             @Override
             public String toString(Double aDouble) {

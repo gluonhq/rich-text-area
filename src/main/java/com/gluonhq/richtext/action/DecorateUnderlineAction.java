@@ -1,6 +1,7 @@
 package com.gluonhq.richtext.action;
 
 import com.gluonhq.richtext.RichTextArea;
+import com.gluonhq.richtext.Selection;
 import com.gluonhq.richtext.model.TextDecoration;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -19,7 +20,12 @@ public class DecorateUnderlineAction extends DecorateAction<Boolean> {
         underlineChangeListener = (obs, ov, nv) -> {
             if (nv != null && !updating) {
                 updating = true;
-                TextDecoration newTextDecoration = TextDecoration.builder().fromDecoration(viewModel.getTextDecoration()).underline(nv).build();
+                TextDecoration newTextDecoration;
+                if (viewModel.getSelection() == Selection.UNDEFINED) {
+                    newTextDecoration = TextDecoration.builder().fromDecoration(viewModel.getTextDecoration()).underline(nv).build();
+                } else {
+                    newTextDecoration = TextDecoration.builder().underline(nv).build();
+                }
                 ACTION_CMD_FACTORY.decorateText(newTextDecoration).apply(viewModel);
                 control.requestFocus();
                 updating = false;
