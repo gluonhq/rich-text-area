@@ -156,8 +156,8 @@ public class TextDecoration {
                 ", " + (fontPosture != null ? getFirstLetter(fontPosture.name()) : "-") +
                 ", " + (fontWeight != null ? getFirstLetter(fontWeight.name()) : "-") +
                 "]" +
-                ", strikethrough=" + strikethrough +
-                ", underline=" + underline +
+                ", S:" + (strikethrough ? 1 : 0) +
+                ", U:" + (underline ? 1 : 0) +
                 "}";
     }
 }

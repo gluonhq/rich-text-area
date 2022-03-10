@@ -170,12 +170,12 @@ public class Main extends Application {
     }
 
     private ToggleButton createToggleButton(Ikon ikon, Function<ObjectProperty<Boolean>, DecorateAction<Boolean>> function) {
-        final ToggleButton fontWeight = new ToggleButton();
+        final ToggleButton toggleButton = new ToggleButton();
         FontIcon icon = new FontIcon(ikon);
         icon.setIconSize(20);
-        fontWeight.setGraphic(icon);
-        function.apply(fontWeight.selectedProperty().asObject());
-        return fontWeight;
+        toggleButton.setGraphic(icon);
+        function.apply(toggleButton.selectedProperty().asObject());
+        return toggleButton;
     }
 
     private MenuItem actionMenuItem(String text, Ikon ikon, Action action) {
