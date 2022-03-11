@@ -85,8 +85,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final Map<KeyCombination, ActionBuilder> INPUT_MAP = Map.ofEntries(
         entry( new KeyCodeCombination(RIGHT, SHIFT_ANY, ALT_ANY, CONTROL_ANY, SHORTCUT_ANY), e -> ACTION_CMD_FACTORY.caretMove(Direction.FORWARD, e)),
         entry( new KeyCodeCombination(LEFT,  SHIFT_ANY, ALT_ANY, CONTROL_ANY, SHORTCUT_ANY), e -> ACTION_CMD_FACTORY.caretMove(Direction.BACK, e)),
-        entry( new KeyCodeCombination(DOWN,  SHIFT_ANY),                                     e -> ACTION_CMD_FACTORY.caretMove(Direction.DOWN, e.isShiftDown(), false, false)),
-        entry( new KeyCodeCombination(UP,    SHIFT_ANY),                                     e -> ACTION_CMD_FACTORY.caretMove(Direction.UP, e.isShiftDown(), false, false)),
+        entry( new KeyCodeCombination(DOWN,  SHIFT_ANY, ALT_ANY, SHORTCUT_ANY),              e -> ACTION_CMD_FACTORY.caretMove(Direction.DOWN, e)),
+        entry( new KeyCodeCombination(UP,    SHIFT_ANY, ALT_ANY, SHORTCUT_ANY),              e -> ACTION_CMD_FACTORY.caretMove(Direction.UP, e)),
         entry( new KeyCodeCombination(HOME,  SHIFT_ANY),                                     e -> ACTION_CMD_FACTORY.caretMove(Direction.FORWARD, e.isShiftDown(), false, true)),
         entry( new KeyCodeCombination(END,   SHIFT_ANY),                                     e -> ACTION_CMD_FACTORY.caretMove(Direction.BACK, e.isShiftDown(), false, true)),
         entry( new KeyCodeCombination(A, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.selectAll()),
@@ -469,7 +469,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                     if (e.getClickCount() == 2) {
                         viewModel.selectCurrentWord();
                     } else if (e.getClickCount() == 3) {
-                        viewModel.selectCurrentLine();
+                        viewModel.selectCurrentParagraph();
                     } else {
                         dragStart = insertionIndex;
                         viewModel.clearSelection();
