@@ -38,13 +38,6 @@ public class RichTextAreaViewModel {
     private final CommandManager<RichTextAreaViewModel> commandManager = new CommandManager<>(this, this::updateProperties);
     private BreakIterator wordIterator;
 
-    @Override
-    public String toString() {
-        return "RichTextAreaViewModel{" +
-                "selection=" + getSelection() +
-                '}';
-    }
-
     /// PROPERTIES ///////////////////////////////////////////////////////////////
 
     // textBufferProperty

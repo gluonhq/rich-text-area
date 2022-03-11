@@ -29,9 +29,9 @@ abstract class AbstractEditCmd extends com.gluonhq.richtext.undo.AbstractCommand
 
     @Override
     public String toString() {
-        return "AbstractEditCmd {" +
-                "caretPosition=" + caretPosition +
-                ", selection=" + selection +
-                '}';
+        return "AbstractEditCmd { " +
+                "c=" + caretPosition +
+                ", s=[" + selection.getStart() + "," + selection.getEnd() + "] " +
+                "}";
     }
 }

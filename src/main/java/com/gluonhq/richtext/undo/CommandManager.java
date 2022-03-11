@@ -39,7 +39,6 @@ public class CommandManager<T> {
             redoStack.push(cmd);
             end();
             LOGGER.log(Level.FINE, "Undo: " + this);
-            LOGGER.log(Level.FINE, "Context: " + context);
         }
     }
 
@@ -50,7 +49,6 @@ public class CommandManager<T> {
             undoStack.push(cmd);
             end();
             LOGGER.log(Level.FINE, "Redo: " + this);
-            LOGGER.log(Level.FINE, "Context: " + context);
         }
     }
 
