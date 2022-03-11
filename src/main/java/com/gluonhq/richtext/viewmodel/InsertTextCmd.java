@@ -22,6 +22,6 @@ class InsertTextCmd extends AbstractEditCmd {
 
     @Override
     public String toString() {
-        return "InsertTextCmd[" + content + "]";
+        return "InsertTextCmd[" + super.toString() + ", " + content + "]";
     }
 }
