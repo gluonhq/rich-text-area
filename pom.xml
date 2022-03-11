@@ -16,7 +16,7 @@
         <maven.compiler.release>11</maven.compiler.release>
         <javafx.version>17.0.2</javafx.version>
         <javafx.plugin.version>0.0.8</javafx.plugin.version>
-        <jpro.version>2021.2.2</jpro.version>
+        <jpro.version>2022.1.0</jpro.version>
         <gluonfx.plugin.version>1.0.10</gluonfx.plugin.version>
         <main.class>com.gluonhq.Main</main.class>
     </properties>
