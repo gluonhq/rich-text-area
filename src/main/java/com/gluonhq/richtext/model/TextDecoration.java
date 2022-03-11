@@ -46,11 +46,11 @@ public class TextDecoration implements Decoration {
     }
 
     public Boolean isStrikethrough() {
-        return strikethrough;
+        return strikethrough != null && strikethrough;
     }
 
     public Boolean isUnderline() {
-        return underline;
+        return underline != null && underline;
     }
 
     public static Builder builder() {
