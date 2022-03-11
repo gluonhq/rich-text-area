@@ -25,7 +25,7 @@ public class CommandManager<T> {
     }
 
     public void execute(AbstractCommand<T> cmd) {
-        Objects.requireNonNull(cmd).redo(context);
+        Objects.requireNonNull(cmd).execute(context);
         undoStack.push(cmd);
         redoStack.clear();
         end();

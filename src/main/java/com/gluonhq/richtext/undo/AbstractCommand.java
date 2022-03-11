@@ -8,13 +8,18 @@ public abstract class AbstractCommand<T> {
     protected void storeContext(T context){}
     protected void restoreContext(T context){}
 
+    public final void execute(T context) {
+        storeContext(context);
+        doRedo(context);
+    }
+
     public final void undo(T context) {
         doUndo(context);
         restoreContext(context);
     }
 
     public final void redo(T context) {
-        storeContext(context);
+        restoreContext(context);
         doRedo(context);
     }
 

@@ -51,7 +51,7 @@ public class Selection {
 
     @Override
     public String toString() {
-        return "Selection{" +
+        return "Selection {" +
                 "start=" + start +
                 ", end=" + end +
                 '}';
