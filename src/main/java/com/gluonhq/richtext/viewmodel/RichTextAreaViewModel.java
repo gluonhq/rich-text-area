@@ -299,7 +299,7 @@ public class RichTextAreaViewModel {
         }
     }
 
-    void moveCaret(Direction direction, boolean changeSelection, boolean wordSelection, boolean lineSelection) {
+    void moveCaret(Direction direction, boolean changeSelection, boolean wordSelection, boolean lineSelection, boolean paragraphSelection) {
         Selection prevSelection = getSelection();
         int prevCaretPosition = getCaretPosition();
         switch (direction) {
@@ -308,6 +308,8 @@ public class RichTextAreaViewModel {
                     nextWord(c -> c != ' ' && c != '\t');
                 } else if (lineSelection) {
                     lineEnd();
+                } else if (paragraphSelection) {
+                    paragraphEnd();
                 } else {
                     moveCaretPosition(1);
                 }
@@ -317,15 +319,27 @@ public class RichTextAreaViewModel {
                     previousWord();
                 } else if (lineSelection) {
                     lineStart();
+                } else if (paragraphSelection) {
+                    paragraphStart();
                 } else {
                     moveCaretPosition(-1);
                 }
                 break;
             case DOWN:
             case UP:
-                int rowCharIndex = getNextRowPosition.apply(-1d, Direction.DOWN == direction);
-                if (rowCharIndex >= 0) {
-                    setCaretPosition(rowCharIndex);
+                if (wordSelection) { //  Mac
+                    if (direction == Direction.UP) {
+                        paragraphStart();
+                    } else {
+                        paragraphEnd();
+                    }
+                } else if (lineSelection) { // home, end on Mac
+                    setCaretPosition (direction == Direction.UP ? 0 : getTextLength());
+                } else {
+                    int rowCharIndex = getNextRowPosition.apply(-1d, Direction.DOWN == direction);
+                    if (rowCharIndex >= 0) {
+                        setCaretPosition(rowCharIndex);
+                    }
                 }
                 break;
         }
@@ -365,18 +379,18 @@ public class RichTextAreaViewModel {
         if (getTextLength() <= 0) {
             return;
         }
-        moveCaret(Direction.BACK, false, true, false);
+        moveCaret(Direction.BACK, false, true, false, false);
         int prevCaretPosition = getCaretPosition();
         nextWord(c -> !Character.isLetterOrDigit(c));
         setSelection(new Selection(prevCaretPosition, getCaretPosition()));
     }
 
-    public void selectCurrentLine() {
+    public void selectCurrentParagraph() {
         if (getTextLength() <= 0) {
             return;
         }
-        moveCaret(Direction.BACK, false, false, true);
-        moveCaret(Direction.FORWARD, true, false, true);
+        moveCaret(Direction.BACK, false, false, false, true);
+        moveCaret(Direction.FORWARD, true, false, false, true);
     }
 
     private void previousWord() {
@@ -430,6 +444,27 @@ public class RichTextAreaViewModel {
     private void lineEnd() {
         int pos = getNextRowPosition.apply(Double.MAX_VALUE, false);
         setCaretPosition(pos);
+    }
+
+    private void paragraphStart() {
+        int pos = getCaretPosition();
+        if (pos > 0) {
+            while (pos > 0 && getTextBuffer().charAt(pos - 1) != 0x0a) {
+                pos--;
+            }
+            setCaretPosition(pos);
+        }
+    }
+
+    private void paragraphEnd() {
+        int pos = getCaretPosition();
+        int len = getTextLength();
+        if (pos < len) {
+            while (pos < len && getTextBuffer().charAt(pos) != 0x0a) {
+                pos++;
+            }
+            setCaretPosition(pos);
+        }
     }
 
     private void updateProperties() {

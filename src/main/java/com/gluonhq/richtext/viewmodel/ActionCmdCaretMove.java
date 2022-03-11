@@ -26,7 +26,7 @@ public class ActionCmdCaretMove implements ActionCmd {
     }
 
     public void apply(RichTextAreaViewModel viewModel) {
-        viewModel.moveCaret(direction, changeSelection, wordSelection, lineSelection);
+        viewModel.moveCaret(direction, changeSelection, wordSelection, lineSelection, false);
     }
 
 }
