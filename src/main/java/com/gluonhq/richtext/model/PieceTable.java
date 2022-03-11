@@ -143,22 +143,6 @@ public final class PieceTable extends AbstractTextBuffer {
         pieces.forEach(p -> onFragment.accept(p.getText(), p.getDecoration()));
     }
 
-    /*@Override
-    public TextDecoration getDecorationForSelection(int startPos, int endPos) {
-        int textPosition = 0;
-        for (Piece piece : pieces) {
-            if (startPos >= textPosition && endPos < textPosition+endPos) {
-                return piece.getDecoration();
-            }
-            textPosition += piece.length;
-        }
-        return TextDecoration.builder()
-                .fontWeight(FontWeight.NORMAL)
-                .fontPosture(FontPosture.REGULAR)
-                .strikethrough(false)
-                .underline(false).build();
-    }*/
-
     @Override
     public Decoration getDecorationAtCaret(int caretPosition) {
         int textPosition = 0;

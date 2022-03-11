@@ -37,7 +37,6 @@ public interface TextBuffer {
     void addChangeListener(Consumer<TextBuffer.Event> listener);
     void removeChangeListener(Consumer<TextBuffer.Event> listener);
 
-    // TextDecoration getDecorationForSelection(int startPos, int endPos);
     Decoration getDecorationAtCaret(int caretPosition);
     void setDecorationAtCaret(TextDecoration decoration);
 

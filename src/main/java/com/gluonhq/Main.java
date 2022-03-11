@@ -2,17 +2,29 @@ package com.gluonhq;
 
 import com.gluonhq.richtext.action.Action;
 import com.gluonhq.richtext.RichTextArea;
+import com.gluonhq.richtext.action.DecorateAction;
+import com.gluonhq.richtext.action.TextDecorateAction;
 import com.gluonhq.richtext.model.DecorationModel;
 import com.gluonhq.richtext.model.FaceModel;
 import com.gluonhq.richtext.model.ImageDecoration;
-import com.gluonhq.richtext.action.*;
 import com.gluonhq.richtext.model.TextDecoration;
 import javafx.application.Application;
 import javafx.beans.property.ObjectProperty;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.Separator;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -82,7 +94,6 @@ public class Main extends Application {
         ComboBox<String> fontFamilies = new ComboBox<>();
         fontFamilies.getItems().setAll(Font.getFamilies());
         fontFamilies.setValue("Arial");
-        // new DecorateFontFamilyAction(editor, fontFamilies.valueProperty());
         new TextDecorateAction<>(editor, fontFamilies.valueProperty(), TextDecoration::getFontFamily, (builder, a) -> builder.fontFamily(a).build());
 
         final ComboBox<Double> fontSize = new ComboBox<>();
@@ -91,7 +102,6 @@ public class Main extends Application {
         fontSize.getItems().addAll(IntStream.range(1, 100)
                 .filter(i -> i % 2 == 0 || i < 18)
                 .asDoubleStream().boxed().collect(Collectors.toList()));
-        // new DecorateFontSizeAction(editor, fontSize.valueProperty());
         new TextDecorateAction<>(editor, fontSize.valueProperty(), TextDecoration::getFontSize, (builder, a) -> builder.fontSize(a).build());
         fontSize.setConverter(new StringConverter<>() {
             @Override
@@ -108,13 +118,11 @@ public class Main extends Application {
 
         final ColorPicker textForeground = new ColorPicker();
         textForeground.getStyleClass().add("foreground");
-        // new DecorateForegroundAction(editor, textForeground.valueProperty());
         new TextDecorateAction<>(editor, textForeground.valueProperty(), TextDecoration::getForeground, (builder, a) -> builder.foreground(a).build());
         textForeground.setValue(Color.BLUE);
 
         final ColorPicker textBackground = new ColorPicker();
         textBackground.getStyleClass().add("background");
-        // new DecorateBackgroundAction(editor, textBackground.valueProperty());
         new TextDecorateAction<>(editor, textBackground.valueProperty(), TextDecoration::getBackground, (builder, a) -> builder.background(a).build());
         textBackground.setValue(Color.TRANSPARENT);
 
