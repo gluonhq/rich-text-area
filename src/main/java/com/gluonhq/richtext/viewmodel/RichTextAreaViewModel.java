@@ -65,7 +65,14 @@ public class RichTextAreaViewModel {
     }
 
     // caretPositionProperty
-    private final IntegerProperty caretPositionProperty = new SimpleIntegerProperty(this, "caretPosition", -1);
+    private final IntegerProperty caretPositionProperty = new SimpleIntegerProperty(this, "caretPosition", -1) {
+        @Override
+        protected void invalidated() {
+            if (!hasSelection()) {
+                setDecoration(getTextBuffer().getDecorationAtCaret(get()));
+            }
+        }
+    };
     private final BiFunction<Double, Boolean, Integer> getNextRowPosition;
 
     public final IntegerProperty caretPositionProperty() {
@@ -85,11 +92,17 @@ public class RichTextAreaViewModel {
             Selection selection = Selection.UNDEFINED;
             if (value != null) {
                 selection = value.getEnd() >= getTextLength()?
-                    new Selection( value.getStart(), getTextLength()): value;
+                    new Selection(value.getStart(), getTextLength()): value;
             }
             super.set(selection);
         }
 
+        @Override
+        protected void invalidated() {
+            if (!get().isDefined()) {
+                setDecoration(getTextBuffer().getDecorationAtCaret(getCaretPosition()));
+            }
+        }
     };
     public final ObjectProperty<Selection> selectionProperty() {
         return selectionProperty;
@@ -137,6 +150,25 @@ public class RichTextAreaViewModel {
     }
     public final void setEditable(boolean value) {
         editableProperty.set(value);
+    }
+
+    // textDecorationProperty
+    private final ObjectProperty<Decoration> decorationProperty = new SimpleObjectProperty<>(this, "decoration") {
+        @Override
+        protected void invalidated() {
+            if (get() instanceof TextDecoration && !getSelection().isDefined()) {
+                getTextBuffer().setDecorationAtCaret((TextDecoration) get());
+            }
+        }
+    };
+    public final ObjectProperty<Decoration> decorationProperty() {
+       return decorationProperty;
+    }
+    public final Decoration getDecoration() {
+       return decorationProperty.get();
+    }
+    public final void setDecoration(Decoration value) {
+        decorationProperty.set(value);
     }
 
     public RichTextAreaViewModel(BiFunction<Double, Boolean, Integer> getNextRowPosition) {

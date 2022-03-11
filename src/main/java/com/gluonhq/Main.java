@@ -2,15 +2,29 @@ package com.gluonhq;
 
 import com.gluonhq.richtext.action.Action;
 import com.gluonhq.richtext.RichTextArea;
+import com.gluonhq.richtext.action.DecorateAction;
+import com.gluonhq.richtext.action.TextDecorateAction;
 import com.gluonhq.richtext.model.DecorationModel;
 import com.gluonhq.richtext.model.FaceModel;
 import com.gluonhq.richtext.model.ImageDecoration;
 import com.gluonhq.richtext.model.TextDecoration;
 import javafx.application.Application;
+import javafx.beans.property.ObjectProperty;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.Separator;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -30,11 +44,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static javafx.scene.text.FontPosture.ITALIC;
+import static javafx.scene.text.FontPosture.REGULAR;
+import static javafx.scene.text.FontWeight.BOLD;
+import static javafx.scene.text.FontWeight.NORMAL;
 
 public class Main extends Application {
 
@@ -74,18 +94,15 @@ public class Main extends Application {
         ComboBox<String> fontFamilies = new ComboBox<>();
         fontFamilies.getItems().setAll(Font.getFamilies());
         fontFamilies.setValue("Arial");
-        fontFamilies.setOnAction(e -> editor.getActionFactory().decorate(
-                TextDecoration.builder().fontFamily(fontFamilies.getSelectionModel().getSelectedItem()).build()).execute(e));
+        new TextDecorateAction<>(editor, fontFamilies.valueProperty(), TextDecoration::getFontFamily, (builder, a) -> builder.fontFamily(a).build());
 
         final ComboBox<Double> fontSize = new ComboBox<>();
         fontSize.setEditable(true);
         fontSize.setPrefWidth(60);
         fontSize.getItems().addAll(IntStream.range(1, 100)
-                .filter(i -> i % 2 == 0 || i < 10)
+                .filter(i -> i % 2 == 0 || i < 18)
                 .asDoubleStream().boxed().collect(Collectors.toList()));
-        fontSize.setValue(17.0);
-        fontSize.setOnAction(e -> editor.getActionFactory().decorate(
-                TextDecoration.builder().fontSize(fontSize.getValue()).build()).execute(e));
+        new TextDecorateAction<>(editor, fontSize.valueProperty(), TextDecoration::getFontSize, (builder, a) -> builder.fontSize(a).build());
         fontSize.setConverter(new StringConverter<>() {
             @Override
             public String toString(Double aDouble) {
@@ -97,16 +114,17 @@ public class Main extends Application {
                 return Double.parseDouble(s);
             }
         });
+        fontSize.setValue(17.0);
 
         final ColorPicker textForeground = new ColorPicker();
         textForeground.getStyleClass().add("foreground");
-        textForeground.setOnAction(e -> editor.getActionFactory().decorate(
-                TextDecoration.builder().foreground(textForeground.getValue()).build()).execute(e));
+        new TextDecorateAction<>(editor, textForeground.valueProperty(), TextDecoration::getForeground, (builder, a) -> builder.foreground(a).build());
+        textForeground.setValue(Color.BLUE);
 
         final ColorPicker textBackground = new ColorPicker();
         textBackground.getStyleClass().add("background");
-        textBackground.setOnAction(e -> editor.getActionFactory().decorate(
-                TextDecoration.builder().background(textBackground.getValue()).build()).execute(e));
+        new TextDecorateAction<>(editor, textBackground.valueProperty(), TextDecoration::getBackground, (builder, a) -> builder.background(a).build());
+        textBackground.setValue(Color.TRANSPARENT);
 
         CheckBox editableProp = new CheckBox("Editable");
         editableProp.selectedProperty().bindBidirectional(editor.editableProperty());
@@ -124,8 +142,10 @@ public class Main extends Application {
                 new Separator(Orientation.VERTICAL),
                 fontFamilies,
                 fontSize,
-                actionButton(LineAwesomeSolid.BOLD, editor.getActionFactory().decorate(TextDecoration.builder().fontWeight(FontWeight.BOLD).build())),
-                actionButton(LineAwesomeSolid.ITALIC, editor.getActionFactory().decorate(TextDecoration.builder().fontPosture(FontPosture.ITALIC).build())),
+                createToggleButton(LineAwesomeSolid.BOLD, property -> new TextDecorateAction<>(editor, property, d -> d.getFontWeight() == BOLD, (builder, a) -> builder.fontWeight(a ? BOLD : NORMAL).build())),
+                createToggleButton(LineAwesomeSolid.ITALIC, property -> new TextDecorateAction<>(editor, property, d -> d.getFontPosture() == ITALIC, (builder, a) -> builder.fontPosture(a ? ITALIC : REGULAR).build())),
+                createToggleButton(LineAwesomeSolid.STRIKETHROUGH, property -> new TextDecorateAction<>(editor, property, TextDecoration::isStrikethrough, (builder, a) -> builder.strikethrough(a).build())),
+                createToggleButton(LineAwesomeSolid.UNDERLINE, property -> new TextDecorateAction<>(editor, property, TextDecoration::isUnderline, (builder, a) -> builder.underline(a).build())),
                 textForeground,
                 textBackground,
                 new Separator(Orientation.VERTICAL),
@@ -176,6 +196,15 @@ public class Main extends Application {
         button.disableProperty().bind(action.disabledProperty());
         button.setOnAction(action::execute);
         return button;
+    }
+
+    private ToggleButton createToggleButton(Ikon ikon, Function<ObjectProperty<Boolean>, DecorateAction<Boolean>> function) {
+        final ToggleButton toggleButton = new ToggleButton();
+        FontIcon icon = new FontIcon(ikon);
+        icon.setIconSize(20);
+        toggleButton.setGraphic(icon);
+        function.apply(toggleButton.selectedProperty().asObject());
+        return toggleButton;
     }
 
     private Button actionImage(Ikon ikon) {

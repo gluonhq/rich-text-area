@@ -7,6 +7,7 @@ import java.util.Objects;
 class DecorateCmd extends AbstractEditCmd {
 
     private final Decoration decoration;
+    private Decoration prevDecoration;
 
     public DecorateCmd(Decoration decoration) {
         this.decoration = decoration;
@@ -14,12 +15,23 @@ class DecorateCmd extends AbstractEditCmd {
 
     @Override
     public void doRedo(RichTextAreaViewModel viewModel) {
-        Objects.requireNonNull(viewModel).decorate(decoration);
+        if (selection.isDefined()) {
+            Objects.requireNonNull(viewModel).decorate(decoration);
+        } else {
+            prevDecoration = Objects.requireNonNull(viewModel).getDecoration();
+            Objects.requireNonNull(viewModel).setDecoration(decoration);
+        }
     }
 
     @Override
     public void doUndo(RichTextAreaViewModel viewModel) {
-        Objects.requireNonNull(viewModel).undoDecoration();
+        if (!selection.isDefined()) {
+            Objects.requireNonNull(viewModel).undoDecoration();
+        } else {
+            if (prevDecoration != null) {
+                Objects.requireNonNull(viewModel).setDecoration(prevDecoration);
+            }
+        }
     }
 
     @Override

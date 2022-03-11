@@ -46,6 +46,8 @@ import javafx.scene.shape.Path;
 import javafx.scene.shape.PathElement;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.HitInfo;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -67,15 +69,20 @@ import static java.util.Map.entry;
 import static javafx.scene.input.KeyCode.*;
 import static javafx.scene.input.KeyCombination.*;
 import static javafx.scene.text.FontPosture.ITALIC;
+import static javafx.scene.text.FontPosture.REGULAR;
 import static javafx.scene.text.FontWeight.BOLD;
+import static javafx.scene.text.FontWeight.NORMAL;
 
 public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     interface ActionBuilder extends Function<KeyEvent, ActionCmd>{}
 
+    // TODO need to find a better way to find next row caret position
+    private final RichTextAreaViewModel viewModel = new RichTextAreaViewModel(this::getNextRowPosition);
+
     private static final ActionCmdFactory ACTION_CMD_FACTORY = new ActionCmdFactory();
 
-    private static final Map<KeyCombination, ActionBuilder> INPUT_MAP = Map.ofEntries(
+    private final Map<KeyCombination, ActionBuilder> INPUT_MAP = Map.ofEntries(
         entry( new KeyCodeCombination(RIGHT, SHIFT_ANY, ALT_ANY, CONTROL_ANY, SHORTCUT_ANY), e -> ACTION_CMD_FACTORY.caretMove(Direction.FORWARD, e)),
         entry( new KeyCodeCombination(LEFT,  SHIFT_ANY, ALT_ANY, CONTROL_ANY, SHORTCUT_ANY), e -> ACTION_CMD_FACTORY.caretMove(Direction.BACK, e)),
         entry( new KeyCodeCombination(DOWN,  SHIFT_ANY),                                     e -> ACTION_CMD_FACTORY.caretMove(Direction.DOWN, e.isShiftDown(), false, false)),
@@ -91,12 +98,17 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         entry( new KeyCodeCombination(ENTER, SHIFT_ANY),                                     e -> ACTION_CMD_FACTORY.insertText("\n")),
         entry( new KeyCodeCombination(BACK_SPACE, SHIFT_ANY),                                e -> ACTION_CMD_FACTORY.removeText(-1)),
         entry( new KeyCodeCombination(DELETE),                                               e -> ACTION_CMD_FACTORY.removeText(0)),
-        entry( new KeyCodeCombination(B, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().fontWeight(BOLD).build())),
-        entry( new KeyCodeCombination(I, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().fontPosture(ITALIC).build()))
+        entry( new KeyCodeCombination(B, SHORTCUT_DOWN),                                     e -> {
+            TextDecoration decoration = (TextDecoration) viewModel.getDecoration();
+            FontWeight fontWeight = decoration.getFontWeight() == BOLD ? NORMAL : BOLD;
+            return ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().fromDecoration(decoration).fontWeight(fontWeight).build());
+        }),
+        entry( new KeyCodeCombination(I, SHORTCUT_DOWN),                                    e -> {
+            TextDecoration decoration = (TextDecoration) viewModel.getDecoration();
+            FontPosture fontPosture = decoration.getFontPosture() == ITALIC ? REGULAR : ITALIC;
+            return ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().fromDecoration(decoration).fontPosture(fontPosture).build());
+        })
     );
-
-    // TODO need to find a better way to find next row caret position
-    private final RichTextAreaViewModel viewModel = new RichTextAreaViewModel(this::getNextRowPosition);
 
     private final ScrollPane scrollPane;
     private final TextFlow textFlow = new TextFlow();
@@ -323,12 +335,14 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         textBackgroundColorPaths.addAll(fillPathMap.values());
     }
 
-    private Text buildText(String content, TextDecoration decoration ) {
+    private Text buildText(String content, TextDecoration decoration) {
         Objects.requireNonNull(decoration);
         Text text = new Text(Objects.requireNonNull(content));
         text.setFill(decoration.getForeground());
+        text.setStrikethrough(decoration.isStrikethrough());
+        text.setUnderline(decoration.isUnderline());
 
-        // Cashing fonts, assuming their reuse, especially for default one
+        // Caching fonts, assuming their reuse, especially for default one
         int hash = Objects.hash(
                 decoration.getFontFamily(),
                 decoration.getFontWeight(),
