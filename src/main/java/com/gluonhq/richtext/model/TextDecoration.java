@@ -8,7 +8,7 @@ import java.util.Objects;
 
 import static com.gluonhq.richtext.Tools.getFirstLetter;
 
-public class TextDecoration {
+public class TextDecoration implements Decoration {
 
     private Color foreground;
     private Color background;
@@ -137,7 +137,7 @@ public class TextDecoration {
 
     @Override
     public String toString() {
-        return "deco{" +
+        return "TextDecoration{" +
                 "fcolor=" + foreground +
                 ", bcolor=" + background +
                 ", font['" + fontFamily + '\'' +

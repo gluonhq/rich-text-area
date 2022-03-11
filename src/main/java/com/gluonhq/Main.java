@@ -2,7 +2,9 @@ package com.gluonhq;
 
 import com.gluonhq.richtext.action.Action;
 import com.gluonhq.richtext.RichTextArea;
-import com.gluonhq.richtext.FaceModel;
+import com.gluonhq.richtext.model.DecorationModel;
+import com.gluonhq.richtext.model.FaceModel;
+import com.gluonhq.richtext.model.ImageDecoration;
 import com.gluonhq.richtext.model.TextDecoration;
 import javafx.application.Application;
 import javafx.geometry.Orientation;
@@ -16,14 +18,17 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import org.kordamp.ikonli.Ikon;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.lineawesome.LineAwesomeSolid;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -43,17 +48,21 @@ public class Main extends Application {
         }
     }
 
-    private final List<FaceModel.Decoration> decorations = List.of(
-                new FaceModel.Decoration(0, 12, TextDecoration.builder().presets().build()),
-                new FaceModel.Decoration(12, 3, TextDecoration.builder().presets().fontWeight(FontWeight.BOLD).build()),
-                new FaceModel.Decoration(15, 11, TextDecoration.builder().presets().fontPosture(FontPosture.ITALIC).build()),
-                new FaceModel.Decoration(26, 15, TextDecoration.builder().presets().foreground(Color.RED).build())
+    private final List<DecorationModel> decorations = List.of(
+                new DecorationModel(0, 12, TextDecoration.builder().presets().build()),
+                new DecorationModel(12, 3, TextDecoration.builder().presets().fontWeight(FontWeight.BOLD).build()),
+                new DecorationModel(15, 1, new ImageDecoration(Main.class.getResource("gluon_logo-150x150@2x.png").toURI().toString(), 32, 32)),
+                new DecorationModel(16, 11, TextDecoration.builder().presets().fontPosture(FontPosture.ITALIC).build()),
+                new DecorationModel(27, 15, TextDecoration.builder().presets().foreground(Color.RED).build())
         );
 
-    private final FaceModel faceModel = new FaceModel("Simple text one two three\nExtra line text", decorations, 41);
+    private final FaceModel faceModel = new FaceModel("Simple text one\u200b two three\nExtra line text", decorations, 42);
 
     private final Label textLengthLabel = new Label();
     private final RichTextArea editor = new RichTextArea();
+
+    public Main() throws URISyntaxException {
+    }
 
     @Override
     public void start(Stage stage) {
@@ -111,6 +120,8 @@ public class Main extends Application {
                 actionButton(LineAwesomeSolid.UNDO, editor.getActionFactory().undo()),
                 actionButton(LineAwesomeSolid.REDO, editor.getActionFactory().redo()),
                 new Separator(Orientation.VERTICAL),
+                actionImage(LineAwesomeSolid.IMAGE),
+                new Separator(Orientation.VERTICAL),
                 fontFamilies,
                 fontSize,
                 actionButton(LineAwesomeSolid.BOLD, editor.getActionFactory().decorate(TextDecoration.builder().fontWeight(FontWeight.BOLD).build())),
@@ -164,6 +175,23 @@ public class Main extends Application {
         button.setGraphic(icon);
         button.disableProperty().bind(action.disabledProperty());
         button.setOnAction(action::execute);
+        return button;
+    }
+
+    private Button actionImage(Ikon ikon) {
+        Button button = new Button();
+        FontIcon icon = new FontIcon(ikon);
+        icon.setIconSize(20);
+        button.setGraphic(icon);
+        button.setOnAction(e -> {
+            final FileChooser fileChooser = new FileChooser();
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image", "*.png", ".jpeg", ".gif"));
+            File file = fileChooser.showOpenDialog(button.getScene().getWindow());
+            if (file != null) {
+                String url = file.toURI().toString();
+                editor.getActionFactory().decorate(new ImageDecoration(url)).execute(e);
+            }
+        });
         return button;
     }
 
