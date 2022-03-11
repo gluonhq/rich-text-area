@@ -158,7 +158,7 @@ public final class PieceTable extends AbstractTextBuffer {
         int index = 0;
         for (; index < pieces.size(); index++) {
             Piece piece = pieces.get(index);
-            if (textPosition <= caretPosition && caretPosition < textPosition + piece.length) {
+            if (textPosition < caretPosition && caretPosition <= textPosition + piece.length) {
                 return piece.getDecoration();
             }
             textPosition += piece.length;

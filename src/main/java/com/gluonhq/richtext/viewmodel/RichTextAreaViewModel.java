@@ -89,15 +89,17 @@ public class RichTextAreaViewModel {
             Selection selection = Selection.UNDEFINED;
             if (value != null) {
                 selection = value.getEnd() >= getTextLength()?
-                    new Selection( value.getStart(), getTextLength()): value;
+                    new Selection(value.getStart(), getTextLength()): value;
             }
             super.set(selection);
         }
 
-        /*@Override
+        @Override
         protected void invalidated() {
-            setTextDecoration(getTextBuffer().getDecorationForSelection(get().getStart(), get().getEnd()));
-        }*/
+            if (!get().isDefined()) {
+                setTextDecoration(getTextBuffer().getDecorationAtCaret(getCaretPosition()));
+            }
+        }
     };
     public final ObjectProperty<Selection> selectionProperty() {
         return selectionProperty;
