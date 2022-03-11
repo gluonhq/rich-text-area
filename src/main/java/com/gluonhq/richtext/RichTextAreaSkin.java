@@ -462,20 +462,21 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         if (e.getButton() == MouseButton.PRIMARY && !(e.isMiddleButtonDown() || e.isSecondaryButtonDown())) {
             HitInfo hitInfo = textFlow.hitTest(new Point2D(e.getX() - textFlowLayoutX, e.getY() - textFlowLayoutY));
             int prevCaretPosition = viewModel.getCaretPosition();
-            if (hitInfo.getInsertionIndex() >= 0) {
+            int insertionIndex = hitInfo.getInsertionIndex();
+            if (insertionIndex >= 0) {
                 if (!(e.isControlDown() || e.isAltDown() || e.isShiftDown() || e.isMetaDown() || e.isShortcutDown())) {
-                    viewModel.setCaretPosition(hitInfo.getInsertionIndex());
+                    viewModel.setCaretPosition(insertionIndex);
                     if (e.getClickCount() == 2) {
                         viewModel.selectCurrentWord();
                     } else if (e.getClickCount() == 3) {
                         viewModel.selectCurrentLine();
                     } else {
-                        dragStart = prevCaretPosition;
+                        dragStart = insertionIndex;
                         viewModel.clearSelection();
                     }
                 } else if (e.isShiftDown() && e.getClickCount() == 1 && !(e.isControlDown() || e.isAltDown() || e.isMetaDown() || e.isShortcutDown())) {
-                    viewModel.setSelection(new Selection(prevCaretPosition, hitInfo.getInsertionIndex()));
-                    viewModel.setCaretPosition(hitInfo.getInsertionIndex());
+                    viewModel.setSelection(new Selection(prevCaretPosition, insertionIndex));
+                    viewModel.setCaretPosition(insertionIndex);
                 }
             }
             getSkinnable().requestFocus();
@@ -490,7 +491,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         HitInfo hitInfo = textFlow.hitTest(new Point2D(e.getX() - textFlowLayoutX, e.getY() - textFlowLayoutY));
         if (hitInfo.getInsertionIndex() >= 0) {
             int dragEnd = hitInfo.getInsertionIndex();
-            viewModel.setSelection( new Selection(dragStart, dragEnd));
+            viewModel.setSelection(new Selection(dragStart, dragEnd));
             viewModel.setCaretPosition(hitInfo.getInsertionIndex());
         }
         e.consume();
