@@ -25,7 +25,7 @@ public class CommandManager<T> {
     }
 
     public void execute(AbstractCommand<T> cmd) {
-        Objects.requireNonNull(cmd).redo(context);
+        Objects.requireNonNull(cmd).execute(context);
         undoStack.push(cmd);
         redoStack.clear();
         end();
@@ -39,6 +39,7 @@ public class CommandManager<T> {
             redoStack.push(cmd);
             end();
             LOGGER.log(Level.FINE, "Undo: " + this);
+            LOGGER.log(Level.FINE, "Context: " + context);
         }
     }
 
@@ -49,6 +50,7 @@ public class CommandManager<T> {
             undoStack.push(cmd);
             end();
             LOGGER.log(Level.FINE, "Redo: " + this);
+            LOGGER.log(Level.FINE, "Context: " + context);
         }
     }
 

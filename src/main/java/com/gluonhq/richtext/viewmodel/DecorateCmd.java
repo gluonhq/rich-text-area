@@ -25,17 +25,14 @@ class DecorateCmd extends AbstractEditCmd {
 
     @Override
     public void doUndo(RichTextAreaViewModel viewModel) {
-        if (!selection.isDefined()) {
-            Objects.requireNonNull(viewModel).undoDecoration();
-        } else {
-            if (prevDecoration != null) {
-                Objects.requireNonNull(viewModel).setDecoration(prevDecoration);
-            }
+        if (prevDecoration != null) {
+            Objects.requireNonNull(viewModel).setDecoration(prevDecoration);
         }
+        Objects.requireNonNull(viewModel).undoDecoration();
     }
 
     @Override
     public String toString() {
-        return "DecorateCmd[" + decoration + "]";
+        return "DecorateCmd [" + super.toString() + "\n" + decoration + "]";
     }
 }

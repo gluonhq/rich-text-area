@@ -24,6 +24,6 @@ class RemoveTextCmd extends AbstractEditCmd {
 
     @Override
     public String toString() {
-        return "RemoveTextCmd[" + caretOffset + "]";
+        return "RemoveTextCmd[" + super.toString() + "\n" + caretOffset + "]";
     }
 }
