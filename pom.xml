@@ -16,9 +16,25 @@
         <maven.compiler.release>11</maven.compiler.release>
         <javafx.version>17.0.2</javafx.version>
         <javafx.plugin.version>0.0.8</javafx.plugin.version>
+        <jpro.version>2021.2.2</jpro.version>
         <gluonfx.plugin.version>1.0.10</gluonfx.plugin.version>
         <main.class>com.gluonhq.Main</main.class>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>jpro - sandec repository</id>
+            <url>https://sandec.jfrog.io/artifactory/repo</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>jpro - sandec repository</id>
+            <url>https://sandec.jfrog.io/artifactory/repo</url>
+        </pluginRepository>
+    </pluginRepositories>
+
 
     <dependencies>
         <dependency>
@@ -121,6 +137,25 @@
 <!--                    <target>${gluonfx.target}</target>-->
                     <mainClass>${main.class}</mainClass>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.sandec.jpro</groupId>
+                <artifactId>jpro-maven-plugin</artifactId>
+                <version>${jpro.version}</version>
+                <configuration>
+                    <visible>false</visible>
+                    <mainClassName>
+                        ${main.class}
+                    </mainClassName>
+                    <openingPath>/</openingPath>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
