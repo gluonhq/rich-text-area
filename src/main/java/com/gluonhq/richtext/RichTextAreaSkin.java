@@ -46,6 +46,8 @@ import javafx.scene.shape.Path;
 import javafx.scene.shape.PathElement;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.HitInfo;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -67,7 +69,9 @@ import static java.util.Map.entry;
 import static javafx.scene.input.KeyCode.*;
 import static javafx.scene.input.KeyCombination.*;
 import static javafx.scene.text.FontPosture.ITALIC;
+import static javafx.scene.text.FontPosture.REGULAR;
 import static javafx.scene.text.FontWeight.BOLD;
+import static javafx.scene.text.FontWeight.NORMAL;
 
 public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
@@ -94,8 +98,16 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         entry( new KeyCodeCombination(ENTER, SHIFT_ANY),                                     e -> ACTION_CMD_FACTORY.insertText("\n")),
         entry( new KeyCodeCombination(BACK_SPACE, SHIFT_ANY),                                e -> ACTION_CMD_FACTORY.removeText(-1)),
         entry( new KeyCodeCombination(DELETE),                                               e -> ACTION_CMD_FACTORY.removeText(0)),
-        entry( new KeyCodeCombination(B, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().fromDecoration((TextDecoration) viewModel.getDecoration()).fontWeight(BOLD).build())),
-        entry( new KeyCodeCombination(I, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().fromDecoration((TextDecoration) viewModel.getDecoration()).fontPosture(ITALIC).build()))
+        entry( new KeyCodeCombination(B, SHORTCUT_DOWN),                                     e -> {
+            TextDecoration decoration = (TextDecoration) viewModel.getDecoration();
+            FontWeight fontWeight = decoration.getFontWeight() == BOLD ? NORMAL : BOLD;
+            return ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().fromDecoration(decoration).fontWeight(fontWeight).build());
+        }),
+        entry( new KeyCodeCombination(I, SHORTCUT_DOWN),                                    e -> {
+            TextDecoration decoration = (TextDecoration) viewModel.getDecoration();
+            FontPosture fontPosture = decoration.getFontPosture() == ITALIC ? REGULAR : ITALIC;
+            return ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().fromDecoration(decoration).fontPosture(fontPosture).build());
+        })
     );
 
     private final ScrollPane scrollPane;
@@ -323,7 +335,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         textBackgroundColorPaths.addAll(fillPathMap.values());
     }
 
-    private Text buildText(String content, TextDecoration decoration ) {
+    private Text buildText(String content, TextDecoration decoration) {
         Objects.requireNonNull(decoration);
         Text text = new Text(Objects.requireNonNull(content));
         text.setFill(decoration.getForeground());
