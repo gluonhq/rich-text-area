@@ -179,10 +179,10 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
         prefWidthBinding = Bindings.createDoubleBinding(() ->
                         getSkinnable().getContentAreaWidth() > 0 ?
-                                getSkinnable().getContentAreaWidth() : scrollPane.getViewportBounds().getWidth() - 1,
-                getSkinnable().contentAreaWidthProperty(), scrollPane.viewportBoundsProperty());
-        prefHeightBinding = Bindings.createDoubleBinding(() -> scrollPane.getViewportBounds().getHeight() - 1,
-                scrollPane.viewportBoundsProperty());
+                                getSkinnable().getContentAreaWidth() : scrollPane.getViewportBounds().getWidth() - root.getInsets().getLeft() - root.getInsets().getRight(),
+                getSkinnable().contentAreaWidthProperty(), scrollPane.viewportBoundsProperty(), root.insetsProperty());
+        prefHeightBinding = Bindings.createDoubleBinding(() -> scrollPane.getViewportBounds().getHeight() - root.getInsets().getTop() - root.getInsets().getBottom(),
+                scrollPane.viewportBoundsProperty(), root.insetsProperty());
 
         hbarPolicyBinding = Bindings.createObjectBinding(
                 () -> getSkinnable().getContentAreaWidth() > 0 ? ScrollPane.ScrollBarPolicy.AS_NEEDED : ScrollPane.ScrollBarPolicy.NEVER,
