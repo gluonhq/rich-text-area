@@ -10,14 +10,14 @@ import javafx.beans.value.ChangeListener;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class GenericDecorateAction<T> extends DecorateAction<T> {
+public class TextDecorateAction<T> extends DecorateAction<T> {
 
     private ChangeListener<T> valuePropertyChangeListener;
     private ChangeListener<Decoration> decorationChangeListener;
     private final Function<TextDecoration, T> function;
     private final BiFunction<TextDecoration.Builder, T, TextDecoration> builderTFunction;
 
-    public GenericDecorateAction(RichTextArea control, ObjectProperty<T> valueProperty, Function<TextDecoration, T> valueFunction, BiFunction<TextDecoration.Builder, T, TextDecoration> builderTFunction) {
+    public TextDecorateAction(RichTextArea control, ObjectProperty<T> valueProperty, Function<TextDecoration, T> valueFunction, BiFunction<TextDecoration.Builder, T, TextDecoration> builderTFunction) {
         super(control, valueProperty);
         this.function = valueFunction;
         this.builderTFunction = builderTFunction;

@@ -83,7 +83,7 @@ public class Main extends Application {
         fontFamilies.getItems().setAll(Font.getFamilies());
         fontFamilies.setValue("Arial");
         // new DecorateFontFamilyAction(editor, fontFamilies.valueProperty());
-        new GenericDecorateAction<>(editor, fontFamilies.valueProperty(), TextDecoration::getFontFamily, (builder, a) -> builder.fontFamily(a).build());
+        new TextDecorateAction<>(editor, fontFamilies.valueProperty(), TextDecoration::getFontFamily, (builder, a) -> builder.fontFamily(a).build());
 
         final ComboBox<Double> fontSize = new ComboBox<>();
         fontSize.setEditable(true);
@@ -92,7 +92,7 @@ public class Main extends Application {
                 .filter(i -> i % 2 == 0 || i < 18)
                 .asDoubleStream().boxed().collect(Collectors.toList()));
         // new DecorateFontSizeAction(editor, fontSize.valueProperty());
-        new GenericDecorateAction<>(editor, fontSize.valueProperty(), TextDecoration::getFontSize, (builder, a) -> builder.fontSize(a).build());
+        new TextDecorateAction<>(editor, fontSize.valueProperty(), TextDecoration::getFontSize, (builder, a) -> builder.fontSize(a).build());
         fontSize.setConverter(new StringConverter<>() {
             @Override
             public String toString(Double aDouble) {
@@ -109,13 +109,13 @@ public class Main extends Application {
         final ColorPicker textForeground = new ColorPicker();
         textForeground.getStyleClass().add("foreground");
         // new DecorateForegroundAction(editor, textForeground.valueProperty());
-        new GenericDecorateAction<>(editor, textForeground.valueProperty(), TextDecoration::getForeground, (builder, a) -> builder.foreground(a).build());
+        new TextDecorateAction<>(editor, textForeground.valueProperty(), TextDecoration::getForeground, (builder, a) -> builder.foreground(a).build());
         textForeground.setValue(Color.BLUE);
 
         final ColorPicker textBackground = new ColorPicker();
         textBackground.getStyleClass().add("background");
         // new DecorateBackgroundAction(editor, textBackground.valueProperty());
-        new GenericDecorateAction<>(editor, textBackground.valueProperty(), TextDecoration::getBackground, (builder, a) -> builder.background(a).build());
+        new TextDecorateAction<>(editor, textBackground.valueProperty(), TextDecoration::getBackground, (builder, a) -> builder.background(a).build());
         textBackground.setValue(Color.TRANSPARENT);
 
         CheckBox editableProp = new CheckBox("Editable");
@@ -134,10 +134,10 @@ public class Main extends Application {
                 new Separator(Orientation.VERTICAL),
                 fontFamilies,
                 fontSize,
-                createToggleButton(LineAwesomeSolid.BOLD, property -> new GenericDecorateAction<>(editor, property, d -> d.getFontWeight() == BOLD, (builder, a) -> builder.fontWeight(a ? BOLD : NORMAL).build())),
-                createToggleButton(LineAwesomeSolid.ITALIC, property -> new GenericDecorateAction<>(editor, property, d -> d.getFontPosture() == ITALIC, (builder, a) -> builder.fontPosture(a ? ITALIC : REGULAR).build())),
-                createToggleButton(LineAwesomeSolid.STRIKETHROUGH, property -> new GenericDecorateAction<>(editor, property, TextDecoration::isStrikethrough, (builder, a) -> builder.strikethrough(a).build())),
-                createToggleButton(LineAwesomeSolid.UNDERLINE, property -> new GenericDecorateAction<>(editor, property, TextDecoration::isUnderline, (builder, a) -> builder.underline(a).build())),
+                createToggleButton(LineAwesomeSolid.BOLD, property -> new TextDecorateAction<>(editor, property, d -> d.getFontWeight() == BOLD, (builder, a) -> builder.fontWeight(a ? BOLD : NORMAL).build())),
+                createToggleButton(LineAwesomeSolid.ITALIC, property -> new TextDecorateAction<>(editor, property, d -> d.getFontPosture() == ITALIC, (builder, a) -> builder.fontPosture(a ? ITALIC : REGULAR).build())),
+                createToggleButton(LineAwesomeSolid.STRIKETHROUGH, property -> new TextDecorateAction<>(editor, property, TextDecoration::isStrikethrough, (builder, a) -> builder.strikethrough(a).build())),
+                createToggleButton(LineAwesomeSolid.UNDERLINE, property -> new TextDecorateAction<>(editor, property, TextDecoration::isUnderline, (builder, a) -> builder.underline(a).build())),
                 textForeground,
                 textBackground,
                 new Separator(Orientation.VERTICAL),
