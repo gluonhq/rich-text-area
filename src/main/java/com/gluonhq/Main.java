@@ -26,12 +26,18 @@ import org.kordamp.ikonli.lineawesome.LineAwesomeSolid;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static javafx.scene.text.FontPosture.ITALIC;
+import static javafx.scene.text.FontPosture.REGULAR;
+import static javafx.scene.text.FontWeight.BOLD;
+import static javafx.scene.text.FontWeight.NORMAL;
 
 public class Main extends Application {
 
@@ -67,7 +73,8 @@ public class Main extends Application {
         ComboBox<String> fontFamilies = new ComboBox<>();
         fontFamilies.getItems().setAll(Font.getFamilies());
         fontFamilies.setValue("Arial");
-        new DecorateFontFamilyAction(editor, fontFamilies.valueProperty());
+        // new DecorateFontFamilyAction(editor, fontFamilies.valueProperty());
+        new GenericDecorateAction<>(editor, fontFamilies.valueProperty(), TextDecoration::getFontFamily, (builder, a) -> builder.fontFamily(a).build());
 
         final ComboBox<Double> fontSize = new ComboBox<>();
         fontSize.setEditable(true);
@@ -75,7 +82,8 @@ public class Main extends Application {
         fontSize.getItems().addAll(IntStream.range(1, 100)
                 .filter(i -> i % 2 == 0 || i < 18)
                 .asDoubleStream().boxed().collect(Collectors.toList()));
-        new DecorateFontSizeAction(editor, fontSize.valueProperty());
+        // new DecorateFontSizeAction(editor, fontSize.valueProperty());
+        new GenericDecorateAction<>(editor, fontSize.valueProperty(), TextDecoration::getFontSize, (builder, a) -> builder.fontSize(a).build());
         fontSize.setConverter(new StringConverter<>() {
             @Override
             public String toString(Double aDouble) {
@@ -91,12 +99,14 @@ public class Main extends Application {
 
         final ColorPicker textForeground = new ColorPicker();
         textForeground.getStyleClass().add("foreground");
-        new DecorateForegroundAction(editor, textForeground.valueProperty());
+        // new DecorateForegroundAction(editor, textForeground.valueProperty());
+        new GenericDecorateAction<>(editor, textForeground.valueProperty(), TextDecoration::getForeground, (builder, a) -> builder.foreground(a).build());
         textForeground.setValue(Color.BLUE);
 
         final ColorPicker textBackground = new ColorPicker();
         textBackground.getStyleClass().add("background");
-        new DecorateBackgroundAction(editor, textBackground.valueProperty());
+        // new DecorateBackgroundAction(editor, textBackground.valueProperty());
+        new GenericDecorateAction<>(editor, textBackground.valueProperty(), TextDecoration::getBackground, (builder, a) -> builder.background(a).build());
         textBackground.setValue(Color.TRANSPARENT);
 
         CheckBox editableProp = new CheckBox("Editable");
@@ -113,10 +123,10 @@ public class Main extends Application {
                 new Separator(Orientation.VERTICAL),
                 fontFamilies,
                 fontSize,
-                createToggleButton(LineAwesomeSolid.BOLD, property -> new DecorateFontWeightAction(editor, property)),
-                createToggleButton(LineAwesomeSolid.ITALIC, property -> new DecorateFontPostureAction(editor, property)),
-                createToggleButton(LineAwesomeSolid.STRIKETHROUGH, property -> new DecorateStrikethroughAction(editor, property)),
-                createToggleButton(LineAwesomeSolid.UNDERLINE, property -> new DecorateUnderlineAction(editor, property)),
+                createToggleButton(LineAwesomeSolid.BOLD, property -> new GenericDecorateAction<>(editor, property, d -> d.getFontWeight() == BOLD, (builder, a) -> builder.fontWeight(a ? BOLD : NORMAL).build())),
+                createToggleButton(LineAwesomeSolid.ITALIC, property -> new GenericDecorateAction<>(editor, property, d -> d.getFontPosture() == ITALIC, (builder, a) -> builder.fontPosture(a ? ITALIC : REGULAR).build())),
+                createToggleButton(LineAwesomeSolid.STRIKETHROUGH, property -> new GenericDecorateAction<>(editor, property, TextDecoration::isStrikethrough, (builder, a) -> builder.strikethrough(a).build())),
+                createToggleButton(LineAwesomeSolid.UNDERLINE, property -> new GenericDecorateAction<>(editor, property, TextDecoration::isUnderline, (builder, a) -> builder.underline(a).build())),
                 textForeground,
                 textBackground,
                 new Separator(Orientation.VERTICAL),
