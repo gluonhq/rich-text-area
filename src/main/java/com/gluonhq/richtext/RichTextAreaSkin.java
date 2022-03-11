@@ -1,5 +1,7 @@
 package com.gluonhq.richtext;
 
+import com.gluonhq.richtext.model.FaceModel;
+import com.gluonhq.richtext.model.ImageDecoration;
 import com.gluonhq.richtext.model.PieceTable;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
@@ -29,6 +31,8 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SkinBase;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -48,7 +52,6 @@ import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -91,8 +94,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         entry( new KeyCodeCombination(ENTER, SHIFT_ANY),                                     e -> ACTION_CMD_FACTORY.insertText("\n")),
         entry( new KeyCodeCombination(BACK_SPACE, SHIFT_ANY),                                e -> ACTION_CMD_FACTORY.removeText(-1)),
         entry( new KeyCodeCombination(DELETE),                                               e -> ACTION_CMD_FACTORY.removeText(0)),
-        entry( new KeyCodeCombination(B, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().fromDecoration(viewModel.getTextDecoration()).fontWeight(BOLD).build())),
-        entry( new KeyCodeCombination(I, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().fromDecoration(viewModel.getTextDecoration()).fontPosture(ITALIC).build()))
+        entry( new KeyCodeCombination(B, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().fromDecoration(viewModel.getDecoration()).fontWeight(BOLD).build())),
+        entry( new KeyCodeCombination(I, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().fromDecoration(viewModel.getDecoration()).fontPosture(ITALIC).build()))
     );
 
     private final ScrollPane scrollPane;
@@ -118,7 +121,9 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     );
 
     private final Map<Integer, Font> fontCache = new ConcurrentHashMap<>();
-    private final SmartTimer fontCacheEvictionTimer = new SmartTimer( this::evictUnusedFonts, 1000, 60000);
+    private final Map<String, Image> imageCache = new ConcurrentHashMap<>();
+    private final SmartTimer fontCacheEvictionTimer = new SmartTimer(this::evictUnusedFonts, 1000, 60000);
+    private final SmartTimer imageCacheEvictionTimer = new SmartTimer(this::evictUnusedImages, 1000, 60000);
 
     private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow();
     private final ChangeListener<Boolean> focusChangeListener;
@@ -136,14 +141,14 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final DoubleBinding prefHeightBinding;
     private final ChangeListener<Number> textFlowPrefWidthListener = (obs, ov, nv) -> {
         refreshTextFlow();
-        updateSelection(viewModel.getSelection());
-        updateCaretPosition(viewModel.getCaretPosition());
+        requestLayout();
     };
     private double textFlowLayoutX = 0d, textFlowLayoutY = 0d;
     private final ChangeListener<Insets> insetsChangeListener = (obs, ov, nv) -> {
         textFlowLayoutX = nv.getLeft();
         textFlowLayoutY = nv.getTop();
     };
+    private int nonTextNodesCount;
 
     protected RichTextAreaSkin(final RichTextArea control) {
         super(control);
@@ -264,28 +269,38 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     //  For now rebuilding the whole text flow
     private void refreshTextFlow() {
         fontCacheEvictionTimer.pause();
+        imageCacheEvictionTimer.pause();
         try {
-            var fragments = new ArrayList<Text>();
+            var fragments = new ArrayList<Node>();
             var backgroundIndexRanges = new ArrayList<IndexRangeColor>();
             var length = new AtomicInteger();
+            var nonTextNodes = new AtomicInteger();
             viewModel.walkFragments((text, decoration) -> {
-                final Text textNode = buildText(text, decoration);
-                fragments.add(textNode);
-
-                if (decoration.getBackground() != Color.TRANSPARENT) {
-                    final IndexRangeColor indexRangeColor = new IndexRangeColor(
-                            length.get(),
-                            length.get() + textNode.getText().length(),
-                            decoration.getBackground()
-                    );
-                    backgroundIndexRanges.add(indexRangeColor);
+                if (decoration instanceof TextDecoration) {
+                    final Text textNode = buildText(text, (TextDecoration) decoration);
+                    fragments.add(textNode);
+                    Color background = ((TextDecoration) decoration).getBackground();
+                    if (background != Color.TRANSPARENT) {
+                        backgroundIndexRanges.add(new IndexRangeColor(
+                                length.get(), length.get() + text.length(), background));
+                    }
+                    length.addAndGet(text.length());
+                } else if (decoration instanceof ImageDecoration) {
+                    fragments.add(buildImage((ImageDecoration) decoration));
+                    length.incrementAndGet();
+                    nonTextNodes.incrementAndGet();
                 }
-                length.addAndGet(textNode.getText().length());
             });
             textFlow.getChildren().setAll(fragments);
             addBackgroundPathsToLayers(backgroundIndexRanges);
+            if (nonTextNodesCount != nonTextNodes.get()) {
+                requestLayout();
+                nonTextNodesCount = nonTextNodes.get();
+            }
+            getSkinnable().requestFocus();
         } finally {
             fontCacheEvictionTimer.start();
+            imageCacheEvictionTimer.start();
         }
     }
 
@@ -322,7 +337,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 decoration.getFontPosture(),
                 decoration.getFontSize());
 
-        Font font = fontCache.computeIfAbsent( hash,
+        Font font = fontCache.computeIfAbsent(hash,
             h -> Font.font(
                     decoration.getFontFamily(),
                     decoration.getFontWeight(),
@@ -333,16 +348,43 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         return text;
     }
 
+    private ImageView buildImage(ImageDecoration imageDecoration) {
+        Image image = imageCache.computeIfAbsent(imageDecoration.getUrl(), Image::new);
+        final ImageView imageView = new ImageView(image);
+        // TODO Create resizable ImageView
+        if (imageDecoration.getWidth() > -1 && imageDecoration.getHeight() > -1) {
+            imageView.setFitWidth(imageDecoration.getWidth());
+            imageView.setFitHeight(imageDecoration.getHeight());
+        }
+        // TODO Clip imageView if wider than contentArea
+        if (imageDecoration.getLink() != null) {
+            // TODO Add action to open link on mouseClick
+        }
+        return imageView;
+    }
+
     private void evictUnusedFonts() {
         Set<Font> usedFonts =  textFlow.getChildren()
                 .stream()
                 .filter(Text.class::isInstance)
-                .map( t -> ((Text)t).getFont())
+                .map(t -> ((Text) t).getFont())
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         List<Font> cachedFonts = new ArrayList<>(fontCache.values());
         cachedFonts.removeAll(usedFonts);
         fontCache.values().removeAll(cachedFonts);
+    }
+
+    private void evictUnusedImages() {
+        Set<Image> usedImages =  textFlow.getChildren()
+                .stream()
+                .filter(ImageView.class::isInstance)
+                .map(t -> ((ImageView) t).getImage())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        List<Image> cachedImages = new ArrayList<>(imageCache.values());
+        cachedImages.removeAll(usedImages);
+        imageCache.values().removeAll(cachedImages);
     }
 
     private void editableChangeListener(Observable o) {
@@ -391,6 +433,12 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             // Otherwise text appears to be jumping
             caretShape.setOpacity( on? 1: 0 );
         }
+    }
+
+    private void requestLayout() {
+        updateSelection(viewModel.getSelection());
+        updateCaretPosition(viewModel.getCaretPosition());
+        getSkinnable().requestLayout();
     }
 
     private int dragStart = -1;

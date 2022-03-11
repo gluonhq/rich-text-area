@@ -1,15 +1,15 @@
 package com.gluonhq.richtext.viewmodel;
 
-import com.gluonhq.richtext.model.TextDecoration;
+import com.gluonhq.richtext.model.Decoration;
 
 import java.util.Objects;
 
-class DecorateTextCmd extends AbstractEditCmd {
+class DecorateCmd extends AbstractEditCmd {
 
-    private final TextDecoration decoration;
-    private TextDecoration prevDecoration;
+    private final Decoration decoration;
+    private Decoration prevDecoration;
 
-    public DecorateTextCmd(TextDecoration decoration) {
+    public DecorateCmd(Decoration decoration) {
         this.decoration = decoration;
     }
 
@@ -18,8 +18,8 @@ class DecorateTextCmd extends AbstractEditCmd {
         if (selection.isDefined()) {
             Objects.requireNonNull(viewModel).decorate(decoration);
         } else {
-            prevDecoration = Objects.requireNonNull(viewModel).getTextDecoration();
-            Objects.requireNonNull(viewModel).setTextDecoration(decoration);
+            prevDecoration = Objects.requireNonNull(viewModel).getDecoration();
+            Objects.requireNonNull(viewModel).setDecoration(decoration);
         }
     }
 
@@ -29,14 +29,13 @@ class DecorateTextCmd extends AbstractEditCmd {
             Objects.requireNonNull(viewModel).undoDecoration();
         } else {
             if (prevDecoration != null) {
-                Objects.requireNonNull(viewModel).setTextDecoration(prevDecoration);
+                Objects.requireNonNull(viewModel).setDecoration(prevDecoration);
             }
         }
     }
 
     @Override
     public String toString() {
-        return "DecorateTextCmd[" + decoration + "]";
+        return "DecorateCmd[" + decoration + "]";
     }
-
 }

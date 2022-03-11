@@ -1,6 +1,8 @@
 package com.gluonhq.richtext.action;
 
 import com.gluonhq.richtext.RichTextArea;
+import com.gluonhq.richtext.model.Decoration;
+import com.gluonhq.richtext.model.ImageDecoration;
 import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.viewmodel.ActionCmdFactory;
 
@@ -53,7 +55,14 @@ public class ActionFactory {
         return paste;
     }
 
-    public Action decorate(TextDecoration decoration) {
-        return new BasicAction(control, action -> ACTION_CMD_FACTORY.decorateText(decoration));
+    public Action decorate(Decoration decoration) {
+        return new BasicAction(control, action -> {
+            if (decoration instanceof TextDecoration) {
+                return ACTION_CMD_FACTORY.decorateText((TextDecoration) decoration);
+            } else if (decoration instanceof ImageDecoration) {
+                return ACTION_CMD_FACTORY.decorateImage((ImageDecoration) decoration);
+            }
+            throw new IllegalArgumentException("Decoration type not supported: " + decoration);
+        });
     }
 }
