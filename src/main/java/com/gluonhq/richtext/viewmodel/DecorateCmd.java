@@ -33,6 +33,6 @@ class DecorateCmd extends AbstractEditCmd {
 
     @Override
     public String toString() {
-        return "DecorateCmd [" + super.toString() + "\n" + decoration + "]";
+        return "DecorateCmd [" + super.toString() + ", " + decoration + "]";
     }
 }
