@@ -10,6 +10,7 @@ import com.gluonhq.richtext.viewmodel.ActionCmdFactory;
 import com.gluonhq.richtext.viewmodel.RichTextAreaViewModel;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
@@ -136,6 +137,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final Map<String, Image> imageCache = new ConcurrentHashMap<>();
     private final SmartTimer fontCacheEvictionTimer = new SmartTimer(this::evictUnusedFonts, 1000, 60000);
     private final SmartTimer imageCacheEvictionTimer = new SmartTimer(this::evictUnusedImages, 1000, 60000);
+    private final SmartTimer checkFaceModelTimer = new SmartTimer(this::checkFaceModel, 1000, 1000);
 
     private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow();
     private final ChangeListener<Boolean> focusChangeListener;
@@ -161,6 +163,11 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         textFlowLayoutY = nv.getTop();
     };
     private int nonTextNodesCount;
+    private final ChangeListener<FaceModel> faceModelChangeListener = (obs, ov, nv) -> {
+        if (nv != null) {
+            getSkinnable().setFaceModel(nv);
+        }
+    };
 
     protected RichTextAreaSkin(final RichTextArea control) {
         super(control);
@@ -217,13 +224,16 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     @Override
     public void dispose() {
+        checkFaceModelTimer.pause();
         viewModel.clearSelection();
         viewModel.caretPositionProperty().removeListener(caretPositionListener);
         viewModel.selectionProperty().removeListener(selectionListener);
         viewModel.removeChangeListener(textChangeListener);
+        viewModel.faceModelProperty().removeListener(faceModelChangeListener);
         lastValidCaretPosition = -1;
         getSkinnable().editableProperty().removeListener(this::editableChangeListener);
         getSkinnable().textLengthProperty.unbind();
+        getSkinnable().modifiedProperty.unbind();
         getSkinnable().setOnKeyPressed(null);
         getSkinnable().setOnKeyTyped(null);
         textBackgroundColorPaths.removeListener(textBackgroundColorPathsChangeListener);
@@ -253,11 +263,15 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             return;
         }
         viewModel.setTextBuffer(new PieceTable(faceModel));
+        lastValidCaretPosition = faceModel.getCaretPosition();
+        viewModel.setCaretPosition(lastValidCaretPosition);
         viewModel.caretPositionProperty().addListener(caretPositionListener);
         viewModel.selectionProperty().addListener(selectionListener);
         viewModel.addChangeListener(textChangeListener);
-        lastValidCaretPosition = faceModel.getCaretPosition();
+        viewModel.setFaceModel(faceModel);
+        viewModel.faceModelProperty().addListener(faceModelChangeListener);
         getSkinnable().textLengthProperty.bind(viewModel.textLengthProperty());
+        getSkinnable().modifiedProperty.bind(viewModel.modifiedProperty());
         getSkinnable().setOnContextMenuRequested(contextMenuEventEventHandler);
         getSkinnable().editableProperty().addListener(this::editableChangeListener);
         getSkinnable().setOnKeyPressed(this::keyPressedListener);
@@ -274,7 +288,9 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         root.prefWidthProperty().bind(textFlow.widthProperty());
         root.prefHeightProperty().bind(textFlow.heightProperty());
         refreshTextFlow();
+        requestLayout();
         editableChangeListener(null); // sets up all related listeners
+        checkFaceModelTimer.start();
     }
 
     // TODO Need more optimal way of rendering text fragments.
@@ -397,6 +413,13 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         List<Image> cachedImages = new ArrayList<>(imageCache.values());
         cachedImages.removeAll(usedImages);
         imageCache.values().removeAll(cachedImages);
+    }
+
+    private void checkFaceModel() {
+        final boolean modified = !viewModel.getCurrentFaceModel().equals(getSkinnable().getFaceModel());
+        if (modified != viewModel.isModified()) {
+            Platform.runLater(() -> viewModel.setModified(modified));
+        }
     }
 
     private void editableChangeListener(Observable o) {

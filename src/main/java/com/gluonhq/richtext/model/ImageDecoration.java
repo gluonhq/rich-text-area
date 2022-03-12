@@ -1,5 +1,7 @@
 package com.gluonhq.richtext.model;
 
+import java.util.Objects;
+
 public class ImageDecoration implements Decoration {
 
     private final int width;
@@ -40,6 +42,19 @@ public class ImageDecoration implements Decoration {
 
     public String getLink() {
         return link;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ImageDecoration that = (ImageDecoration) o;
+        return width == that.width && height == that.height && url.equals(that.url) && link.equals(that.link);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(width, height, url, link);
     }
 
     @Override

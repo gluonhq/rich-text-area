@@ -3,10 +3,12 @@ package com.gluonhq.richtext.viewmodel;
 import com.gluonhq.richtext.Selection;
 import com.gluonhq.richtext.Tools;
 import com.gluonhq.richtext.model.Decoration;
+import com.gluonhq.richtext.model.FaceModel;
 import com.gluonhq.richtext.model.ImageDecoration;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.undo.CommandManager;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
@@ -152,6 +154,18 @@ public class RichTextAreaViewModel {
         editableProperty.set(value);
     }
 
+    // modifiedProperty
+    private final BooleanProperty modifiedProperty = new SimpleBooleanProperty(this, "modified");
+    public final BooleanProperty modifiedProperty() {
+       return modifiedProperty;
+    }
+    public final boolean isModified() {
+       return modifiedProperty.get();
+    }
+    public final void setModified(boolean value) {
+        modifiedProperty.set(value);
+    }
+
     // textDecorationProperty
     private final ObjectProperty<Decoration> decorationProperty = new SimpleObjectProperty<>(this, "decoration") {
         @Override
@@ -170,6 +184,19 @@ public class RichTextAreaViewModel {
     public final void setDecoration(Decoration value) {
         decorationProperty.set(value);
     }
+
+    // faceModelProperty
+    private final ObjectProperty<FaceModel> faceModelProperty = new SimpleObjectProperty<>(this, "faceModel");
+    public final ObjectProperty<FaceModel> faceModelProperty() {
+       return faceModelProperty;
+    }
+    public final FaceModel getFaceModel() {
+       return faceModelProperty.get();
+    }
+    public final void setFaceModel(FaceModel value) {
+        faceModelProperty.set(value);
+    }
+
 
     public RichTextAreaViewModel(BiFunction<Double, Boolean, Integer> getNextRowPosition) {
         this.getNextRowPosition = Objects.requireNonNull(getNextRowPosition);
@@ -470,5 +497,21 @@ public class RichTextAreaViewModel {
     private void updateProperties() {
         undoStackEmptyProperty.set(commandManager.isUndoStackEmpty());
         redoStackEmptyProperty.set(commandManager.isRedoStackEmpty());
+    }
+
+    public FaceModel getCurrentFaceModel() {
+        return new FaceModel(getTextBuffer().getText(), getTextBuffer().getDecorationModelList(), getCaretPosition());
+    }
+
+    public void newFaceModel() {
+        Platform.runLater(() -> setFaceModel(new FaceModel()));
+    }
+
+    public void open(FaceModel faceModel) {
+        Platform.runLater(() -> setFaceModel(faceModel));
+    }
+
+    public void save() {
+        setFaceModel(getCurrentFaceModel());
     }
 }

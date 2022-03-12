@@ -92,6 +92,13 @@ public final class PieceTable extends AbstractTextBuffer {
     }
 
     @Override
+    public List<DecorationModel> getDecorationModelList() {
+        return pieces.stream()
+                .map(p -> new DecorationModel(p.start, p.length, p.getDecoration()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public CharacterIterator getCharacterIterator() {
         return pieceCharacterIterator;
     }
