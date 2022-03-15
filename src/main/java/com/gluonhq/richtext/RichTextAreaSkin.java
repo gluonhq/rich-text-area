@@ -461,6 +461,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         }
         if (e.getButton() == MouseButton.PRIMARY && !(e.isMiddleButtonDown() || e.isSecondaryButtonDown())) {
             HitInfo hitInfo = textFlow.hitTest(new Point2D(e.getX() - textFlowLayoutX, e.getY() - textFlowLayoutY));
+            Selection prevSelection = viewModel.getSelection();
             int prevCaretPosition = viewModel.getCaretPosition();
             int insertionIndex = hitInfo.getInsertionIndex();
             if (insertionIndex >= 0) {
@@ -475,7 +476,10 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                         viewModel.clearSelection();
                     }
                 } else if (e.isShiftDown() && e.getClickCount() == 1 && !(e.isControlDown() || e.isAltDown() || e.isMetaDown() || e.isShortcutDown())) {
-                    viewModel.setSelection(new Selection(prevCaretPosition, insertionIndex));
+                    int pos = prevSelection.isDefined() ?
+                            insertionIndex < prevSelection.getStart() ? prevSelection.getEnd() : prevSelection.getStart() :
+                            prevCaretPosition;
+                    viewModel.setSelection(new Selection(pos, insertionIndex));
                     viewModel.setCaretPosition(insertionIndex);
                 }
             }
