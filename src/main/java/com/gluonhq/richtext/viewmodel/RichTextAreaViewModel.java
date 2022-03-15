@@ -71,7 +71,10 @@ public class RichTextAreaViewModel {
         @Override
         protected void invalidated() {
             if (!hasSelection()) {
-                setDecoration(getTextBuffer().getDecorationAtCaret(get()));
+                Decoration decorationAtCaret = getTextBuffer().getDecorationAtCaret(get());
+                if (decorationAtCaret instanceof TextDecoration) {
+                    setDecoration(decorationAtCaret);
+                }
             }
         }
     };

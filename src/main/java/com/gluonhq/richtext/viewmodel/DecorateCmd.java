@@ -1,6 +1,8 @@
 package com.gluonhq.richtext.viewmodel;
 
 import com.gluonhq.richtext.model.Decoration;
+import com.gluonhq.richtext.model.ImageDecoration;
+import com.gluonhq.richtext.model.TextDecoration;
 
 import java.util.Objects;
 
@@ -15,7 +17,7 @@ class DecorateCmd extends AbstractEditCmd {
 
     @Override
     public void doRedo(RichTextAreaViewModel viewModel) {
-        if (selection.isDefined()) {
+        if (selection.isDefined() || decoration instanceof ImageDecoration) {
             Objects.requireNonNull(viewModel).decorate(decoration);
         } else {
             prevDecoration = Objects.requireNonNull(viewModel).getDecoration();
@@ -25,7 +27,7 @@ class DecorateCmd extends AbstractEditCmd {
 
     @Override
     public void doUndo(RichTextAreaViewModel viewModel) {
-        if (prevDecoration != null) {
+        if (prevDecoration != null && prevDecoration instanceof TextDecoration) {
             Objects.requireNonNull(viewModel).setDecoration(prevDecoration);
         }
         Objects.requireNonNull(viewModel).undoDecoration();
