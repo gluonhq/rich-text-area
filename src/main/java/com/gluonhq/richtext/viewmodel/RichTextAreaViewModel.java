@@ -129,7 +129,7 @@ public class RichTextAreaViewModel {
 
     // undoStackSizeProperty
     final ReadOnlyBooleanWrapper undoStackEmptyProperty = new ReadOnlyBooleanWrapper(this, "undoStackEmpty", true);
-    ReadOnlyBooleanProperty undoStackEmptyProperty() {
+    public ReadOnlyBooleanProperty undoStackEmptyProperty() {
         return undoStackEmptyProperty.getReadOnlyProperty();
     }
     boolean isUndoStackEmpty() {
@@ -155,18 +155,6 @@ public class RichTextAreaViewModel {
     }
     public final void setEditable(boolean value) {
         editableProperty.set(value);
-    }
-
-    // modifiedProperty
-    private final BooleanProperty modifiedProperty = new SimpleBooleanProperty(this, "modified");
-    public final BooleanProperty modifiedProperty() {
-       return modifiedProperty;
-    }
-    public final boolean isModified() {
-       return modifiedProperty.get();
-    }
-    public final void setModified(boolean value) {
-        modifiedProperty.set(value);
     }
 
     // textDecorationProperty
@@ -502,10 +490,6 @@ public class RichTextAreaViewModel {
         redoStackEmptyProperty.set(commandManager.isRedoStackEmpty());
     }
 
-    public FaceModel getCurrentFaceModel() {
-        return new FaceModel(getTextBuffer().getText(), getTextBuffer().getDecorationModelList(), getCaretPosition());
-    }
-
     public void newFaceModel() {
         Platform.runLater(() -> setFaceModel(new FaceModel()));
     }
@@ -515,6 +499,7 @@ public class RichTextAreaViewModel {
     }
 
     public void save() {
-        setFaceModel(getCurrentFaceModel());
+        FaceModel currentFaceModel = new FaceModel(getTextBuffer().getText(), getTextBuffer().getDecorationModelList(), getCaretPosition());
+        Platform.runLater(() -> setFaceModel(currentFaceModel));
     }
 }
