@@ -31,6 +31,8 @@ import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.gluonhq.richtext.model.FaceModel.EMPTY_FACE_MODEL;
+
 public class RichTextAreaViewModel {
 
     public static final Logger LOGGER = Logger.getLogger(RichTextAreaViewModel.class.getName());
@@ -129,7 +131,7 @@ public class RichTextAreaViewModel {
 
     // undoStackSizeProperty
     final ReadOnlyBooleanWrapper undoStackEmptyProperty = new ReadOnlyBooleanWrapper(this, "undoStackEmpty", true);
-    public ReadOnlyBooleanProperty undoStackEmptyProperty() {
+    ReadOnlyBooleanProperty undoStackEmptyProperty() {
         return undoStackEmptyProperty.getReadOnlyProperty();
     }
     boolean isUndoStackEmpty() {
@@ -188,6 +190,26 @@ public class RichTextAreaViewModel {
         faceModelProperty.set(value);
     }
 
+    // modifiedProperty
+    private final BooleanProperty modifiedProperty = new SimpleBooleanProperty(this, "modified");
+    public final BooleanProperty modifiedProperty() {
+        return modifiedProperty;
+    }
+    public final boolean isModified() {
+        return modifiedProperty.get();
+    }
+    public final void setModified(boolean value) {
+        modifiedProperty.set(value);
+    }
+
+    // savingProperty
+    final ReadOnlyBooleanWrapper savingProperty = new ReadOnlyBooleanWrapper(this, "saving");
+    public final ReadOnlyBooleanProperty savingProperty() {
+       return savingProperty.getReadOnlyProperty();
+    }
+    public final boolean isSaving() {
+       return savingProperty.get();
+    }
 
     public RichTextAreaViewModel(BiFunction<Double, Boolean, Integer> getNextRowPosition) {
         this.getNextRowPosition = Objects.requireNonNull(getNextRowPosition);
@@ -490,16 +512,30 @@ public class RichTextAreaViewModel {
         redoStackEmptyProperty.set(commandManager.isRedoStackEmpty());
     }
 
-    public void newFaceModel() {
-        Platform.runLater(() -> setFaceModel(new FaceModel()));
+    public FaceModel getCurrentFaceModel() {
+        return new FaceModel(getTextBuffer().getText(), getTextBuffer().getDecorationModelList(), getCaretPosition());
     }
 
-    public void open(FaceModel faceModel) {
-        Platform.runLater(() -> setFaceModel(faceModel));
+    void newFaceModel() {
+        Platform.runLater(() -> {
+            setFaceModel(EMPTY_FACE_MODEL);
+            setFaceModel(new FaceModel());
+        });
     }
 
-    public void save() {
-        FaceModel currentFaceModel = new FaceModel(getTextBuffer().getText(), getTextBuffer().getDecorationModelList(), getCaretPosition());
-        Platform.runLater(() -> setFaceModel(currentFaceModel));
+    void open(FaceModel faceModel) {
+        Platform.runLater(() -> {
+            setFaceModel(EMPTY_FACE_MODEL);
+            setFaceModel(faceModel);
+        });
+    }
+
+    void save() {
+        FaceModel currentFaceModel = getCurrentFaceModel();
+        Platform.runLater(() -> {
+            savingProperty.set(true);
+            setFaceModel(currentFaceModel);
+            savingProperty.set(false);
+        });
     }
 }
