@@ -32,8 +32,6 @@ import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.gluonhq.richtext.model.FaceModel.EMPTY_FACE_MODEL;
-
 public class RichTextAreaViewModel {
 
     public static final Logger LOGGER = Logger.getLogger(RichTextAreaViewModel.class.getName());
@@ -514,14 +512,16 @@ public class RichTextAreaViewModel {
 
     void newFaceModel() {
         Platform.runLater(() -> {
-            setFaceModel(EMPTY_FACE_MODEL);
+            // invalidate faceModelProperty
+            setFaceModel(null);
             setFaceModel(new FaceModel());
         });
     }
 
     void open(FaceModel faceModel) {
         Platform.runLater(() -> {
-            setFaceModel(EMPTY_FACE_MODEL);
+            // invalidate faceModelProperty
+            setFaceModel(null);
             setFaceModel(faceModel);
         });
     }

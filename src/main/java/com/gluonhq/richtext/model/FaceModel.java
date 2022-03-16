@@ -8,9 +8,6 @@ import static com.gluonhq.richtext.model.PieceTable.ZERO_WIDTH_TEXT;
 
 public class FaceModel {
 
-    private static final String EMPTY_TEXT = "\u0001";
-    public static FaceModel EMPTY_FACE_MODEL = new FaceModel(EMPTY_TEXT);
-
     private final String text;
     private final List<DecorationModel> decorationList;
     private final int caretPosition;

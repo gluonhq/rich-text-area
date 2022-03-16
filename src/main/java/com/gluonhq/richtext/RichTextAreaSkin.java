@@ -64,7 +64,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.gluonhq.richtext.model.FaceModel.EMPTY_FACE_MODEL;
 import static com.gluonhq.richtext.viewmodel.RichTextAreaViewModel.Direction;
 import static java.util.Map.entry;
 import static javafx.scene.input.KeyCode.*;
@@ -163,14 +162,13 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     };
     private int nonTextNodesCount;
     private final ChangeListener<FaceModel> faceModelChangeListener = (obs, ov, nv) -> {
-        if (nv == null) {
-            return;
-        }
-        if (EMPTY_FACE_MODEL.equals(ov)) {
+        if (ov == null && nv != null) {
+            // new/open
             dispose();
             getSkinnable().setFaceModel(nv);
             setup(nv);
-        } else if (!EMPTY_FACE_MODEL.equals(nv)) {
+        } else if (nv != null) {
+            // save
             getSkinnable().setFaceModel(nv);
         }
     };
