@@ -10,7 +10,6 @@ import com.gluonhq.richtext.viewmodel.ActionCmdFactory;
 import com.gluonhq.richtext.viewmodel.RichTextAreaViewModel;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
@@ -138,7 +137,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final Map<String, Image> imageCache = new ConcurrentHashMap<>();
     private final SmartTimer fontCacheEvictionTimer = new SmartTimer(this::evictUnusedFonts, 1000, 60000);
     private final SmartTimer imageCacheEvictionTimer = new SmartTimer(this::evictUnusedImages, 1000, 60000);
-    private final SmartTimer checkFaceModelTimer = new SmartTimer(this::checkFaceModel, 1000, 1000);
 
     private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow();
     private final ChangeListener<Boolean> focusChangeListener;
@@ -217,7 +215,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
         // all listeners have to be removed within dispose method
         control.faceModelProperty().addListener((obs, ov, nv) -> {
-            if (viewModel.isSaving()) {
+            if (viewModel.isSaved()) {
                 getSkinnable().requestFocus();
                 return;
             }
@@ -236,7 +234,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     @Override
     public void dispose() {
-        checkFaceModelTimer.pause();
         viewModel.clearSelection();
         viewModel.caretPositionProperty().removeListener(caretPositionListener);
         viewModel.selectionProperty().removeListener(selectionListener);
@@ -284,7 +281,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         viewModel.setFaceModel(faceModel);
         viewModel.faceModelProperty().addListener(faceModelChangeListener);
         getSkinnable().textLengthProperty.bind(viewModel.textLengthProperty());
-        getSkinnable().modifiedProperty.bind(viewModel.modifiedProperty());
+        getSkinnable().modifiedProperty.bind(viewModel.savedProperty().not());
         getSkinnable().setOnContextMenuRequested(contextMenuEventEventHandler);
         getSkinnable().editableProperty().addListener(this::editableChangeListener);
         getSkinnable().setOnKeyPressed(this::keyPressedListener);
@@ -303,7 +300,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         refreshTextFlow();
         requestLayout();
         editableChangeListener(null); // sets up all related listeners
-        checkFaceModelTimer.start();
     }
 
     // TODO Need more optimal way of rendering text fragments.
@@ -426,13 +422,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         List<Image> cachedImages = new ArrayList<>(imageCache.values());
         cachedImages.removeAll(usedImages);
         imageCache.values().removeAll(cachedImages);
-    }
-
-    private void checkFaceModel() {
-        final boolean modified = !viewModel.getCurrentFaceModel().equals(getSkinnable().getFaceModel());
-        if (modified != viewModel.isModified()) {
-            Platform.runLater(() -> viewModel.setModified(modified));
-        }
     }
 
     private void editableChangeListener(Observable o) {

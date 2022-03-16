@@ -11,6 +11,6 @@ class ActionCmdSave implements ActionCmd {
 
     @Override
     public BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
-        return viewModel.textBufferProperty().isNull().or(viewModel.modifiedProperty().not());
+        return viewModel.textBufferProperty().isNull().or(viewModel.savedProperty());
     }
 }

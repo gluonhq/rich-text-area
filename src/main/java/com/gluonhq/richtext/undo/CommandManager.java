@@ -52,12 +52,12 @@ public class CommandManager<T> {
         }
     }
 
-    public boolean isUndoStackEmpty() {
-        return undoStack.isEmpty();
+    public int getUndoStackSize() {
+        return undoStack.size();
     }
 
-    public boolean isRedoStackEmpty() {
-        return redoStack.isEmpty();
+    public int getRedoStackSize() {
+        return redoStack.size();
     }
 
     public void clearStacks() {

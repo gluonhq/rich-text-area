@@ -15,6 +15,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyIntegerProperty;
+import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -41,6 +42,7 @@ public class RichTextAreaViewModel {
 
     private final CommandManager<RichTextAreaViewModel> commandManager = new CommandManager<>(this, this::updateProperties);
     private BreakIterator wordIterator;
+    private int undoStackSizeWhenSaved = 0;
 
     /// PROPERTIES ///////////////////////////////////////////////////////////////
 
@@ -50,8 +52,9 @@ public class RichTextAreaViewModel {
         protected void invalidated() {
             // invalidate undo/redo stack
             commandManager.clearStacks();
-            undoStackEmptyProperty.set(true);
-            redoStackEmptyProperty.set(true);
+            undoStackSizeWhenSaved = 0;
+            undoStackSizeProperty.set(0);
+            redoStackSizeProperty.set(0);
         }
     };
     public final ObjectProperty<TextBuffer> textBufferProperty() {
@@ -130,21 +133,26 @@ public class RichTextAreaViewModel {
     }
 
     // undoStackSizeProperty
-    final ReadOnlyBooleanWrapper undoStackEmptyProperty = new ReadOnlyBooleanWrapper(this, "undoStackEmpty", true);
-    ReadOnlyBooleanProperty undoStackEmptyProperty() {
-        return undoStackEmptyProperty.getReadOnlyProperty();
+    private final ReadOnlyIntegerWrapper undoStackSizeProperty = new ReadOnlyIntegerWrapper(this, "undoStackSize") {
+        @Override
+        protected void invalidated() {
+            savedProperty.set(get() == undoStackSizeWhenSaved);
+        }
+    };
+    public final ReadOnlyIntegerProperty undoStackSizeProperty() {
+       return undoStackSizeProperty.getReadOnlyProperty();
     }
-    boolean isUndoStackEmpty() {
-        return undoStackEmptyProperty.get();
+    public final int getUndoStackSize() {
+       return undoStackSizeProperty.get();
     }
 
     // redoStackSizeProperty
-    final ReadOnlyBooleanWrapper redoStackEmptyProperty = new ReadOnlyBooleanWrapper(this, "redoStackEmpty", true);
-    ReadOnlyBooleanProperty redoStackEmptyProperty() {
-        return redoStackEmptyProperty.getReadOnlyProperty();
+    private final ReadOnlyIntegerWrapper redoStackSizeProperty = new ReadOnlyIntegerWrapper(this, "redoStackSize");
+    public final ReadOnlyIntegerProperty redoStackSizeProperty() {
+       return redoStackSizeProperty.getReadOnlyProperty();
     }
-    boolean isRedoStackEmpty() {
-        return redoStackEmptyProperty.get();
+    public final int getRedoStackSize() {
+       return redoStackSizeProperty.get();
     }
 
     // editableProperty
@@ -190,25 +198,13 @@ public class RichTextAreaViewModel {
         faceModelProperty.set(value);
     }
 
-    // modifiedProperty
-    private final BooleanProperty modifiedProperty = new SimpleBooleanProperty(this, "modified");
-    public final BooleanProperty modifiedProperty() {
-        return modifiedProperty;
+    // savedProperty
+    final ReadOnlyBooleanWrapper savedProperty = new ReadOnlyBooleanWrapper(this, "saved", true);
+    public final ReadOnlyBooleanProperty savedProperty() {
+       return savedProperty.getReadOnlyProperty();
     }
-    public final boolean isModified() {
-        return modifiedProperty.get();
-    }
-    public final void setModified(boolean value) {
-        modifiedProperty.set(value);
-    }
-
-    // savingProperty
-    final ReadOnlyBooleanWrapper savingProperty = new ReadOnlyBooleanWrapper(this, "saving");
-    public final ReadOnlyBooleanProperty savingProperty() {
-       return savingProperty.getReadOnlyProperty();
-    }
-    public final boolean isSaving() {
-       return savingProperty.get();
+    public final boolean isSaved() {
+       return savedProperty.get();
     }
 
     public RichTextAreaViewModel(BiFunction<Double, Boolean, Integer> getNextRowPosition) {
@@ -508,8 +504,8 @@ public class RichTextAreaViewModel {
     }
 
     private void updateProperties() {
-        undoStackEmptyProperty.set(commandManager.isUndoStackEmpty());
-        redoStackEmptyProperty.set(commandManager.isRedoStackEmpty());
+        undoStackSizeProperty.set(commandManager.getUndoStackSize());
+        redoStackSizeProperty.set(commandManager.getRedoStackSize());
     }
 
     public FaceModel getCurrentFaceModel() {
@@ -533,9 +529,9 @@ public class RichTextAreaViewModel {
     void save() {
         FaceModel currentFaceModel = getCurrentFaceModel();
         Platform.runLater(() -> {
-            savingProperty.set(true);
+            undoStackSizeWhenSaved = getUndoStackSize();
+            savedProperty.set(true);
             setFaceModel(currentFaceModel);
-            savingProperty.set(false);
         });
     }
 }
