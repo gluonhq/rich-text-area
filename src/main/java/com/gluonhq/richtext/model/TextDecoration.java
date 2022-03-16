@@ -108,10 +108,10 @@ public class TextDecoration implements Decoration {
         }
 
         public Builder presets() {
-            foreground = Color.BLUE;
+            foreground = Color.BLACK;
             background = Color.TRANSPARENT;
-            fontFamily = "Arial";
-            fontSize = 17.0;
+            fontFamily = "Serif";
+            fontSize = 12.0;
             fontPosture = FontPosture.REGULAR;
             fontWeight = FontWeight.NORMAL;
             strikethrough = false;

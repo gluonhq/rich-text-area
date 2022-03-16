@@ -93,7 +93,8 @@ public class Main extends Application {
 
         ComboBox<String> fontFamilies = new ComboBox<>();
         fontFamilies.getItems().setAll(Font.getFamilies());
-        fontFamilies.setValue("Arial");
+        fontFamilies.setValue("Serif");
+        fontFamilies.setPrefWidth(100);
         new TextDecorateAction<>(editor, fontFamilies.valueProperty(), TextDecoration::getFontFamily, (builder, a) -> builder.fontFamily(a).build());
 
         final ComboBox<Double> fontSize = new ComboBox<>();
@@ -114,12 +115,12 @@ public class Main extends Application {
                 return Double.parseDouble(s);
             }
         });
-        fontSize.setValue(17.0);
+        fontSize.setValue(12.0);
 
         final ColorPicker textForeground = new ColorPicker();
         textForeground.getStyleClass().add("foreground");
         new TextDecorateAction<>(editor, textForeground.valueProperty(), TextDecoration::getForeground, (builder, a) -> builder.foreground(a).build());
-        textForeground.setValue(Color.BLUE);
+        textForeground.setValue(Color.BLACK);
 
         final ColorPicker textBackground = new ColorPicker();
         textBackground.getStyleClass().add("background");
