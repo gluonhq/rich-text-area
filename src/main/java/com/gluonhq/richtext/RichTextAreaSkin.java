@@ -618,6 +618,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         final double contentAreaWidth = getSkinnable().getContentAreaWidth();
         final double contentAreaLimit = contentAreaWidth == 0 ? viewportWidth : contentAreaWidth;
         final double padding = textFlow.getPadding().getLeft() + textFlow.getPadding().getRight() + root.getPadding().getLeft() + root.getPadding().getRight();
+        // Subtracting 1 pixel prevents infinite layout calls when resizing the control
         return Math.min(contentAreaLimit, viewportWidth) - padding - 1;
     }
 
