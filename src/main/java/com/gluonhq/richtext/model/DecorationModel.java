@@ -1,5 +1,7 @@
 package com.gluonhq.richtext.model;
 
+import java.util.Objects;
+
 public class DecorationModel {
     private final int start;
     private final int length;
@@ -21,5 +23,27 @@ public class DecorationModel {
 
     public Decoration getDecoration() {
         return decoration;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DecorationModel that = (DecorationModel) o;
+        return start == that.start && length == that.length && decoration.equals(that.decoration);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(start, length, decoration);
+    }
+
+    @Override
+    public String toString() {
+        return "DecorationModel{" +
+                "start=" + start +
+                ", length=" + length +
+                ", decoration=" + decoration +
+                '}';
     }
 }

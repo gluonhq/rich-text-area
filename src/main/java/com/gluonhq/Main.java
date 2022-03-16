@@ -9,6 +9,7 @@ import com.gluonhq.richtext.model.FaceModel;
 import com.gluonhq.richtext.model.ImageDecoration;
 import com.gluonhq.richtext.model.TextDecoration;
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
@@ -94,6 +95,7 @@ public class Main extends Application {
         ComboBox<String> fontFamilies = new ComboBox<>();
         fontFamilies.getItems().setAll(Font.getFamilies());
         fontFamilies.setValue("Arial");
+        fontFamilies.setPrefWidth(100);
         new TextDecorateAction<>(editor, fontFamilies.valueProperty(), TextDecoration::getFontFamily, (builder, a) -> builder.fontFamily(a).build());
 
         final ComboBox<Double> fontSize = new ComboBox<>();
@@ -131,12 +133,16 @@ public class Main extends Application {
 
         ToolBar toolbar = new ToolBar();
         toolbar.getItems().setAll(
+                actionButton(LineAwesomeSolid.FILE,  editor.getActionFactory().newFaceModel()),
+                actionButton(LineAwesomeSolid.FOLDER_OPEN, editor.getActionFactory().open(faceModel)),
+                actionButton(LineAwesomeSolid.SAVE,  editor.getActionFactory().save()),
+                new Separator(Orientation.VERTICAL),
                 actionButton(LineAwesomeSolid.CUT,   editor.getActionFactory().cut()),
                 actionButton(LineAwesomeSolid.COPY,  editor.getActionFactory().copy()),
                 actionButton(LineAwesomeSolid.PASTE, editor.getActionFactory().paste()),
                 new Separator(Orientation.VERTICAL),
-                actionButton(LineAwesomeSolid.UNDO, editor.getActionFactory().undo()),
-                actionButton(LineAwesomeSolid.REDO, editor.getActionFactory().redo()),
+                actionButton(LineAwesomeSolid.UNDO,  editor.getActionFactory().undo()),
+                actionButton(LineAwesomeSolid.REDO,  editor.getActionFactory().redo()),
                 new Separator(Orientation.VERTICAL),
                 actionImage(LineAwesomeSolid.IMAGE),
                 new Separator(Orientation.VERTICAL),
@@ -156,14 +162,12 @@ public class Main extends Application {
         statusBar.setAlignment(Pos.CENTER_RIGHT);
         statusBar.getChildren().setAll(textLengthLabel);
 
-        MenuItem newFileMenu = new MenuItem("New Text");
-        newFileMenu.setOnAction(e -> editor.setFaceModel(new FaceModel()));
-        MenuItem openFileMenu = new MenuItem("Open Text");
-        // For now, just load a decorated text
-        openFileMenu.setOnAction(e -> editor.setFaceModel(faceModel));
-
         Menu fileMenu = new Menu("File");
-        fileMenu.getItems().addAll(newFileMenu, openFileMenu);
+        fileMenu.getItems().addAll(
+                actionMenuItem("New Text", LineAwesomeSolid.FILE, editor.getActionFactory().newFaceModel()),
+                actionMenuItem("Open Text", LineAwesomeSolid.FOLDER_OPEN, editor.getActionFactory().open(faceModel)),
+                new SeparatorMenuItem(),
+                actionMenuItem("Save Text", LineAwesomeSolid.SAVE, editor.getActionFactory().save()));
         Menu editMenu = new Menu("Edit");
         editMenu.getItems().addAll(
                 actionMenuItem("Undo", LineAwesomeSolid.UNDO, editor.getActionFactory().undo()),
@@ -179,9 +183,9 @@ public class Main extends Application {
         root.setTop(new VBox(menuBar, toolbar));
         root.setBottom(statusBar);
 
-        Scene scene = new Scene(root, 800, 480);
+        Scene scene = new Scene(root, 900, 480);
         scene.getStylesheets().add(Main.class.getResource("main.css").toExternalForm());
-        stage.setTitle("Rich Text Demo");
+        stage.titleProperty().bind(Bindings.createStringBinding(() -> "Rich Text Demo" + (editor.isModified() ? " *" : ""), editor.modifiedProperty()));
         stage.setScene(scene);
         stage.show();
 

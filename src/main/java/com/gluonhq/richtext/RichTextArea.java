@@ -5,6 +5,8 @@ import com.gluonhq.richtext.model.FaceModel;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -39,7 +41,12 @@ public class RichTextArea extends Control {
     }
 
     // faceModelProperty
-    private final ObjectProperty<FaceModel> faceModelProperty = new SimpleObjectProperty<>(this, "faceModel", new FaceModel());
+    private final ObjectProperty<FaceModel> faceModelProperty = new SimpleObjectProperty<>(this, "faceModel", new FaceModel()) {
+        @Override
+        protected void invalidated() {
+            System.out.println(get());
+        }
+    };
     public final ObjectProperty<FaceModel> faceModelProperty() {
        return faceModelProperty;
     }
@@ -48,6 +55,15 @@ public class RichTextArea extends Control {
     }
     public final void setFaceModel(FaceModel value) {
         faceModelProperty.set(value);
+    }
+
+    // modifiedProperty
+    final ReadOnlyBooleanWrapper modifiedProperty = new ReadOnlyBooleanWrapper(this, "modified");
+    public final ReadOnlyBooleanProperty modifiedProperty() {
+       return modifiedProperty.getReadOnlyProperty();
+    }
+    public final boolean isModified() {
+       return modifiedProperty.get();
     }
 
     // editableProperty

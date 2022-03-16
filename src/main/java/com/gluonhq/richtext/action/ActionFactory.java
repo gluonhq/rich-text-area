@@ -2,6 +2,7 @@ package com.gluonhq.richtext.action;
 
 import com.gluonhq.richtext.RichTextArea;
 import com.gluonhq.richtext.model.Decoration;
+import com.gluonhq.richtext.model.FaceModel;
 import com.gluonhq.richtext.model.ImageDecoration;
 import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.viewmodel.ActionCmdFactory;
@@ -53,6 +54,26 @@ public class ActionFactory {
             paste = new BasicAction(control, action -> ACTION_CMD_FACTORY.paste());
         }
         return paste;
+    }
+
+    private Action newFaceModel;
+    public Action newFaceModel() {
+        if (newFaceModel == null) {
+            newFaceModel = new BasicAction(control, action -> ACTION_CMD_FACTORY.newFaceModel());
+        }
+        return newFaceModel;
+    }
+
+    public Action open(FaceModel faceModel) {
+        return new BasicAction(control, action -> ACTION_CMD_FACTORY.open(faceModel));
+    }
+
+    private Action save;
+    public Action save() {
+        if (save == null) {
+            save = new BasicAction(control, action -> ACTION_CMD_FACTORY.save());
+        }
+        return save;
     }
 
     public Action decorate(Decoration decoration) {

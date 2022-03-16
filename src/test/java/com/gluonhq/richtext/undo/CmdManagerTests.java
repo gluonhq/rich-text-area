@@ -61,8 +61,8 @@ public class CmdManagerTests {
         StringBuilder text = new StringBuilder("Text");
         CommandManager<StringBuilder> commander = new CommandManager<>(text);
         Assertions.assertAll(
-                () -> Assertions.assertTrue(commander.isUndoStackEmpty()),
-                () -> Assertions.assertTrue(commander.isRedoStackEmpty())
+                () -> Assertions.assertEquals(0, commander.getUndoStackSize()),
+                () -> Assertions.assertEquals(0, commander.getRedoStackSize())
         );
     }
 
@@ -72,7 +72,7 @@ public class CmdManagerTests {
         StringBuilder text = new StringBuilder("Text");
         CommandManager<StringBuilder> commander = new CommandManager<>(text);
         commander.execute(new TestCommand());
-        Assertions.assertFalse(commander.isUndoStackEmpty());
+        Assertions.assertNotEquals(0, commander.getUndoStackSize());
     }
 
     @Test
@@ -81,7 +81,7 @@ public class CmdManagerTests {
         StringBuilder text = new StringBuilder("Text");
         CommandManager<StringBuilder> commander = new CommandManager<>(text);
         commander.execute(new TestCommand());
-        Assertions.assertTrue(commander.isRedoStackEmpty());
+        Assertions.assertEquals(0, commander.getRedoStackSize());
     }
 
     @Test
@@ -91,7 +91,7 @@ public class CmdManagerTests {
         CommandManager<StringBuilder> commander = new CommandManager<>(text);
         commander.execute(new TestCommand());
         commander.undo();
-        Assertions.assertTrue(commander.isUndoStackEmpty());
+        Assertions.assertEquals(0, commander.getUndoStackSize());
     }
 
     @Test
@@ -101,7 +101,7 @@ public class CmdManagerTests {
         CommandManager<StringBuilder> commander = new CommandManager<>(text);
         commander.execute(new TestCommand());
         commander.undo();
-        Assertions.assertFalse(commander.isRedoStackEmpty());
+        Assertions.assertNotEquals(0, commander.getRedoStackSize());
     }
 
     @Test
@@ -112,7 +112,7 @@ public class CmdManagerTests {
         commander.execute(new TestCommand());
         commander.undo();
         commander.redo();
-        Assertions.assertTrue(commander.isRedoStackEmpty());
+        Assertions.assertEquals(0, commander.getRedoStackSize());
     }
 
     @Test
@@ -123,7 +123,7 @@ public class CmdManagerTests {
         commander.execute(new TestCommand());
         commander.undo();
         commander.redo();
-        Assertions.assertFalse(commander.isUndoStackEmpty());
+        Assertions.assertNotEquals(0, commander.getUndoStackSize());
     }
 
     @Test
