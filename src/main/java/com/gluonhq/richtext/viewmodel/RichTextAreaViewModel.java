@@ -3,16 +3,19 @@ package com.gluonhq.richtext.viewmodel;
 import com.gluonhq.richtext.Selection;
 import com.gluonhq.richtext.Tools;
 import com.gluonhq.richtext.model.Decoration;
+import com.gluonhq.richtext.model.FaceModel;
 import com.gluonhq.richtext.model.ImageDecoration;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.undo.CommandManager;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyIntegerProperty;
+import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -37,6 +40,7 @@ public class RichTextAreaViewModel {
 
     private final CommandManager<RichTextAreaViewModel> commandManager = new CommandManager<>(this, this::updateProperties);
     private BreakIterator wordIterator;
+    private int undoStackSizeWhenSaved = 0;
 
     /// PROPERTIES ///////////////////////////////////////////////////////////////
 
@@ -46,8 +50,9 @@ public class RichTextAreaViewModel {
         protected void invalidated() {
             // invalidate undo/redo stack
             commandManager.clearStacks();
-            undoStackEmptyProperty.set(true);
-            redoStackEmptyProperty.set(true);
+            undoStackSizeWhenSaved = 0;
+            undoStackSizeProperty.set(0);
+            redoStackSizeProperty.set(0);
         }
     };
     public final ObjectProperty<TextBuffer> textBufferProperty() {
@@ -126,21 +131,26 @@ public class RichTextAreaViewModel {
     }
 
     // undoStackSizeProperty
-    final ReadOnlyBooleanWrapper undoStackEmptyProperty = new ReadOnlyBooleanWrapper(this, "undoStackEmpty", true);
-    ReadOnlyBooleanProperty undoStackEmptyProperty() {
-        return undoStackEmptyProperty.getReadOnlyProperty();
+    private final ReadOnlyIntegerWrapper undoStackSizeProperty = new ReadOnlyIntegerWrapper(this, "undoStackSize") {
+        @Override
+        protected void invalidated() {
+            savedProperty.set(get() == undoStackSizeWhenSaved);
+        }
+    };
+    public final ReadOnlyIntegerProperty undoStackSizeProperty() {
+       return undoStackSizeProperty.getReadOnlyProperty();
     }
-    boolean isUndoStackEmpty() {
-        return undoStackEmptyProperty.get();
+    public final int getUndoStackSize() {
+       return undoStackSizeProperty.get();
     }
 
     // redoStackSizeProperty
-    final ReadOnlyBooleanWrapper redoStackEmptyProperty = new ReadOnlyBooleanWrapper(this, "redoStackEmpty", true);
-    ReadOnlyBooleanProperty redoStackEmptyProperty() {
-        return redoStackEmptyProperty.getReadOnlyProperty();
+    private final ReadOnlyIntegerWrapper redoStackSizeProperty = new ReadOnlyIntegerWrapper(this, "redoStackSize");
+    public final ReadOnlyIntegerProperty redoStackSizeProperty() {
+       return redoStackSizeProperty.getReadOnlyProperty();
     }
-    boolean isRedoStackEmpty() {
-        return redoStackEmptyProperty.get();
+    public final int getRedoStackSize() {
+       return redoStackSizeProperty.get();
     }
 
     // editableProperty
@@ -172,6 +182,27 @@ public class RichTextAreaViewModel {
     }
     public final void setDecoration(Decoration value) {
         decorationProperty.set(value);
+    }
+
+    // faceModelProperty
+    private final ObjectProperty<FaceModel> faceModelProperty = new SimpleObjectProperty<>(this, "faceModel");
+    public final ObjectProperty<FaceModel> faceModelProperty() {
+       return faceModelProperty;
+    }
+    public final FaceModel getFaceModel() {
+       return faceModelProperty.get();
+    }
+    public final void setFaceModel(FaceModel value) {
+        faceModelProperty.set(value);
+    }
+
+    // savedProperty
+    final ReadOnlyBooleanWrapper savedProperty = new ReadOnlyBooleanWrapper(this, "saved", true);
+    public final ReadOnlyBooleanProperty savedProperty() {
+       return savedProperty.getReadOnlyProperty();
+    }
+    public final boolean isSaved() {
+       return savedProperty.get();
     }
 
     public RichTextAreaViewModel(BiFunction<Double, Boolean, Integer> getNextRowPosition) {
@@ -471,7 +502,36 @@ public class RichTextAreaViewModel {
     }
 
     private void updateProperties() {
-        undoStackEmptyProperty.set(commandManager.isUndoStackEmpty());
-        redoStackEmptyProperty.set(commandManager.isRedoStackEmpty());
+        undoStackSizeProperty.set(commandManager.getUndoStackSize());
+        redoStackSizeProperty.set(commandManager.getRedoStackSize());
+    }
+
+    public FaceModel getCurrentFaceModel() {
+        return new FaceModel(getTextBuffer().getText(), getTextBuffer().getDecorationModelList(), getCaretPosition());
+    }
+
+    void newFaceModel() {
+        Platform.runLater(() -> {
+            // invalidate faceModelProperty
+            setFaceModel(null);
+            setFaceModel(new FaceModel());
+        });
+    }
+
+    void open(FaceModel faceModel) {
+        Platform.runLater(() -> {
+            // invalidate faceModelProperty
+            setFaceModel(null);
+            setFaceModel(faceModel);
+        });
+    }
+
+    void save() {
+        FaceModel currentFaceModel = getCurrentFaceModel();
+        Platform.runLater(() -> {
+            undoStackSizeWhenSaved = getUndoStackSize();
+            savedProperty.set(true);
+            setFaceModel(currentFaceModel);
+        });
     }
 }
