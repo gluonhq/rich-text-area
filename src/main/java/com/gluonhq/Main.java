@@ -183,7 +183,7 @@ public class Main extends Application {
         root.setTop(new VBox(menuBar, toolbar));
         root.setBottom(statusBar);
 
-        Scene scene = new Scene(root, 900, 480);
+        Scene scene = new Scene(root, 960, 480);
         scene.getStylesheets().add(Main.class.getResource("main.css").toExternalForm());
         stage.titleProperty().bind(Bindings.createStringBinding(() -> "Rich Text Demo" + (editor.isModified() ? " *" : ""), editor.modifiedProperty()));
         stage.setScene(scene);
