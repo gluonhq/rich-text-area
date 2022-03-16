@@ -94,7 +94,7 @@ public class Main extends Application {
 
         ComboBox<String> fontFamilies = new ComboBox<>();
         fontFamilies.getItems().setAll(Font.getFamilies());
-        fontFamilies.setValue("Arial");
+        fontFamilies.setValue("Serif");
         fontFamilies.setPrefWidth(100);
         new TextDecorateAction<>(editor, fontFamilies.valueProperty(), TextDecoration::getFontFamily, (builder, a) -> builder.fontFamily(a).build());
 
@@ -116,12 +116,12 @@ public class Main extends Application {
                 return Double.parseDouble(s);
             }
         });
-        fontSize.setValue(17.0);
+        fontSize.setValue(12.0);
 
         final ColorPicker textForeground = new ColorPicker();
         textForeground.getStyleClass().add("foreground");
         new TextDecorateAction<>(editor, textForeground.valueProperty(), TextDecoration::getForeground, (builder, a) -> builder.foreground(a).build());
-        textForeground.setValue(Color.BLUE);
+        textForeground.setValue(Color.BLACK);
 
         final ColorPicker textBackground = new ColorPicker();
         textBackground.getStyleClass().add("background");
@@ -183,7 +183,7 @@ public class Main extends Application {
         root.setTop(new VBox(menuBar, toolbar));
         root.setBottom(statusBar);
 
-        Scene scene = new Scene(root, 900, 480);
+        Scene scene = new Scene(root, 960, 480);
         scene.getStylesheets().add(Main.class.getResource("main.css").toExternalForm());
         stage.titleProperty().bind(Bindings.createStringBinding(() -> "Rich Text Demo" + (editor.isModified() ? " *" : ""), editor.modifiedProperty()));
         stage.setScene(scene);

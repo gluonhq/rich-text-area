@@ -4,6 +4,7 @@ import com.gluonhq.richtext.RichTextArea;
 import com.gluonhq.richtext.Selection;
 import com.gluonhq.richtext.model.Decoration;
 import com.gluonhq.richtext.model.TextDecoration;
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 
@@ -34,8 +35,10 @@ public class TextDecorateAction<T> extends DecorateAction<T> {
                     builder = builder.fromDecoration((TextDecoration) decoration);
                 }
                 TextDecoration newTextDecoration = builderTFunction.apply(builder, nv);
-                ACTION_CMD_FACTORY.decorateText(newTextDecoration).apply(viewModel);
-                control.requestFocus();
+                Platform.runLater(() ->  {
+                    ACTION_CMD_FACTORY.decorateText(newTextDecoration).apply(viewModel);
+                    control.requestFocus();
+                });
                 updating = false;
             }
         };
