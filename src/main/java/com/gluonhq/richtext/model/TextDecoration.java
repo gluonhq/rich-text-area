@@ -81,6 +81,26 @@ public class TextDecoration implements Decoration {
         return td;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TextDecoration that = (TextDecoration) o;
+        return Double.compare(that.fontSize, fontSize) == 0 &&
+                Objects.equals(foreground, that.foreground) &&
+                Objects.equals(background, that.background) &&
+                Objects.equals(fontFamily, that.fontFamily) &&
+                fontPosture == that.fontPosture &&
+                fontWeight == that.fontWeight &&
+                Objects.equals(strikethrough, that.strikethrough) &&
+                Objects.equals(underline, that.underline);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(foreground, background, fontFamily, fontSize, fontPosture, fontWeight, strikethrough, underline);
+    }
+
     public static class Builder {
 
         private Color foreground;

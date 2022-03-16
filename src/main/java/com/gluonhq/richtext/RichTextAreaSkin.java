@@ -161,6 +161,17 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         textFlowLayoutY = nv.getTop();
     };
     private int nonTextNodesCount;
+    private final ChangeListener<FaceModel> faceModelChangeListener = (obs, ov, nv) -> {
+        if (ov == null && nv != null) {
+            // new/open
+            dispose();
+            getSkinnable().setFaceModel(nv);
+            setup(nv);
+        } else if (nv != null) {
+            // save
+            getSkinnable().setFaceModel(nv);
+        }
+    };
 
     protected RichTextAreaSkin(final RichTextArea control) {
         super(control);
@@ -202,6 +213,10 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
         // all listeners have to be removed within dispose method
         control.faceModelProperty().addListener((obs, ov, nv) -> {
+            if (viewModel.isSaved()) {
+                getSkinnable().requestFocus();
+                return;
+            }
             if (ov != null) {
                 dispose();
             }
@@ -221,12 +236,15 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         viewModel.caretPositionProperty().removeListener(caretPositionListener);
         viewModel.selectionProperty().removeListener(selectionListener);
         viewModel.removeChangeListener(textChangeListener);
+        viewModel.faceModelProperty().removeListener(faceModelChangeListener);
         lastValidCaretPosition = -1;
         getSkinnable().editableProperty().removeListener(this::editableChangeListener);
         getSkinnable().textLengthProperty.unbind();
+        getSkinnable().modifiedProperty.unbind();
         getSkinnable().setOnKeyPressed(null);
         getSkinnable().setOnKeyTyped(null);
         textBackgroundColorPaths.removeListener(textBackgroundColorPathsChangeListener);
+        textFlow.getChildren().clear();
         textFlow.setOnMousePressed(null);
         textFlow.setOnMouseDragged(null);
         textFlow.prefWidthProperty().unbind();
@@ -253,11 +271,15 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             return;
         }
         viewModel.setTextBuffer(new PieceTable(faceModel));
+        lastValidCaretPosition = faceModel.getCaretPosition();
+        viewModel.setCaretPosition(lastValidCaretPosition);
         viewModel.caretPositionProperty().addListener(caretPositionListener);
         viewModel.selectionProperty().addListener(selectionListener);
         viewModel.addChangeListener(textChangeListener);
-        lastValidCaretPosition = faceModel.getCaretPosition();
+        viewModel.setFaceModel(faceModel);
+        viewModel.faceModelProperty().addListener(faceModelChangeListener);
         getSkinnable().textLengthProperty.bind(viewModel.textLengthProperty());
+        getSkinnable().modifiedProperty.bind(viewModel.savedProperty().not());
         getSkinnable().setOnContextMenuRequested(contextMenuEventEventHandler);
         getSkinnable().editableProperty().addListener(this::editableChangeListener);
         getSkinnable().setOnKeyPressed(this::keyPressedListener);
@@ -274,6 +296,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         root.prefWidthProperty().bind(textFlow.widthProperty());
         root.prefHeightProperty().bind(textFlow.heightProperty());
         refreshTextFlow();
+        requestLayout();
         editableChangeListener(null); // sets up all related listeners
     }
 

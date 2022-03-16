@@ -14,7 +14,7 @@ class ActionCmdRedo implements ActionCmd {
 
     @Override
     public BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
-        return Bindings.createBooleanBinding(() -> viewModel.isRedoStackEmpty() || !viewModel.isEditable(),
-                viewModel.redoStackEmptyProperty(), viewModel.editableProperty());
+        return Bindings.createBooleanBinding(() -> viewModel.getRedoStackSize() == 0 || !viewModel.isEditable(),
+                viewModel.redoStackSizeProperty(), viewModel.editableProperty());
     }
 }
