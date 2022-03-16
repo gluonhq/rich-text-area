@@ -6,25 +6,25 @@ import java.util.stream.Collectors;
 
 import static com.gluonhq.richtext.model.PieceTable.ZERO_WIDTH_TEXT;
 
-public class FaceModel {
+public class Document {
 
     private final String text;
     private final List<DecorationModel> decorationList;
     private final int caretPosition;
 
-    public FaceModel() {
+    public Document() {
         this("");
     }
 
-    public FaceModel(String text) {
+    public Document(String text) {
         this(text, 0);
     }
 
-    public FaceModel(String text, int caretPosition) {
+    public Document(String text, int caretPosition) {
         this(text, List.of(new DecorationModel(0, text.length(), TextDecoration.builder().presets().build())), caretPosition);
     }
 
-    public FaceModel(String text, List<DecorationModel> decorationList, int caretPosition) {
+    public Document(String text, List<DecorationModel> decorationList, int caretPosition) {
         this.text = text;
         this.decorationList = decorationList;
         this.caretPosition = caretPosition;
@@ -46,8 +46,8 @@ public class FaceModel {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        FaceModel faceModel = (FaceModel) o;
-        return Objects.equals(text, faceModel.text) && Objects.equals(decorationList, faceModel.decorationList);
+        Document document = (Document) o;
+        return Objects.equals(text, document.text) && Objects.equals(decorationList, document.decorationList);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class FaceModel {
 
     @Override
     public String toString() {
-        return "FaceModel{" +
+        return "Document{" +
                 "text='" + text.replaceAll("\n", "<n>").replaceAll(ZERO_WIDTH_TEXT, "<a>")  + '\'' +
                 ", decorationList=" + (decorationList == null ? "null" : "{" +
                     decorationList.stream().map(decorationModel -> " - " + decorationModel.toString()).collect(Collectors.joining("\n", "\n", ""))) +

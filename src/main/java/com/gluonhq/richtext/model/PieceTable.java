@@ -32,14 +32,14 @@ public final class PieceTable extends AbstractTextBuffer {
 
     /**
      * Creates piece table using original text
-     * @param faceModel model with decorated text to start with
+     * @param document model with decorated text to start with
      */
-     public PieceTable(FaceModel faceModel) {
-        this.originalText = Objects.requireNonNull(Objects.requireNonNull(faceModel).getText());
-        if (faceModel.getDecorationList() == null) {
+     public PieceTable(Document document) {
+        this.originalText = Objects.requireNonNull(Objects.requireNonNull(document).getText());
+        if (document.getDecorationList() == null) {
             pieces.add(piece(Piece.BufferType.ORIGINAL, 0, originalText.length()));
         } else {
-            faceModel.getDecorationList().forEach(d ->
+            document.getDecorationList().forEach(d ->
                     pieces.add(new Piece(PieceTable.this, Piece.BufferType.ORIGINAL, d.getStart(), d.getLength(), d.getDecoration())));
         }
         textLengthProperty.set(pieces.stream().mapToInt(b -> b.length).sum());

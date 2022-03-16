@@ -5,7 +5,7 @@ import com.gluonhq.richtext.RichTextArea;
 import com.gluonhq.richtext.action.DecorateAction;
 import com.gluonhq.richtext.action.TextDecorateAction;
 import com.gluonhq.richtext.model.DecorationModel;
-import com.gluonhq.richtext.model.FaceModel;
+import com.gluonhq.richtext.model.Document;
 import com.gluonhq.richtext.model.ImageDecoration;
 import com.gluonhq.richtext.model.TextDecoration;
 import javafx.application.Application;
@@ -77,7 +77,7 @@ public class Main extends Application {
                 new DecorationModel(27, 15, TextDecoration.builder().presets().foreground(Color.RED).build())
         );
 
-    private final FaceModel faceModel = new FaceModel("Simple text one\u200b two three\nExtra line text", decorations, 42);
+    private final Document document = new Document("Simple text one\u200b two three\nExtra line text", decorations, 42);
 
     private final Label textLengthLabel = new Label();
     private final RichTextArea editor = new RichTextArea();
@@ -133,8 +133,8 @@ public class Main extends Application {
 
         ToolBar toolbar = new ToolBar();
         toolbar.getItems().setAll(
-                actionButton(LineAwesomeSolid.FILE,  editor.getActionFactory().newFaceModel()),
-                actionButton(LineAwesomeSolid.FOLDER_OPEN, editor.getActionFactory().open(faceModel)),
+                actionButton(LineAwesomeSolid.FILE,  editor.getActionFactory().newDocument()),
+                actionButton(LineAwesomeSolid.FOLDER_OPEN, editor.getActionFactory().open(document)),
                 actionButton(LineAwesomeSolid.SAVE,  editor.getActionFactory().save()),
                 new Separator(Orientation.VERTICAL),
                 actionButton(LineAwesomeSolid.CUT,   editor.getActionFactory().cut()),
@@ -164,8 +164,8 @@ public class Main extends Application {
 
         Menu fileMenu = new Menu("File");
         fileMenu.getItems().addAll(
-                actionMenuItem("New Text", LineAwesomeSolid.FILE, editor.getActionFactory().newFaceModel()),
-                actionMenuItem("Open Text", LineAwesomeSolid.FOLDER_OPEN, editor.getActionFactory().open(faceModel)),
+                actionMenuItem("New Text", LineAwesomeSolid.FILE, editor.getActionFactory().newDocument()),
+                actionMenuItem("Open Text", LineAwesomeSolid.FOLDER_OPEN, editor.getActionFactory().open(document)),
                 new SeparatorMenuItem(),
                 actionMenuItem("Save Text", LineAwesomeSolid.SAVE, editor.getActionFactory().save()));
         Menu editMenu = new Menu("Edit");
