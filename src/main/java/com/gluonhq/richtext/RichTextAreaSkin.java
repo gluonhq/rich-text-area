@@ -1,6 +1,6 @@
 package com.gluonhq.richtext;
 
-import com.gluonhq.richtext.model.FaceModel;
+import com.gluonhq.richtext.model.Document;
 import com.gluonhq.richtext.model.ImageDecoration;
 import com.gluonhq.richtext.model.PieceTable;
 import com.gluonhq.richtext.model.TextBuffer;
@@ -162,16 +162,16 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     };
     private int nonTextNodesCount;
     private double maxWidthAvailable;
-
-    private final ChangeListener<FaceModel> faceModelChangeListener = (obs, ov, nv) -> {
+    
+    private final ChangeListener<Document> documentChangeListener = (obs, ov, nv) -> {
         if (ov == null && nv != null) {
             // new/open
             dispose();
-            getSkinnable().setFaceModel(nv);
+            getSkinnable().setDocument(nv);
             setup(nv);
         } else if (nv != null) {
             // save
-            getSkinnable().setFaceModel(nv);
+            getSkinnable().setDocument(nv);
         }
     };
 
@@ -214,7 +214,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 getSkinnable().contentAreaWidthProperty());
 
         // all listeners have to be removed within dispose method
-        control.faceModelProperty().addListener((obs, ov, nv) -> {
+        control.documentProperty().addListener((obs, ov, nv) -> {
             if (viewModel.isSaved()) {
                 getSkinnable().requestFocus();
                 return;
@@ -224,7 +224,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             }
             setup(nv);
         });
-        setup(control.getFaceModel());
+        setup(control.getDocument());
     }
 
     /// PROPERTIES ///////////////////////////////////////////////////////////////
@@ -238,7 +238,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         viewModel.caretPositionProperty().removeListener(caretPositionListener);
         viewModel.selectionProperty().removeListener(selectionListener);
         viewModel.removeChangeListener(textChangeListener);
-        viewModel.faceModelProperty().removeListener(faceModelChangeListener);
+        viewModel.documentProperty().removeListener(documentChangeListener);
         lastValidCaretPosition = -1;
         getSkinnable().editableProperty().removeListener(this::editableChangeListener);
         getSkinnable().textLengthProperty.unbind();
@@ -268,18 +268,18 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     /// PRIVATE METHODS /////////////////////////////////////////////////////////
 
-    private void setup(FaceModel faceModel) {
-        if (faceModel == null) {
+    private void setup(Document document) {
+        if (document == null) {
             return;
         }
-        viewModel.setTextBuffer(new PieceTable(faceModel));
-        lastValidCaretPosition = faceModel.getCaretPosition();
+        viewModel.setTextBuffer(new PieceTable(document));
+        lastValidCaretPosition = document.getCaretPosition();
         viewModel.setCaretPosition(lastValidCaretPosition);
         viewModel.caretPositionProperty().addListener(caretPositionListener);
         viewModel.selectionProperty().addListener(selectionListener);
         viewModel.addChangeListener(textChangeListener);
-        viewModel.setFaceModel(faceModel);
-        viewModel.faceModelProperty().addListener(faceModelChangeListener);
+        viewModel.setDocument(document);
+        viewModel.documentProperty().addListener(documentChangeListener);
         getSkinnable().textLengthProperty.bind(viewModel.textLengthProperty());
         getSkinnable().modifiedProperty.bind(viewModel.savedProperty().not());
         getSkinnable().setOnContextMenuRequested(contextMenuEventEventHandler);

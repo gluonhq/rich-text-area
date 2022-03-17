@@ -3,7 +3,7 @@ package com.gluonhq.richtext.viewmodel;
 import com.gluonhq.richtext.Selection;
 import com.gluonhq.richtext.Tools;
 import com.gluonhq.richtext.model.Decoration;
-import com.gluonhq.richtext.model.FaceModel;
+import com.gluonhq.richtext.model.Document;
 import com.gluonhq.richtext.model.ImageDecoration;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
@@ -184,16 +184,16 @@ public class RichTextAreaViewModel {
         decorationProperty.set(value);
     }
 
-    // faceModelProperty
-    private final ObjectProperty<FaceModel> faceModelProperty = new SimpleObjectProperty<>(this, "faceModel");
-    public final ObjectProperty<FaceModel> faceModelProperty() {
-       return faceModelProperty;
+    // documentProperty
+    private final ObjectProperty<Document> documentProperty = new SimpleObjectProperty<>(this, "document");
+    public final ObjectProperty<Document> documentProperty() {
+       return documentProperty;
     }
-    public final FaceModel getFaceModel() {
-       return faceModelProperty.get();
+    public final Document getDocument() {
+       return documentProperty.get();
     }
-    public final void setFaceModel(FaceModel value) {
-        faceModelProperty.set(value);
+    public final void setDocument(Document value) {
+        documentProperty.set(value);
     }
 
     // savedProperty
@@ -506,32 +506,32 @@ public class RichTextAreaViewModel {
         redoStackSizeProperty.set(commandManager.getRedoStackSize());
     }
 
-    public FaceModel getCurrentFaceModel() {
-        return new FaceModel(getTextBuffer().getText(), getTextBuffer().getDecorationModelList(), getCaretPosition());
+    public Document getCurrentDocument() {
+        return new Document(getTextBuffer().getText(), getTextBuffer().getDecorationModelList(), getCaretPosition());
     }
 
-    void newFaceModel() {
+    void newDocument() {
         Platform.runLater(() -> {
-            // invalidate faceModelProperty
-            setFaceModel(null);
-            setFaceModel(new FaceModel());
+            // invalidate documentProperty
+            setDocument(null);
+            setDocument(new Document());
         });
     }
 
-    void open(FaceModel faceModel) {
+    void open(Document document) {
         Platform.runLater(() -> {
-            // invalidate faceModelProperty
-            setFaceModel(null);
-            setFaceModel(faceModel);
+            // invalidate documentProperty
+            setDocument(null);
+            setDocument(document);
         });
     }
 
     void save() {
-        FaceModel currentFaceModel = getCurrentFaceModel();
+        Document currentDocument = getCurrentDocument();
         Platform.runLater(() -> {
             undoStackSizeWhenSaved = getUndoStackSize();
             savedProperty.set(true);
-            setFaceModel(currentFaceModel);
+            setDocument(currentDocument);
         });
     }
 }

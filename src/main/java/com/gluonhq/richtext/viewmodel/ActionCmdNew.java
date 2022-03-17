@@ -4,7 +4,7 @@ class ActionCmdNew implements ActionCmd {
 
     @Override
     public void apply(RichTextAreaViewModel viewModel) {
-        viewModel.newFaceModel();
+        viewModel.newDocument();
     }
 
 }

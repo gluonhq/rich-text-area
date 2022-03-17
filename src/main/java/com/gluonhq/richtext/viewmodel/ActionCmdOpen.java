@@ -1,18 +1,18 @@
 package com.gluonhq.richtext.viewmodel;
 
-import com.gluonhq.richtext.model.FaceModel;
+import com.gluonhq.richtext.model.Document;
 
 class ActionCmdOpen implements ActionCmd {
 
-    private final FaceModel faceModel;
+    private final Document document;
 
-    public ActionCmdOpen(FaceModel faceModel) {
-        this.faceModel = faceModel;
+    public ActionCmdOpen(Document document) {
+        this.document = document;
     }
 
     @Override
     public void apply(RichTextAreaViewModel viewModel) {
-        viewModel.open(faceModel);
+        viewModel.open(document);
     }
 
 }
