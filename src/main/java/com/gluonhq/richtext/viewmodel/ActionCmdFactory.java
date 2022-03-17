@@ -1,6 +1,6 @@
 package com.gluonhq.richtext.viewmodel;
 
-import com.gluonhq.richtext.model.FaceModel;
+import com.gluonhq.richtext.model.Document;
 import com.gluonhq.richtext.model.ImageDecoration;
 import com.gluonhq.richtext.model.TextDecoration;
 import javafx.scene.input.KeyEvent;
@@ -14,7 +14,7 @@ public final class ActionCmdFactory {
     private final ActionCmd undo = new ActionCmdUndo();
     private final ActionCmd redo = new ActionCmdRedo();
 
-    private final ActionCmd newFaceModel = new ActionCmdNew();
+    private final ActionCmd newDocument = new ActionCmdNew();
     private final ActionCmd save = new ActionCmdSave();
 
     private final ActionCmd selectAll = new ActionCmdSelectAll();
@@ -39,12 +39,12 @@ public final class ActionCmdFactory {
         return redo;
     }
 
-    public ActionCmd newFaceModel() {
-        return newFaceModel;
+    public ActionCmd newDocument() {
+        return newDocument;
     }
 
-    public ActionCmd open(FaceModel faceModel) {
-        return new ActionCmdOpen(faceModel);
+    public ActionCmd open(Document document) {
+        return new ActionCmdOpen(document);
     }
 
     public ActionCmd save() {

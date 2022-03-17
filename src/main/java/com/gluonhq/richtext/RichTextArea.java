@@ -1,7 +1,7 @@
 package com.gluonhq.richtext;
 
 import com.gluonhq.richtext.action.ActionFactory;
-import com.gluonhq.richtext.model.FaceModel;
+import com.gluonhq.richtext.model.Document;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -40,21 +40,21 @@ public class RichTextArea extends Control {
         return getClass().getResource("rich-text-area.css").toExternalForm();
     }
 
-    // faceModelProperty
-    private final ObjectProperty<FaceModel> faceModelProperty = new SimpleObjectProperty<>(this, "faceModel", new FaceModel()) {
+    // documentProperty
+    private final ObjectProperty<Document> documentProperty = new SimpleObjectProperty<>(this, "document", new Document()) {
         @Override
         protected void invalidated() {
             System.out.println(get());
         }
     };
-    public final ObjectProperty<FaceModel> faceModelProperty() {
-       return faceModelProperty;
+    public final ObjectProperty<Document> documentProperty() {
+       return documentProperty;
     }
-    public final FaceModel getFaceModel() {
-       return faceModelProperty.get();
+    public final Document getDocument() {
+       return documentProperty.get();
     }
-    public final void setFaceModel(FaceModel value) {
-        faceModelProperty.set(value);
+    public final void setDocument(Document value) {
+        documentProperty.set(value);
     }
 
     // modifiedProperty

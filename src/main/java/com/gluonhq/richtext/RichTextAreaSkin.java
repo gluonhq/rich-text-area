@@ -1,6 +1,6 @@
 package com.gluonhq.richtext;
 
-import com.gluonhq.richtext.model.FaceModel;
+import com.gluonhq.richtext.model.Document;
 import com.gluonhq.richtext.model.ImageDecoration;
 import com.gluonhq.richtext.model.PieceTable;
 import com.gluonhq.richtext.model.TextBuffer;
@@ -162,15 +162,17 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         textFlowLayoutY = nv.getTop();
     };
     private int nonTextNodesCount;
-    private final ChangeListener<FaceModel> faceModelChangeListener = (obs, ov, nv) -> {
+    private double maxWidthAvailable;
+
+    private final ChangeListener<Document> documentChangeListener = (obs, ov, nv) -> {
         if (ov == null && nv != null) {
             // new/open
             dispose();
-            getSkinnable().setFaceModel(nv);
+            getSkinnable().setDocument(nv);
             setup(nv);
         } else if (nv != null) {
             // save
-            getSkinnable().setFaceModel(nv);
+            getSkinnable().setDocument(nv);
         }
     };
 
@@ -213,7 +215,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 getSkinnable().contentAreaWidthProperty());
 
         // all listeners have to be removed within dispose method
-        control.faceModelProperty().addListener((obs, ov, nv) -> {
+        control.documentProperty().addListener((obs, ov, nv) -> {
             if (viewModel.isSaved()) {
                 getSkinnable().requestFocus();
                 return;
@@ -223,7 +225,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             }
             setup(nv);
         });
-        setup(control.getFaceModel());
+        setup(control.getDocument());
     }
 
     /// PROPERTIES ///////////////////////////////////////////////////////////////
@@ -237,7 +239,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         viewModel.caretPositionProperty().removeListener(caretPositionListener);
         viewModel.selectionProperty().removeListener(selectionListener);
         viewModel.removeChangeListener(textChangeListener);
-        viewModel.faceModelProperty().removeListener(faceModelChangeListener);
+        viewModel.documentProperty().removeListener(documentChangeListener);
         lastValidCaretPosition = -1;
         getSkinnable().editableProperty().removeListener(this::editableChangeListener);
         getSkinnable().textLengthProperty.unbind();
@@ -267,18 +269,18 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     /// PRIVATE METHODS /////////////////////////////////////////////////////////
 
-    private void setup(FaceModel faceModel) {
-        if (faceModel == null) {
+    private void setup(Document document) {
+        if (document == null) {
             return;
         }
-        viewModel.setTextBuffer(new PieceTable(faceModel));
-        lastValidCaretPosition = faceModel.getCaretPosition();
+        viewModel.setTextBuffer(new PieceTable(document));
+        lastValidCaretPosition = document.getCaretPosition();
         viewModel.setCaretPosition(lastValidCaretPosition);
         viewModel.caretPositionProperty().addListener(caretPositionListener);
         viewModel.selectionProperty().addListener(selectionListener);
         viewModel.addChangeListener(textChangeListener);
-        viewModel.setFaceModel(faceModel);
-        viewModel.faceModelProperty().addListener(faceModelChangeListener);
+        viewModel.setDocument(document);
+        viewModel.documentProperty().addListener(documentChangeListener);
         getSkinnable().textLengthProperty.bind(viewModel.textLengthProperty());
         getSkinnable().modifiedProperty.bind(viewModel.savedProperty().not());
         getSkinnable().setOnContextMenuRequested(contextMenuEventEventHandler);
@@ -311,6 +313,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             var backgroundIndexRanges = new ArrayList<IndexRangeColor>();
             var length = new AtomicInteger();
             var nonTextNodes = new AtomicInteger();
+            maxWidthAvailable = getMaxWidthAvailable();
             viewModel.walkFragments((text, decoration) -> {
                 if (decoration instanceof TextDecoration) {
                     final Text textNode = buildText(text, (TextDecoration) decoration);
@@ -398,8 +401,12 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         if (imageDecoration.getWidth() > -1 && imageDecoration.getHeight() > -1) {
             imageView.setFitWidth(imageDecoration.getWidth());
             imageView.setFitHeight(imageDecoration.getHeight());
+        } else {
+            // for now, limit the image within the content area
+            double width = Math.min(image.getWidth(), maxWidthAvailable);
+            imageView.setFitWidth(width);
+            imageView.setPreserveRatio(true);
         }
-        // TODO Clip imageView if wider than contentArea
         if (imageDecoration.getLink() != null) {
             // TODO Add action to open link on mouseClick
         }
@@ -612,6 +619,15 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         menuItem.disableProperty().bind(actionCmd.getDisabledBinding(viewModel));
         menuItem.setOnAction(e -> actionCmd.apply(viewModel));
         return menuItem;
+    }
+
+    private double getMaxWidthAvailable() {
+        final double viewportWidth = scrollPane.getViewportBounds().getWidth();
+        final double contentAreaWidth = getSkinnable().getContentAreaWidth();
+        final double contentAreaLimit = contentAreaWidth == 0 ? viewportWidth : contentAreaWidth;
+        final double padding = textFlow.getPadding().getLeft() + textFlow.getPadding().getRight() + root.getPadding().getLeft() + root.getPadding().getRight();
+        // Subtracting 1 pixel prevents infinite layout calls when resizing the control
+        return Math.min(contentAreaLimit, viewportWidth) - padding - 1;
     }
 
     private void launchBrowser(String url) {
