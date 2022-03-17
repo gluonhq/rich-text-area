@@ -161,6 +161,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         textFlowLayoutY = nv.getTop();
     };
     private int nonTextNodesCount;
+    private double maxWidthAvailable;
+
     private final ChangeListener<FaceModel> faceModelChangeListener = (obs, ov, nv) -> {
         if (ov == null && nv != null) {
             // new/open
@@ -310,6 +312,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             var backgroundIndexRanges = new ArrayList<IndexRangeColor>();
             var length = new AtomicInteger();
             var nonTextNodes = new AtomicInteger();
+            maxWidthAvailable = getMaxWidthAvailable();
             viewModel.walkFragments((text, decoration) -> {
                 if (decoration instanceof TextDecoration) {
                     final Text textNode = buildText(text, (TextDecoration) decoration);
@@ -390,8 +393,12 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         if (imageDecoration.getWidth() > -1 && imageDecoration.getHeight() > -1) {
             imageView.setFitWidth(imageDecoration.getWidth());
             imageView.setFitHeight(imageDecoration.getHeight());
+        } else {
+            // for now, limit the image within the content area
+            double width = Math.min(image.getWidth(), maxWidthAvailable);
+            imageView.setFitWidth(width);
+            imageView.setPreserveRatio(true);
         }
-        // TODO Clip imageView if wider than contentArea
         if (imageDecoration.getLink() != null) {
             // TODO Add action to open link on mouseClick
         }
@@ -604,6 +611,15 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         menuItem.disableProperty().bind(actionCmd.getDisabledBinding(viewModel));
         menuItem.setOnAction(e -> actionCmd.apply(viewModel));
         return menuItem;
+    }
+
+    private double getMaxWidthAvailable() {
+        final double viewportWidth = scrollPane.getViewportBounds().getWidth();
+        final double contentAreaWidth = getSkinnable().getContentAreaWidth();
+        final double contentAreaLimit = contentAreaWidth == 0 ? viewportWidth : contentAreaWidth;
+        final double padding = textFlow.getPadding().getLeft() + textFlow.getPadding().getRight() + root.getPadding().getLeft() + root.getPadding().getRight();
+        // Subtracting 1 pixel prevents infinite layout calls when resizing the control
+        return Math.min(contentAreaLimit, viewportWidth) - padding - 1;
     }
 
     private static class IndexRangeColor {
