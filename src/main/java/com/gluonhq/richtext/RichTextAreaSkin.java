@@ -2,7 +2,6 @@ package com.gluonhq.richtext;
 
 import com.gluonhq.richtext.model.FaceModel;
 import com.gluonhq.richtext.model.ImageDecoration;
-import com.gluonhq.richtext.model.HyperlinkDecoration;
 import com.gluonhq.richtext.model.PieceTable;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
@@ -330,10 +329,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                     fragments.add(buildImage((ImageDecoration) decoration));
                     length.incrementAndGet();
                     nonTextNodes.incrementAndGet();
-                } else if (decoration instanceof HyperlinkDecoration) {
-                    fragments.add(buildHyperlink((HyperlinkDecoration) decoration));
-                    length.incrementAndGet();
-                    nonTextNodes.incrementAndGet();
                 }
             });
             textFlow.getChildren().setAll(fragments);
@@ -390,20 +385,20 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                     decoration.getFontSize()));
 
         text.setFont(font);
+        String url = decoration.getURL();
+        if (url != null) {
+            text.setUnderline(true);
+            text.setFill(Color.BLUE);
+            text.setCursor(Cursor.HAND);
+            text.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+                try {
+                    Desktop.getDesktop().browse(new URI(url));
+                } catch (IOException | URISyntaxException ex) {
+                    ex.printStackTrace();
+                }
+            });
+        }
         return text;
-    }
-
-    // TODO: Change to custom node
-    private Hyperlink buildHyperlink(HyperlinkDecoration decoration) {
-        final Hyperlink hyperlink = new Hyperlink(decoration.getText());
-        hyperlink.setOnAction(e -> {
-            try {
-                Desktop.getDesktop().browse(new URI(decoration.getUrl()));
-            } catch (IOException | URISyntaxException ex) {
-                ex.printStackTrace();
-            }
-        });
-        return hyperlink;
     }
 
     private ImageView buildImage(ImageDecoration imageDecoration) {

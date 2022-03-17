@@ -134,8 +134,8 @@ public final class PieceTable extends AbstractTextBuffer {
     public void decorate(int start, int end, Decoration decoration) {
         if (decoration instanceof TextDecoration) {
             commander.execute(new TextDecorateCmd(start, end, decoration));
-        } else if (decoration instanceof NonTextDecoration) {
-            commander.execute(new ImageDecorateCmd((NonTextDecoration) decoration, start));
+        } else if (decoration instanceof ImageDecoration) {
+            commander.execute(new ImageDecorateCmd((ImageDecoration) decoration, start));
         } else {
             throw new IllegalArgumentException("Decoration type not supported: " + decoration);
         }
@@ -597,7 +597,7 @@ class DeleteCmd extends AbstractCommand<PieceTable> {
 
 class ImageDecorateCmd extends AbstractCommand<PieceTable> {
 
-    private final NonTextDecoration decoration;
+    private final ImageDecoration decoration;
     private final int insertPosition;
 
     private boolean execSuccess = false;
@@ -611,7 +611,7 @@ class ImageDecorateCmd extends AbstractCommand<PieceTable> {
      * @param decoration the image decoration
      * @param insertPosition index of the character to decorate
      */
-    ImageDecorateCmd(NonTextDecoration decoration, int insertPosition) {
+    ImageDecorateCmd(ImageDecoration decoration, int insertPosition) {
         this.decoration = decoration;
         this.insertPosition = insertPosition;
     }

@@ -6,7 +6,6 @@ import com.gluonhq.richtext.action.DecorateAction;
 import com.gluonhq.richtext.action.TextDecorateAction;
 import com.gluonhq.richtext.model.DecorationModel;
 import com.gluonhq.richtext.model.FaceModel;
-import com.gluonhq.richtext.model.HyperlinkDecoration;
 import com.gluonhq.richtext.model.ImageDecoration;
 import com.gluonhq.richtext.model.TextDecoration;
 import javafx.application.Application;
@@ -246,17 +245,17 @@ public class Main extends Application {
         icon.setIconSize(20);
         button.setGraphic(icon);
         button.setOnAction(e -> {
-            final Dialog<Pair<String, String>> hyperlinkDialog = createHyperlinkDialog();
-            Optional<Pair<String, String>> result = hyperlinkDialog.showAndWait();
+            final Dialog<String> hyperlinkDialog = createHyperlinkDialog();
+            Optional<String> result = hyperlinkDialog.showAndWait();
             result.ifPresent(textURL -> {
-                editor.getActionFactory().decorate(new HyperlinkDecoration(textURL.getValue(), textURL.getKey())).execute(e);
+                editor.getActionFactory().decorate(TextDecoration.builder().url(textURL).build()).execute(e);
             });
         });
         return button;
     }
 
-    private Dialog<Pair<String, String>> createHyperlinkDialog() {
-        Dialog<Pair<String, String>> dialog = new Dialog<>();
+    private Dialog<String> createHyperlinkDialog() {
+        Dialog<String> dialog = new Dialog<>();
         dialog.setTitle("Hyperlink");
 
         // Set the button types
@@ -269,30 +268,26 @@ public class Main extends Application {
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 20, 10, 10));
 
-        TextField text = new TextField();
-        text.setPromptText("Text");
         TextField url = new TextField();
         url.setPromptText("URL");
 
-        grid.add(new Label("Text:"), 0, 0);
-        grid.add(text, 1, 0);
         grid.add(new Label("URL:"), 0, 1);
         grid.add(url, 1, 1);
 
         Node loginButton = dialog.getDialogPane().lookupButton(textButtonType);
         loginButton.setDisable(true);
-        loginButton.disableProperty().bind(text.textProperty().isEmpty().or(url.textProperty().isEmpty()));
+        loginButton.disableProperty().bind(url.textProperty().isEmpty());
 
         dialog.getDialogPane().setContent(grid);
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == textButtonType) {
-                return new Pair<>(text.getText(), url.getText());
+                return url.getText();
             }
             return null;
         });
 
         // Request focus on the username field by default.
-        dialog.setOnShown(e -> Platform.runLater(text::requestFocus));
+        dialog.setOnShown(e -> Platform.runLater(url::requestFocus));
 
         return dialog;
     }

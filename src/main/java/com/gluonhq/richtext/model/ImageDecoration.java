@@ -2,7 +2,7 @@ package com.gluonhq.richtext.model;
 
 import java.util.Objects;
 
-public class ImageDecoration implements NonTextDecoration {
+public class ImageDecoration implements Decoration {
 
     private final int width;
     private final int height;
