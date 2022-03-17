@@ -11,6 +11,7 @@ import com.gluonhq.richtext.model.TextDecoration;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
+import javafx.event.ActionEvent;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -55,6 +56,7 @@ import java.util.stream.IntStream;
 import static javafx.scene.text.FontPosture.ITALIC;
 import static javafx.scene.text.FontPosture.REGULAR;
 import static javafx.scene.text.FontWeight.BOLD;
+import static javafx.scene.text.FontWeight.EXTRA_BOLD;
 import static javafx.scene.text.FontWeight.NORMAL;
 
 public class Main extends Application {
@@ -91,6 +93,25 @@ public class Main extends Application {
         editor.textLengthProperty().addListener( (o, ov, nv) ->
            textLengthLabel.setText( "Text length: " + nv)
         );
+
+        ComboBox<Presets> presets = new ComboBox<>();
+        presets.getItems().setAll(Presets.values());
+        presets.setValue(Presets.DEFAULT);
+        presets.setPrefWidth(100);
+        presets.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(Presets presets) {
+                return presets.getName();
+            }
+
+            @Override
+            public Presets fromString(String s) {
+                return Presets.valueOf(s.replaceAll(" ", ""));
+            }
+        });
+        presets.getSelectionModel().selectedItemProperty().addListener((observableValue, ov, nv) -> {
+            editor.getActionFactory().decorate(TextDecoration.builder().fontSize(nv.getFontSize()).fontWeight(nv.getWeight()).build()).execute(new ActionEvent());
+        });
 
         ComboBox<String> fontFamilies = new ComboBox<>();
         fontFamilies.getItems().setAll(Font.getFamilies());
@@ -133,6 +154,7 @@ public class Main extends Application {
 
         ToolBar toolbar = new ToolBar();
         toolbar.getItems().setAll(
+                presets,
                 actionButton(LineAwesomeSolid.FILE,  editor.getActionFactory().newDocument()),
                 actionButton(LineAwesomeSolid.FOLDER_OPEN, editor.getActionFactory().open(document)),
                 actionButton(LineAwesomeSolid.SAVE,  editor.getActionFactory().save()),
@@ -239,6 +261,36 @@ public class Main extends Application {
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    private enum Presets {
+
+        DEFAULT("Default",12, NORMAL),
+        HEADER1("Header 1", 32, EXTRA_BOLD),
+        HEADER2("Header 2", 24, EXTRA_BOLD),
+        HEADER3("Header 3", 19, EXTRA_BOLD);
+
+        private final String name;
+        private final int fontSize;
+        private final FontWeight weight;
+
+        Presets(String name, int fontSize, FontWeight weight) {
+            this.name = name;
+            this.fontSize = fontSize;
+            this.weight = weight;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getFontSize() {
+            return fontSize;
+        }
+
+        public FontWeight getWeight() {
+            return weight;
+        }
     }
 }
 
