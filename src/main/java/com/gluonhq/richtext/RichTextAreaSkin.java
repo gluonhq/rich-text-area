@@ -27,7 +27,6 @@ import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Hyperlink;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SeparatorMenuItem;
@@ -54,12 +53,9 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
-import java.awt.Desktop;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -390,13 +386,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             text.setUnderline(true);
             text.setFill(Color.BLUE);
             text.setCursor(Cursor.HAND);
-            text.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
-                try {
-                    Desktop.getDesktop().browse(new URI(url));
-                } catch (IOException | URISyntaxException ex) {
-                    ex.printStackTrace();
-                }
-            });
+            text.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> launchBrowser(url));
         }
         return text;
     }
@@ -622,6 +612,23 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         menuItem.disableProperty().bind(actionCmd.getDisabledBinding(viewModel));
         menuItem.setOnAction(e -> actionCmd.apply(viewModel));
         return menuItem;
+    }
+
+    private void launchBrowser(String url) {
+        if (url == null || url.isEmpty()) {
+            return;
+        }
+        String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
+        try {
+            List<String> command = os.contains("mac") ?
+                    List.of("open", url) :
+                    os.contains("win") ?
+                            List.of("rundll32", "url.dll,FileProtocolHandler", url) :
+                            List.of("xdg-open", url);
+            Runtime.getRuntime().exec(command.toArray(String[]::new));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private static class IndexRangeColor {
