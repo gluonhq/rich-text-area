@@ -3,6 +3,7 @@ package com.gluonhq.richtext.action;
 import com.gluonhq.richtext.RichTextArea;
 import com.gluonhq.richtext.model.Decoration;
 import com.gluonhq.richtext.model.FaceModel;
+import com.gluonhq.richtext.model.HyperlinkDecoration;
 import com.gluonhq.richtext.model.ImageDecoration;
 import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.viewmodel.ActionCmdFactory;
@@ -82,6 +83,8 @@ public class ActionFactory {
                 return ACTION_CMD_FACTORY.decorateText((TextDecoration) decoration);
             } else if (decoration instanceof ImageDecoration) {
                 return ACTION_CMD_FACTORY.decorateImage((ImageDecoration) decoration);
+            } else if (decoration instanceof HyperlinkDecoration) {
+                return ACTION_CMD_FACTORY.decorateHyperlink((HyperlinkDecoration) decoration);
             }
             throw new IllegalArgumentException("Decoration type not supported: " + decoration);
         });

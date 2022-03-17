@@ -1,32 +1,41 @@
 package com.gluonhq;
 
-import com.gluonhq.richtext.action.Action;
 import com.gluonhq.richtext.RichTextArea;
+import com.gluonhq.richtext.action.Action;
 import com.gluonhq.richtext.action.DecorateAction;
 import com.gluonhq.richtext.action.TextDecorateAction;
 import com.gluonhq.richtext.model.DecorationModel;
 import com.gluonhq.richtext.model.FaceModel;
+import com.gluonhq.richtext.model.HyperlinkDecoration;
 import com.gluonhq.richtext.model.ImageDecoration;
 import com.gluonhq.richtext.model.TextDecoration;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Separator;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -35,6 +44,7 @@ import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 import javafx.util.StringConverter;
 import org.kordamp.ikonli.Ikon;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -45,6 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -145,6 +156,7 @@ public class Main extends Application {
                 actionButton(LineAwesomeSolid.REDO,  editor.getActionFactory().redo()),
                 new Separator(Orientation.VERTICAL),
                 actionImage(LineAwesomeSolid.IMAGE),
+                actionHyperlink(LineAwesomeSolid.LINK),
                 new Separator(Orientation.VERTICAL),
                 fontFamilies,
                 fontSize,
@@ -226,6 +238,63 @@ public class Main extends Application {
             }
         });
         return button;
+    }
+
+    private Button actionHyperlink(Ikon ikon) {
+        Button button = new Button();
+        FontIcon icon = new FontIcon(ikon);
+        icon.setIconSize(20);
+        button.setGraphic(icon);
+        button.setOnAction(e -> {
+            final Dialog<Pair<String, String>> hyperlinkDialog = createHyperlinkDialog();
+            Optional<Pair<String, String>> result = hyperlinkDialog.showAndWait();
+            result.ifPresent(textURL -> {
+                editor.getActionFactory().decorate(new HyperlinkDecoration(textURL.getValue(), textURL.getKey())).execute(e);
+            });
+        });
+        return button;
+    }
+
+    private Dialog<Pair<String, String>> createHyperlinkDialog() {
+        Dialog<Pair<String, String>> dialog = new Dialog<>();
+        dialog.setTitle("Hyperlink");
+
+        // Set the button types
+        ButtonType textButtonType = new ButtonType("Create", ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().add(textButtonType);
+
+        // Create the text and url labels and fields.
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 20, 10, 10));
+
+        TextField text = new TextField();
+        text.setPromptText("Text");
+        TextField url = new TextField();
+        url.setPromptText("URL");
+
+        grid.add(new Label("Text:"), 0, 0);
+        grid.add(text, 1, 0);
+        grid.add(new Label("URL:"), 0, 1);
+        grid.add(url, 1, 1);
+
+        Node loginButton = dialog.getDialogPane().lookupButton(textButtonType);
+        loginButton.setDisable(true);
+        loginButton.disableProperty().bind(text.textProperty().isEmpty().or(url.textProperty().isEmpty()));
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == textButtonType) {
+                return new Pair<>(text.getText(), url.getText());
+            }
+            return null;
+        });
+
+        // Request focus on the username field by default.
+        dialog.setOnShown(e -> Platform.runLater(text::requestFocus));
+
+        return dialog;
     }
 
     private MenuItem actionMenuItem(String text, Ikon ikon, Action action) {

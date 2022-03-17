@@ -5,6 +5,7 @@ import com.gluonhq.richtext.Tools;
 import com.gluonhq.richtext.model.Decoration;
 import com.gluonhq.richtext.model.FaceModel;
 import com.gluonhq.richtext.model.ImageDecoration;
+import com.gluonhq.richtext.model.NonTextDecoration;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.undo.CommandManager;
@@ -273,7 +274,7 @@ public class RichTextAreaViewModel {
                 setCaretPosition(caretPosition);
                 setSelection(selection);
             }
-        } else if (decoration instanceof ImageDecoration) {
+        } else if (decoration instanceof NonTextDecoration) {
             int caretPosition = getCaretPosition();
             setCaretPosition(-1);
             getTextBuffer().decorate(caretPosition, 1, decoration);

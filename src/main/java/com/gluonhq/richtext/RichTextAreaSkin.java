@@ -2,6 +2,7 @@ package com.gluonhq.richtext;
 
 import com.gluonhq.richtext.model.FaceModel;
 import com.gluonhq.richtext.model.ImageDecoration;
+import com.gluonhq.richtext.model.HyperlinkDecoration;
 import com.gluonhq.richtext.model.PieceTable;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
@@ -27,6 +28,7 @@ import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SeparatorMenuItem;
@@ -324,6 +326,10 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                     fragments.add(buildImage((ImageDecoration) decoration));
                     length.incrementAndGet();
                     nonTextNodes.incrementAndGet();
+                } else if (decoration instanceof HyperlinkDecoration) {
+                    fragments.add(buildHyperlink((HyperlinkDecoration) decoration));
+                    length.incrementAndGet();
+                    nonTextNodes.incrementAndGet();
                 }
             });
             textFlow.getChildren().setAll(fragments);
@@ -381,6 +387,12 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
         text.setFont(font);
         return text;
+    }
+
+    // TODO: Change to custom node
+    private Hyperlink buildHyperlink(HyperlinkDecoration decoration) {
+        final Hyperlink hyperlink = new Hyperlink(decoration.getUrl());
+        return hyperlink;
     }
 
     private ImageView buildImage(ImageDecoration imageDecoration) {
