@@ -55,6 +55,10 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
+import java.awt.Desktop;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -391,7 +395,14 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     // TODO: Change to custom node
     private Hyperlink buildHyperlink(HyperlinkDecoration decoration) {
-        final Hyperlink hyperlink = new Hyperlink(decoration.getUrl());
+        final Hyperlink hyperlink = new Hyperlink(decoration.getText());
+        hyperlink.setOnAction(e -> {
+            try {
+                Desktop.getDesktop().browse(new URI(decoration.getUrl()));
+            } catch (IOException | URISyntaxException ex) {
+                ex.printStackTrace();
+            }
+        });
         return hyperlink;
     }
 
