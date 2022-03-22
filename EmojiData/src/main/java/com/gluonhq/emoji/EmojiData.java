@@ -55,6 +55,12 @@ public class EmojiData {
         return Optional.empty();
     }
 
+    public static Optional<Emoji> emojiFromUnicode(String unicodeText) {
+        return EMOJI_MAP.values().stream()
+                .filter(emoji -> emoji.character().equals(unicodeText))
+                .findFirst();
+    }
+
     public static List<Emoji> emojiFromCategory(String category) {
         return EMOJI_MAP.values().stream()
                 .filter(emoji -> emoji.getCategory().isPresent())

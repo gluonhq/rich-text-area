@@ -333,10 +333,10 @@ public class Emoji {
     }
 
     public String character() {
-        return unifiedCharacter();
+        return unicodeCharacter();
     }
 
-    private String unifiedCharacter() {
+    private String unicodeCharacter() {
         StringBuilder emojiString = new StringBuilder();
         final String unified = getUnified();
         for (String s : unified.split("-")) {
