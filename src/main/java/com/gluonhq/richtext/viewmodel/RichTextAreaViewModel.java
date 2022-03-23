@@ -389,10 +389,13 @@ public class RichTextAreaViewModel {
 
     }
 
-    public void walkFragments(BiConsumer<String, Decoration> onFragment) {
+    public void resetCharacterIterator() {
         getTextBuffer().resetCharacterIterator();
-        getTextBuffer().walkFragments(onFragment);
         LOGGER.log(Level.FINE, getTextBuffer().toString());
+    }
+
+    public void walkFragments(BiConsumer<String, Decoration> onFragment, int start, int end) {
+        getTextBuffer().walkFragments(onFragment, start, end);
     }
 
     void undo() {

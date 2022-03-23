@@ -10,16 +10,15 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-import static com.gluonhq.richtext.model.PieceTable.ZERO_WIDTH_TEXT;
+import static com.gluonhq.richtext.model.TextBuffer.ZERO_WIDTH_TEXT;
 
 /**
  * Piece table implementation.<br>
  * More info at  https://en.wikipedia.org/wiki/Piece_table
  */
 public final class PieceTable extends AbstractTextBuffer {
-
-    static final String ZERO_WIDTH_TEXT = "\u200b";
 
     final String originalText;
     String additionBuffer = "";
@@ -34,7 +33,7 @@ public final class PieceTable extends AbstractTextBuffer {
      * Creates piece table using original text
      * @param document model with decorated text to start with
      */
-     public PieceTable(Document document) {
+    public PieceTable(Document document) {
         this.originalText = Objects.requireNonNull(Objects.requireNonNull(document).getText());
         if (document.getDecorationList() == null) {
             pieces.add(piece(Piece.BufferType.ORIGINAL, 0, originalText.length()));
@@ -109,6 +108,11 @@ public final class PieceTable extends AbstractTextBuffer {
     }
 
     @Override
+    public List<Integer> getLineFeeds() {
+        return pieceCharacterIterator.getLineFeedList();
+    }
+
+    @Override
     public void resetCharacterIterator() {
         pieceCharacterIterator.reset();
     }
@@ -144,10 +148,22 @@ public final class PieceTable extends AbstractTextBuffer {
     /**
      * Walks through text fragments. Each fragment is represented by related text and decoration
      * @param onFragment callback to get fragment info
+     * @param start the initial position of the fragment
+     * @param end the end position of the fragment (not included)
      */
     @Override
-    public void walkFragments(BiConsumer<String, Decoration> onFragment) {
-        pieces.forEach(p -> onFragment.accept(p.getText(), p.getDecoration()));
+    public void walkFragments(BiConsumer<String, Decoration> onFragment, int start, int end) {
+        StringBuilder sb = new StringBuilder();
+        walkPieces((p, i, tp) -> {
+            sb.append(p.getText());
+            if (start <= tp + p.length && end > tp && !p.getText().isEmpty()) {
+                String text = sb.substring(Math.max(start, tp), Math.min(end, tp + p.length));
+                if (!text.isEmpty()) {
+                    onFragment.accept(text, p.getDecoration());
+                }
+            }
+            return (end <= tp);
+        });
     }
 
     @Override
@@ -267,11 +283,13 @@ public final class PieceTable extends AbstractTextBuffer {
 
 class PieceCharacterIterator implements CharacterIterator {
 
+    private static final char LF = 0x0a;
     private final PieceTable pt;
     private int begin;
     private int end;
     private int pos;
     private int[] posArray;
+    private List<Integer> lineFeedList;
 
     public PieceCharacterIterator(PieceTable pt) {
         this.pt = Objects.requireNonNull(pt);
@@ -284,7 +302,16 @@ class PieceCharacterIterator implements CharacterIterator {
         this.pos = 0;
 
         posArray = new int[pt.pieces.size() + 1];
+        lineFeedList = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
         pt.walkPieces((p, i, tp) -> {
+            sb.append(p.getText());
+            String text = sb.substring(tp);
+            IntStream.iterate(text.indexOf(LF),
+                            index -> index >= 0,
+                            index -> text.indexOf(LF, index + 1))
+                    .boxed()
+                    .forEach(index -> lineFeedList.add(tp + index));
             posArray[i] = tp;
             return false;
         });
@@ -301,6 +328,10 @@ class PieceCharacterIterator implements CharacterIterator {
             }
         }
         return 0;
+    }
+
+    public List<Integer> getLineFeedList() {
+        return lineFeedList;
     }
 
     @Override
