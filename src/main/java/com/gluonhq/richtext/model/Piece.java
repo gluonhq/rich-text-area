@@ -93,6 +93,6 @@ public final class Piece {
                 ", [" + start +
                 ", " + length +
                 "], " + decoration +
-                ", \"" + getText().replaceAll("\n", "<n>").replaceAll(PieceTable.ZERO_WIDTH_TEXT, "<a>") + "\"}";
+                ", \"" + getText().replaceAll("\n", "<n>").replaceAll(TextBuffer.ZERO_WIDTH_TEXT, "<a>") + "\"}";
     }
 }

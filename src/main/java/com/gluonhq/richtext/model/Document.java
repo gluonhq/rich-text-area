@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.gluonhq.richtext.model.PieceTable.ZERO_WIDTH_TEXT;
+import static com.gluonhq.richtext.model.TextBuffer.ZERO_WIDTH_TEXT;
 
 public class Document {
 

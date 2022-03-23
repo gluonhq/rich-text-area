@@ -9,6 +9,8 @@ import java.util.function.Consumer;
 
 public interface TextBuffer {
 
+    String ZERO_WIDTH_TEXT = "\u200b";
+
     int getTextLength();
     ReadOnlyIntegerProperty textLengthProperty();
     String getText();
@@ -17,6 +19,7 @@ public interface TextBuffer {
 
     CharacterIterator getCharacterIterator();
     char charAt(int pos);
+    List<Integer> getLineFeeds();
     void resetCharacterIterator();
 
     void insert(String text, int insertPosition);
@@ -34,7 +37,7 @@ public interface TextBuffer {
     void undo();
     void redo();
 
-    void walkFragments(BiConsumer<String, Decoration> onFragment);
+    void walkFragments(BiConsumer<String, Decoration> onFragment, int start, int end);
 
     void addChangeListener(Consumer<TextBuffer.Event> listener);
     void removeChangeListener(Consumer<TextBuffer.Event> listener);
