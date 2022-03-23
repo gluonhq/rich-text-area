@@ -61,7 +61,7 @@ public class ParagraphTile extends HBox {
     private final RichTextAreaViewModel viewModel;
 
     private Paragraph paragraph;
-    private final double textFlowLayoutX = 1d, textFlowLayoutY = 1d;
+    private final double textFlowLayoutX, textFlowLayoutY;
     private final ChangeListener<Number> caretPositionListener = (o, ocp, p) -> updateCaretPosition(p.intValue());
     private final ChangeListener<Selection> selectionListener = (o, os, selection) -> updateSelection(selection);
 
@@ -95,11 +95,16 @@ public class ParagraphTile extends HBox {
         getChildren().add(root);
         // TODO: expose padding as paragraph indentation
         setPadding(new Insets(0, 0, 10, 0));
+        textFlowLayoutX = 1d + textFlow.getPadding().getLeft();
+        textFlowLayoutY = 1d + textFlow.getPadding().getTop();
     }
 
     void setParagraph(Paragraph paragraph) {
         viewModel.caretPositionProperty().removeListener(caretPositionListener);
         viewModel.selectionProperty().removeListener(selectionListener);
+        if (paragraph == null) {
+            return;
+        }
         this.paragraph = paragraph;
         viewModel.caretPositionProperty().addListener(caretPositionListener);
         viewModel.selectionProperty().addListener(selectionListener);
@@ -107,6 +112,14 @@ public class ParagraphTile extends HBox {
 
     TextFlow getTextFlow() {
         return textFlow;
+    }
+
+    double getTextFlowLayoutX() {
+        return textFlowLayoutX;
+    }
+
+    double getTextFlowLayoutY() {
+        return textFlowLayoutY;
     }
 
     ObservableSet<Path> getTextBackgroundColorPaths() {
@@ -123,7 +136,8 @@ public class ParagraphTile extends HBox {
             int prevCaretPosition = viewModel.getCaretPosition();
             int insertionIndex = hitInfo.getInsertionIndex();
             if (insertionIndex >= 0) {
-                int globalInsertionIndex = paragraph.getStart() + insertionIndex;
+                // get global insertion point, preventing insertionIndex after linefeed
+                int globalInsertionIndex = Math.min(paragraph.getStart() + insertionIndex, paragraph.getEnd() - 1);
                 if (!(e.isControlDown() || e.isAltDown() || e.isShiftDown() || e.isMetaDown() || e.isShortcutDown())) {
                     viewModel.setCaretPosition(globalInsertionIndex);
                     if (e.getClickCount() == 2) {
