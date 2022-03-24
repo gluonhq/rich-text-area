@@ -18,6 +18,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.shape.LineTo;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.PathElement;
 import javafx.scene.text.Font;
@@ -126,7 +127,7 @@ public class ParagraphTile extends HBox {
         return textBackgroundColorPaths;
     }
 
-    private void mousePressedListener(MouseEvent e) {
+    void mousePressedListener(MouseEvent e) {
         if (control.isDisabled()) {
             return;
         }
@@ -137,7 +138,7 @@ public class ParagraphTile extends HBox {
             int insertionIndex = hitInfo.getInsertionIndex();
             if (insertionIndex >= 0) {
                 // get global insertion point, preventing insertionIndex after linefeed
-                int globalInsertionIndex = Math.min(paragraph.getStart() + insertionIndex, paragraph.getEnd() - 1);
+                int globalInsertionIndex = Math.min(paragraph.getStart() + insertionIndex, getParagraphLimit() - 1);
                 if (!(e.isControlDown() || e.isAltDown() || e.isShiftDown() || e.isMetaDown() || e.isShortcutDown())) {
                     viewModel.setCaretPosition(globalInsertionIndex);
                     if (e.getClickCount() == 2) {
@@ -176,7 +177,7 @@ public class ParagraphTile extends HBox {
 
     private void updateCaretPosition(int caretPosition) {
         caretShape.getElements().clear();
-        if (paragraph == null || caretPosition < paragraph.getStart() || paragraph.getEnd() <= caretPosition) {
+        if (paragraph == null || caretPosition < paragraph.getStart() || getParagraphLimit() <= caretPosition) {
             caretTimeline.stop();
             return;
         }
@@ -186,6 +187,10 @@ public class ParagraphTile extends HBox {
             var pathElements = textFlow.caretShape(caretPosition - paragraph.getStart(), true);
             if (pathElements.length > 0) {
                 caretShape.getElements().addAll(pathElements);
+                // prevent tiny caret
+                if (caretShape.getLayoutBounds().getHeight() < 5) {
+                    caretShape.getElements().add(new LineTo(0, 16));
+                }
                 richTextAreaSkin.lastValidCaretPosition = caretPosition;
                 caretTimeline.play();
             }
@@ -268,6 +273,16 @@ public class ParagraphTile extends HBox {
         double xPos = x < 0d ? caretBounds.getMaxX() : x;
         HitInfo hitInfo = textFlow.hitTest(new Point2D(xPos, nextRowPos));
         return paragraph.getStart() + hitInfo.getInsertionIndex();
+    }
+
+    private int getParagraphLimit() {
+        int limit = paragraph.getEnd();
+        if (paragraph.equals(richTextAreaSkin.lastParagraph)) {
+            // at the end of the last paragraph there is no linefeed, so we need
+            // an extra position for the caret
+            limit += 1;
+        }
+        return limit;
     }
 
 }

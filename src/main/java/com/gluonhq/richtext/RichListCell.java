@@ -54,14 +54,33 @@ class RichListCell extends ListCell<Paragraph> {
         addEventHandler(MouseDragEvent.MOUSE_DRAG_OVER, event -> {
             event.consume();
             if (richTextAreaSkin.anchorIndex != -1) {
-                if (getGraphic() instanceof ParagraphTile) {
-                    ((ParagraphTile) getGraphic()).mouseDraggedListener(event);
-                }
+                getParagraphTile().ifPresent(p -> p.mouseDraggedListener(event));
             }
+        });
+        addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
+            getParagraphTile().ifPresentOrElse(
+                    p -> p.mousePressedListener(event),
+                    () -> {
+                        // process click event on lower empty cells
+                        int textLength = richTextAreaSkin.getViewModel().getTextLength();
+                        if (richTextAreaSkin.getViewModel().getSelection().isDefined()) {
+                            if (!event.isShiftDown()) {
+                                richTextAreaSkin.getViewModel().clearSelection();
+                            }
+                        } else {
+                            // move caret to beginning or end of document
+                            richTextAreaSkin.getViewModel().setCaretPosition(textLength);
+                        }
+                        // allow dragging
+                        if (richTextAreaSkin.anchorIndex == -1) {
+                            richTextAreaSkin.dragStart = textLength;
+                        }
+                    });
         });
         addEventHandler(MouseEvent.MOUSE_RELEASED, event -> {
             if (richTextAreaSkin.anchorIndex != -1) {
                 event.consume();
+                richTextAreaSkin.dragStart = -1;
                 richTextAreaSkin.anchorIndex = -1;
             }
         });

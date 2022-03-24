@@ -51,7 +51,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static com.gluonhq.richtext.viewmodel.RichTextAreaViewModel.Direction;
 import static java.util.Map.entry;
@@ -140,6 +139,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     int lastValidCaretPosition = -1;
     int dragStart = -1;
     int anchorIndex = -1;
+    Paragraph lastParagraph = null;
 
     final DoubleProperty textFlowPrefWidthProperty = new SimpleDoubleProperty() {
         @Override
@@ -164,6 +164,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             getSkinnable().setDocument(nv);
         }
     };
+
+    private final ChangeListener<Number> caretChangeListener;
 
     private class RichVirtualFlow extends VirtualFlow<ListCell<Paragraph>> {
 
@@ -221,6 +223,27 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             // force updateItem call to recalculate backgroundPath positions
             virtualFlow.rebuildCells();
         }
+
+        void scrollIfNeeded() {
+            final Bounds vfBounds = virtualFlow.localToScene(virtualFlow.getBoundsInLocal());
+            double viewportMinY = vfBounds.getMinY();
+            double viewportMaxY = vfBounds.getMaxY();
+            virtualFlow.lookupAll(".caret").stream()
+                    .filter(Path.class::isInstance)
+                    .map(Path.class::cast)
+                    .filter(path -> !path.getElements().isEmpty())
+                    .findFirst()
+                    .ifPresent(caret -> {
+                        final Bounds bounds = caret.localToScene(caret.getBoundsInLocal());
+                        double minY = bounds.getMinY();
+                        double maxY = bounds.getMaxY();
+                        if (!(maxY <= viewportMaxY && minY >= viewportMinY)) {
+                            // If caret is not fully visible, scroll as needed
+                            virtualFlow.scrollPixels(maxY > viewportMaxY ?
+                                    maxY - viewportMaxY + 1 : minY - viewportMinY - 1);
+                        }
+                    });
+        }
     }
 
     protected RichTextAreaSkin(final RichTextArea control) {
@@ -241,6 +264,14 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         controlPrefWidthListener = (obs, ov, nv) -> {
             refreshTextFlow();
             paragraphListView.updateLayout();
+        };
+
+        caretChangeListener = (obs, ov, nv) -> {
+            paragraphSet.stream()
+                    .filter(p -> p.getStart() <= nv.intValue() &&
+                            nv.intValue() < (p.equals(lastParagraph) ? p.getEnd() + 1 : p.getEnd()))
+                    .findFirst()
+                    .ifPresent(paragraph -> Platform.runLater(paragraphListView::scrollIfNeeded));
         };
 
         // all listeners have to be removed within dispose method
@@ -265,6 +296,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     @Override
     public void dispose() {
         viewModel.clearSelection();
+        viewModel.caretPositionProperty().removeListener(caretChangeListener);
         viewModel.removeChangeListener(textChangeListener);
         viewModel.documentProperty().removeListener(documentChangeListener);
         lastValidCaretPosition = -1;
@@ -300,6 +332,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         if (document == null) {
             return;
         }
+        viewModel.caretPositionProperty().addListener(caretChangeListener);
         viewModel.setTextBuffer(new PieceTable(document));
         lastValidCaretPosition = document.getCaretPosition();
         viewModel.setCaretPosition(lastValidCaretPosition);
@@ -348,11 +381,11 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         List<Integer> lineFeeds = viewModel.getTextBuffer().getLineFeeds();
         List<Paragraph> paragraphList = new ArrayList<>();
         AtomicInteger pos = new AtomicInteger();
-        lineFeeds.forEach(lfPos -> {
-            paragraphList.add(new Paragraph(pos.getAndSet(lfPos), pos.incrementAndGet()));
-        });
-        if (pos.get() < viewModel.getTextLength()) {
-            paragraphList.add(new Paragraph(pos.get(), viewModel.getTextLength()));
+        lineFeeds.forEach(lfPos ->
+                paragraphList.add(new Paragraph(pos.getAndSet(lfPos), pos.incrementAndGet())));
+        if (pos.get() <= viewModel.getTextLength()) {
+            lastParagraph = new Paragraph(pos.get(), viewModel.getTextLength());
+            paragraphList.add(lastParagraph);
         }
         return paragraphList;
     }
@@ -362,8 +395,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         viewModel.setEditable(editable);
         viewModel.setCaretPosition(editable ? lastValidCaretPosition : -1);
         paragraphListView.setCursor(editable ? Cursor.TEXT : Cursor.DEFAULT);
-
         populateContextMenu(editable);
+        Platform.runLater(paragraphListView::scrollIfNeeded);
     }
 
     private void requestLayout() {
@@ -377,25 +410,28 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private int getNextRowPosition(double x, boolean down) {
         ObservableList<Paragraph> items = paragraphListView.getItems();
         int caretPosition = viewModel.getCaretPosition();
-        int nextRowPosition = paragraphListView.getNextRowPosition(x, down);
+        int nextRowPosition = Math.min(viewModel.getTextLength(), paragraphListView.getNextRowPosition(x, down));
         // if the caret is at the top or bottom of the paragraph:
-        if ((down && nextRowPosition <= viewModel.getCaretPosition()) ||
-                (!down && nextRowPosition >= viewModel.getCaretPosition())) {
+        if ((down && nextRowPosition <= caretPosition) ||
+                (!down && nextRowPosition >= caretPosition)) {
             int paragraphWithCaretIndex = items.stream()
-                    .filter(p -> p.getStart() <= caretPosition && caretPosition < p.getEnd())
+                    .filter(p -> p.getStart() <= caretPosition &&
+                            caretPosition < (p.equals(lastParagraph) ? p.getEnd() + 1 : p.getEnd()))
                     .mapToInt(items::indexOf)
                     .findFirst()
                     .orElse(-1);
             if (down) {
-                // move to next paragraph
+                // move to beginning of next paragraph or end
                 int nextIndex = Math.min(items.size() - 1, paragraphWithCaretIndex + 1);
                 Paragraph nextParagraph = items.get(nextIndex);
-                return nextParagraph.getStart();
+                return items.indexOf(nextParagraph) != paragraphWithCaretIndex ?
+                        nextParagraph.getStart() : viewModel.getTextLength();
             } else {
-                // move to previous paragraph
+                // move to end of previous paragraph or home
                 int prevIndex = Math.max(0, paragraphWithCaretIndex - 1);
                 Paragraph prevParagraph = items.get(prevIndex);
-                return Math.max(0, prevParagraph.getEnd() - 1);
+                return items.indexOf(prevParagraph) != paragraphWithCaretIndex ?
+                        Math.max(0, prevParagraph.getEnd() - 1) : 0;
             }
         }
         return nextRowPosition;
