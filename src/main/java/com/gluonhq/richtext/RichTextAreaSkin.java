@@ -377,15 +377,15 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private int getNextRowPosition(double x, boolean down) {
         ObservableList<Paragraph> items = paragraphListView.getItems();
         int caretPosition = viewModel.getCaretPosition();
-        int paragraphWithCaretIndex = items.stream()
-                .filter(p -> p.getStart() <= caretPosition && caretPosition < p.getEnd())
-                .mapToInt(items::indexOf)
-                .findFirst()
-                .orElse(-1);
         int nextRowPosition = paragraphListView.getNextRowPosition(x, down);
-        // when the caret is at the top or bottom of the paragraph, the
-        // next row position is the same
-        if (nextRowPosition == viewModel.getCaretPosition()) {
+        // if the caret is at the top or bottom of the paragraph:
+        if ((down && nextRowPosition <= viewModel.getCaretPosition()) ||
+                (!down && nextRowPosition >= viewModel.getCaretPosition())) {
+            int paragraphWithCaretIndex = items.stream()
+                    .filter(p -> p.getStart() <= caretPosition && caretPosition < p.getEnd())
+                    .mapToInt(items::indexOf)
+                    .findFirst()
+                    .orElse(-1);
             if (down) {
                 // move to next paragraph
                 int nextIndex = Math.min(items.size() - 1, paragraphWithCaretIndex + 1);

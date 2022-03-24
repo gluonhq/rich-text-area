@@ -43,7 +43,7 @@ class RichListCell extends ListCell<Paragraph> {
         setFont(MIN_LF_FONT);
 
         paragraphTile = new ParagraphTile(richTextAreaSkin);
-        paragraphTile.getTextFlow().setPrefWidth(richTextAreaSkin.textFlowPrefWidthProperty.get()); //.subtract(textTile.getPadding().getLeft() + textTile.getPadding().getRight()));
+        paragraphTile.getTextFlow().setPrefWidth(richTextAreaSkin.textFlowPrefWidthProperty.get());
         setText(null);
 
         addEventHandler(MouseEvent.DRAG_DETECTED, event -> {
@@ -92,13 +92,15 @@ class RichListCell extends ListCell<Paragraph> {
                 }
             }, item.getStart(), item.getEnd());
             paragraphTile.getTextFlow().getChildren().setAll(fragments);
-            paragraphTile.getTextFlow().setPrefWidth(richTextAreaSkin.textFlowPrefWidthProperty.get()); //.subtract(textTile.getPadding().getLeft() + textTile.getPadding().getRight()));
+            paragraphTile.getTextFlow().setPrefWidth(richTextAreaSkin.textFlowPrefWidthProperty.get());
             paragraphTile.setParagraph(item);
             addBackgroundPathsToLayers(paragraphTile.getTextFlow(), paragraphTile.getTextBackgroundColorPaths(), backgroundIndexRanges);
             setGraphic(paragraphTile);
             // required: update caret and selection
             paragraphTile.updateLayout();
         } else {
+            // clean up listeners
+            paragraphTile.setParagraph(null);
             setGraphic(null);
 
         }
@@ -110,8 +112,8 @@ class RichListCell extends ListCell<Paragraph> {
                     final Path path = new BackgroundColorPath(textFlow.rangeShape(indexRangeBackground.getStart(), indexRangeBackground.getEnd()));
                     path.setStrokeWidth(0);
                     path.setFill(indexRangeBackground.getColor());
-//                    path.setLayoutX(textFlowLayoutX);
-//                    path.setLayoutY(textFlowLayoutY);
+                    path.setLayoutX(paragraphTile.getTextFlowLayoutX());
+                    path.setLayoutY(paragraphTile.getTextFlowLayoutY());
                     return path;
                 })
                 .collect(Collectors.toMap(Path::getFill, Function.identity(), (p1, p2) -> {
