@@ -10,6 +10,7 @@ public class Document {
 
     private final String text;
     private final List<DecorationModel> decorationList;
+    private final List<Paragraph> paragraphList;
     private final int caretPosition;
 
     public Document() {
@@ -21,12 +22,16 @@ public class Document {
     }
 
     public Document(String text, int caretPosition) {
-        this(text, List.of(new DecorationModel(0, text.length(), TextDecoration.builder().presets().build())), caretPosition);
+        this(text,
+                List.of(new DecorationModel(0, text.length(), TextDecoration.builder().presets().build())),
+                List.of(new Paragraph(0, text.length(), ParagraphDecoration.builder().presets().build())),
+                caretPosition);
     }
 
-    public Document(String text, List<DecorationModel> decorationList, int caretPosition) {
+    public Document(String text, List<DecorationModel> decorationList, List<Paragraph> paragraphList, int caretPosition) {
         this.text = text;
         this.decorationList = decorationList;
+        this.paragraphList = paragraphList;
         this.caretPosition = caretPosition;
     }
 
@@ -38,6 +43,10 @@ public class Document {
         return decorationList;
     }
 
+    public List<Paragraph> getParagraphList() {
+        return paragraphList;
+    }
+
     public int getCaretPosition() {
         return caretPosition;
     }
@@ -47,12 +56,14 @@ public class Document {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Document document = (Document) o;
-        return Objects.equals(text, document.text) && Objects.equals(decorationList, document.decorationList);
+        return Objects.equals(text, document.text) &&
+                Objects.equals(decorationList, document.decorationList) &&
+                Objects.equals(paragraphList, document.paragraphList);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(text, decorationList, caretPosition);
+        return Objects.hash(text, decorationList, paragraphList, caretPosition);
     }
 
     @Override
@@ -61,6 +72,8 @@ public class Document {
                 "text='" + text.replaceAll("\n", "<n>").replaceAll(ZERO_WIDTH_TEXT, "<a>")  + '\'' +
                 ", decorationList=" + (decorationList == null ? "null" : "{" +
                     decorationList.stream().map(decorationModel -> " - " + decorationModel.toString()).collect(Collectors.joining("\n", "\n", ""))) +
+                ", paragraphDecorationList=" + (paragraphList == null ? "null" : "{" +
+                    paragraphList.stream().map(decorationModel -> " - " + decorationModel.toString()).collect(Collectors.joining("\n", "\n", ""))) +
                 "\n}, caretPosition=" + caretPosition +
                 '}';
     }

@@ -1,6 +1,7 @@
 package com.gluonhq.richtext;
 
 import com.gluonhq.richtext.model.Paragraph;
+import com.gluonhq.richtext.model.ParagraphDecoration;
 import com.gluonhq.richtext.viewmodel.RichTextAreaViewModel;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -24,7 +25,6 @@ import javafx.scene.shape.PathElement;
 import javafx.scene.text.Font;
 import javafx.scene.text.HitInfo;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
@@ -62,7 +62,7 @@ public class ParagraphTile extends HBox {
     private final RichTextAreaViewModel viewModel;
 
     private Paragraph paragraph;
-    private final double textFlowLayoutX, textFlowLayoutY;
+    private double textFlowLayoutX, textFlowLayoutY;
     private final ChangeListener<Number> caretPositionListener = (o, ocp, p) -> updateCaretPosition(p.intValue());
     private final ChangeListener<Selection> selectionListener = (o, os, selection) -> updateSelection(selection);
 
@@ -75,10 +75,6 @@ public class ParagraphTile extends HBox {
         textFlow.setFocusTraversable(false);
         textFlow.getStyleClass().setAll("text-flow");
         textFlow.setOnMousePressed(this::mousePressedListener);
-        // TODO: Expose paragraph justification
-        textFlow.setTextAlignment(TextAlignment.LEFT);
-        // TODO: Expose paragraph spacing
-        textFlow.setLineSpacing(0);
 
         caretShape.setFocusTraversable(false);
         caretShape.getStyleClass().add("caret");
@@ -94,10 +90,6 @@ public class ParagraphTile extends HBox {
         textBackgroundColorPaths.addListener(this::updateLayers);
         // TODO: add left label for list decoration, line number, indentation
         getChildren().add(root);
-        // TODO: expose padding as paragraph indentation
-        setPadding(new Insets(0, 0, 10, 0));
-        textFlowLayoutX = 1d + textFlow.getPadding().getLeft();
-        textFlowLayoutY = 1d + textFlow.getPadding().getTop();
     }
 
     void setParagraph(Paragraph paragraph) {
@@ -107,6 +99,12 @@ public class ParagraphTile extends HBox {
             return;
         }
         this.paragraph = paragraph;
+        ParagraphDecoration decoration = paragraph.getDecoration();
+        textFlow.setTextAlignment(decoration.getAlignment());
+        textFlow.setLineSpacing(decoration.getSpacing());
+        textFlow.setPadding(new Insets(decoration.getTopInset(), decoration.getRightInset(), decoration.getBottomInset(), decoration.getLeftInset()));
+        textFlowLayoutX = 1d + decoration.getLeftInset();
+        textFlowLayoutY = 1d + decoration.getTopInset();
         viewModel.caretPositionProperty().addListener(caretPositionListener);
         viewModel.selectionProperty().addListener(selectionListener);
     }

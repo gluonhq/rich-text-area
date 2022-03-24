@@ -30,8 +30,8 @@ public class TextDecorateAction<T> extends DecorateAction<T> {
             if (nv != null && !updating) {
                 updating = true;
                 TextDecoration.Builder builder = TextDecoration.builder();
-                Decoration decoration = viewModel.getDecoration();
-                if (viewModel.getSelection() == Selection.UNDEFINED && decoration instanceof TextDecoration) {
+                Decoration decoration = viewModel.getDecorationAtCaret();
+                if (viewModel.getSelection().isDefined() && decoration instanceof TextDecoration) {
                     builder = builder.fromDecoration((TextDecoration) decoration);
                 }
                 TextDecoration newTextDecoration = builderTFunction.apply(builder, nv);
@@ -53,12 +53,12 @@ public class TextDecorateAction<T> extends DecorateAction<T> {
                 }
             }
         };
-        viewModel.decorationProperty().addListener(decorationChangeListener);
+        viewModel.decorationAtCaretProperty().addListener(decorationChangeListener);
     }
 
     @Override
     protected void unbind() {
         valueProperty.removeListener(valuePropertyChangeListener);
-        viewModel.decorationProperty().removeListener(decorationChangeListener);
+        viewModel.decorationAtCaretProperty().removeListener(decorationChangeListener);
     }
 }

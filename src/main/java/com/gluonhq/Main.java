@@ -3,10 +3,13 @@ package com.gluonhq;
 import com.gluonhq.richtext.action.Action;
 import com.gluonhq.richtext.RichTextArea;
 import com.gluonhq.richtext.action.DecorateAction;
+import com.gluonhq.richtext.action.ParagraphDecorateAction;
 import com.gluonhq.richtext.action.TextDecorateAction;
 import com.gluonhq.richtext.model.DecorationModel;
 import com.gluonhq.richtext.model.Document;
 import com.gluonhq.richtext.model.ImageDecoration;
+import com.gluonhq.richtext.model.Paragraph;
+import com.gluonhq.richtext.model.ParagraphDecoration;
 import com.gluonhq.richtext.model.TextDecoration;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
@@ -33,6 +36,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
@@ -78,13 +82,22 @@ public class Main extends Application {
             new DecorationModel(1253, 1059, TextDecoration.builder().presets().build())
     );
 
+    private final List<Paragraph> paragraphDecorations = List.of(
+            new Paragraph(0, 21, ParagraphDecoration.builder().presets().alignment(TextAlignment.CENTER).topInset(6).bottomInset(3).build()),
+            new Paragraph(21, 596, ParagraphDecoration.builder().presets().alignment(TextAlignment.JUSTIFY).topInset(2).bottomInset(2).build()),
+            new Paragraph(596, 614, ParagraphDecoration.builder().presets().alignment(TextAlignment.CENTER).topInset(6).bottomInset(3).build()),
+            new Paragraph(614, 1228, ParagraphDecoration.builder().presets().alignment(TextAlignment.RIGHT).topInset(2).bottomInset(2).build()),
+            new Paragraph(1228, 1253, ParagraphDecoration.builder().presets().alignment(TextAlignment.CENTER).topInset(6).bottomInset(3).build()),
+            new Paragraph(1253, 2017, ParagraphDecoration.builder().presets().alignment(TextAlignment.LEFT).topInset(5).bottomInset(3).spacing(5).build()),
+            new Paragraph(2017, 2312, ParagraphDecoration.builder().presets().alignment(TextAlignment.CENTER).topInset(4).bottomInset(2).build()));
+
     private final Document document = new Document("What is Lorem Ipsum?\n" +
             "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.\n" +
             "Why do we use it?\n" +
             "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).\n" +
             "Where does it come from?\n" +
             "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of \"de Finibus Bonorum et Malorum\" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, \"Lorem ipsum dolor sit amet..\", comes from a line in section 1.10.32.\nThe standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested. Sections 1.10.32 and 1.10.33 from \"de Finibus Bonorum et Malorum\" by Cicero are also reproduced in their exact original form, accompanied by English versions from the 1914 translation by H. Rackham.\n",
-            decorations, 2312);
+            decorations, paragraphDecorations, 2312);
 
 //    private final List<DecorationModel> decorations = List.of(
 //                new DecorationModel(0, 12, TextDecoration.builder().presets().build()),
@@ -174,6 +187,15 @@ public class Main extends Application {
                 new Separator(Orientation.VERTICAL),
                 editableProp);
 
+        ToolBar paragraphToolbar = new ToolBar();
+        paragraphToolbar.getItems().setAll(
+                createToggleButton(LineAwesomeSolid.ALIGN_LEFT, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == TextAlignment.LEFT, (builder, a) -> builder.alignment(TextAlignment.LEFT).build())),
+                createToggleButton(LineAwesomeSolid.ALIGN_CENTER, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == TextAlignment.CENTER, (builder, a) -> builder.alignment(TextAlignment.CENTER).build())),
+                createToggleButton(LineAwesomeSolid.ALIGN_RIGHT, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == TextAlignment.RIGHT, (builder, a) -> builder.alignment(TextAlignment.RIGHT).build())),
+                createToggleButton(LineAwesomeSolid.ALIGN_JUSTIFY, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == TextAlignment.JUSTIFY, (builder, a) -> builder.alignment(TextAlignment.JUSTIFY).build())),
+                new Separator(Orientation.VERTICAL)
+        );
+
         HBox statusBar = new HBox(10);
         statusBar.getStyleClass().add("status-bar");
         statusBar.setAlignment(Pos.CENTER_RIGHT);
@@ -197,7 +219,7 @@ public class Main extends Application {
 //        menuBar.setUseSystemMenuBar(true);
 
         BorderPane root = new BorderPane(editor);
-        root.setTop(new VBox(menuBar, toolbar));
+        root.setTop(new VBox(menuBar, toolbar, paragraphToolbar));
         root.setBottom(statusBar);
 
         Scene scene = new Scene(root, 960, 480);
