@@ -220,7 +220,7 @@ public class RichTextAreaViewModel {
             paragraphList.clear();
             Document document = get();
             if (document != null) {
-                paragraphList.addAll(document.getParagraphList());
+                updateParagraphList();
             }
         }
     };
@@ -325,25 +325,23 @@ public class RichTextAreaViewModel {
         } else if (decoration instanceof ParagraphDecoration) {
             if (getSelection().isDefined()) {
                 // check all possible paragraphs within selection
-                Selection selection = getSelection();
-                int caretPosition = getCaretPosition();
-                List<Paragraph> changes = getParagraphsWithSelection();
-                clearSelection();
-                setCaretPosition(-1);
-                paragraphList.removeAll(changes);
-                changes.forEach(p -> paragraphList.add(new Paragraph(p.getStart(), p.getEnd(),
-                                    ParagraphDecoration.builder().fromDecoration((ParagraphDecoration) decoration).build())));
-                setCaretPosition(caretPosition);
-                setSelection(selection);
+                List<Paragraph> paragraphsWithSelection = getParagraphsWithSelection();
+                if (!paragraphsWithSelection.isEmpty()) {
+                    Selection selection = getSelection();
+                    int caretPosition = getCaretPosition();
+                    int start = paragraphsWithSelection.get(0).getStart();
+                    int end = paragraphsWithSelection.get(paragraphsWithSelection.size() - 1).getEnd();
+                    setCaretPosition(-1);
+                    clearSelection();
+                    getTextBuffer().decorate(start, end, decoration);
+                    setCaretPosition(caretPosition);
+                    setSelection(selection);
+                }
             } else {
                 // only paragraph where caret is
                 int caretPosition = getCaretPosition();
-                getParagraphWithCaret().ifPresent(p -> {
-                    setCaretPosition(-1);
-                    paragraphList.remove(p);
-                    paragraphList.add(new Paragraph(p.getStart(), p.getEnd(),
-                            ParagraphDecoration.builder().fromDecoration((ParagraphDecoration) decoration).build()));
-                });
+                Paragraph paragraph = getParagraphWithCaret().orElseThrow(() -> new IllegalArgumentException("No paragraph available"));
+                getTextBuffer().decorate(paragraph.getStart(), paragraph.getEnd(), decoration);
                 setCaretPosition(caretPosition);
             }
         }
@@ -478,15 +476,11 @@ public class RichTextAreaViewModel {
             newParagraphList.add(lastParagraph);
         }
         paragraphList.setAll(newParagraphList);
-
     }
 
     private Paragraph getParagraphAt(int start, int end) {
-        // TODO: check changes in text
-        return paragraphList.stream()
-                .filter(p -> p.getStart() == start && p.getEnd() == end)
-                .findFirst()
-                .orElse(new Paragraph(start, end, ParagraphDecoration.builder().presets().build()));
+        ParagraphDecoration pd = getTextBuffer().getParagraphDecorationAtCaret(start);
+        return new Paragraph(start, end, pd != null ? pd : ParagraphDecoration.builder().presets().build());
     }
 
     public Optional<Paragraph> getParagraphWithCaret() {
@@ -619,10 +613,7 @@ public class RichTextAreaViewModel {
     }
 
     private Document getCurrentDocument() {
-        List<Paragraph> sortedParagraphList = paragraphList.stream()
-                .sorted(Comparator.comparing(Paragraph::getStart))
-                .collect(Collectors.toList());
-        return new Document(getTextBuffer().getText(), getTextBuffer().getDecorationModelList(), sortedParagraphList, getCaretPosition());
+        return new Document(getTextBuffer().getText(), getTextBuffer().getDecorationModelList(), getCaretPosition());
     }
 
     void newDocument() {

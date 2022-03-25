@@ -44,6 +44,7 @@ public interface TextBuffer {
 
     Decoration getDecorationAtCaret(int caretPosition);
     void setDecorationAtCaret(TextDecoration decoration);
+    ParagraphDecoration getParagraphDecorationAtCaret(int caretPosition);
 
     interface Event {}
 

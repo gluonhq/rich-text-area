@@ -65,7 +65,7 @@ public class ParagraphDecoration implements Decoration {
 
     @Override
     public String toString() {
-        return "ParagraphDecoration{" +
+        return "PDec{" +
                 "s=" + spacing +
                 ", a=" + alignment +
                 ", [" + topInset + ", " + rightInset + ", " + bottomInset + ", " + leftInset + "]}";
