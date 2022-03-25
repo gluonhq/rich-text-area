@@ -341,6 +341,7 @@ public class RichTextAreaViewModel {
                 // only paragraph where caret is
                 int caretPosition = getCaretPosition();
                 Paragraph paragraph = getParagraphWithCaret().orElseThrow(() -> new IllegalArgumentException("No paragraph available"));
+                setCaretPosition(-1);
                 getTextBuffer().decorate(paragraph.getStart(), paragraph.getEnd(), decoration);
                 setCaretPosition(caretPosition);
             }

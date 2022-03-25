@@ -30,7 +30,7 @@ public class ParagraphDecorateAction<T> extends DecorateAction<T> {
             if (nv != null && !updating) {
                 updating = true;
                 ParagraphDecoration.Builder builder = ParagraphDecoration.builder();
-                if (!viewModel.getSelection().isDefined()) {
+                if (!viewModel.getSelection().isDefined() && viewModel.getDecorationAtParagraph() != null) {
                     builder = builder.fromDecoration(viewModel.getDecorationAtParagraph());
                 }
                 ParagraphDecoration newParagraphDecoration = builderTFunction.apply(builder, nv);
