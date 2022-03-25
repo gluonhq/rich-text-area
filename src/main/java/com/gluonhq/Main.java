@@ -26,6 +26,8 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Separator;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
@@ -194,6 +196,13 @@ public class Main extends Application {
                 createToggleButton(LineAwesomeSolid.ALIGN_CENTER, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == TextAlignment.CENTER, (builder, a) -> builder.alignment(TextAlignment.CENTER).build())),
                 createToggleButton(LineAwesomeSolid.ALIGN_RIGHT, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == TextAlignment.RIGHT, (builder, a) -> builder.alignment(TextAlignment.RIGHT).build())),
                 createToggleButton(LineAwesomeSolid.ALIGN_JUSTIFY, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == TextAlignment.JUSTIFY, (builder, a) -> builder.alignment(TextAlignment.JUSTIFY).build())),
+                new Separator(Orientation.VERTICAL),
+                createSpinner("Spacing", p -> new ParagraphDecorateAction<>(editor, p, v -> (int) v.getSpacing(), (builder, a) -> builder.spacing(a).build())),
+                new Separator(Orientation.VERTICAL),
+                createSpinner("Top", p -> new ParagraphDecorateAction<>(editor, p, v -> (int) v.getTopInset(), (builder, a) -> builder.topInset(a).build())),
+                createSpinner("Right", p -> new ParagraphDecorateAction<>(editor, p, v -> (int) v.getRightInset(), (builder, a) -> builder.rightInset(a).build())),
+                createSpinner("Bottom", p -> new ParagraphDecorateAction<>(editor, p, v -> (int) v.getBottomInset(), (builder, a) -> builder.bottomInset(a).build())),
+                createSpinner("Left", p -> new ParagraphDecorateAction<>(editor, p, v -> (int) v.getLeftInset(), (builder, a) -> builder.leftInset(a).build())),
                 new Separator(Orientation.VERTICAL)
         );
 
@@ -223,7 +232,7 @@ public class Main extends Application {
         root.setTop(new VBox(menuBar, toolbar, paragraphToolbar));
         root.setBottom(statusBar);
 
-        Scene scene = new Scene(root, 960, 480);
+        Scene scene = new Scene(root, 960, 580);
         scene.getStylesheets().add(Main.class.getResource("main.css").toExternalForm());
         stage.titleProperty().bind(Bindings.createStringBinding(() -> "Rich Text Demo" + (editor.isModified() ? " *" : ""), editor.modifiedProperty()));
         stage.setScene(scene);
@@ -249,6 +258,18 @@ public class Main extends Application {
         toggleButton.setGraphic(icon);
         function.apply(toggleButton.selectedProperty().asObject());
         return toggleButton;
+    }
+
+    private HBox createSpinner(String text, Function<ObjectProperty<Integer>, DecorateAction<Integer>> function) {
+        Spinner<Integer> spinner = new Spinner<>();
+        SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 20);
+        spinner.setValueFactory(valueFactory);
+        spinner.setPrefWidth(80);
+        spinner.setEditable(false);
+        function.apply(valueFactory.valueProperty());
+        HBox spinnerBox = new HBox(5, new Label(text), spinner);
+        spinnerBox.setAlignment(Pos.CENTER);
+        return spinnerBox;
     }
 
     private Button actionImage(Ikon ikon) {

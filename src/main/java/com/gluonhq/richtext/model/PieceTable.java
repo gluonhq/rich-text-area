@@ -858,7 +858,7 @@ class ParagraphDecorateCmd extends AbstractCommand<PieceTable> {
 
     @Override
     protected void doRedo(PieceTable pt) {
-        if (!PieceTable.inRange(start, 0, pt.getTextLength())) {
+        if (!PieceTable.inRange(start, 0, pt.getTextLength() + 1)) {
             throw new IllegalArgumentException("Position " + start + " is outside of text bounds [0, " + pt.getTextLength() + ")");
         }
 
