@@ -36,17 +36,13 @@ public final class PieceTable extends AbstractTextBuffer {
     public PieceTable(Document document) {
         this.originalText = Objects.requireNonNull(Objects.requireNonNull(document).getText());
         if (document.getDecorationList() == null) {
-            pieces.add(piece(Piece.BufferType.ORIGINAL, 0, originalText.length()));
+            pieces.add(new Piece(PieceTable.this, Piece.BufferType.ORIGINAL, 0, originalText.length()));
         } else {
             document.getDecorationList().forEach(d ->
-                    pieces.add(new Piece(PieceTable.this, Piece.BufferType.ORIGINAL, d.getStart(), d.getLength(), d.getDecoration())));
+                    pieces.add(new Piece(PieceTable.this, Piece.BufferType.ORIGINAL, d.getStart(), d.getLength(), d.getDecoration(), d.getParagraphDecoration())));
         }
         textLengthProperty.set(pieces.stream().mapToInt(b -> b.length).sum());
         pieceCharacterIterator = new PieceCharacterIterator(this);
-    }
-
-    private Piece piece(Piece.BufferType bufferType, int start, int length ) {
-        return new Piece( this, bufferType, start, length );
     }
 
     /**
@@ -93,7 +89,7 @@ public final class PieceTable extends AbstractTextBuffer {
     @Override
     public List<DecorationModel> getDecorationModelList() {
         return pieces.stream()
-                .map(p -> new DecorationModel(p.start, p.length, p.getDecoration()))
+                .map(p -> new DecorationModel(p.start, p.length, p.getDecoration(), p.getParagraphDecoration()))
                 .collect(Collectors.toList());
     }
 
@@ -140,6 +136,8 @@ public final class PieceTable extends AbstractTextBuffer {
             commander.execute(new TextDecorateCmd(start, end, decoration));
         } else if (decoration instanceof ImageDecoration) {
             commander.execute(new ImageDecorateCmd((ImageDecoration) decoration, start));
+        } else if (decoration instanceof ParagraphDecoration) {
+            commander.execute(new ParagraphDecorateCmd(start, end, (ParagraphDecoration) decoration));
         } else {
             throw new IllegalArgumentException("Decoration type not supported: " + decoration);
         }
@@ -178,6 +176,20 @@ public final class PieceTable extends AbstractTextBuffer {
             textPosition += piece.length;
         }
         return previousPieceDecoration(index);
+    }
+
+    @Override
+    public ParagraphDecoration getParagraphDecorationAtCaret(int caretPosition) {
+        int textPosition = 0;
+        int index = 0;
+        for (; index < pieces.size(); index++) {
+            Piece piece = pieces.get(index);
+            if (textPosition <= caretPosition && caretPosition < textPosition + piece.length) {
+                return piece.getParagraphDecoration();
+            }
+            textPosition += piece.length;
+        }
+        return null;
     }
 
     @Override
@@ -806,6 +818,110 @@ class TextDecorateCmd extends AbstractCommand<PieceTable> {
     public String toString() {
         return "TextDecorateCmd[" + start +
                 " x " + end + "]";
+    }
+}
+
+class ParagraphDecorateCmd extends AbstractCommand<PieceTable> {
+
+    private int start;
+    private int end;
+    private final ParagraphDecoration paragraphDecoration;
+
+    private boolean execSuccess = false;
+    private int pieceIndex = -1;
+    private Collection<Piece> newPieces = new ArrayList<>();
+    private Collection<Piece> oldPieces = new ArrayList<>();
+
+    /**
+     * Decorates the text within the given paragraph with the supplied decoration.
+     * @param start index of the first character to decorate
+     * @param end index of the last character to decorate
+     * @param paragraphDecoration Decorations to apply on the selected paragraph
+     */
+    ParagraphDecorateCmd(int start, int end, ParagraphDecoration paragraphDecoration) {
+        this.start = start;
+        this.end = end;
+        this.paragraphDecoration = paragraphDecoration;
+    }
+
+    @Override
+    protected void doUndo(PieceTable pt) {
+        if (execSuccess) {
+            pt.pieces.addAll(pieceIndex, oldPieces);
+            pt.pieces.removeAll(newPieces);
+
+            oldPieces.forEach(piece -> {
+                pt.fire(new TextBuffer.DecorateEvent(piece.start, piece.start + piece.length, piece.decoration));
+            });
+        }
+    }
+
+    @Override
+    protected void doRedo(PieceTable pt) {
+        if (!PieceTable.inRange(start, 0, pt.getTextLength() + 1)) {
+            throw new IllegalArgumentException("Position " + start + " is outside of text bounds [0, " + pt.getTextLength() + ")");
+        }
+
+        //  Accept length larger than actual and adjust it to actual
+        if (end >= pt.getTextLength()) {
+            end = pt.getTextLength();
+        }
+
+        final int[] startPieceIndex = new int[1];
+        final List<Piece> additions = new ArrayList<>(); // start and end pieces
+        final List<Piece> removals = new ArrayList<>();
+
+        pt.walkPieces((piece, pieceIndex, textPosition) -> {
+            if (isPieceInSelection(piece, textPosition)) {
+                startPieceIndex[0] = pieceIndex;
+                if (textPosition <= start) {
+                    int offset = start - textPosition;
+                    int length;
+                    if (textPosition + piece.length > end) {
+                        length = Math.min(end - start, piece.length); // selection ends in current piece
+                    } else {
+                        length = piece.length - offset; // selection spans over next piece(s)
+                    }
+                    if (offset > 0) {
+                        additions.add(piece.pieceBefore(offset));
+                    }
+                    additions.add(piece.copy(piece.start + offset, length, piece.decoration, paragraphDecoration));
+                    if (end < textPosition + piece.length) {
+                        additions.add(piece.pieceFrom(end - textPosition));
+                    }
+                    removals.add(piece);
+                }  else if (textPosition + piece.length <= end) { // entire piece is in selection
+                    additions.add(piece.copy(piece.start, piece.length, piece.decoration, paragraphDecoration));
+                    removals.add(piece);
+                } else if (textPosition < end) {
+                    int offset = end - textPosition;
+                    additions.add(piece.copy(piece.start, offset, piece.decoration, paragraphDecoration));
+                    additions.add(piece.pieceFrom(offset));
+                    removals.add(piece);
+                }
+            }
+            return false;
+        });
+
+        newPieces = PieceTable.normalize(additions);
+        oldPieces = removals;
+        if (newPieces.size() > 0 || oldPieces.size() > 0) {
+            pieceIndex = startPieceIndex[0];
+            pt.pieces.addAll(pieceIndex, newPieces);
+            pt.pieces.removeAll(oldPieces);
+            pt.fire(new TextBuffer.DecorateEvent(start, end, paragraphDecoration));
+            execSuccess = true;
+        }
+    }
+
+    private boolean isPieceInSelection(Piece piece, int textPosition) {
+        int pieceEndPosition = textPosition + piece.length - 1;
+        return start <= pieceEndPosition && (end >= pieceEndPosition || end >= textPosition);
+    }
+
+    @Override
+    public String toString() {
+        return "ParagraphDecorateCmd[" + start + " x " + end + "]";
     }
 }
 

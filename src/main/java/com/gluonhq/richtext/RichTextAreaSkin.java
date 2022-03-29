@@ -8,6 +8,7 @@ import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.viewmodel.ActionCmd;
 import com.gluonhq.richtext.viewmodel.ActionCmdFactory;
 import com.gluonhq.richtext.viewmodel.RichTextAreaViewModel;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -17,8 +18,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableSet;
-import javafx.collections.SetChangeListener;
+import javafx.collections.transformation.SortedList;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.scene.Cursor;
@@ -42,9 +42,9 @@ import javafx.scene.shape.Path;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.util.Duration;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -107,18 +107,19 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         entry( new KeyCodeCombination(BACK_SPACE, SHIFT_ANY),                                e -> ACTION_CMD_FACTORY.removeText(-1)),
         entry( new KeyCodeCombination(DELETE),                                               e -> ACTION_CMD_FACTORY.removeText(0)),
         entry( new KeyCodeCombination(B, SHORTCUT_DOWN),                                     e -> {
-            TextDecoration decoration = (TextDecoration) viewModel.getDecoration();
+            TextDecoration decoration = (TextDecoration) viewModel.getDecorationAtCaret();
             FontWeight fontWeight = decoration.getFontWeight() == BOLD ? NORMAL : BOLD;
             return ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().fromDecoration(decoration).fontWeight(fontWeight).build());
         }),
         entry( new KeyCodeCombination(I, SHORTCUT_DOWN),                                    e -> {
-            TextDecoration decoration = (TextDecoration) viewModel.getDecoration();
+            TextDecoration decoration = (TextDecoration) viewModel.getDecorationAtCaret();
             FontPosture fontPosture = decoration.getFontPosture() == ITALIC ? REGULAR : ITALIC;
             return ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().fromDecoration(decoration).fontPosture(fontPosture).build());
         })
     );
 
     private final ParagraphListView paragraphListView;
+    private final SortedList<Paragraph> paragraphSortedList = new SortedList<>(viewModel.getParagraphList(), Comparator.comparing(Paragraph::getStart));
 
     final ContextMenu contextMenu = new ContextMenu();
     private ObservableList<MenuItem> editableContextMenuItems;
@@ -131,9 +132,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final Map<Integer, Font> fontCache = new ConcurrentHashMap<>();
     private final Map<String, Image> imageCache = new ConcurrentHashMap<>();
     private final SmartTimer objectsCacheEvictionTimer;
-
-    private final ObservableSet<Paragraph> paragraphSet = FXCollections.observableSet();
-    private final SetChangeListener<Paragraph> paragraphsChangeListener;
 
     private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow();
     int lastValidCaretPosition = -1;
@@ -233,16 +231,20 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                     .map(Path.class::cast)
                     .filter(path -> !path.getElements().isEmpty())
                     .findFirst()
-                    .ifPresent(caret -> {
-                        final Bounds bounds = caret.localToScene(caret.getBoundsInLocal());
-                        double minY = bounds.getMinY();
-                        double maxY = bounds.getMaxY();
-                        if (!(maxY <= viewportMaxY && minY >= viewportMinY)) {
-                            // If caret is not fully visible, scroll as needed
-                            virtualFlow.scrollPixels(maxY > viewportMaxY ?
-                                    maxY - viewportMaxY + 1 : minY - viewportMinY - 1);
-                        }
-                    });
+                    .ifPresentOrElse(caret -> {
+                            final Bounds bounds = caret.localToScene(caret.getBoundsInLocal());
+                            double minY = bounds.getMinY();
+                            double maxY = bounds.getMaxY();
+                            if (!(maxY <= viewportMaxY && minY >= viewportMinY)) {
+                                // If caret is not fully visible, scroll line by line as needed
+                                virtualFlow.scrollPixels(maxY > viewportMaxY ?
+                                        maxY - viewportMaxY + 1 : minY - viewportMinY - 1);
+                            }
+                        }, () -> {
+                            // In case no caret was found (paragraph is not in a listCell yet),
+                            // scroll directly to the paragraph
+                            viewModel.getParagraphWithCaret().ifPresent(this::scrollTo);
+                        });
         }
     }
 
@@ -250,29 +252,18 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         super(control);
 
         paragraphListView = new ParagraphListView(control);
+        paragraphListView.setItems(paragraphSortedList);
         paragraphListView.setFocusTraversable(false);
         getChildren().add(paragraphListView);
         paragraphListView.setCellFactory(p -> new RichListCell(this));
-        paragraphsChangeListener = c -> {
-            if (c.wasAdded()) {
-                paragraphListView.getItems().add(c.getElementAdded());
-            } else if (c.wasRemoved()) {
-                paragraphListView.getItems().remove(c.getElementRemoved());
-            }
-        };
         objectsCacheEvictionTimer = new SmartTimer(paragraphListView::evictUnusedObjects, 1000, 60000);
         controlPrefWidthListener = (obs, ov, nv) -> {
             refreshTextFlow();
             paragraphListView.updateLayout();
         };
 
-        caretChangeListener = (obs, ov, nv) -> {
-            paragraphSet.stream()
-                    .filter(p -> p.getStart() <= nv.intValue() &&
-                            nv.intValue() < (p.equals(lastParagraph) ? p.getEnd() + 1 : p.getEnd()))
-                    .findFirst()
-                    .ifPresent(paragraph -> Platform.runLater(paragraphListView::scrollIfNeeded));
-        };
+        caretChangeListener = (obs, ov, nv) -> viewModel.getParagraphWithCaret()
+                .ifPresent(paragraph -> Platform.runLater(paragraphListView::scrollIfNeeded));
 
         // all listeners have to be removed within dispose method
         control.documentProperty().addListener((obs, ov, nv) -> {
@@ -306,9 +297,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().setOnKeyPressed(null);
         getSkinnable().setOnKeyTyped(null);
         getSkinnable().widthProperty().removeListener(controlPrefWidthListener);
-        paragraphSet.removeListener(paragraphsChangeListener);
-        paragraphSet.clear();
-        paragraphListView.getItems().clear();
         contextMenu.getItems().clear();
         editableContextMenuItems = null;
         nonEditableContextMenuItems = null;
@@ -346,7 +334,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().setOnKeyPressed(this::keyPressedListener);
         getSkinnable().setOnKeyTyped(this::keyTypedListener);
         getSkinnable().widthProperty().addListener(controlPrefWidthListener);
-        paragraphSet.addListener(paragraphsChangeListener);
         refreshTextFlow();
         requestLayout();
         editableChangeListener(null); // sets up all related listeners
@@ -359,10 +346,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         try {
             nonTextNodes.set(0);
             viewModel.resetCharacterIterator();
-            List<Paragraph> paragraphList = buildParagraphs();
-            paragraphSet.removeIf(p -> !paragraphList.contains(p));
-            paragraphSet.addAll(paragraphList);
-
+            lastParagraph = paragraphSortedList.get(paragraphSortedList.size() - 1);
             // this ensures changes in decoration are applied:
             paragraphListView.updateLayout();
 
@@ -375,19 +359,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         } finally {
             objectsCacheEvictionTimer.start();
         }
-    }
-
-    private List<Paragraph> buildParagraphs() {
-        List<Integer> lineFeeds = viewModel.getTextBuffer().getLineFeeds();
-        List<Paragraph> paragraphList = new ArrayList<>();
-        AtomicInteger pos = new AtomicInteger();
-        lineFeeds.forEach(lfPos ->
-                paragraphList.add(new Paragraph(pos.getAndSet(lfPos), pos.incrementAndGet())));
-        if (pos.get() <= viewModel.getTextLength()) {
-            lastParagraph = new Paragraph(pos.get(), viewModel.getTextLength());
-            paragraphList.add(lastParagraph);
-        }
-        return paragraphList;
     }
 
     private void editableChangeListener(Observable o) {

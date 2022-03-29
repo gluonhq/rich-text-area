@@ -3,10 +3,12 @@ package com.gluonhq;
 import com.gluonhq.richtext.action.Action;
 import com.gluonhq.richtext.RichTextArea;
 import com.gluonhq.richtext.action.DecorateAction;
+import com.gluonhq.richtext.action.ParagraphDecorateAction;
 import com.gluonhq.richtext.action.TextDecorateAction;
 import com.gluonhq.richtext.model.DecorationModel;
 import com.gluonhq.richtext.model.Document;
 import com.gluonhq.richtext.model.ImageDecoration;
+import com.gluonhq.richtext.model.ParagraphDecoration;
 import com.gluonhq.richtext.model.TextDecoration;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
@@ -24,6 +26,8 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Separator;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
@@ -31,8 +35,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontPosture;
-import javafx.scene.text.FontWeight;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
@@ -69,21 +72,34 @@ public class Main extends Application {
         }
     }
 
-    private final List<DecorationModel> decorations = List.of(
-            new DecorationModel(0, 21, TextDecoration.builder().presets().fontWeight(FontWeight.BOLD).fontSize(14).build()),
-            new DecorationModel(21, 575, TextDecoration.builder().presets().build()),
-            new DecorationModel(596, 18, TextDecoration.builder().presets().fontWeight(FontWeight.BOLD).fontSize(14).build()),
-            new DecorationModel(614, 614, TextDecoration.builder().presets().build()),
-            new DecorationModel(1228, 25, TextDecoration.builder().presets().fontWeight(FontWeight.BOLD).fontSize(14).build()),
-            new DecorationModel(1253, 1059, TextDecoration.builder().presets().build())
-    );
+    private final List<DecorationModel> decorations;
+
+    {
+        TextDecoration bold14 = TextDecoration.builder().presets().fontWeight(BOLD).fontSize(14).build();
+        TextDecoration preset = TextDecoration.builder().presets().build();
+        ParagraphDecoration center63 = ParagraphDecoration.builder().presets().alignment(TextAlignment.CENTER).topInset(6).bottomInset(3).build();
+        ParagraphDecoration justify22 = ParagraphDecoration.builder().presets().alignment(TextAlignment.JUSTIFY).topInset(2).bottomInset(2).build();
+        ParagraphDecoration right22 = ParagraphDecoration.builder().presets().alignment(TextAlignment.RIGHT).topInset(2).bottomInset(2).build();
+        ParagraphDecoration left535 = ParagraphDecoration.builder().presets().alignment(TextAlignment.LEFT).topInset(5).bottomInset(3).spacing(5).build();
+        ParagraphDecoration center42 = ParagraphDecoration.builder().presets().alignment(TextAlignment.CENTER).topInset(4).bottomInset(2).build();
+        decorations = List.of(
+                new DecorationModel(0, 21, bold14, center63),
+                new DecorationModel(21, 575, preset, justify22),
+                new DecorationModel(596, 18, bold14, center63),
+                new DecorationModel(614, 614, preset, right22),
+                new DecorationModel(1228, 25, bold14, center63),
+                new DecorationModel(1253, 764, preset, left535),
+                new DecorationModel(2017, 295, preset, center42)
+        );
+    }
 
     private final Document document = new Document("What is Lorem Ipsum?\n" +
             "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.\n" +
             "Why do we use it?\n" +
             "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).\n" +
             "Where does it come from?\n" +
-            "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of \"de Finibus Bonorum et Malorum\" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, \"Lorem ipsum dolor sit amet..\", comes from a line in section 1.10.32.\nThe standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested. Sections 1.10.32 and 1.10.33 from \"de Finibus Bonorum et Malorum\" by Cicero are also reproduced in their exact original form, accompanied by English versions from the 1914 translation by H. Rackham.\n",
+            "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of \"de Finibus Bonorum et Malorum\" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, \"Lorem ipsum dolor sit amet..\", comes from a line in section 1.10.32.\n" +
+            "The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested. Sections 1.10.32 and 1.10.33 from \"de Finibus Bonorum et Malorum\" by Cicero are also reproduced in their exact original form, accompanied by English versions from the 1914 translation by H. Rackham.\n",
             decorations, 2312);
 
 //    private final List<DecorationModel> decorations = List.of(
@@ -174,6 +190,22 @@ public class Main extends Application {
                 new Separator(Orientation.VERTICAL),
                 editableProp);
 
+        ToolBar paragraphToolbar = new ToolBar();
+        paragraphToolbar.getItems().setAll(
+                createToggleButton(LineAwesomeSolid.ALIGN_LEFT, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == TextAlignment.LEFT, (builder, a) -> builder.alignment(TextAlignment.LEFT).build())),
+                createToggleButton(LineAwesomeSolid.ALIGN_CENTER, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == TextAlignment.CENTER, (builder, a) -> builder.alignment(TextAlignment.CENTER).build())),
+                createToggleButton(LineAwesomeSolid.ALIGN_RIGHT, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == TextAlignment.RIGHT, (builder, a) -> builder.alignment(TextAlignment.RIGHT).build())),
+                createToggleButton(LineAwesomeSolid.ALIGN_JUSTIFY, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == TextAlignment.JUSTIFY, (builder, a) -> builder.alignment(TextAlignment.JUSTIFY).build())),
+                new Separator(Orientation.VERTICAL),
+                createSpinner("Spacing", p -> new ParagraphDecorateAction<>(editor, p, v -> (int) v.getSpacing(), (builder, a) -> builder.spacing(a).build())),
+                new Separator(Orientation.VERTICAL),
+                createSpinner("Top", p -> new ParagraphDecorateAction<>(editor, p, v -> (int) v.getTopInset(), (builder, a) -> builder.topInset(a).build())),
+                createSpinner("Right", p -> new ParagraphDecorateAction<>(editor, p, v -> (int) v.getRightInset(), (builder, a) -> builder.rightInset(a).build())),
+                createSpinner("Bottom", p -> new ParagraphDecorateAction<>(editor, p, v -> (int) v.getBottomInset(), (builder, a) -> builder.bottomInset(a).build())),
+                createSpinner("Left", p -> new ParagraphDecorateAction<>(editor, p, v -> (int) v.getLeftInset(), (builder, a) -> builder.leftInset(a).build())),
+                new Separator(Orientation.VERTICAL)
+        );
+
         HBox statusBar = new HBox(10);
         statusBar.getStyleClass().add("status-bar");
         statusBar.setAlignment(Pos.CENTER_RIGHT);
@@ -197,10 +229,10 @@ public class Main extends Application {
 //        menuBar.setUseSystemMenuBar(true);
 
         BorderPane root = new BorderPane(editor);
-        root.setTop(new VBox(menuBar, toolbar));
+        root.setTop(new VBox(menuBar, toolbar, paragraphToolbar));
         root.setBottom(statusBar);
 
-        Scene scene = new Scene(root, 960, 480);
+        Scene scene = new Scene(root, 960, 580);
         scene.getStylesheets().add(Main.class.getResource("main.css").toExternalForm());
         stage.titleProperty().bind(Bindings.createStringBinding(() -> "Rich Text Demo" + (editor.isModified() ? " *" : ""), editor.modifiedProperty()));
         stage.setScene(scene);
@@ -226,6 +258,18 @@ public class Main extends Application {
         toggleButton.setGraphic(icon);
         function.apply(toggleButton.selectedProperty().asObject());
         return toggleButton;
+    }
+
+    private HBox createSpinner(String text, Function<ObjectProperty<Integer>, DecorateAction<Integer>> function) {
+        Spinner<Integer> spinner = new Spinner<>();
+        SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 20);
+        spinner.setValueFactory(valueFactory);
+        spinner.setPrefWidth(80);
+        spinner.setEditable(false);
+        function.apply(valueFactory.valueProperty());
+        HBox spinnerBox = new HBox(5, new Label(text), spinner);
+        spinnerBox.setAlignment(Pos.CENTER);
+        return spinnerBox;
     }
 
     private Button actionImage(Ikon ikon) {
