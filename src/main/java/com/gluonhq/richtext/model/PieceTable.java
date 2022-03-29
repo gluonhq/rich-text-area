@@ -35,10 +35,10 @@ public final class PieceTable extends AbstractTextBuffer {
      */
     public PieceTable(Document document) {
         this.originalText = Objects.requireNonNull(Objects.requireNonNull(document).getText());
-        if (document.getDecorationList() == null) {
+        if (document.getDecorations() == null) {
             pieces.add(new Piece(PieceTable.this, Piece.BufferType.ORIGINAL, 0, originalText.length()));
         } else {
-            document.getDecorationList().forEach(d ->
+            document.getDecorations().forEach(d ->
                     pieces.add(new Piece(PieceTable.this, Piece.BufferType.ORIGINAL, d.getStart(), d.getLength(), d.getDecoration(), d.getParagraphDecoration())));
         }
         textLengthProperty.set(pieces.stream().mapToInt(b -> b.length).sum());
