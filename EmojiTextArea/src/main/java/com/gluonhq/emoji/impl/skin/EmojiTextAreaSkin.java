@@ -145,6 +145,11 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
                 isReplacing.set(false);
             }
         });
+        control.focusedProperty().addListener((obs, ov, nv) -> {
+            if (nv) {
+                textarea.requestFocus();
+            }
+        });
 
 //        double fontSize = ((Region) textarea.lookup(".styled-text-area")).getChildrenUnmodifiable().stream()
 //                .filter(Text.class::isInstance)
