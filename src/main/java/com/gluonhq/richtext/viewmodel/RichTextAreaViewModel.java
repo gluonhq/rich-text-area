@@ -29,7 +29,6 @@ import javafx.scene.input.ClipboardContent;
 
 import java.text.BreakIterator;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -147,7 +146,11 @@ public class RichTextAreaViewModel {
     private final ReadOnlyIntegerWrapper undoStackSizeProperty = new ReadOnlyIntegerWrapper(this, "undoStackSize") {
         @Override
         protected void invalidated() {
-            savedProperty.set(get() == undoStackSizeWhenSaved);
+            if (isAutoSave()) {
+                save();
+            } else {
+                savedProperty.set(get() == undoStackSizeWhenSaved);
+            }
         }
     };
     public final ReadOnlyIntegerProperty undoStackSizeProperty() {
@@ -232,6 +235,18 @@ public class RichTextAreaViewModel {
     }
     public final void setDocument(Document value) {
         documentProperty.set(value);
+    }
+
+    // autoSaveProperty
+    private final BooleanProperty autoSaveProperty = new SimpleBooleanProperty(this, "autoSave");
+    public final BooleanProperty autoSaveProperty() {
+       return autoSaveProperty;
+    }
+    public final boolean isAutoSave() {
+       return autoSaveProperty.get();
+    }
+    public final void setAutoSave(boolean value) {
+        autoSaveProperty.set(value);
     }
 
     // savedProperty
@@ -635,10 +650,8 @@ public class RichTextAreaViewModel {
 
     void save() {
         Document currentDocument = getCurrentDocument();
-        Platform.runLater(() -> {
-            undoStackSizeWhenSaved = getUndoStackSize();
-            savedProperty.set(true);
-            setDocument(currentDocument);
-        });
+        undoStackSizeWhenSaved = getUndoStackSize();
+        savedProperty.set(true);
+        setDocument(currentDocument);
     }
 }

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -88,9 +89,23 @@ public final class PieceTable extends AbstractTextBuffer {
 
     @Override
     public List<DecorationModel> getDecorationModelList() {
-        return pieces.stream()
-                .map(p -> new DecorationModel(p.start, p.length, p.getDecoration(), p.getParagraphDecoration()))
-                .collect(Collectors.toList());
+        List<DecorationModel> mergedList = new ArrayList<>();
+        if (!pieces.isEmpty()) {
+            AtomicInteger start = new AtomicInteger();
+            DecorationModel dm = null;
+            for (Piece piece : pieces) {
+                if (mergedList.isEmpty()) {
+                    dm = new DecorationModel(start.addAndGet(piece.start), piece.length, piece.getDecoration(), piece.getParagraphDecoration());
+                } else if (piece.getDecoration().equals(dm.getDecoration()) && piece.getParagraphDecoration().equals(dm.getParagraphDecoration())) {
+                    mergedList.remove(mergedList.size() - 1);
+                    dm = new DecorationModel(dm.getStart(), dm.getLength() + piece.length, dm.getDecoration(), dm.getParagraphDecoration());
+                } else {
+                    dm = new DecorationModel(start.addAndGet(dm.getLength()), piece.length, piece.getDecoration(), piece.getParagraphDecoration());
+                }
+                mergedList.add(dm);
+            }
+        }
+        return mergedList;
     }
 
     @Override
@@ -114,11 +129,11 @@ public final class PieceTable extends AbstractTextBuffer {
     }
 
     // internal append
-    Piece appendTextInternal(String text, Decoration decoration) {
+    Piece appendTextInternal(String text, Decoration decoration, ParagraphDecoration paragraphDecoration) {
         int pos = additionBuffer.length();
         additionBuffer += text;
         textLengthProperty.set(getTextLength() + text.length());
-        return new Piece(this, Piece.BufferType.ADDITION, pos, text.length(), decoration);
+        return new Piece(this, Piece.BufferType.ADDITION, pos, text.length(), decoration, paragraphDecoration);
     }
 
     /**
@@ -189,7 +204,7 @@ public final class PieceTable extends AbstractTextBuffer {
             }
             textPosition += piece.length;
         }
-        return null;
+        return previousPieceParagraphDecoration(index);
     }
 
     @Override
@@ -280,6 +295,11 @@ public final class PieceTable extends AbstractTextBuffer {
     Decoration previousPieceDecoration(int index) {
         return pieces.isEmpty() || !(pieces.get(index > 0 ? index - 1 : 0).getDecoration() instanceof TextDecoration) ?
                 TextDecoration.builder().presets().build() : pieces.get(index > 0 ? index - 1 : 0).getDecoration();
+    }
+
+    ParagraphDecoration previousPieceParagraphDecoration(int index) {
+        return pieces.isEmpty() ?
+                ParagraphDecoration.builder().presets().build() : pieces.get(index > 0 ? index - 1 : 0).getParagraphDecoration();
     }
 
     @Override
@@ -464,8 +484,11 @@ class AppendCmd extends AbstractPTCmd {
     protected void doRedo(PieceTable pt) {
         if (!text.isEmpty()) {
             int pos = pt.getTextLength();
-            newPiece = pt.appendTextInternal(text, pt.decorationAtCaret != null ?
-                    pt.decorationAtCaret : pt.previousPieceDecoration(pt.pieces.size()));
+            newPiece = pt.appendTextInternal(text,
+                    pt.decorationAtCaret != null ?
+                    pt.decorationAtCaret : pt.previousPieceDecoration(pt.pieces.size()),
+                    pt.getParagraphDecorationAtCaret(pos) != null ?
+                    pt.getParagraphDecorationAtCaret(pos) : pt.previousPieceParagraphDecoration(pt.pieces.size()));
             pt.pieces.add(newPiece);
             pt.fire(new TextBuffer.InsertEvent(text, pos));
             execSuccess = true;
@@ -521,9 +544,11 @@ class InsertCmd extends AbstractCommand<PieceTable> {
                 if (PieceTable.inRange(insertPosition, textPosition, piece.length)) {
                     int pieceOffset = insertPosition - textPosition;
                     final Decoration decoration = pieceOffset > 0 ? (TextDecoration) piece.getDecoration() : pt.previousPieceDecoration(pieceIndex);
+                    final ParagraphDecoration paragraphDecoration = pt.getParagraphDecorationAtCaret(insertPosition) != null ?
+                            pt.getParagraphDecorationAtCaret(insertPosition) : pt.previousPieceParagraphDecoration(pieceIndex);
                     newPieces = PieceTable.normalize(List.of(
                             piece.pieceBefore(pieceOffset),
-                            pt.appendTextInternal(text, decoration),
+                            pt.appendTextInternal(text, decoration, paragraphDecoration),
                             piece.pieceFrom(pieceOffset)
                     ));
                     oldPiece = piece;
@@ -680,9 +705,12 @@ class ImageDecorateCmd extends AbstractCommand<PieceTable> {
             throw new IllegalArgumentException("Position " + insertPosition + " is outside of text bounds [0, " + pt.getTextLength() + "]");
         }
 
+        final ParagraphDecoration paragraphDecoration = pt.getParagraphDecorationAtCaret(insertPosition) != null ?
+                pt.getParagraphDecorationAtCaret(insertPosition) : pt.previousPieceParagraphDecoration(insertPosition);
+
         if (insertPosition == pt.getTextLength()) {
             int pos = pt.getTextLength();
-            newPiece = pt.appendTextInternal(ZERO_WIDTH_TEXT, decoration);
+            newPiece = pt.appendTextInternal(ZERO_WIDTH_TEXT, decoration, paragraphDecoration);
             pt.pieces.add(newPiece);
             pt.fire(new TextBuffer.InsertEvent(ZERO_WIDTH_TEXT, pos));
             execSuccess = true;
@@ -692,7 +720,7 @@ class ImageDecorateCmd extends AbstractCommand<PieceTable> {
                     int pieceOffset = insertPosition - textPosition;
                     newPieces = PieceTable.normalize(List.of(
                             piece.pieceBefore(pieceOffset),
-                            pt.appendTextInternal(ZERO_WIDTH_TEXT, decoration),
+                            pt.appendTextInternal(ZERO_WIDTH_TEXT, decoration, paragraphDecoration),
                             piece.pieceFrom(pieceOffset)
                     ));
                     oldPiece = piece;
