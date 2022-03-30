@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.gluonhq.chatapp</groupId>
     <artifactId>chatapp</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.2</version>
     <packaging>pom</packaging>
     <name>ChatApp</name>
     <description>An application for peer-to-peer messaging.</description>
@@ -30,7 +30,7 @@
         <mapsVersion>2.0.0-ea+5</mapsVersion>
         <connectVersion>2.0.1</connectVersion>
         <javafxVersion>17.0.0.1</javafxVersion>
-        <controlsfxVersion>11.1.1</controlsfxVersion>
+        <controlsfxVersion>11.1.0</controlsfxVersion>
         <javafx-maven-plugin-version>0.0.8</javafx-maven-plugin-version>
         <gluonfx-maven-plugin-version>1.0.7</gluonfx-maven-plugin-version>
     </properties>
@@ -111,12 +111,12 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>gluon-nexus</id>
+            <url>https://nexus.gluonhq.com/nexus/content/repositories/public-snapshots/</url>
         </snapshotRepository>
         <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>gluon-nexus</id>
+            <url>https://nexus.gluonhq.com/nexus/content/repositories/releases/</url>
         </repository>
     </distributionManagement>
 </project>
