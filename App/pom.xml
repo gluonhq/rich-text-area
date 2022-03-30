@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.gluonhq.chatapp</groupId>
         <artifactId>chatapp</artifactId>
-        <version>1.1.0</version>
+        <version>1.1.1</version>
     </parent>
 
     <properties>
@@ -301,18 +301,18 @@
         <dependency>
             <groupId>com.gluonhq.chatapp</groupId>
             <artifactId>ChatListView</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.1</version>
         </dependency>
         <dependency>
             <groupId>com.gluonhq.chatapp</groupId>
             <artifactId>EmojiData</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.gluonhq.chatapp</groupId>
             <artifactId>EmojiTextArea</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.1</version>
             <scope>compile</scope>
         </dependency>
         <!--<dependency>
@@ -337,12 +337,12 @@
                 <dependency>
                     <groupId>com.gluonhq.chatapp</groupId>
                     <artifactId>orientation</artifactId>
-                    <version>1.1.0</version>
+                    <version>1.1.1</version>
                 </dependency>
                 <dependency>
                     <groupId>com.gluonhq.chatapp</groupId>
                     <artifactId>position</artifactId>
-                    <version>1.1.0</version>
+                    <version>1.1.1</version>
                 </dependency>
 
                 <!-- Attach for javafx:run -->
