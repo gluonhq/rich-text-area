@@ -38,7 +38,7 @@ public class Document {
         return text;
     }
 
-    public List<DecorationModel> getDecorationList() {
+    public List<DecorationModel> getDecorations() {
         return decorationList;
     }
 
