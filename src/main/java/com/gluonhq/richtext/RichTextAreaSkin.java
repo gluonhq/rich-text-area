@@ -1,14 +1,9 @@
 package com.gluonhq.richtext;
 
-import com.gluonhq.richtext.model.Document;
-import com.gluonhq.richtext.model.Paragraph;
-import com.gluonhq.richtext.model.PieceTable;
-import com.gluonhq.richtext.model.TextBuffer;
-import com.gluonhq.richtext.model.TextDecoration;
+import com.gluonhq.richtext.model.*;
 import com.gluonhq.richtext.viewmodel.ActionCmd;
 import com.gluonhq.richtext.viewmodel.ActionCmdFactory;
 import com.gluonhq.richtext.viewmodel.RichTextAreaViewModel;
-import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -24,25 +19,15 @@ import javafx.geometry.Bounds;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.Skin;
-import javafx.scene.control.SkinBase;
+import javafx.scene.control.*;
 import javafx.scene.control.skin.ListViewSkin;
 import javafx.scene.control.skin.VirtualFlow;
 import javafx.scene.image.Image;
-import javafx.scene.input.ContextMenuEvent;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
+import javafx.scene.input.*;
 import javafx.scene.shape.Path;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
-import javafx.util.Duration;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -54,28 +39,8 @@ import java.util.function.Function;
 
 import static com.gluonhq.richtext.viewmodel.RichTextAreaViewModel.Direction;
 import static java.util.Map.entry;
-import static javafx.scene.input.KeyCode.A;
-import static javafx.scene.input.KeyCode.B;
-import static javafx.scene.input.KeyCode.BACK_SPACE;
-import static javafx.scene.input.KeyCode.C;
-import static javafx.scene.input.KeyCode.DELETE;
-import static javafx.scene.input.KeyCode.DOWN;
-import static javafx.scene.input.KeyCode.END;
-import static javafx.scene.input.KeyCode.ENTER;
-import static javafx.scene.input.KeyCode.HOME;
-import static javafx.scene.input.KeyCode.I;
-import static javafx.scene.input.KeyCode.LEFT;
-import static javafx.scene.input.KeyCode.RIGHT;
-import static javafx.scene.input.KeyCode.UP;
-import static javafx.scene.input.KeyCode.V;
-import static javafx.scene.input.KeyCode.X;
-import static javafx.scene.input.KeyCode.Z;
-import static javafx.scene.input.KeyCombination.ALT_ANY;
-import static javafx.scene.input.KeyCombination.CONTROL_ANY;
-import static javafx.scene.input.KeyCombination.SHIFT_ANY;
-import static javafx.scene.input.KeyCombination.SHIFT_DOWN;
-import static javafx.scene.input.KeyCombination.SHORTCUT_ANY;
-import static javafx.scene.input.KeyCombination.SHORTCUT_DOWN;
+import static javafx.scene.input.KeyCode.*;
+import static javafx.scene.input.KeyCombination.*;
 import static javafx.scene.text.FontPosture.ITALIC;
 import static javafx.scene.text.FontPosture.REGULAR;
 import static javafx.scene.text.FontWeight.BOLD;
@@ -277,6 +242,9 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             setup(nv);
         });
         setup(control.getDocument());
+
+        control.setOnDragOver(this::dragOverListener);
+        control.setOnDragDropped(this::dragDroppedListener);
     }
 
     /// PROPERTIES ///////////////////////////////////////////////////////////////
@@ -475,4 +443,26 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         return menuItem;
     }
 
+    private void dragOverListener(DragEvent dragEvent) {
+        Dragboard dragboard = dragEvent.getDragboard();
+        if (dragboard.hasContent(DataFormat.IMAGE) || dragboard.hasString() || dragboard.hasUrl() | dragboard.hasFiles()) {
+            dragEvent.acceptTransferModes(TransferMode.ANY);
+        }
+    }
+
+    private void dragDroppedListener(DragEvent dragEvent) {
+        Dragboard dragboard = dragEvent.getDragboard();
+        if (!dragboard.getFiles().isEmpty()) {
+            dragboard.getFiles().forEach(file -> {
+                String url = file.toURI().toString();
+                getSkinnable().getActionFactory().decorate(new ImageDecoration(url)).execute(null);
+            });
+        } else if (dragboard.hasImage())  {
+            // TODO:implement
+        } else if (dragboard.hasUrl()) {
+            // TODO:insert URL as hyperlink once hyperlink support exists
+        } else if (dragboard.hasString()) {
+            ACTION_CMD_FACTORY.insertText(dragboard.getString()).apply(viewModel);
+        }
+    }
 }
