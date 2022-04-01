@@ -18,6 +18,7 @@ public class TextDecoration implements Decoration {
     private FontWeight fontWeight;
     private Boolean strikethrough;
     private Boolean underline;
+    private String url;
 
     private TextDecoration() {}
 
@@ -53,6 +54,10 @@ public class TextDecoration implements Decoration {
         return underline != null && underline;
     }
 
+    public String getURL() {
+        return url;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -78,6 +83,7 @@ public class TextDecoration implements Decoration {
         td.fontPosture = Objects.requireNonNullElse(fontPosture, decoration.fontPosture);
         td.strikethrough = Objects.requireNonNullElse(strikethrough, decoration.strikethrough);
         td.underline = Objects.requireNonNullElse(underline, decoration.underline);
+        td.url = url == null ? decoration.url : url;
         return td;
     }
 
@@ -93,12 +99,13 @@ public class TextDecoration implements Decoration {
                 fontPosture == that.fontPosture &&
                 fontWeight == that.fontWeight &&
                 Objects.equals(strikethrough, that.strikethrough) &&
-                Objects.equals(underline, that.underline);
+                Objects.equals(underline, that.underline) &&
+                Objects.equals(url, that.url);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(foreground, background, fontFamily, fontSize, fontPosture, fontWeight, strikethrough, underline);
+        return Objects.hash(foreground, background, fontFamily, fontSize, fontPosture, fontWeight, strikethrough, underline, url);
     }
 
     public static class Builder {
@@ -111,6 +118,7 @@ public class TextDecoration implements Decoration {
         private FontWeight fontWeight;
         private Boolean strikethrough;
         private Boolean underline;
+        private String url;
 
         private Builder() {}
 
@@ -124,6 +132,7 @@ public class TextDecoration implements Decoration {
             decoration.fontPosture = this.fontPosture;
             decoration.strikethrough = this.strikethrough;
             decoration.underline = this.underline;
+            decoration.url = this.url;
             return decoration;
         }
 
@@ -136,6 +145,7 @@ public class TextDecoration implements Decoration {
             fontWeight = FontWeight.NORMAL;
             strikethrough = false;
             underline = false;
+            url = null;
             return this;
         }
 
@@ -148,6 +158,7 @@ public class TextDecoration implements Decoration {
             fontWeight = decoration.fontWeight;
             strikethrough = decoration.strikethrough;
             underline = decoration.underline;
+            url = decoration.url;
             return this;
         }
 
@@ -190,6 +201,11 @@ public class TextDecoration implements Decoration {
             this.underline = underline;
             return this;
         }
+
+        public Builder url(String url) {
+            this.url = url;
+            return this;
+        }
     }
 
     @Override
@@ -204,6 +220,7 @@ public class TextDecoration implements Decoration {
                 "]" +
                 ", S:" + strikethrough +
                 ", U:" + underline +
+                ", URL:" + url +
                 "}";
     }
 }

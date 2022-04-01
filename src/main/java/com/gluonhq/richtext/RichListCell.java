@@ -5,6 +5,7 @@ import com.gluonhq.richtext.model.Paragraph;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
 import javafx.collections.ObservableSet;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.ListCell;
 import javafx.scene.image.Image;
@@ -21,6 +22,7 @@ import javafx.scene.text.TextFlow;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -171,6 +173,13 @@ class RichListCell extends ListCell<Paragraph> {
                         decoration.getFontSize()));
 
         text.setFont(font);
+        String url = decoration.getURL();
+        if (url != null) {
+            text.setUnderline(true);
+            text.setFill(Color.BLUE);
+            text.setCursor(Cursor.HAND);
+            text.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> launchBrowser(url));
+        }
         return text;
     }
 
@@ -214,5 +223,22 @@ class RichListCell extends ListCell<Paragraph> {
             return Optional.of((ParagraphTile) getGraphic());
         }
         return Optional.empty();
+    }
+
+    private void launchBrowser(String url) {
+        if (url == null || url.isEmpty()) {
+            return;
+        }
+        String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
+        try {
+            List<String> command = os.contains("mac") ?
+                    List.of("open", url) :
+                    os.contains("win") ?
+                            List.of("rundll32", "url.dll,FileProtocolHandler", url) :
+                            List.of("xdg-open", url);
+            Runtime.getRuntime().exec(command.toArray(String[]::new));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
