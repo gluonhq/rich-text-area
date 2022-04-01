@@ -1,7 +1,15 @@
 .rich-text-area .paragraph-list-view {
 }
 
+.rich-text-area .paragraph-tile {
+    /*-fx-background-color: #000ff010;*/
+}
+
 .rich-text-area .paragraph-tile > .content-area {
+    /*-fx-background-color: #000ff010;*/
+}
+
+.rich-text-area .paragraph-tile > .graphic-box {
     /*-fx-background-color: #000ff010;*/
 }
 

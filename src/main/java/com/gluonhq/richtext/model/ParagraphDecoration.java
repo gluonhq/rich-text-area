@@ -7,9 +7,16 @@ import java.util.Objects;
 
 public class ParagraphDecoration implements Decoration {
 
+    public enum GraphicType {
+        NONE,
+        NUMBERED_LIST,
+        BULLETED_LIST
+    }
     private double spacing;
     private TextAlignment alignment;
     private double topInset, rightInset, bottomInset, leftInset;
+    private int indentationLevel;
+    private GraphicType graphicType;
 
     private ParagraphDecoration() {}
 
@@ -41,6 +48,14 @@ public class ParagraphDecoration implements Decoration {
         this.bottomInset = bottomInset;
     }
 
+    public int getIndentationLevel() {
+        return indentationLevel;
+    }
+
+    public GraphicType getGraphicType() {
+        return graphicType;
+    }
+
     public static ParagraphDecoration.Builder builder() {
         return new ParagraphDecoration.Builder();
     }
@@ -55,12 +70,14 @@ public class ParagraphDecoration implements Decoration {
                 Double.compare(that.rightInset, rightInset) == 0 &&
                 Double.compare(that.bottomInset, bottomInset) == 0 &&
                 Double.compare(that.leftInset, leftInset) == 0 &&
+                that.indentationLevel == indentationLevel &&
+                that.graphicType == graphicType &&
                 alignment == that.alignment;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(spacing, alignment, topInset, rightInset, bottomInset, leftInset);
+        return Objects.hash(spacing, alignment, topInset, rightInset, bottomInset, leftInset, indentationLevel, graphicType);
     }
 
     @Override
@@ -68,13 +85,16 @@ public class ParagraphDecoration implements Decoration {
         return "PDec{" +
                 "s=" + spacing +
                 ", a=" + alignment +
-                ", [" + topInset + ", " + rightInset + ", " + bottomInset + ", " + leftInset + "]}";
+                ", [" + topInset + ", " + rightInset + ", " + bottomInset + ", " + leftInset + "]" +
+                ", i=" + indentationLevel + ", type=" + graphicType + "}";
     }
 
     public static class Builder {
         private double spacing;
         private TextAlignment alignment;
         private double topInset, rightInset, bottomInset, leftInset;
+        private int indentationLevel;
+        private GraphicType graphicType;
 
         private Builder() {}
 
@@ -86,6 +106,8 @@ public class ParagraphDecoration implements Decoration {
             decoration.rightInset = this.rightInset;
             decoration.bottomInset = this.bottomInset;
             decoration.leftInset = this.leftInset;
+            decoration.indentationLevel = this.indentationLevel;
+            decoration.graphicType = this.graphicType;
             return decoration;
         }
 
@@ -96,6 +118,8 @@ public class ParagraphDecoration implements Decoration {
             rightInset = 0;
             bottomInset = 0;
             leftInset = 0;
+            indentationLevel = 0;
+            graphicType = GraphicType.NONE;
             return this;
         }
 
@@ -106,6 +130,8 @@ public class ParagraphDecoration implements Decoration {
             this.rightInset = decoration.rightInset;
             this.bottomInset = decoration.bottomInset;
             this.leftInset = decoration.leftInset;
+            this.indentationLevel = decoration.indentationLevel;
+            this.graphicType = decoration.graphicType;
             return this;
         }
 
@@ -152,6 +178,16 @@ public class ParagraphDecoration implements Decoration {
 
         public Builder leftInset(double leftInset) {
             this.leftInset = leftInset;
+            return this;
+        }
+
+        public Builder indentationLevel(int indentationLevel) {
+            this.indentationLevel = indentationLevel;
+            return this;
+        }
+
+        public Builder graphicType(GraphicType graphicType) {
+            this.graphicType = graphicType;
             return this;
         }
     }
