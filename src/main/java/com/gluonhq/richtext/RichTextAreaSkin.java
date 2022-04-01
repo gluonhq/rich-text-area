@@ -8,6 +8,7 @@ import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.viewmodel.ActionCmd;
 import com.gluonhq.richtext.viewmodel.ActionCmdFactory;
 import com.gluonhq.richtext.viewmodel.RichTextAreaViewModel;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -41,8 +42,11 @@ import javafx.scene.shape.Path;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.util.Duration;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -146,6 +150,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final ChangeListener<Number> controlPrefWidthListener;
     private int nonTextNodesCount;
     AtomicInteger nonTextNodes = new AtomicInteger();
+
     private final ChangeListener<Document> documentChangeListener = (obs, ov, nv) -> {
         if (ov == null && nv != null) {
             // new/open
@@ -469,4 +474,5 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         menuItem.setOnAction(e -> actionCmd.apply(viewModel));
         return menuItem;
     }
+
 }
