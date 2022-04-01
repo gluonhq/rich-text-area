@@ -210,7 +210,7 @@ public class TextDecoration implements Decoration {
 
     @Override
     public String toString() {
-        return "TextDecoration{" +
+        return "TDec{" +
                 "fcolor=" + foreground +
                 ", bcolor=" + background +
                 ", font['" + fontFamily + '\'' +

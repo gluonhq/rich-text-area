@@ -59,7 +59,7 @@ public class ImageDecoration implements Decoration {
 
     @Override
     public String toString() {
-        return "ImageDecoration{" +
+        return "IDec{" +
                 "width=" + width +
                 ", height=" + height +
                 ", url='" + url + '\'' +

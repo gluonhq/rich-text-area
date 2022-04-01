@@ -5,6 +5,8 @@ import com.gluonhq.richtext.Tools;
 import com.gluonhq.richtext.model.Decoration;
 import com.gluonhq.richtext.model.Document;
 import com.gluonhq.richtext.model.ImageDecoration;
+import com.gluonhq.richtext.model.Paragraph;
+import com.gluonhq.richtext.model.ParagraphDecoration;
 import com.gluonhq.richtext.model.TextBuffer;
 import com.gluonhq.richtext.model.TextDecoration;
 import com.gluonhq.richtext.undo.CommandManager;
@@ -19,18 +21,26 @@ import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 
 import java.text.BreakIterator;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class RichTextAreaViewModel {
 
@@ -42,6 +52,8 @@ public class RichTextAreaViewModel {
     private BreakIterator wordIterator;
     private int undoStackSizeWhenSaved = 0;
 
+    private final ObservableList<Paragraph> paragraphList = FXCollections.observableArrayList();
+    Paragraph lastParagraph;
     /// PROPERTIES ///////////////////////////////////////////////////////////////
 
     // textBufferProperty
@@ -76,8 +88,9 @@ public class RichTextAreaViewModel {
             if (!hasSelection()) {
                 Decoration decorationAtCaret = getTextBuffer().getDecorationAtCaret(get());
                 if (decorationAtCaret instanceof TextDecoration) {
-                    setDecoration(decorationAtCaret);
+                    setDecorationAtCaret(decorationAtCaret);
                 }
+                getParagraphWithCaret().ifPresent(p -> setDecorationAtParagraph(p.getDecoration()));
             }
         }
     };
@@ -108,7 +121,7 @@ public class RichTextAreaViewModel {
         @Override
         protected void invalidated() {
             if (!get().isDefined()) {
-                setDecoration(getTextBuffer().getDecorationAtCaret(getCaretPosition()));
+                setDecorationAtCaret(getTextBuffer().getDecorationAtCaret(getCaretPosition()));
             }
         }
     };
@@ -165,8 +178,8 @@ public class RichTextAreaViewModel {
         editableProperty.set(value);
     }
 
-    // textDecorationProperty
-    private final ObjectProperty<Decoration> decorationProperty = new SimpleObjectProperty<>(this, "decoration") {
+    // decorationAtCaretProperty
+    private final ObjectProperty<Decoration> decorationAtCaretProperty = new SimpleObjectProperty<>(this, "decorationAtCaret") {
         @Override
         protected void invalidated() {
             if (get() instanceof TextDecoration && !getSelection().isDefined()) {
@@ -174,18 +187,43 @@ public class RichTextAreaViewModel {
             }
         }
     };
-    public final ObjectProperty<Decoration> decorationProperty() {
-       return decorationProperty;
+    public final ObjectProperty<Decoration> decorationAtCaretProperty() {
+       return decorationAtCaretProperty;
     }
-    public final Decoration getDecoration() {
-       return decorationProperty.get();
+    public final Decoration getDecorationAtCaret() {
+       return decorationAtCaretProperty.get();
     }
-    public final void setDecoration(Decoration value) {
-        decorationProperty.set(value);
+    public final void setDecorationAtCaret(Decoration value) {
+        decorationAtCaretProperty.set(value);
+    }
+
+    // decorationAtParagraphProperty
+    private final ObjectProperty<ParagraphDecoration> decorationAtParagraphProperty = new SimpleObjectProperty<>(this, "decorationAtParagraph") {
+        @Override
+        protected void invalidated() {
+        }
+    };
+    public final ObjectProperty<ParagraphDecoration> decorationAtParagraphProperty() {
+        return decorationAtParagraphProperty;
+    }
+    public final ParagraphDecoration getDecorationAtParagraph() {
+        return decorationAtParagraphProperty.get();
+    }
+    public final void setDecorationAtParagraph(ParagraphDecoration value) {
+        decorationAtParagraphProperty.set(value);
     }
 
     // documentProperty
-    private final ObjectProperty<Document> documentProperty = new SimpleObjectProperty<>(this, "document");
+    private final ObjectProperty<Document> documentProperty = new SimpleObjectProperty<>(this, "document") {
+        @Override
+        protected void invalidated() {
+            paragraphList.clear();
+            Document document = get();
+            if (document != null) {
+                updateParagraphList();
+            }
+        }
+    };
     public final ObjectProperty<Document> documentProperty() {
        return documentProperty;
     }
@@ -207,6 +245,10 @@ public class RichTextAreaViewModel {
 
     public RichTextAreaViewModel(BiFunction<Double, Boolean, Integer> getNextRowPosition) {
         this.getNextRowPosition = Objects.requireNonNull(getNextRowPosition);
+    }
+
+    public ObservableList<Paragraph> getParagraphList() {
+        return paragraphList;
     }
 
     public final void addChangeListener(Consumer<TextBuffer.Event> listener) {
@@ -246,8 +288,10 @@ public class RichTextAreaViewModel {
         int caretPosition = getCaretPosition();
         if (caretPosition >= getTextLength()) {
             getTextBuffer().append(text);
+            // text (with 0+ LF) appended to last paragraph or as new paragraphs
         } else {
             getTextBuffer().insert(text, caretPosition);
+            // text (with 0+ LF) inserted to some paragraph or as new paragraphs
         }
         moveCaretPosition(text.length());
     }
@@ -278,6 +322,29 @@ public class RichTextAreaViewModel {
             setCaretPosition(-1);
             getTextBuffer().decorate(caretPosition, 1, decoration);
             setCaretPosition(caretPosition + 1);
+        } else if (decoration instanceof ParagraphDecoration) {
+            if (getSelection().isDefined()) {
+                // check all possible paragraphs within selection
+                List<Paragraph> paragraphsWithSelection = getParagraphsWithSelection();
+                if (!paragraphsWithSelection.isEmpty()) {
+                    Selection selection = getSelection();
+                    int caretPosition = getCaretPosition();
+                    int start = paragraphsWithSelection.get(0).getStart();
+                    int end = paragraphsWithSelection.get(paragraphsWithSelection.size() - 1).getEnd();
+                    setCaretPosition(-1);
+                    clearSelection();
+                    getTextBuffer().decorate(start, end, decoration);
+                    setCaretPosition(caretPosition);
+                    setSelection(selection);
+                }
+            } else {
+                // only paragraph where caret is
+                int caretPosition = getCaretPosition();
+                Paragraph paragraph = getParagraphWithCaret().orElseThrow(() -> new IllegalArgumentException("No paragraph available"));
+                setCaretPosition(-1);
+                getTextBuffer().decorate(paragraph.getStart(), paragraph.getEnd(), decoration);
+                setCaretPosition(caretPosition);
+            }
         }
     }
 
@@ -389,10 +456,50 @@ public class RichTextAreaViewModel {
 
     }
 
-    public void walkFragments(BiConsumer<String, Decoration> onFragment) {
+    public void resetCharacterIterator() {
         getTextBuffer().resetCharacterIterator();
-        getTextBuffer().walkFragments(onFragment);
+        updateParagraphList();
         LOGGER.log(Level.FINE, getTextBuffer().toString());
+    }
+
+    public void walkFragments(BiConsumer<String, Decoration> onFragment, int start, int end) {
+        getTextBuffer().walkFragments(onFragment, start, end);
+    }
+
+    private void updateParagraphList() {
+        List<Integer> lineFeeds = getTextBuffer().getLineFeeds();
+        AtomicInteger pos = new AtomicInteger();
+        List<Paragraph> newParagraphList = new ArrayList<>();
+        lineFeeds.forEach(lfPos ->
+                newParagraphList.add(getParagraphAt(pos.getAndSet(lfPos), pos.incrementAndGet())));
+        if (pos.get() <= getTextLength()) {
+            lastParagraph = getParagraphAt(pos.get(), getTextLength());
+            newParagraphList.add(lastParagraph);
+        }
+        paragraphList.setAll(newParagraphList);
+    }
+
+    private Paragraph getParagraphAt(int start, int end) {
+        ParagraphDecoration pd = getTextBuffer().getParagraphDecorationAtCaret(start);
+        return new Paragraph(start, end, pd != null ? pd : ParagraphDecoration.builder().presets().build());
+    }
+
+    public Optional<Paragraph> getParagraphWithCaret() {
+        int position = getCaretPosition();
+        return paragraphList.stream()
+                .filter(p -> p.getStart() <= position &&
+                        position < (p.equals(lastParagraph) ? p.getEnd() + 1 : p.getEnd()))
+                .findFirst();
+    }
+
+    private List<Paragraph> getParagraphsWithSelection() {
+        Selection selection = getSelection();
+        if (!selection.isDefined()) {
+            return List.of();
+        }
+        return paragraphList.stream()
+                .filter(p -> !(p.getStart() > selection.getEnd() || p.getEnd() <= selection.getStart()))
+                .collect(Collectors.toList());
     }
 
     void undo() {
@@ -506,7 +613,7 @@ public class RichTextAreaViewModel {
         redoStackSizeProperty.set(commandManager.getRedoStackSize());
     }
 
-    public Document getCurrentDocument() {
+    private Document getCurrentDocument() {
         return new Document(getTextBuffer().getText(), getTextBuffer().getDecorationModelList(), getCaretPosition());
     }
 

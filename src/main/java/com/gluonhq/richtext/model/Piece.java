@@ -12,32 +12,25 @@ public final class Piece {
     final BufferType bufferType;
     final int start;                // start position with the buffer
     final int length;               // text length
-//    final int[] lineStops;          // array if line stop indexes
-    final Decoration decoration;
+    final Decoration decoration;    // the piece can contain only a single TextDecoration or ImageDecoration
+    final ParagraphDecoration paragraphDecoration; // the piece can contain only a single ParagraphDecoration,
+                                                   // but it can contain zero, one or more line feed characters
 
     public Piece(final PieceTable source, final BufferType bufferType, final int start, final int length) {
-        this(source, bufferType, start, length, null);
+        this(source, bufferType, start, length, null, null);
     }
 
     public Piece(final PieceTable source, final BufferType bufferType, final int start, final int length, Decoration decoration) {
+        this(source, bufferType, start, length, decoration, null);
+    }
 
+    public Piece(final PieceTable source, final BufferType bufferType, final int start, final int length, Decoration decoration, ParagraphDecoration paragraphDecoration) {
         this.bufferType = bufferType;
         this.start = start;
         this.length = Math.max(length, 0);
         this.source = Objects.requireNonNull(source);
         this.decoration = decoration == null ? TextDecoration.builder().presets().build() : decoration;
-
-
-        // find all the line stops
-//        if (length == 0) {
-//            lineStops = new int[0];
-//        } else {
-//            String text = getText();
-//            lineStops = IntStream
-//                    .range(0, text.length())
-//                    .filter(i -> text.charAt(i) == '\n')
-//                    .toArray();
-//        }
+        this.paragraphDecoration = paragraphDecoration;
     }
 
     public boolean isEmpty() {
@@ -61,18 +54,26 @@ public final class Piece {
         return decoration;
     }
 
+    public ParagraphDecoration getParagraphDecoration() {
+        return paragraphDecoration;
+    }
+
     Piece copy(int newStart, int newLength) {
-        return new Piece(source, bufferType, newStart, newLength, decoration);
+        return new Piece(source, bufferType, newStart, newLength, decoration, paragraphDecoration);
     }
 
     Piece copy(int newStart, int newLength, Decoration newDecoration) {
         if (decoration instanceof TextDecoration) {
             return new Piece(source, bufferType, newStart, newLength,
                     newDecoration instanceof TextDecoration ?
-                            ((TextDecoration) newDecoration).normalize((TextDecoration) decoration) : newDecoration);
+                            ((TextDecoration) newDecoration).normalize((TextDecoration) decoration) : newDecoration, paragraphDecoration);
         } else {
-            return new Piece(source, bufferType, newStart, newLength, decoration);
+            return new Piece(source, bufferType, newStart, newLength, decoration, paragraphDecoration);
         }
+    }
+
+    Piece copy(int newStart, int newLength, Decoration decoration, ParagraphDecoration newParagraphDecoration) {
+        return new Piece(source, bufferType, newStart, newLength, decoration, newParagraphDecoration);
     }
 
     // excludes char at offset
@@ -93,6 +94,7 @@ public final class Piece {
                 ", [" + start +
                 ", " + length +
                 "], " + decoration +
-                ", \"" + getText().replaceAll("\n", "<n>").replaceAll(PieceTable.ZERO_WIDTH_TEXT, "<a>") + "\"}";
+                ", " + paragraphDecoration +
+                ", \"" + getText().replaceAll("\n", "<n>").replaceAll(TextBuffer.ZERO_WIDTH_TEXT, "<a>") + "\"}";
     }
 }
