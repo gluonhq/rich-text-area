@@ -16,20 +16,22 @@
     -fx-padding: 10;
 }
 
-.rich-text-area > .scroll-pane {
+.rich-text-area {
+    -fx-background-color: whitesmoke;
     -fx-padding: 20;
 }
 
-.rich-text-area .content-area {
+.rich-text-area > .paragraph-list-view {
+    -fx-padding: 10;
     -fx-background-color: white;
     -fx-border-color: black;
 }
 
-.rich-text-area:readonly .content-area {
+.rich-text-area:readonly .paragraph-list-view {
     -fx-background-color: lightblue;
-    -fx-border-color: darkgray;
+    /*-fx-border-color: darkgray;*/
 }
 
-.rich-text-area .content-area > .layers > .text-flow {
-    -fx-padding: 10;
+.rich-text-area .paragraph-list-view > .content-area > .layers > .text-flow {
+    /*-fx-padding: 10;*/
 }

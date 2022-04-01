@@ -10,16 +10,15 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-import static com.gluonhq.richtext.model.PieceTable.ZERO_WIDTH_TEXT;
+import static com.gluonhq.richtext.model.TextBuffer.ZERO_WIDTH_TEXT;
 
 /**
  * Piece table implementation.<br>
  * More info at  https://en.wikipedia.org/wiki/Piece_table
  */
 public final class PieceTable extends AbstractTextBuffer {
-
-    static final String ZERO_WIDTH_TEXT = "\u200b";
 
     final String originalText;
     String additionBuffer = "";
@@ -34,20 +33,16 @@ public final class PieceTable extends AbstractTextBuffer {
      * Creates piece table using original text
      * @param document model with decorated text to start with
      */
-     public PieceTable(Document document) {
+    public PieceTable(Document document) {
         this.originalText = Objects.requireNonNull(Objects.requireNonNull(document).getText());
-        if (document.getDecorationList() == null) {
-            pieces.add(piece(Piece.BufferType.ORIGINAL, 0, originalText.length()));
+        if (document.getDecorations() == null) {
+            pieces.add(new Piece(PieceTable.this, Piece.BufferType.ORIGINAL, 0, originalText.length()));
         } else {
-            document.getDecorationList().forEach(d ->
-                    pieces.add(new Piece(PieceTable.this, Piece.BufferType.ORIGINAL, d.getStart(), d.getLength(), d.getDecoration())));
+            document.getDecorations().forEach(d ->
+                    pieces.add(new Piece(PieceTable.this, Piece.BufferType.ORIGINAL, d.getStart(), d.getLength(), d.getDecoration(), d.getParagraphDecoration())));
         }
         textLengthProperty.set(pieces.stream().mapToInt(b -> b.length).sum());
         pieceCharacterIterator = new PieceCharacterIterator(this);
-    }
-
-    private Piece piece(Piece.BufferType bufferType, int start, int length ) {
-        return new Piece( this, bufferType, start, length );
     }
 
     /**
@@ -94,7 +89,7 @@ public final class PieceTable extends AbstractTextBuffer {
     @Override
     public List<DecorationModel> getDecorationModelList() {
         return pieces.stream()
-                .map(p -> new DecorationModel(p.start, p.length, p.getDecoration()))
+                .map(p -> new DecorationModel(p.start, p.length, p.getDecoration(), p.getParagraphDecoration()))
                 .collect(Collectors.toList());
     }
 
@@ -106,6 +101,11 @@ public final class PieceTable extends AbstractTextBuffer {
     @Override
     public char charAt(int pos) {
         return pieceCharacterIterator.charAt(pos);
+    }
+
+    @Override
+    public List<Integer> getLineFeeds() {
+        return pieceCharacterIterator.getLineFeedList();
     }
 
     @Override
@@ -136,6 +136,8 @@ public final class PieceTable extends AbstractTextBuffer {
             commander.execute(new TextDecorateCmd(start, end, decoration));
         } else if (decoration instanceof ImageDecoration) {
             commander.execute(new ImageDecorateCmd((ImageDecoration) decoration, start));
+        } else if (decoration instanceof ParagraphDecoration) {
+            commander.execute(new ParagraphDecorateCmd(start, end, (ParagraphDecoration) decoration));
         } else {
             throw new IllegalArgumentException("Decoration type not supported: " + decoration);
         }
@@ -144,10 +146,22 @@ public final class PieceTable extends AbstractTextBuffer {
     /**
      * Walks through text fragments. Each fragment is represented by related text and decoration
      * @param onFragment callback to get fragment info
+     * @param start the initial position of the fragment
+     * @param end the end position of the fragment (not included)
      */
     @Override
-    public void walkFragments(BiConsumer<String, Decoration> onFragment) {
-        pieces.forEach(p -> onFragment.accept(p.getText(), p.getDecoration()));
+    public void walkFragments(BiConsumer<String, Decoration> onFragment, int start, int end) {
+        StringBuilder sb = new StringBuilder();
+        walkPieces((p, i, tp) -> {
+            sb.append(p.getText());
+            if (start <= tp + p.length && end > tp && !p.getText().isEmpty()) {
+                String text = sb.substring(Math.max(start, tp), Math.min(end, tp + p.length));
+                if (!text.isEmpty()) {
+                    onFragment.accept(text, p.getDecoration());
+                }
+            }
+            return (end <= tp);
+        });
     }
 
     @Override
@@ -162,6 +176,20 @@ public final class PieceTable extends AbstractTextBuffer {
             textPosition += piece.length;
         }
         return previousPieceDecoration(index);
+    }
+
+    @Override
+    public ParagraphDecoration getParagraphDecorationAtCaret(int caretPosition) {
+        int textPosition = 0;
+        int index = 0;
+        for (; index < pieces.size(); index++) {
+            Piece piece = pieces.get(index);
+            if (textPosition <= caretPosition && caretPosition < textPosition + piece.length) {
+                return piece.getParagraphDecoration();
+            }
+            textPosition += piece.length;
+        }
+        return null;
     }
 
     @Override
@@ -267,11 +295,13 @@ public final class PieceTable extends AbstractTextBuffer {
 
 class PieceCharacterIterator implements CharacterIterator {
 
+    private static final char LF = 0x0a;
     private final PieceTable pt;
     private int begin;
     private int end;
     private int pos;
     private int[] posArray;
+    private List<Integer> lineFeedList;
 
     public PieceCharacterIterator(PieceTable pt) {
         this.pt = Objects.requireNonNull(pt);
@@ -284,7 +314,16 @@ class PieceCharacterIterator implements CharacterIterator {
         this.pos = 0;
 
         posArray = new int[pt.pieces.size() + 1];
+        lineFeedList = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
         pt.walkPieces((p, i, tp) -> {
+            sb.append(p.getText());
+            String text = sb.substring(tp);
+            IntStream.iterate(text.indexOf(LF),
+                            index -> index >= 0,
+                            index -> text.indexOf(LF, index + 1))
+                    .boxed()
+                    .forEach(index -> lineFeedList.add(tp + index));
             posArray[i] = tp;
             return false;
         });
@@ -301,6 +340,10 @@ class PieceCharacterIterator implements CharacterIterator {
             }
         }
         return 0;
+    }
+
+    public List<Integer> getLineFeedList() {
+        return lineFeedList;
     }
 
     @Override
@@ -775,6 +818,110 @@ class TextDecorateCmd extends AbstractCommand<PieceTable> {
     public String toString() {
         return "TextDecorateCmd[" + start +
                 " x " + end + "]";
+    }
+}
+
+class ParagraphDecorateCmd extends AbstractCommand<PieceTable> {
+
+    private int start;
+    private int end;
+    private final ParagraphDecoration paragraphDecoration;
+
+    private boolean execSuccess = false;
+    private int pieceIndex = -1;
+    private Collection<Piece> newPieces = new ArrayList<>();
+    private Collection<Piece> oldPieces = new ArrayList<>();
+
+    /**
+     * Decorates the text within the given paragraph with the supplied decoration.
+     * @param start index of the first character to decorate
+     * @param end index of the last character to decorate
+     * @param paragraphDecoration Decorations to apply on the selected paragraph
+     */
+    ParagraphDecorateCmd(int start, int end, ParagraphDecoration paragraphDecoration) {
+        this.start = start;
+        this.end = end;
+        this.paragraphDecoration = paragraphDecoration;
+    }
+
+    @Override
+    protected void doUndo(PieceTable pt) {
+        if (execSuccess) {
+            pt.pieces.addAll(pieceIndex, oldPieces);
+            pt.pieces.removeAll(newPieces);
+
+            oldPieces.forEach(piece -> {
+                pt.fire(new TextBuffer.DecorateEvent(piece.start, piece.start + piece.length, piece.decoration));
+            });
+        }
+    }
+
+    @Override
+    protected void doRedo(PieceTable pt) {
+        if (!PieceTable.inRange(start, 0, pt.getTextLength() + 1)) {
+            throw new IllegalArgumentException("Position " + start + " is outside of text bounds [0, " + pt.getTextLength() + ")");
+        }
+
+        //  Accept length larger than actual and adjust it to actual
+        if (end >= pt.getTextLength()) {
+            end = pt.getTextLength();
+        }
+
+        final int[] startPieceIndex = new int[1];
+        final List<Piece> additions = new ArrayList<>(); // start and end pieces
+        final List<Piece> removals = new ArrayList<>();
+
+        pt.walkPieces((piece, pieceIndex, textPosition) -> {
+            if (isPieceInSelection(piece, textPosition)) {
+                startPieceIndex[0] = pieceIndex;
+                if (textPosition <= start) {
+                    int offset = start - textPosition;
+                    int length;
+                    if (textPosition + piece.length > end) {
+                        length = Math.min(end - start, piece.length); // selection ends in current piece
+                    } else {
+                        length = piece.length - offset; // selection spans over next piece(s)
+                    }
+                    if (offset > 0) {
+                        additions.add(piece.pieceBefore(offset));
+                    }
+                    additions.add(piece.copy(piece.start + offset, length, piece.decoration, paragraphDecoration));
+                    if (end < textPosition + piece.length) {
+                        additions.add(piece.pieceFrom(end - textPosition));
+                    }
+                    removals.add(piece);
+                }  else if (textPosition + piece.length <= end) { // entire piece is in selection
+                    additions.add(piece.copy(piece.start, piece.length, piece.decoration, paragraphDecoration));
+                    removals.add(piece);
+                } else if (textPosition < end) {
+                    int offset = end - textPosition;
+                    additions.add(piece.copy(piece.start, offset, piece.decoration, paragraphDecoration));
+                    additions.add(piece.pieceFrom(offset));
+                    removals.add(piece);
+                }
+            }
+            return false;
+        });
+
+        newPieces = PieceTable.normalize(additions);
+        oldPieces = removals;
+        if (newPieces.size() > 0 || oldPieces.size() > 0) {
+            pieceIndex = startPieceIndex[0];
+            pt.pieces.addAll(pieceIndex, newPieces);
+            pt.pieces.removeAll(oldPieces);
+            pt.fire(new TextBuffer.DecorateEvent(start, end, paragraphDecoration));
+            execSuccess = true;
+        }
+    }
+
+    private boolean isPieceInSelection(Piece piece, int textPosition) {
+        int pieceEndPosition = textPosition + piece.length - 1;
+        return start <= pieceEndPosition && (end >= pieceEndPosition || end >= textPosition);
+    }
+
+    @Override
+    public String toString() {
+        return "ParagraphDecorateCmd[" + start + " x " + end + "]";
     }
 }
 

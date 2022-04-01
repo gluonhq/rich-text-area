@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.gluonhq.richtext.model.PieceTable.ZERO_WIDTH_TEXT;
+import static com.gluonhq.richtext.model.TextBuffer.ZERO_WIDTH_TEXT;
 
 public class Document {
 
@@ -21,7 +21,11 @@ public class Document {
     }
 
     public Document(String text, int caretPosition) {
-        this(text, List.of(new DecorationModel(0, text.length(), TextDecoration.builder().presets().build())), caretPosition);
+        this(text,
+                List.of(new DecorationModel(0, text.length(),
+                        TextDecoration.builder().presets().build(),
+                        ParagraphDecoration.builder().presets().build())),
+                caretPosition);
     }
 
     public Document(String text, List<DecorationModel> decorationList, int caretPosition) {
@@ -34,7 +38,7 @@ public class Document {
         return text;
     }
 
-    public List<DecorationModel> getDecorationList() {
+    public List<DecorationModel> getDecorations() {
         return decorationList;
     }
 
@@ -47,7 +51,8 @@ public class Document {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Document document = (Document) o;
-        return Objects.equals(text, document.text) && Objects.equals(decorationList, document.decorationList);
+        return Objects.equals(text, document.text) &&
+                Objects.equals(decorationList, document.decorationList);
     }
 
     @Override
