@@ -19,6 +19,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -235,10 +236,13 @@ public class Main extends Application {
         statusBar.getChildren().setAll(textLengthLabel);
 
         Menu fileMenu = new Menu("File");
+        CheckMenuItem autoSaveMenuItem = new CheckMenuItem("Auto Save");
+        editor.autoSaveProperty().bind(autoSaveMenuItem.selectedProperty());
         fileMenu.getItems().addAll(
                 actionMenuItem("New Text", LineAwesomeSolid.FILE, editor.getActionFactory().newDocument()),
                 actionMenuItem("Open Text", LineAwesomeSolid.FOLDER_OPEN, editor.getActionFactory().open(document)),
                 new SeparatorMenuItem(),
+                autoSaveMenuItem,
                 actionMenuItem("Save Text", LineAwesomeSolid.SAVE, editor.getActionFactory().save()));
         Menu editMenu = new Menu("Edit");
         editMenu.getItems().addAll(

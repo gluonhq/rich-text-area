@@ -57,6 +57,18 @@ public class RichTextArea extends Control {
         documentProperty.set(value);
     }
 
+    // autoSaveProperty
+    private final BooleanProperty autoSaveProperty = new SimpleBooleanProperty(this, "autoSave");
+    public final BooleanProperty autoSaveProperty() {
+       return autoSaveProperty;
+    }
+    public final boolean isAutoSave() {
+       return autoSaveProperty.get();
+    }
+    public final void setAutoSave(boolean value) {
+        autoSaveProperty.set(value);
+    }
+
     // modifiedProperty
     final ReadOnlyBooleanWrapper modifiedProperty = new ReadOnlyBooleanWrapper(this, "modified");
     public final ReadOnlyBooleanProperty modifiedProperty() {

@@ -290,6 +290,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         viewModel.caretPositionProperty().removeListener(caretChangeListener);
         viewModel.removeChangeListener(textChangeListener);
         viewModel.documentProperty().removeListener(documentChangeListener);
+        viewModel.autoSaveProperty().unbind();
         lastValidCaretPosition = -1;
         getSkinnable().editableProperty().removeListener(this::editableChangeListener);
         getSkinnable().textLengthProperty.unbind();
@@ -327,6 +328,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         viewModel.addChangeListener(textChangeListener);
         viewModel.setDocument(document);
         viewModel.documentProperty().addListener(documentChangeListener);
+        viewModel.autoSaveProperty().bind(getSkinnable().autoSaveProperty());
         getSkinnable().textLengthProperty.bind(viewModel.textLengthProperty());
         getSkinnable().modifiedProperty.bind(viewModel.savedProperty().not());
         getSkinnable().setOnContextMenuRequested(contextMenuEventEventHandler);
