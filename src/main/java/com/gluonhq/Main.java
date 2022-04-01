@@ -44,6 +44,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
@@ -68,6 +70,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.gluonhq.richtext.model.ParagraphDecoration.GraphicType.BULLETED_LIST;
+import static com.gluonhq.richtext.model.ParagraphDecoration.GraphicType.NUMBERED_LIST;
 import static javafx.scene.text.FontPosture.ITALIC;
 import static javafx.scene.text.FontPosture.REGULAR;
 import static javafx.scene.text.FontWeight.BOLD;
@@ -199,7 +203,6 @@ public class Main extends Application {
 
         ToolBar toolbar = new ToolBar();
         toolbar.getItems().setAll(
-                presets,
                 actionButton(LineAwesomeSolid.FILE,  editor.getActionFactory().newDocument()),
                 actionButton(LineAwesomeSolid.FOLDER_OPEN, editor.getActionFactory().open(document)),
                 actionButton(LineAwesomeSolid.SAVE,  editor.getActionFactory().save()),
@@ -213,7 +216,11 @@ public class Main extends Application {
                 new Separator(Orientation.VERTICAL),
                 actionImage(LineAwesomeSolid.IMAGE),
                 actionHyperlink(LineAwesomeSolid.LINK),
-                new Separator(Orientation.VERTICAL),
+                new Separator(Orientation.VERTICAL));
+
+        ToolBar fontsToolbar = new ToolBar();
+        fontsToolbar.getItems().setAll(
+                presets,
                 fontFamilies,
                 fontSize,
                 createToggleButton(LineAwesomeSolid.BOLD, property -> new TextDecorateAction<>(editor, property, d -> d.getFontWeight() == BOLD, (builder, a) -> builder.fontWeight(a ? BOLD : NORMAL).build())),
@@ -238,8 +245,35 @@ public class Main extends Application {
                 createSpinner("Right", p -> new ParagraphDecorateAction<>(editor, p, v -> (int) v.getRightInset(), (builder, a) -> builder.rightInset(a).build())),
                 createSpinner("Bottom", p -> new ParagraphDecorateAction<>(editor, p, v -> (int) v.getBottomInset(), (builder, a) -> builder.bottomInset(a).build())),
                 createSpinner("Left", p -> new ParagraphDecorateAction<>(editor, p, v -> (int) v.getLeftInset(), (builder, a) -> builder.leftInset(a).build())),
+                new Separator(Orientation.VERTICAL),
+                createToggleButton(LineAwesomeSolid.LIST_OL, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getGraphicType() == NUMBERED_LIST, (builder, a) -> builder.graphicType(NUMBERED_LIST).build())),
+                createToggleButton(LineAwesomeSolid.LIST_UL, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getGraphicType() == BULLETED_LIST, (builder, a) -> builder.graphicType(BULLETED_LIST).build())),
+                createSpinner("Indent", p -> new ParagraphDecorateAction<>(editor, p, ParagraphDecoration::getIndentationLevel, (builder, a) -> builder.indentationLevel(a).build())),
                 new Separator(Orientation.VERTICAL)
         );
+
+        editor.setParagraphGraphicFactory((indent, type) -> {
+            if (type == null) {
+                return null;
+            }
+            switch (type) {
+                case NUMBERED_LIST:
+                    return new Label("#.");
+                case BULLETED_LIST:
+                    switch (indent) {
+                        case 0:
+                            return null;
+                        case 1:
+                            return new Circle(2);
+                        case 2:
+                            return new Rectangle(3, 3);
+                        default:
+                            return new Label("-");
+                    }
+                default:
+                    return null;
+            }
+        });
 
         HBox statusBar = new HBox(10);
         statusBar.getStyleClass().add("status-bar");
@@ -267,7 +301,7 @@ public class Main extends Application {
 //        menuBar.setUseSystemMenuBar(true);
 
         BorderPane root = new BorderPane(editor);
-        root.setTop(new VBox(menuBar, toolbar, paragraphToolbar));
+        root.setTop(new VBox(menuBar, toolbar, fontsToolbar, paragraphToolbar));
         root.setBottom(statusBar);
 
         Scene scene = new Scene(root, 960, 580);
@@ -302,7 +336,7 @@ public class Main extends Application {
         Spinner<Integer> spinner = new Spinner<>();
         SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 20);
         spinner.setValueFactory(valueFactory);
-        spinner.setPrefWidth(80);
+        spinner.setPrefWidth(60);
         spinner.setEditable(false);
         function.apply(valueFactory.valueProperty());
         HBox spinnerBox = new HBox(5, new Label(text), spinner);

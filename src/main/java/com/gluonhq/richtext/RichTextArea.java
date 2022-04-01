@@ -2,6 +2,7 @@ package com.gluonhq.richtext;
 
 import com.gluonhq.richtext.action.ActionFactory;
 import com.gluonhq.richtext.model.Document;
+import com.gluonhq.richtext.model.ParagraphDecoration;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -15,10 +16,14 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.css.PseudoClass;
+import javafx.scene.Node;
 import javafx.scene.control.Control;
 import javafx.scene.control.SkinBase;
 
+import java.util.BitSet;
 import java.util.Objects;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class RichTextArea extends Control {
 
@@ -140,6 +145,19 @@ public class RichTextArea extends Control {
     public final void setContentAreaWidth(double value) {
         contentAreaWidthProperty.set(value);
     }
+
+    // paragraphGraphicFactoryProperty
+    private final ObjectProperty<BiFunction<Integer, ParagraphDecoration.GraphicType, Node>> paragraphGraphicFactoryProperty = new SimpleObjectProperty<>(this, "paragraphGraphicFactory");
+    public final ObjectProperty<BiFunction<Integer, ParagraphDecoration.GraphicType, Node>> paragraphGraphicFactoryProperty() {
+       return paragraphGraphicFactoryProperty;
+    }
+    public final BiFunction<Integer, ParagraphDecoration.GraphicType, Node> getParagraphGraphicFactory() {
+       return paragraphGraphicFactoryProperty.get();
+    }
+    public final void setParagraphGraphicFactory(BiFunction<Integer, ParagraphDecoration.GraphicType, Node> value) {
+        paragraphGraphicFactoryProperty.set(value);
+    }
+
 
     public final ActionFactory getActionFactory() {
         return actionFactory;

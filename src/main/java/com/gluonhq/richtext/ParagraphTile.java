@@ -5,6 +5,8 @@ import com.gluonhq.richtext.model.ParagraphDecoration;
 import com.gluonhq.richtext.viewmodel.RichTextAreaViewModel;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
@@ -12,7 +14,10 @@ import javafx.collections.SetChangeListener;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -32,9 +37,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public class ParagraphTile extends HBox {
+
+    private static final double INDENT_PADDING = 10.0;
 
     private final Timeline caretTimeline = new Timeline(
             new KeyFrame(Duration.ZERO        , e -> setCaretVisibility(false)),
@@ -62,6 +71,7 @@ public class ParagraphTile extends HBox {
     private final RichTextAreaViewModel viewModel;
 
     private Paragraph paragraph;
+    private final HBox graphicBox;
     private double textFlowLayoutX, textFlowLayoutY;
     private final ChangeListener<Number> caretPositionListener = (o, ocp, p) -> updateCaretPosition(p.intValue());
     private final ChangeListener<Selection> selectionListener = (o, os, selection) -> updateSelection(selection);
@@ -88,13 +98,17 @@ public class ParagraphTile extends HBox {
         root.getStyleClass().setAll("content-area");
         layers.getChildren().addAll(0, textBackgroundColorPaths);
         textBackgroundColorPaths.addListener(this::updateLayers);
-        // TODO: add left label for list decoration, line number, indentation
-        getChildren().add(root);
+        graphicBox = new HBox();
+        graphicBox.getStyleClass().add("graphic-box");
+        graphicBox.setAlignment(Pos.TOP_RIGHT);
+        getChildren().addAll(graphicBox, root);
+        setSpacing(0);
     }
 
     void setParagraph(Paragraph paragraph) {
         viewModel.caretPositionProperty().removeListener(caretPositionListener);
         viewModel.selectionProperty().removeListener(selectionListener);
+        graphicFactoryProperty.unbind();
         if (paragraph == null) {
             return;
         }
@@ -102,7 +116,13 @@ public class ParagraphTile extends HBox {
         ParagraphDecoration decoration = paragraph.getDecoration();
         textFlow.setTextAlignment(decoration.getAlignment());
         textFlow.setLineSpacing(decoration.getSpacing());
+        graphicFactoryProperty.bind(control.paragraphGraphicFactoryProperty());
+        double graphicPrefWidth = decoration.getIndentationLevel() * INDENT_PADDING;
+        textFlow.setPrefWidth(richTextAreaSkin.textFlowPrefWidthProperty.get() - graphicPrefWidth);
         textFlow.setPadding(new Insets(decoration.getTopInset(), decoration.getRightInset(), decoration.getBottomInset(), decoration.getLeftInset()));
+        graphicBox.setPadding(new Insets(decoration.getTopInset(), 2, decoration.getBottomInset(), 0));
+        graphicBox.setMinWidth(graphicPrefWidth);
+        graphicBox.setMaxWidth(graphicPrefWidth);
         textFlowLayoutX = 1d + decoration.getLeftInset();
         textFlowLayoutY = 1d + decoration.getTopInset();
         viewModel.caretPositionProperty().addListener(caretPositionListener);
@@ -124,6 +144,41 @@ public class ParagraphTile extends HBox {
     ObservableSet<Path> getTextBackgroundColorPaths() {
         return textBackgroundColorPaths;
     }
+
+    // graphicFactoryProperty
+    private final ObjectProperty<BiFunction<Integer, ParagraphDecoration.GraphicType, Node>> graphicFactoryProperty = new SimpleObjectProperty<>(this, "graphicFactory") {
+        @Override
+        protected void invalidated() {
+            graphicBox.getChildren().clear();
+            ParagraphDecoration decoration = paragraph.getDecoration();
+            int indentationLevel = decoration.getIndentationLevel();
+            Node node = get().apply(indentationLevel, decoration.getGraphicType());
+
+            if (node != null) {
+                if (node instanceof Label) {
+                    String text = ((Label) node).getText();
+                    if (text != null && text.contains("#")) {
+                        AtomicInteger ordinal = new AtomicInteger();
+                        viewModel.getParagraphList().stream()
+                                .filter(p -> p.getDecoration().getIndentationLevel() == indentationLevel)
+                                .peek(p -> {
+                                    if (p.getDecoration().getGraphicType() == ParagraphDecoration.GraphicType.BULLETED_LIST) {
+                                        // restart ordinal if previous paragraph with same indentation is a bulleted list
+                                        ordinal.set(0);
+                                    } else {
+                                        ordinal.incrementAndGet();
+                                    }
+                                })
+                                .filter(p -> paragraph.equals(p))
+                                .findFirst()
+                                .ifPresent(p ->
+                                        ((Label) node).setText(text.replace("#", "" + ordinal.get())));
+                    }
+                }
+                graphicBox.getChildren().add(node);
+            }
+        }
+    };
 
     void mousePressedListener(MouseEvent e) {
         if (control.isDisabled()) {

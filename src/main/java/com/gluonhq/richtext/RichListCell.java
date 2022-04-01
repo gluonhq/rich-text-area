@@ -113,7 +113,6 @@ class RichListCell extends ListCell<Paragraph> {
                 }
             }, item.getStart(), item.getEnd());
             paragraphTile.getTextFlow().getChildren().setAll(fragments);
-            paragraphTile.getTextFlow().setPrefWidth(richTextAreaSkin.textFlowPrefWidthProperty.get());
             paragraphTile.setParagraph(item);
             addBackgroundPathsToLayers(paragraphTile.getTextFlow(), paragraphTile.getTextBackgroundColorPaths(), backgroundIndexRanges);
             setGraphic(paragraphTile);
