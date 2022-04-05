@@ -68,6 +68,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.gluonhq.richtextarea.model.ParagraphDecoration.GraphicType.BULLETED_LIST;
+import static com.gluonhq.richtextarea.model.ParagraphDecoration.GraphicType.NONE;
 import static com.gluonhq.richtextarea.model.ParagraphDecoration.GraphicType.NUMBERED_LIST;
 import static javafx.scene.text.FontPosture.ITALIC;
 import static javafx.scene.text.FontPosture.REGULAR;
@@ -232,9 +233,9 @@ public class Main extends Application {
         ToolBar paragraphToolbar = new ToolBar();
         paragraphToolbar.getItems().setAll(
                 createToggleButton(LineAwesomeSolid.ALIGN_LEFT, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == TextAlignment.LEFT, (builder, a) -> builder.alignment(TextAlignment.LEFT).build())),
-                createToggleButton(LineAwesomeSolid.ALIGN_CENTER, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == TextAlignment.CENTER, (builder, a) -> builder.alignment(TextAlignment.CENTER).build())),
-                createToggleButton(LineAwesomeSolid.ALIGN_RIGHT, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == TextAlignment.RIGHT, (builder, a) -> builder.alignment(TextAlignment.RIGHT).build())),
-                createToggleButton(LineAwesomeSolid.ALIGN_JUSTIFY, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == TextAlignment.JUSTIFY, (builder, a) -> builder.alignment(TextAlignment.JUSTIFY).build())),
+                createToggleButton(LineAwesomeSolid.ALIGN_CENTER, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == TextAlignment.CENTER, (builder, a) -> builder.alignment(a ? TextAlignment.CENTER : TextAlignment.LEFT).build())),
+                createToggleButton(LineAwesomeSolid.ALIGN_RIGHT, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == TextAlignment.RIGHT, (builder, a) -> builder.alignment(a ? TextAlignment.RIGHT : TextAlignment.LEFT).build())),
+                createToggleButton(LineAwesomeSolid.ALIGN_JUSTIFY, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == TextAlignment.JUSTIFY, (builder, a) -> builder.alignment(a ? TextAlignment.JUSTIFY : TextAlignment.LEFT).build())),
                 new Separator(Orientation.VERTICAL),
                 createSpinner("Spacing", p -> new ParagraphDecorateAction<>(editor, p, v -> (int) v.getSpacing(), (builder, a) -> builder.spacing(a).build())),
                 new Separator(Orientation.VERTICAL),
@@ -243,8 +244,8 @@ public class Main extends Application {
                 createSpinner("Bottom", p -> new ParagraphDecorateAction<>(editor, p, v -> (int) v.getBottomInset(), (builder, a) -> builder.bottomInset(a).build())),
                 createSpinner("Left", p -> new ParagraphDecorateAction<>(editor, p, v -> (int) v.getLeftInset(), (builder, a) -> builder.leftInset(a).build())),
                 new Separator(Orientation.VERTICAL),
-                createToggleButton(LineAwesomeSolid.LIST_OL, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getGraphicType() == NUMBERED_LIST, (builder, a) -> builder.graphicType(NUMBERED_LIST).build())),
-                createToggleButton(LineAwesomeSolid.LIST_UL, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getGraphicType() == BULLETED_LIST, (builder, a) -> builder.graphicType(BULLETED_LIST).build())),
+                createToggleButton(LineAwesomeSolid.LIST_OL, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getGraphicType() == NUMBERED_LIST, (builder, a) -> builder.graphicType(a ? NUMBERED_LIST : NONE).build())),
+                createToggleButton(LineAwesomeSolid.LIST_UL, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getGraphicType() == BULLETED_LIST, (builder, a) -> builder.graphicType(a ? BULLETED_LIST : NONE).build())),
                 createSpinner("Indent", p -> new ParagraphDecorateAction<>(editor, p, ParagraphDecoration::getIndentationLevel, (builder, a) -> builder.indentationLevel(a).build())),
                 new Separator(Orientation.VERTICAL)
         );
