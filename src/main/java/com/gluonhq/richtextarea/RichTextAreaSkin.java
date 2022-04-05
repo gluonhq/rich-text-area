@@ -9,6 +9,7 @@ import com.gluonhq.richtextarea.viewmodel.ActionCmd;
 import com.gluonhq.richtextarea.viewmodel.ActionCmdFactory;
 import com.gluonhq.richtextarea.viewmodel.RichTextAreaViewModel;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
@@ -162,6 +163,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     };
 
     private final ChangeListener<Number> caretChangeListener;
+    private final InvalidationListener focusListener;
 
     private class RichVirtualFlow extends VirtualFlow<ListCell<Paragraph>> {
 
@@ -262,8 +264,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
         caretChangeListener = (obs, ov, nv) -> viewModel.getParagraphWithCaret()
                 .ifPresent(paragraph -> Platform.runLater(paragraphListView::scrollIfNeeded));
+        focusListener = o -> paragraphListView.updateLayout();
 
-        // all listeners have to be removed within dispose method
         control.documentProperty().addListener((obs, ov, nv) -> {
             if (viewModel.isSaved()) {
                 getSkinnable().requestFocus();
@@ -296,6 +298,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().setOnKeyPressed(null);
         getSkinnable().setOnKeyTyped(null);
         getSkinnable().widthProperty().removeListener(controlPrefWidthListener);
+        getSkinnable().focusedProperty().removeListener(focusListener);
         contextMenu.getItems().clear();
         editableContextMenuItems = null;
         nonEditableContextMenuItems = null;
@@ -334,6 +337,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().setOnKeyPressed(this::keyPressedListener);
         getSkinnable().setOnKeyTyped(this::keyTypedListener);
         getSkinnable().widthProperty().addListener(controlPrefWidthListener);
+        getSkinnable().focusedProperty().addListener(focusListener);
         refreshTextFlow();
         requestLayout();
         editableChangeListener(null); // sets up all related listeners
