@@ -22,11 +22,11 @@ import javafx.scene.text.TextFlow;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -177,7 +177,15 @@ class RichListCell extends ListCell<Paragraph> {
             text.setUnderline(true);
             text.setFill(Color.BLUE);
             text.setCursor(Cursor.HAND);
-            text.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> launchBrowser(url));
+            text.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+                Function<Node, Consumer<String>> linkCallbackFactory = richTextAreaSkin.getSkinnable().getLinkCallbackFactory();
+                if (linkCallbackFactory != null) {
+                    Consumer<String> consumer = linkCallbackFactory.apply(text);
+                    if (consumer != null) {
+                        consumer.accept(url);
+                    }
+                }
+            });
         }
         return text;
     }
@@ -196,7 +204,16 @@ class RichListCell extends ListCell<Paragraph> {
             imageView.setPreserveRatio(true);
         }
         if (imageDecoration.getLink() != null) {
-            // TODO Add action to open link on mouseClick
+            imageView.setCursor(Cursor.HAND);
+            imageView.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+                Function<Node, Consumer<String>> linkCallbackFactory = richTextAreaSkin.getSkinnable().getLinkCallbackFactory();
+                if (linkCallbackFactory != null) {
+                    Consumer<String> consumer = linkCallbackFactory.apply(imageView);
+                    if (consumer != null) {
+                        consumer.accept(imageDecoration.getLink());
+                    }
+                }
+            });
         }
         return imageView;
     }
@@ -224,20 +241,4 @@ class RichListCell extends ListCell<Paragraph> {
         return Optional.empty();
     }
 
-    private void launchBrowser(String url) {
-        if (url == null || url.isEmpty()) {
-            return;
-        }
-        String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
-        try {
-            List<String> command = os.contains("mac") ?
-                    List.of("open", url) :
-                    os.contains("win") ?
-                            List.of("rundll32", "url.dll,FileProtocolHandler", url) :
-                            List.of("xdg-open", url);
-            Runtime.getRuntime().exec(command.toArray(String[]::new));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }
