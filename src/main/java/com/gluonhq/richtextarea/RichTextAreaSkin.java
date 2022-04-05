@@ -2,6 +2,7 @@ package com.gluonhq.richtextarea;
 
 import com.gluonhq.richtextarea.model.Document;
 import com.gluonhq.richtextarea.model.Paragraph;
+import com.gluonhq.richtextarea.model.ParagraphDecoration;
 import com.gluonhq.richtextarea.model.PieceTable;
 import com.gluonhq.richtextarea.model.TextBuffer;
 import com.gluonhq.richtextarea.model.TextDecoration;
@@ -64,6 +65,7 @@ import static javafx.scene.input.KeyCode.HOME;
 import static javafx.scene.input.KeyCode.I;
 import static javafx.scene.input.KeyCode.LEFT;
 import static javafx.scene.input.KeyCode.RIGHT;
+import static javafx.scene.input.KeyCode.TAB;
 import static javafx.scene.input.KeyCode.UP;
 import static javafx.scene.input.KeyCode.V;
 import static javafx.scene.input.KeyCode.X;
@@ -109,10 +111,18 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             FontWeight fontWeight = decoration.getFontWeight() == BOLD ? NORMAL : BOLD;
             return ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().fromDecoration(decoration).fontWeight(fontWeight).build());
         }),
-        entry( new KeyCodeCombination(I, SHORTCUT_DOWN),                                    e -> {
+        entry(new KeyCodeCombination(I, SHORTCUT_DOWN),                                      e -> {
             TextDecoration decoration = (TextDecoration) viewModel.getDecorationAtCaret();
             FontPosture fontPosture = decoration.getFontPosture() == ITALIC ? REGULAR : ITALIC;
             return ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().fromDecoration(decoration).fontPosture(fontPosture).build());
+        }),
+        entry(new KeyCodeCombination(TAB, SHIFT_ANY),                                        e -> {
+            ParagraphDecoration decoration = viewModel.getDecorationAtParagraph();
+            if (decoration.getGraphicType() != ParagraphDecoration.GraphicType.NONE) {
+                int level = Math.max(decoration.getIndentationLevel() + (e.isShiftDown() ? -1 : 1), 0);
+                return ACTION_CMD_FACTORY.decorateParagraph(ParagraphDecoration.builder().fromDecoration(decoration).indentationLevel(level).build());
+            }
+            return null;
         })
     );
 
@@ -431,7 +441,11 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         // Find an applicable action and execute it if found
         for (KeyCombination kc : INPUT_MAP.keySet()) {
             if (kc.match(e)) {
-                execute(INPUT_MAP.get(kc).apply(e));
+                ActionBuilder actionBuilder = INPUT_MAP.get(kc);
+                ActionCmd actionCmd = actionBuilder.apply(e);
+                if (actionCmd != null) {
+                    execute(actionCmd);
+                }
                 e.consume();
                 return;
             }
@@ -440,6 +454,14 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private void keyTypedListener(KeyEvent e) {
         if (isCharOnly(e)) {
+            if ("\t".equals(e.getCharacter())) {
+                ParagraphDecoration decoration = viewModel.getDecorationAtParagraph();
+                if (decoration.getGraphicType() != ParagraphDecoration.GraphicType.NONE) {
+                    // processed via keyPressedListener
+                    e.consume();
+                    return;
+                }
+            }
             if (viewModel.getSelection().isDefined()) {
                 execute(ACTION_CMD_FACTORY.removeText(-1));
             }
