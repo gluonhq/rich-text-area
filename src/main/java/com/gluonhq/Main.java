@@ -44,8 +44,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
@@ -250,29 +248,6 @@ public class Main extends Application {
                 createSpinner("Indent", p -> new ParagraphDecorateAction<>(editor, p, ParagraphDecoration::getIndentationLevel, (builder, a) -> builder.indentationLevel(a).build())),
                 new Separator(Orientation.VERTICAL)
         );
-
-        editor.setParagraphGraphicFactory((indent, type) -> {
-            if (type == null) {
-                return null;
-            }
-            switch (type) {
-                case NUMBERED_LIST:
-                    return new Label("#.");
-                case BULLETED_LIST:
-                    switch (indent) {
-                        case 0:
-                            return null;
-                        case 1:
-                            return new Circle(2);
-                        case 2:
-                            return new Rectangle(3, 3);
-                        default:
-                            return new Label("-");
-                    }
-                default:
-                    return null;
-            }
-        });
 
         HBox statusBar = new HBox(10);
         statusBar.getStyleClass().add("status-bar");

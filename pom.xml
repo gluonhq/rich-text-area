@@ -94,6 +94,9 @@
                 <version>${javafx.plugin.version}</version>
                 <configuration>
                     <mainClass>${main.class}</mainClass>
+                    <options>
+                        <option>--add-exports=javafx.graphics/com.sun.javafx.tk=ALL-UNNAMED</option>
+                    </options>
                 </configuration>
                 <executions>
                     <execution>
