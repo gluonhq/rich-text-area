@@ -3,8 +3,6 @@ package com.gluonhq.richtextarea;
 import com.gluonhq.richtextarea.model.Paragraph;
 import com.gluonhq.richtextarea.model.ParagraphDecoration;
 import com.gluonhq.richtextarea.viewmodel.RichTextAreaViewModel;
-import com.sun.javafx.tk.FontLoader;
-import com.sun.javafx.tk.Toolkit;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.value.ChangeListener;
@@ -150,7 +148,7 @@ public class ParagraphTile extends HBox {
         if (graphicFactory != null) {
             graphicNode = graphicFactory.apply(indentationLevel, decoration.getGraphicType());
         }
-        double spanPrefWidth = Math.max((indentationLevel - (graphicNode != null ? 1 : 0)) * INDENT_PADDING, 0d);
+        double spanPrefWidth = Math.max((indentationLevel - (graphicNode == null ? 0 : 1)) * INDENT_PADDING, 0d);
 
         if (graphicNode == null) {
             graphicBox.setMinWidth(spanPrefWidth);
@@ -196,13 +194,9 @@ public class ParagraphTile extends HBox {
                         .orElse(null);
                 Font font = Font.font(textNode != null ? textNode.getFont().getSize() : 12d);
                 numberedListLabel.setFont(font);
-                FontLoader fontLoader = Toolkit.getToolkit().getFontLoader();
-                double labelPrefWidth = numberedListLabel.getText().chars()
-                        .mapToDouble(c -> fontLoader.getCharWidth((char) c, font))
-                        .sum() + 1d;
-                nodePrefWidth = Math.max(labelPrefWidth, INDENT_PADDING);
-                // TODO: For now, same as caretY, but should be the prefHeight of the Label
-                nodePrefHeight = caretY;
+                double w = Tools.computeStringWidth(font, numberedListLabel.getText());
+                nodePrefWidth = Math.max(w + 1, INDENT_PADDING);
+                nodePrefHeight = Tools.computeStringHeight(font, numberedListLabel.getText());
             }
         } else {
             nodePrefWidth = Math.max(graphicNode.prefWidth(-1), INDENT_PADDING);

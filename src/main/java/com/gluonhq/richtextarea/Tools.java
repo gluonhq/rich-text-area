@@ -1,6 +1,9 @@
 package com.gluonhq.richtextarea;
 
 import javafx.scene.control.IndexRange;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextBoundsType;
 
 public class Tools {
 
@@ -36,5 +39,39 @@ public class Tools {
             return "-";
         }
         return name.substring(0, 1);
+    }
+
+    private static final Text helperText = new Text();
+    private static final double TEXT_WRAPPING_WIDTH = helperText.getWrappingWidth();
+    private static final double TEXT_LINE_SPACING = helperText.getLineSpacing();
+    private static final String TEXT_CONTENT = helperText.getText();
+    private static final TextBoundsType TEXT_BOUNDS_TYPE = helperText.getBoundsType();
+
+    public static double computeStringWidth(Font font, String text) {
+        helperText.setText(text);
+        helperText.setFont(font);
+        helperText.setWrappingWidth(0);
+        helperText.setLineSpacing(0);
+        double width = Math.min(helperText.prefWidth(-1), Double.MAX_VALUE);
+        helperText.setWrappingWidth((int) Math.ceil(width));
+        width = helperText.getLayoutBounds().getWidth();
+        helperText.setWrappingWidth(TEXT_WRAPPING_WIDTH);
+        helperText.setLineSpacing(TEXT_LINE_SPACING);
+        helperText.setText(TEXT_CONTENT);
+        return width;
+    }
+
+    public static double computeStringHeight(Font font, String text) {
+        helperText.setText(text);
+        helperText.setFont(font);
+        helperText.setWrappingWidth((int) Double.MAX_VALUE);
+        helperText.setLineSpacing(0);
+        helperText.setBoundsType(TextBoundsType.LOGICAL);
+        final double height = helperText.getLayoutBounds().getHeight();
+        helperText.setWrappingWidth(TEXT_WRAPPING_WIDTH);
+        helperText.setLineSpacing(TEXT_LINE_SPACING);
+        helperText.setText(TEXT_CONTENT);
+        helperText.setBoundsType(TEXT_BOUNDS_TYPE);
+        return height;
     }
 }

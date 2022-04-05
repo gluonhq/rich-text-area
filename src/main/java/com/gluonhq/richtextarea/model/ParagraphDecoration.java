@@ -189,7 +189,7 @@ public class ParagraphDecoration implements Decoration {
 
         public Builder graphicType(GraphicType graphicType) {
             this.graphicType = graphicType;
-            this.indentationLevel = Math.max(graphicType != GraphicType.NONE ? 1 : 0, indentationLevel);
+            this.indentationLevel = Math.max(graphicType == GraphicType.NONE ? 0 : 1, indentationLevel);
             return this;
         }
     }
