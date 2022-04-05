@@ -104,7 +104,19 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         entry( new KeyCodeCombination(Z, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.undo()),
         entry( new KeyCodeCombination(Z, SHORTCUT_DOWN, SHIFT_DOWN),                         e -> ACTION_CMD_FACTORY.redo()),
         entry( new KeyCodeCombination(ENTER, SHIFT_ANY),                                     e -> ACTION_CMD_FACTORY.insertText("\n")),
-        entry( new KeyCodeCombination(BACK_SPACE, SHIFT_ANY),                                e -> ACTION_CMD_FACTORY.removeText(-1)),
+        entry( new KeyCodeCombination(BACK_SPACE, SHIFT_ANY),                                e -> {
+            int caret = viewModel.getCaretPosition();
+            return viewModel.getParagraphWithCaret()
+                    .filter(p -> p.getStart() == caret)
+                    .map(p -> {
+                        ParagraphDecoration decoration = viewModel.getDecorationAtParagraph();
+                        if (decoration.getGraphicType() != ParagraphDecoration.GraphicType.NONE) {
+                            return ACTION_CMD_FACTORY.decorateParagraph(ParagraphDecoration.builder().fromDecoration(decoration).graphicType(ParagraphDecoration.GraphicType.NONE).build());
+                        }
+                        return null;
+                    })
+                    .orElse(ACTION_CMD_FACTORY.removeText(-1));
+        }),
         entry( new KeyCodeCombination(DELETE),                                               e -> ACTION_CMD_FACTORY.removeText(0)),
         entry( new KeyCodeCombination(B, SHORTCUT_DOWN),                                     e -> {
             TextDecoration decoration = (TextDecoration) viewModel.getDecorationAtCaret();
