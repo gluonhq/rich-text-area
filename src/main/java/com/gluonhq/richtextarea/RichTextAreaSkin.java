@@ -1,6 +1,7 @@
 package com.gluonhq.richtextarea;
 
 import com.gluonhq.richtextarea.model.Document;
+import com.gluonhq.richtextarea.model.ImageDecoration;
 import com.gluonhq.richtextarea.model.Paragraph;
 import com.gluonhq.richtextarea.model.ParagraphDecoration;
 import com.gluonhq.richtextarea.model.PieceTable;
@@ -36,9 +37,12 @@ import javafx.scene.control.skin.ListViewSkin;
 import javafx.scene.control.skin.VirtualFlow;
 import javafx.scene.image.Image;
 import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.shape.Path;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
@@ -156,7 +160,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow();
     int lastValidCaretPosition = -1;
-    int dragStart = -1;
+    int mouseDragStart = -1;
+    int dragAndDropStart = -1;
     int anchorIndex = -1;
     Paragraph lastParagraph = null;
 
@@ -186,6 +191,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private final ChangeListener<Number> caretChangeListener;
     private final InvalidationListener focusListener;
+    private final EventHandler<DragEvent> dndHandler = this::dndListener;
 
     private class RichVirtualFlow extends VirtualFlow<ListCell<Paragraph>> {
 
@@ -321,6 +327,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().setOnKeyTyped(null);
         getSkinnable().widthProperty().removeListener(controlPrefWidthListener);
         getSkinnable().focusedProperty().removeListener(focusListener);
+        getSkinnable().removeEventHandler(DragEvent.ANY, dndHandler);
         contextMenu.getItems().clear();
         editableContextMenuItems = null;
         nonEditableContextMenuItems = null;
@@ -360,6 +367,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().setOnKeyTyped(this::keyTypedListener);
         getSkinnable().widthProperty().addListener(controlPrefWidthListener);
         getSkinnable().focusedProperty().addListener(focusListener);
+        getSkinnable().addEventHandler(DragEvent.ANY, dndHandler);
         refreshTextFlow();
         requestLayout();
         editableChangeListener(null); // sets up all related listeners
@@ -511,6 +519,51 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         menuItem.disableProperty().bind(actionCmd.getDisabledBinding(viewModel));
         menuItem.setOnAction(e -> actionCmd.apply(viewModel));
         return menuItem;
+    }
+
+    private void dndListener(DragEvent dragEvent) {
+        if (dragEvent.getEventType() == DragEvent.DRAG_ENTERED) {
+            dragAndDropStart = 1;
+        } else if (dragEvent.getEventType() == DragEvent.DRAG_DONE || dragEvent.getEventType() == DragEvent.DRAG_EXITED) {
+            dragAndDropStart = -1;
+        } else if (dragEvent.getEventType() == DragEvent.DRAG_OVER) {
+            Dragboard dragboard = dragEvent.getDragboard();
+            if (dragboard.hasImage() || dragboard.hasString() || dragboard.hasUrl() | dragboard.hasFiles()) {
+                dragEvent.acceptTransferModes(TransferMode.ANY);
+            }
+        } else if (dragEvent.getEventType() == DragEvent.DRAG_DROPPED) {
+            Dragboard dragboard = dragEvent.getDragboard();
+            if (!dragboard.getFiles().isEmpty()) {
+                dragboard.getFiles().forEach(file -> {
+                    String url = file.toURI().toString();
+                    // validate image before adding it
+                    if (url != null && new Image(url).getException() == null) {
+                        ACTION_CMD_FACTORY.decorateImage(new ImageDecoration(url)).apply(viewModel);
+                    }
+                });
+            } else if (dragboard.hasUrl()) {
+                String url = dragboard.getUrl();
+                // validate if url is an image before adding it:
+                if (url != null) {
+                    if (new Image(url).getException() == null) {
+                        ACTION_CMD_FACTORY.decorateImage(new ImageDecoration(url)).apply(viewModel);
+                    } else {
+                        // add hyperlink to text, makes a selection at the current word where is dropped
+                        viewModel.selectCurrentWord();
+                        if (!viewModel.getSelection().isDefined()) {
+                            int caret = viewModel.getCaretPosition();
+                            ACTION_CMD_FACTORY.insertText(url).apply(viewModel);
+                            viewModel.setSelection(new Selection(caret, caret + url.length()));
+                        }
+                        ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().url(url).build()).apply(viewModel);
+                    }
+                }
+            } else if (dragboard.hasString()) {
+                ACTION_CMD_FACTORY.insertText(dragboard.getString()).apply(viewModel);
+            }
+            requestLayout();
+            dragAndDropStart = -1;
+        }
     }
 
 }
