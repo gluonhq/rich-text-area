@@ -73,7 +73,7 @@ public final class Piece {
     }
 
     Piece copy(int newStart, int newLength, Decoration decoration, ParagraphDecoration newParagraphDecoration) {
-        return new Piece(source, bufferType, newStart, newLength, decoration, newParagraphDecoration);
+        return new Piece(source, bufferType, newStart, newLength, decoration, newParagraphDecoration.normalize(paragraphDecoration));
     }
 
     // excludes char at offset
