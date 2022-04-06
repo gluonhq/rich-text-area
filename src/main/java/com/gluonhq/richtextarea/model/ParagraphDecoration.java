@@ -12,10 +12,10 @@ public class ParagraphDecoration implements Decoration {
         NUMBERED_LIST,
         BULLETED_LIST
     }
-    private double spacing;
+    private Double spacing;
     private TextAlignment alignment;
-    private double topInset, rightInset, bottomInset, leftInset;
-    private int indentationLevel;
+    private Double topInset, rightInset, bottomInset, leftInset;
+    private int indentationLevel = -1;
     private GraphicType graphicType;
 
     private ParagraphDecoration() {}
@@ -60,6 +60,23 @@ public class ParagraphDecoration implements Decoration {
         return new ParagraphDecoration.Builder();
     }
 
+    public ParagraphDecoration normalize(ParagraphDecoration decoration) {
+        if (decoration == null) {
+            return this;
+        }
+
+        ParagraphDecoration pd = new ParagraphDecoration();
+        pd.spacing = Objects.requireNonNullElse(spacing, decoration.spacing);
+        pd.alignment = Objects.requireNonNullElse(alignment, decoration.alignment);
+        pd.topInset = Objects.requireNonNullElse(topInset, decoration.topInset);
+        pd.rightInset = Objects.requireNonNullElse(rightInset, decoration.rightInset);
+        pd.bottomInset = Objects.requireNonNullElse(bottomInset, decoration.bottomInset);
+        pd.leftInset = Objects.requireNonNullElse(leftInset, decoration.leftInset);
+        pd.indentationLevel = indentationLevel < 0 ? decoration.indentationLevel : indentationLevel;
+        pd.graphicType = Objects.requireNonNullElse(graphicType, decoration.graphicType);
+        return pd;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -90,10 +107,10 @@ public class ParagraphDecoration implements Decoration {
     }
 
     public static class Builder {
-        private double spacing;
+        private Double spacing;
         private TextAlignment alignment;
-        private double topInset, rightInset, bottomInset, leftInset;
-        private int indentationLevel;
+        private Double topInset, rightInset, bottomInset, leftInset;
+        private int indentationLevel = -1;
         private GraphicType graphicType;
 
         private Builder() {}
@@ -112,12 +129,12 @@ public class ParagraphDecoration implements Decoration {
         }
 
         public Builder presets() {
-            spacing = 0;
+            spacing = 0d;
             alignment = TextAlignment.LEFT;
-            topInset = 0;
-            rightInset = 0;
-            bottomInset = 0;
-            leftInset = 0;
+            topInset = 0d;
+            rightInset = 0d;
+            bottomInset = 0d;
+            leftInset = 0d;
             indentationLevel = 0;
             graphicType = GraphicType.NONE;
             return this;
