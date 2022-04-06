@@ -147,7 +147,8 @@ public class RichTextArea extends Control {
     }
 
     // paragraphGraphicFactoryProperty
-    private final ObjectProperty<BiFunction<Integer, ParagraphDecoration.GraphicType, Node>> paragraphGraphicFactoryProperty = new SimpleObjectProperty<>(this, "paragraphGraphicFactory");
+    private final ObjectProperty<BiFunction<Integer, ParagraphDecoration.GraphicType, Node>> paragraphGraphicFactoryProperty =
+            new SimpleObjectProperty<>(this, "paragraphGraphicFactory", DefaultParagraphGraphicFactory.getFactory());
     public final ObjectProperty<BiFunction<Integer, ParagraphDecoration.GraphicType, Node>> paragraphGraphicFactoryProperty() {
        return paragraphGraphicFactoryProperty;
     }

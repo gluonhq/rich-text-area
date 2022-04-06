@@ -63,6 +63,9 @@ class RichListCell extends ListCell<Paragraph> {
             getParagraphTile().ifPresentOrElse(
                     p -> p.mousePressedListener(event),
                     () -> {
+                        if (!richTextAreaSkin.getSkinnable().isFocused()) {
+                            richTextAreaSkin.getSkinnable().requestFocus();
+                        }
                         // process click event on lower empty cells
                         int textLength = richTextAreaSkin.getViewModel().getTextLength();
                         if (richTextAreaSkin.getViewModel().getSelection().isDefined()) {
