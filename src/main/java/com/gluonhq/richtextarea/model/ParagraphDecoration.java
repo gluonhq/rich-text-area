@@ -200,11 +200,13 @@ public class ParagraphDecoration implements Decoration {
 
         public Builder indentationLevel(int indentationLevel) {
             this.indentationLevel = indentationLevel;
+            this.graphicType = indentationLevel == 0 ? GraphicType.NONE : graphicType;
             return this;
         }
 
         public Builder graphicType(GraphicType graphicType) {
             this.graphicType = graphicType;
+            this.indentationLevel = Math.max(graphicType == GraphicType.NONE ? 0 : 1, indentationLevel);
             return this;
         }
     }
