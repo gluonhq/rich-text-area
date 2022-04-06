@@ -259,7 +259,7 @@ public class ParagraphTile extends HBox {
 
     private void updateCaretPosition(int caretPosition) {
         caretShape.getElements().clear();
-        if (paragraph == null || caretPosition < paragraph.getStart() || getParagraphLimit() <= caretPosition) {
+        if (!control.isFocused() || paragraph == null || caretPosition < paragraph.getStart() || getParagraphLimit() <= caretPosition) {
             caretTimeline.stop();
             return;
         }
