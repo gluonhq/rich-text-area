@@ -5,8 +5,6 @@ import com.gluonhq.richtextarea.model.ParagraphDecoration;
 import com.gluonhq.richtextarea.viewmodel.RichTextAreaViewModel;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
@@ -40,10 +38,11 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ParagraphTile extends HBox {
 
-    private static final double INDENT_PADDING = 10.0;
+    private static final double INDENT_PADDING = 20.0;
 
     private final Timeline caretTimeline = new Timeline(
             new KeyFrame(Duration.ZERO        , e -> setCaretVisibility(false)),
@@ -108,7 +107,6 @@ public class ParagraphTile extends HBox {
     void setParagraph(Paragraph paragraph) {
         viewModel.caretPositionProperty().removeListener(caretPositionListener);
         viewModel.selectionProperty().removeListener(selectionListener);
-        graphicFactoryProperty.unbind();
         if (paragraph == null) {
             return;
         }
@@ -116,13 +114,9 @@ public class ParagraphTile extends HBox {
         ParagraphDecoration decoration = paragraph.getDecoration();
         textFlow.setTextAlignment(decoration.getAlignment());
         textFlow.setLineSpacing(decoration.getSpacing());
-        graphicFactoryProperty.bind(control.paragraphGraphicFactoryProperty());
-        double graphicPrefWidth = decoration.getIndentationLevel() * INDENT_PADDING;
-        textFlow.setPrefWidth(richTextAreaSkin.textFlowPrefWidthProperty.get() - graphicPrefWidth);
+        updateBox(control.getParagraphGraphicFactory());
         textFlow.setPadding(new Insets(decoration.getTopInset(), decoration.getRightInset(), decoration.getBottomInset(), decoration.getLeftInset()));
         graphicBox.setPadding(new Insets(decoration.getTopInset(), 2, decoration.getBottomInset(), 0));
-        graphicBox.setMinWidth(graphicPrefWidth);
-        graphicBox.setMaxWidth(graphicPrefWidth);
         textFlowLayoutX = 1d + decoration.getLeftInset();
         textFlowLayoutY = 1d + decoration.getTopInset();
         viewModel.caretPositionProperty().addListener(caretPositionListener);
@@ -145,40 +139,75 @@ public class ParagraphTile extends HBox {
         return textBackgroundColorPaths;
     }
 
-    // graphicFactoryProperty
-    private final ObjectProperty<BiFunction<Integer, ParagraphDecoration.GraphicType, Node>> graphicFactoryProperty = new SimpleObjectProperty<>(this, "graphicFactory") {
-        @Override
-        protected void invalidated() {
-            graphicBox.getChildren().clear();
-            ParagraphDecoration decoration = paragraph.getDecoration();
-            int indentationLevel = decoration.getIndentationLevel();
-            Node node = get().apply(indentationLevel, decoration.getGraphicType());
+    private void updateBox(BiFunction<Integer, ParagraphDecoration.GraphicType, Node> graphicFactory) {
+        graphicBox.getChildren().clear();
 
-            if (node != null) {
-                if (node instanceof Label) {
-                    String text = ((Label) node).getText();
-                    if (text != null && text.contains("#")) {
-                        AtomicInteger ordinal = new AtomicInteger();
-                        viewModel.getParagraphList().stream()
-                                .filter(p -> p.getDecoration().getIndentationLevel() == indentationLevel)
-                                .peek(p -> {
-                                    if (p.getDecoration().getGraphicType() == ParagraphDecoration.GraphicType.BULLETED_LIST) {
-                                        // restart ordinal if previous paragraph with same indentation is a bulleted list
-                                        ordinal.set(0);
-                                    } else {
-                                        ordinal.incrementAndGet();
-                                    }
-                                })
-                                .filter(p -> paragraph.equals(p))
-                                .findFirst()
-                                .ifPresent(p ->
-                                        ((Label) node).setText(text.replace("#", "" + ordinal.get())));
-                    }
-                }
-                graphicBox.getChildren().add(node);
-            }
+        ParagraphDecoration decoration = paragraph.getDecoration();
+        int indentationLevel = decoration.getIndentationLevel();
+        Node graphicNode = null;
+        if (graphicFactory != null) {
+            graphicNode = graphicFactory.apply(indentationLevel, decoration.getGraphicType());
         }
-    };
+        double spanPrefWidth = Math.max((indentationLevel - (graphicNode == null ? 0 : 1)) * INDENT_PADDING, 0d);
+
+        if (graphicNode == null) {
+            graphicBox.setMinWidth(spanPrefWidth);
+            graphicBox.setMaxWidth(spanPrefWidth);
+            textFlow.setPrefWidth(richTextAreaSkin.textFlowPrefWidthProperty.get() - spanPrefWidth);
+            return;
+        }
+        graphicBox.getChildren().add(graphicNode);
+
+        double nodePrefWidth = 0d, nodePrefHeight = 0d;
+        var pathElements = textFlow.caretShape(0, false);
+        double caretY = Stream.of(pathElements)
+                .filter(LineTo.class::isInstance)
+                .map(LineTo.class::cast)
+                .findFirst().map(LineTo::getY)
+                .orElse(0d);
+
+        if (graphicNode instanceof Label) {
+            Label numberedListLabel = (Label) graphicNode;
+            String text = numberedListLabel.getText();
+            if (text != null) {
+                if (text.contains("#")) {
+                    AtomicInteger ordinal = new AtomicInteger();
+                    viewModel.getParagraphList().stream()
+                            .filter(p -> p.getDecoration().getIndentationLevel() == indentationLevel)
+                            .peek(p -> {
+                                if (p.getDecoration().getGraphicType() == ParagraphDecoration.GraphicType.BULLETED_LIST) {
+                                    // restart ordinal if previous paragraph with same indentation is a bulleted list
+                                    ordinal.set(0);
+                                } else {
+                                    ordinal.incrementAndGet();
+                                }
+                            })
+                            .filter(p -> paragraph.equals(p))
+                            .findFirst()
+                            .ifPresent(p ->
+                                    numberedListLabel.setText(text.replace("#", "" + ordinal.get())));
+                }
+                Text textNode = textFlow.getChildren().stream()
+                        .filter(Text.class::isInstance)
+                        .map(Text.class::cast)
+                        .findFirst()
+                        .orElse(null);
+                Font font = Font.font(textNode != null ? textNode.getFont().getSize() : 12d);
+                numberedListLabel.setFont(font);
+                double w = Tools.computeStringWidth(font, numberedListLabel.getText());
+                nodePrefWidth = Math.max(w + 1, INDENT_PADDING);
+                nodePrefHeight = Tools.computeStringHeight(font, numberedListLabel.getText());
+            }
+        } else {
+            nodePrefWidth = Math.max(graphicNode.prefWidth(-1), INDENT_PADDING);
+            nodePrefHeight = graphicNode.prefHeight(nodePrefWidth);
+        }
+        graphicNode.setTranslateY((caretY - nodePrefHeight)/ 2d);
+        double boxPrefWidth = spanPrefWidth + nodePrefWidth;
+        graphicBox.setMinWidth(boxPrefWidth);
+        graphicBox.setMaxWidth(boxPrefWidth);
+        textFlow.setPrefWidth(richTextAreaSkin.textFlowPrefWidthProperty.get() - boxPrefWidth);
+    }
 
     void mousePressedListener(MouseEvent e) {
         if (control.isDisabled()) {
