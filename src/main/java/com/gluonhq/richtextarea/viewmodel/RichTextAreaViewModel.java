@@ -398,6 +398,10 @@ public class RichTextAreaViewModel {
         return Clipboard.getSystemClipboard().hasString();
     }
 
+    boolean clipboardHasUrl() {
+        return Clipboard.getSystemClipboard().hasUrl();
+    }
+
     void clipboardPaste() {
         if (clipboardHasImage()) {
             final Image image = Clipboard.getSystemClipboard().getImage();
@@ -406,6 +410,16 @@ public class RichTextAreaViewModel {
                 if (url != null) {
                     commandManager.execute(new DecorateCmd(new ImageDecoration(url)));
                 }
+            }
+        } else if (clipboardHasUrl()) {
+            final String url = Clipboard.getSystemClipboard().getUrl();
+            if (url != null) {
+                if (!getSelection().isDefined()) {
+                    int caret = getCaretPosition();
+                    commandManager.execute(new InsertTextCmd(url));
+                    setSelection(new Selection(caret, caret + url.length()));
+                }
+                commandManager.execute(new DecorateCmd(TextDecoration.builder().url(url).build()));
             }
         } else if (clipboardHasString()) {
             final String text = Clipboard.getSystemClipboard().getString();

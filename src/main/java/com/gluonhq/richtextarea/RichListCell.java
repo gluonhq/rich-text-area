@@ -10,6 +10,8 @@ import javafx.scene.Node;
 import javafx.scene.control.ListCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
@@ -78,18 +80,33 @@ class RichListCell extends ListCell<Paragraph> {
                         }
                         // allow dragging
                         if (richTextAreaSkin.anchorIndex == -1) {
-                            richTextAreaSkin.dragStart = textLength;
+                            richTextAreaSkin.mouseDragStart = textLength;
                         }
                     });
         });
         addEventHandler(MouseEvent.MOUSE_RELEASED, event -> {
             if (richTextAreaSkin.anchorIndex != -1) {
                 event.consume();
-                richTextAreaSkin.dragStart = -1;
+                richTextAreaSkin.mouseDragStart = -1;
                 richTextAreaSkin.anchorIndex = -1;
             }
         });
-
+        addEventHandler(DragEvent.DRAG_OVER, de -> {
+            if (richTextAreaSkin.dragAndDropStart != -1) {
+                getParagraphTile().ifPresent(p -> {
+                    if (!richTextAreaSkin.getSkinnable().isFocused()) {
+                        richTextAreaSkin.getSkinnable().requestFocus();
+                    }
+                    // caret follows dnd movement
+                    p.mousePressedListener(new MouseEvent(de.getSource(), de.getTarget(), MouseEvent.MOUSE_PRESSED,
+                            de.getX(), de.getY(), de.getScreenX(), de.getScreenY(),
+                            MouseButton.PRIMARY, 1,
+                            false, false, false, false,
+                            true, false, false,
+                            false, false, false, null));
+                });
+            }
+        });
     }
 
     @Override
