@@ -23,6 +23,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.PathElement;
 import javafx.scene.text.Font;
@@ -107,6 +108,7 @@ public class ParagraphTile extends HBox {
     void setParagraph(Paragraph paragraph) {
         viewModel.caretPositionProperty().removeListener(caretPositionListener);
         viewModel.selectionProperty().removeListener(selectionListener);
+        caretTimeline.stop();
         if (paragraph == null) {
             return;
         }
@@ -271,7 +273,13 @@ public class ParagraphTile extends HBox {
                 caretShape.getElements().addAll(pathElements);
                 // prevent tiny caret
                 if (caretShape.getLayoutBounds().getHeight() < 5) {
-                    caretShape.getElements().add(new LineTo(0, 16));
+                    double originX = caretShape.getElements().stream()
+                            .filter(MoveTo.class::isInstance)
+                            .map(MoveTo.class::cast)
+                            .findFirst()
+                            .map(MoveTo::getX)
+                            .orElse(0d);
+                    caretShape.getElements().add(new LineTo(originX, 16));
                 }
                 richTextAreaSkin.lastValidCaretPosition = caretPosition;
                 caretTimeline.play();
