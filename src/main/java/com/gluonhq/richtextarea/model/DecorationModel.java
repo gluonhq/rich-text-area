@@ -2,6 +2,10 @@ package com.gluonhq.richtextarea.model;
 
 import java.util.Objects;
 
+/**
+ * A DecorationModel contains the text and paragraph decorations for a fragment of text,
+ * defined by a start position and a length.
+ */
 public class DecorationModel {
     private final int start;
     private final int length;
@@ -16,18 +20,40 @@ public class DecorationModel {
         this.paragraphDecoration = paragraphDecoration;
     }
 
+    /**
+     * Gets the start position of the fragment that has this decoration model
+     *
+     * @return the start position of the fragment
+     */
     public int getStart() {
         return start;
     }
 
+    /**
+     * Gets the length of the fragment that has this decoration model
+     *
+     * @return the length of the fragment
+     */
     public int getLength() {
         return length;
     }
 
+    /**
+     * Gets the decoration for the fragment. It can be a {@link TextDecoration} like font or color,
+     * or an {@link ImageDecoration}, which inserts an image at the start of the fragment
+     *
+     * @return the decoration for the fragment
+     */
     public Decoration getDecoration() {
         return decoration;
     }
 
+    /**
+     * Gets the {@link ParagraphDecoration} for the fragment, that is used to style the paragraph that contains
+     * such fragment.
+     *
+     * @return the paragraph decoration for the fragment
+     */
     public ParagraphDecoration getParagraphDecoration() {
         return paragraphDecoration;
     }

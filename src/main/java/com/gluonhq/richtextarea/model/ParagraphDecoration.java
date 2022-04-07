@@ -5,13 +5,33 @@ import javafx.scene.text.TextAlignment;
 
 import java.util.Objects;
 
+/**
+ * ParagraphDecoration is a {@link Decoration} that can be applied to a fragment of text in order to style
+ * the paragraph that contains such fragment.
+ */
 public class ParagraphDecoration implements Decoration {
 
+    /**
+     * The type of graphic applied to the left of the paragraph
+     */
     public enum GraphicType {
+        /**
+         * By default, no graphic
+         */
         NONE,
+        /**
+         * The graphic is a {@link javafx.scene.control.Label} with a number, and possibly some formatting,
+         * that is used to define a numbered list.
+         * See {@link com.gluonhq.richtextarea.RichTextArea#paragraphGraphicFactoryProperty()}
+         */
         NUMBERED_LIST,
+        /**
+         * The graphic is a {@link javafx.scene.Node} that is used to define a bulleted list.
+         * See {@link com.gluonhq.richtextarea.RichTextArea#paragraphGraphicFactoryProperty()}
+         */
         BULLETED_LIST
     }
+
     private Double spacing;
     private TextAlignment alignment;
     private Double topInset, rightInset, bottomInset, leftInset;
@@ -20,46 +40,110 @@ public class ParagraphDecoration implements Decoration {
 
     private ParagraphDecoration() {}
 
+    /**
+     * Gets the line spacing of the paragraph
+     *
+     * @defaultValue 0
+     *
+     * @return the line spacing
+     */
     public double getSpacing() {
         return spacing;
     }
 
+    /**
+     * Gets the alignment of the paragraph
+     *
+     * @defaultValue {@link TextAlignment#LEFT}
+     *
+     * @return the paragraph alignment
+     */
     public TextAlignment getAlignment() {
         return alignment;
     }
 
+    /**
+     * Gets the top padding of the paragraph
+     *
+     * @defaultValue 0
+     *
+     * @return the top padding
+     */
     public double getTopInset() {
         return topInset;
     }
 
+    /**
+     * Gets the right padding of the paragraph
+     *
+     * @defaultValue 0
+     *
+     * @return the right padding
+     */
     public double getRightInset() {
         return rightInset;
     }
 
+    /**
+     * Gets the bottom padding of the paragraph
+     *
+     * @defaultValue 0
+     *
+     * @return the bottom padding
+     */
     public double getBottomInset() {
         return bottomInset;
     }
 
+    /**
+     * Gets the left padding of the paragraph
+     *
+     * @defaultValue 0
+     *
+     * @return the left padding
+     */
     public double getLeftInset() {
         return leftInset;
     }
 
-    public void setBottomInset(double bottomInset) {
-        this.bottomInset = bottomInset;
-    }
-
+    /**
+     * Gets the level of indentation of the paragraph
+     *
+     * @defaultValue 0
+     *
+     * @return the level of indentation
+     */
     public int getIndentationLevel() {
         return indentationLevel;
     }
 
+    /**
+     * Gets the type of graphic of the paragraph, if any
+     *
+     * @defaultValue {@link GraphicType#NONE}
+     *
+     * @return the {@link GraphicType} used for the paragraph
+     */
     public GraphicType getGraphicType() {
         return graphicType;
     }
 
+    /**
+     * Returns a Builder that can be used to generate paragraph decorations with several
+     * attributes
+     *
+     * @return a {@link ParagraphDecoration.Builder}
+     */
     public static ParagraphDecoration.Builder builder() {
         return new ParagraphDecoration.Builder();
     }
 
+    /**
+     * Returns a new instance of the current ParagraphDecoration
+     * and normalizes properties based on the supplied decoration.
+     * @param decoration ParagraphDecoration to compare and normalize
+     * @return New ParagraphDecoration instance with properties normalized
+     */
     public ParagraphDecoration normalize(ParagraphDecoration decoration) {
         if (decoration == null) {
             return this;

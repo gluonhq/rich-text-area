@@ -14,9 +14,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>11</maven.compiler.release>
-        <javafx.version>17.0.2</javafx.version>
+        <javafx.version>18</javafx.version>
         <javafx.plugin.version>0.0.8</javafx.plugin.version>
-        <gluonfx.plugin.version>1.0.10</gluonfx.plugin.version>
         <main.class>com.gluonhq.Main</main.class>
     </properties>
 
@@ -78,6 +77,19 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.3.2</version>
+                <executions>
+                    <execution>
+                        <id>javadoc</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M5</version>
                 <dependencies>
@@ -113,32 +125,8 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>com.gluonhq</groupId>
-                <artifactId>gluonfx-maven-plugin</artifactId>
-                <version>${gluonfx.plugin.version}</version>
-                <configuration>
-<!--                    <target>${gluonfx.target}</target>-->
-                    <mainClass>${main.class}</mainClass>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>android</id>
-            <properties>
-                <gluonfx.target>android</gluonfx.target>
-            </properties>
-        </profile>
-        <profile>
-            <id>ios</id>
-            <properties>
-                <gluonfx.target>ios</gluonfx.target>
-            </properties>
-        </profile>
-    </profiles>
 
     <developers>
         <developer>

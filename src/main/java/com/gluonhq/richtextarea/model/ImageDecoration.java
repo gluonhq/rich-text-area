@@ -2,6 +2,10 @@ package com.gluonhq.richtextarea.model;
 
 import java.util.Objects;
 
+/**
+ * ImageDecoration is a {@link Decoration} that can be applied to a fragment of text in order to place
+ * an image at its location.
+ */
 public class ImageDecoration implements Decoration {
 
     private final int width;
@@ -28,18 +32,48 @@ public class ImageDecoration implements Decoration {
         this.link = link;
     }
 
+    /**
+     * Gets the string with the url of the image. It can be a resource path, a file path, or a valid URL.
+     *
+     * @return a string with the image's url
+     */
     public String getUrl() {
         return url;
     }
 
+    /**
+     * Gets the width used for the image inserted in the RichTextArea control. Resizing, if needed,
+     * is done preserving the aspect ratio of the image. If the value is -1,
+     * the image will use its original width, but being limited to the control area.
+     *
+     * @defaultValue -1
+     *
+     * @return the width of the image in the text, or -1 to use the original image width
+     */
     public int getWidth() {
         return width;
     }
 
+    /**
+     * Gets the height used for the image inserted in the RichTextArea control. Resizing, if needed,
+     * is done preserving the aspect ratio of the image. If the value is -1,
+     * the image will use its original height, but being limited to the control area.
+     *
+     * @defaultValue -1
+     *
+     * @return the height of the image in the text, or -1 to use the original image height
+     */
     public int getHeight() {
         return height;
     }
 
+    /**
+     * Gets a string with a URL, if any, that can be used to set a hyperlink on the image itself
+     *
+     * @defaultValue null
+     *
+     * @return a string with a URL or null
+     */
     public String getLink() {
         return link;
     }
