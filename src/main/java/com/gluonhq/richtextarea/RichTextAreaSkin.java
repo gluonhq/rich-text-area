@@ -22,6 +22,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -39,6 +40,8 @@ import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Path;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
@@ -206,10 +209,49 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private class ParagraphListView extends ListView<Paragraph> {
 
         private final RichVirtualFlow virtualFlow;
+        private Group sheet;
 
         public ParagraphListView(RichTextArea control) {
             virtualFlow = new RichVirtualFlow(control);
             getStyleClass().setAll("paragraph-list-view");
+
+            addEventHandler(MouseEvent.MOUSE_DRAGGED, e -> {
+                // if a dragging event was started from a listCell, but the event gets out of the
+                // listView bounds, forward event to cell -> paragraphTile -> TextFlow, so selection
+                // can continue
+                if (anchorIndex != -1 && !getLayoutBounds().contains(e.getX(), e.getY())) {
+                    // Translate listView event to a point (in listView coordinates) that could be over a listCell
+                    Point2D listPoint = getPointInListView(e);
+                    getSheet().getChildren().stream()
+                            .filter(RichListCell.class::isInstance)
+                            .filter(cell -> cell.getLayoutBounds().contains(cell.parentToLocal(listPoint)))
+                            .map(RichListCell.class::cast)
+                            .findFirst()
+                            .ifPresent(cell -> {
+                                Point2D cellPoint = cell.parentToLocal(listPoint);
+                                MouseEvent mouseEvent = new MouseEvent(e.getSource(), e.getTarget(), e.getEventType(),
+                                        cellPoint.getX(), cellPoint.getY(), e.getScreenX(), e.getScreenY(),
+                                        MouseButton.PRIMARY, 1,
+                                        false, false, false, false,
+                                        true, false, false,
+                                        false, false, false, null);
+                                cell.forwardDragEvent(mouseEvent);
+                            });
+                }
+            });
+        }
+
+        private Point2D getPointInListView(MouseEvent e) {
+            double deltaX = e.getX() < 0 ? e.getX() : e.getX() > getWidth() ? e.getX() - getSheet().getLayoutBounds().getWidth() + getInsets().getRight() : 0;
+            double deltaY = e.getY() < 0 ? e.getY() : e.getY() > getHeight() ? e.getY() - getSheet().getLayoutBounds().getHeight() + getInsets().getBottom() : 0;
+            return new Point2D(e.getX() - deltaX, e.getY() - deltaY);
+        }
+
+        private Group getSheet() {
+            if (sheet == null) {
+                sheet = (Group) virtualFlow.lookup(".sheet");
+            }
+            return sheet;
         }
 
         @Override
@@ -223,14 +265,14 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         }
 
         void evictUnusedObjects() {
-            ((Group) virtualFlow.lookup(".sheet")).getChildren().stream()
+            getSheet().getChildren().stream()
                     .filter(RichListCell.class::isInstance)
                     .map(RichListCell.class::cast)
                     .forEach(RichListCell::evictUnusedObjects);
         }
 
         int getNextRowPosition(double x, boolean down) {
-            return ((Group) virtualFlow.lookup(".sheet")).getChildren().stream()
+            return getSheet().getChildren().stream()
                     .filter(RichListCell.class::isInstance)
                     .map(RichListCell.class::cast)
                     .filter(RichListCell::hasCaret)
