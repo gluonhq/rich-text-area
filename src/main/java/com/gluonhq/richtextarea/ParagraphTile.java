@@ -230,7 +230,7 @@ public class ParagraphTile extends HBox {
                     } else if (e.getClickCount() == 3) {
                         viewModel.selectCurrentParagraph();
                     } else {
-                        richTextAreaSkin.dragStart = globalInsertionIndex;
+                        richTextAreaSkin.mouseDragStart = globalInsertionIndex;
                         viewModel.clearSelection();
                     }
                 } else if (e.isShiftDown() && e.getClickCount() == 1 && !(e.isControlDown() || e.isAltDown() || e.isMetaDown() || e.isShortcutDown())) {
@@ -253,7 +253,7 @@ public class ParagraphTile extends HBox {
         HitInfo hitInfo = textFlow.hitTest(new Point2D(e.getX() - textFlowLayoutX, e.getY() - textFlowLayoutY));
         if (hitInfo.getInsertionIndex() >= 0) {
             int dragEnd = paragraph.getStart() + hitInfo.getInsertionIndex();
-            viewModel.setSelection(new Selection(richTextAreaSkin.dragStart, dragEnd));
+            viewModel.setSelection(new Selection(richTextAreaSkin.mouseDragStart, dragEnd));
             viewModel.setCaretPosition(dragEnd);
         }
         e.consume();
