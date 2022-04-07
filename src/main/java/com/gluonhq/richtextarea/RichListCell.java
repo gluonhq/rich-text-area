@@ -225,6 +225,10 @@ class RichListCell extends ListCell<Paragraph> {
         getParagraphTile().ifPresent(ParagraphTile::evictUnusedObjects);
     }
 
+    public void forwardDragEvent(MouseEvent e) {
+        getParagraphTile().ifPresent(tile -> tile.mouseDraggedListener(e));
+    }
+
     public boolean hasCaret() {
         return getParagraphTile()
                 .map(ParagraphTile::hasCaret)
