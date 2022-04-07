@@ -548,13 +548,10 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                     if (new Image(url).getException() == null) {
                         ACTION_CMD_FACTORY.decorateImage(new ImageDecoration(url)).apply(viewModel);
                     } else {
-                        // add hyperlink to text, makes a selection at the current word where is dropped
-                        viewModel.selectCurrentWord();
-                        if (!viewModel.getSelection().isDefined()) {
-                            int caret = viewModel.getCaretPosition();
-                            ACTION_CMD_FACTORY.insertText(url).apply(viewModel);
-                            viewModel.setSelection(new Selection(caret, caret + url.length()));
-                        }
+                        // add text and hyperlink
+                        int caret = viewModel.getCaretPosition();
+                        ACTION_CMD_FACTORY.insertText(url).apply(viewModel);
+                        viewModel.setSelection(new Selection(caret, caret + url.length()));
                         ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().url(url).build()).apply(viewModel);
                     }
                 }
