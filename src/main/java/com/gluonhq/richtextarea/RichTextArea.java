@@ -22,6 +22,8 @@ import javafx.scene.control.SkinBase;
 
 import java.util.Objects;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class RichTextArea extends Control {
 
@@ -155,6 +157,19 @@ public class RichTextArea extends Control {
     }
     public final void setParagraphGraphicFactory(BiFunction<Integer, ParagraphDecoration.GraphicType, Node> value) {
         paragraphGraphicFactoryProperty.set(value);
+    }
+
+    // linkCallbackFactoryProperty
+    private final ObjectProperty<Function<Node, Consumer<String>>> linkCallbackFactoryProperty =
+            new SimpleObjectProperty<>(this, "linkCallbackFactory", DefaultLinkCallbackFactory.getFactory());
+    public final ObjectProperty<Function<Node, Consumer<String>>> linkCallbackFactoryProperty() {
+       return linkCallbackFactoryProperty;
+    }
+    public final Function<Node, Consumer<String>> getLinkCallbackFactory() {
+       return linkCallbackFactoryProperty.get();
+    }
+    public final void setLinkCallbackFactory(Function<Node, Consumer<String>> value) {
+        linkCallbackFactoryProperty.set(value);
     }
 
 
