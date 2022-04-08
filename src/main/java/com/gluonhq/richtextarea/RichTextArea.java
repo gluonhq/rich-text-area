@@ -54,7 +54,7 @@ public class RichTextArea extends Control {
 
     // documentProperty
     /**
-     * The {@link Document document} is the madel that holds the full text and decorations that are being
+     * The {@link Document document} is the model that holds the full text and decorations that are being
      * displayed by the control.
      *
      * By default, this property is set via {@link ActionFactory#newDocument()} or {@link ActionFactory#open(Document)},
@@ -95,7 +95,7 @@ public class RichTextArea extends Control {
 
     // modifiedProperty
     /**
-     * Property that indicates if the current {@link Document document} has unsaved changes or not.
+     * Indicates if the current {@link Document document} has unsaved changes or not.
      *
      * Unless {@link #autoSaveProperty()} is enabled, after any change of the document being edited with the control
      * this property will be set to true, and will enable the {@link ActionFactory#save()} action.
@@ -112,7 +112,7 @@ public class RichTextArea extends Control {
 
     // editableProperty
     /**
-     * Property that indicates if the {@link Document document} is editable or not.
+     * Indicates if the {@link Document document} is editable or not.
      *
      * By default, it is set to true.
      *
@@ -136,7 +136,7 @@ public class RichTextArea extends Control {
 
     // selectionProperty
     /**
-     *  Property that contains the {@link Selection selection} of some fragment of the document, if any.
+     *  Contains the {@link Selection selection} of some fragment of the document, if any.
      *
      * @return the existing selection, if any
      */
@@ -150,7 +150,7 @@ public class RichTextArea extends Control {
 
     // textLengthProperty
     /**
-     * Property that returns the current length of the {@link Document document}, and it gets updated after every change,
+     * Returns the current length of the {@link Document document}, and it gets updated after every change,
      * even if the document has not been saved yet.
      *
      * @return the current length of the document
@@ -176,6 +176,8 @@ public class RichTextArea extends Control {
      * In any case, text will be line wrapped as needed to satisfy this constraint.
      *
      * @defaultValue 0
+     *
+     * @return the width of the content area
      */
     public final DoubleProperty contentAreaWidthProperty() {
         return contentAreaWidthProperty;
@@ -221,7 +223,7 @@ public class RichTextArea extends Control {
 
     // linkCallbackFactoryProperty
     /**
-     * This property allows setting a consumer that accepts a valid URL string, for a given node.
+     * Allows setting a consumer that accepts a valid URL string, for a given node.
      *
      * Typically, this can be applied to {@link javafx.scene.text.Text} or {@link javafx.scene.image.ImageView} nodes
      * with a link to a given URL.

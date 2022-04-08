@@ -86,7 +86,7 @@
                             <goal>jar</goal>
                         </goals>
                         <configuration>
-                            <doclint>none</doclint>
+                            <additionalJOption>-javafx</additionalJOption>
                         </configuration>
                     </execution>
                 </executions>

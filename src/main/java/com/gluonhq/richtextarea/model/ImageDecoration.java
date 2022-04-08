@@ -33,7 +33,7 @@ public class ImageDecoration implements Decoration {
     }
 
     /**
-     * Gets the string with the url of the image. It can be a resource path, a file path, or a valid URL.
+     * Returns the string with the url of the image. It can be a resource path, a file path, or a valid URL.
      *
      * @return a string with the image's url
      */
@@ -42,7 +42,7 @@ public class ImageDecoration implements Decoration {
     }
 
     /**
-     * Gets the width used for the image inserted in the RichTextArea control. Resizing, if needed,
+     * Returns the width used for the image inserted in the RichTextArea control. Resizing, if needed,
      * is done preserving the aspect ratio of the image. If the value is -1,
      * the image will use its original width, but being limited to the control area.
      *
@@ -55,7 +55,7 @@ public class ImageDecoration implements Decoration {
     }
 
     /**
-     * Gets the height used for the image inserted in the RichTextArea control. Resizing, if needed,
+     * Returns the height used for the image inserted in the RichTextArea control. Resizing, if needed,
      * is done preserving the aspect ratio of the image. If the value is -1,
      * the image will use its original height, but being limited to the control area.
      *

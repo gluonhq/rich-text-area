@@ -41,7 +41,7 @@ public class ParagraphDecoration implements Decoration {
     private ParagraphDecoration() {}
 
     /**
-     * Gets the line spacing of the paragraph
+     * Returns the line spacing of the paragraph
      *
      * @defaultValue 0
      *
@@ -52,7 +52,7 @@ public class ParagraphDecoration implements Decoration {
     }
 
     /**
-     * Gets the alignment of the paragraph
+     * Returns the alignment of the paragraph
      *
      * @defaultValue {@link TextAlignment#LEFT}
      *
@@ -63,7 +63,7 @@ public class ParagraphDecoration implements Decoration {
     }
 
     /**
-     * Gets the top padding of the paragraph
+     * Returns the top padding of the paragraph
      *
      * @defaultValue 0
      *
@@ -74,7 +74,7 @@ public class ParagraphDecoration implements Decoration {
     }
 
     /**
-     * Gets the right padding of the paragraph
+     * Returns the right padding of the paragraph
      *
      * @defaultValue 0
      *
@@ -85,7 +85,7 @@ public class ParagraphDecoration implements Decoration {
     }
 
     /**
-     * Gets the bottom padding of the paragraph
+     * Returns the bottom padding of the paragraph
      *
      * @defaultValue 0
      *
@@ -96,7 +96,7 @@ public class ParagraphDecoration implements Decoration {
     }
 
     /**
-     * Gets the left padding of the paragraph
+     * Returns the left padding of the paragraph
      *
      * @defaultValue 0
      *
@@ -107,7 +107,7 @@ public class ParagraphDecoration implements Decoration {
     }
 
     /**
-     * Gets the level of indentation of the paragraph
+     * Returns the level of indentation of the paragraph
      *
      * @defaultValue 0
      *
@@ -118,7 +118,7 @@ public class ParagraphDecoration implements Decoration {
     }
 
     /**
-     * Gets the type of graphic of the paragraph, if any
+     * Returns the type of graphic of the paragraph, if any
      *
      * @defaultValue {@link GraphicType#NONE}
      *

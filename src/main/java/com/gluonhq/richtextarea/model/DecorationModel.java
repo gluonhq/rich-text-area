@@ -21,7 +21,7 @@ public class DecorationModel {
     }
 
     /**
-     * Gets the start position of the fragment that has this decoration model
+     * Returns the start position of the fragment that has this decoration model
      *
      * @return the start position of the fragment
      */
@@ -30,7 +30,7 @@ public class DecorationModel {
     }
 
     /**
-     * Gets the length of the fragment that has this decoration model
+     * Returns the length of the fragment that has this decoration model
      *
      * @return the length of the fragment
      */
@@ -39,7 +39,7 @@ public class DecorationModel {
     }
 
     /**
-     * Gets the decoration for the fragment. It can be a {@link TextDecoration} like font or color,
+     * Returns the decoration for the fragment. It can be a {@link TextDecoration} like font or color,
      * or an {@link ImageDecoration}, which inserts an image at the start of the fragment
      *
      * @return the decoration for the fragment
@@ -49,7 +49,7 @@ public class DecorationModel {
     }
 
     /**
-     * Gets the {@link ParagraphDecoration} for the fragment, that is used to style the paragraph that contains
+     * Returns the {@link ParagraphDecoration} for the fragment, that is used to style the paragraph that contains
      * such fragment.
      *
      * @return the paragraph decoration for the fragment

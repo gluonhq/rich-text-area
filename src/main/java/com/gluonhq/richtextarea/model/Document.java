@@ -43,7 +43,7 @@ public class Document {
     }
 
     /**
-     * Gets the full text of the document
+     * Returns the full text of the document
      *
      * @return a string with the full text of the document
      */
@@ -52,7 +52,7 @@ public class Document {
     }
 
     /**
-     * Gets the list of {@link DecorationModel} that define the fragments of text
+     * Returns the list of {@link DecorationModel} that define the fragments of text
      * that share the same decorations
      *
      * @return the list of {@link DecorationModel}
@@ -62,7 +62,7 @@ public class Document {
     }
 
     /**
-     * Gets the caret position in order to restore the caret when the document
+     * Returns the caret position in order to restore the caret when the document
      * is opened
      *
      * @return the caret position when document was saved
