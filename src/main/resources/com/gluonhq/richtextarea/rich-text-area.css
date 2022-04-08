@@ -1,0 +1,68 @@
+.rich-text-area .paragraph-list-view {
+}
+
+.rich-text-area .paragraph-tile {
+    /*-fx-background-color: #000ff010;*/
+}
+
+.rich-text-area .paragraph-tile > .content-area {
+    /*-fx-background-color: #000ff010;*/
+}
+
+.rich-text-area .paragraph-tile > .graphic-box {
+    /*-fx-background-color: #000ff010;*/
+}
+.rich-text-area .paragraph-tile > .graphic-box > .numbered-list-label {
+    -fx-text-fill: black;
+}
+.rich-text-area .paragraph-tile > .graphic-box > .bulleted-list-shape-1 {
+    -fx-fill: black;
+    -fx-stroke: black;
+}
+.rich-text-area .paragraph-tile > .graphic-box > .bulleted-list-shape-2 {
+    -fx-fill: transparent;
+    -fx-stroke: black;
+}
+.rich-text-area .paragraph-tile > .graphic-box > .bulleted-list-shape-3 {
+    -fx-fill: black;
+    -fx-stroke: black;
+    -fx-arc-width: 1;
+    -fx-arc-height: 1;
+}
+.rich-text-area .paragraph-tile > .graphic-box > .bulleted-list-shape-4 {
+    -fx-fill: transparent;
+    -fx-stroke: black;
+    -fx-arc-width: 1;
+    -fx-arc-height: 1;
+}
+
+.rich-text-area .paragraph-tile > .content-area > .layers > .text-flow {
+    /*-fx-background-color: #ff000010;*/
+    /*-fx-padding: 2;*/
+}
+
+.rich-text-area .caret {
+    -fx-stroke: rgba(71, 145, 245, 0.9);
+}
+
+.rich-text-area .selection {
+    -fx-stroke: transparent;
+    -fx-fill: rgba(71, 145, 245, 0.3);
+}
+
+.list-cell {
+    -fx-padding: 0em;
+}
+.list-cell,
+.list-cell:odd {
+    -fx-background: white;
+}
+
+.list-cell:filled:selected,
+.list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected,
+.list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:focused {
+    -fx-background: white;
+    -fx-background-color: white;
+    -fx-table-cell-border-color: white;
+    -fx-background-insets: 0;
+}
