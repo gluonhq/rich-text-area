@@ -17,6 +17,7 @@
         <javafx.version>18</javafx.version>
         <javafx.plugin.version>0.0.8</javafx.plugin.version>
         <main.class>com.gluonhq.Main</main.class>
+        <jpro.version>2022.1.0</jpro.version>
     </properties>
 
     <dependencies>
@@ -51,6 +52,11 @@
             <groupId>org.kordamp.ikonli</groupId>
             <artifactId>ikonli-javafx</artifactId>
             <version>12.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sandec.jpro</groupId>
+            <artifactId>jpro-webapi</artifactId>
+            <version>${jpro.version}</version>
         </dependency>
     </dependencies>
 
@@ -128,6 +134,17 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>com.sandec.jpro</groupId>
+                <artifactId>jpro-maven-plugin</artifactId>
+                <version>${jpro.version}</version>
+                <configuration>
+                    <visible>false</visible>
+                    <!-- noRenderJobs>true</noRenderJobs -->
+                    <mainClassName>${main.class}</mainClassName>
+                    <openingPath>/</openingPath>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -183,4 +200,19 @@
             <url>https://nexus.gluonhq.com/nexus/content/repositories/releases/</url>
         </repository>
     </distributionManagement>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>jpro - sandec repository</id>
+            <url>https://sandec.jfrog.io/artifactory/repo</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <repositories>
+        <repository>
+            <id>jpro - sandec repository</id>
+            <url>https://sandec.jfrog.io/artifactory/repo</url>
+        </repository>
+    </repositories>
+
 </project>
