@@ -8,6 +8,10 @@ import java.util.Objects;
 
 import static com.gluonhq.richtextarea.Tools.getFirstLetter;
 
+/**
+ * TextDecoration is a {@link Decoration} that can be applied to a fragment of text in order to generate
+ * rich text, that is, styled text with different text attributes like color of font.
+ */
 public class TextDecoration implements Decoration {
 
     private Color foreground;
@@ -22,42 +26,111 @@ public class TextDecoration implements Decoration {
 
     private TextDecoration() {}
 
+    /**
+     * Gets the foreground color of the text.
+     *
+     * @defaultValue {@link Color#BLACK}
+     *
+     * @return the foreground color of the text
+     */
     public Color getForeground() {
         return foreground;
     }
 
+    /**
+     * Gets the background color of the text.
+     *
+     * @defaultValue {@link Color#TRANSPARENT}
+     *
+     * @return the background color of the text
+     */
     public Color getBackground() {
         return background;
     }
 
+    /**
+     * Gets the font size of the text.
+     *
+     * @defaultValue 12
+     *
+     * @return the font size of the text
+     */
     public double getFontSize() {
         return fontSize;
     }
 
+    /**
+     * Gets the font family of the text.
+     *
+     * @defaultValue Serif
+     *
+     * @return the font family of the text
+     */
     public String getFontFamily() {
         return fontFamily;
     }
 
+    /**
+     * Gets the font posture of the text.
+     *
+     * @defaultValue {@link FontPosture#REGULAR}
+     *
+     * @return the font posture of the text
+     */
     public FontPosture getFontPosture() {
         return fontPosture;
     }
 
+    /**
+     * Gets the font weight of the text.
+     *
+     * @defaultValue {@link FontWeight#NORMAL}
+     *
+     * @return the font weight of the text
+     */
     public FontWeight getFontWeight() {
         return fontWeight;
     }
 
+    /**
+     * Gets if the text has strike-through formatting.
+     *
+     * @defaultValue false
+     *
+     * @return if strike-through formatting is applied
+     */
     public Boolean isStrikethrough() {
         return strikethrough != null && strikethrough;
     }
 
+    /**
+     * Gets if the text has underline formatting.
+     *
+     * @defaultValue false
+     *
+     * @return if underline formatting is applied
+     */
     public Boolean isUnderline() {
         return underline != null && underline;
     }
 
+    /**
+     * Gets a string with a URL that can be used to decorate a fragment of text as a hyperlink
+     *
+     * @defaultValue null
+     *
+     * @return a string with the URL of a link or null
+     */
     public String getURL() {
         return url;
     }
 
+    /**
+     * Returns a Builder that can be used to generate text decorations with several
+     * attributes
+     *
+     * @return a {@link TextDecoration.Builder}
+     */
     public static Builder builder() {
         return new Builder();
     }

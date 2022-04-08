@@ -9,13 +9,12 @@ Component's internal design is based on MVVM pattern.
 The data model  is based on piece table implementation, which helps to easily deal 
 with huge texts and simplifies to some extent undo functionality. It implements insert, 
 append and delete text operations and a simplistic change listening. Within the piece table 
-changes represented by one or more pieces. Piece does not contain the text itself but points 
+changes are represented by one or more pieces. Piece does not contain the text itself but points 
 to one of two buffers: original - fixed original text, additional - "add only" buffer for changes. 
-Actual text can be restored by walking the prices. For now, each piece also contains simplistic 
-`TextDecoration` definition, which is meant to be used to decorate related text. The model also 
-implements an undo/redo mechanism which uses pieces but is based on abstract independent API 
-(which is reused ViewModel too). Each document operation is represented as a command, which stores 
-the state and can be undone/redone.
+Actual text can be restored by walking the pieces. Each piece contains text, image and paragraph 
+decoration. The model also implements an undo/redo mechanism which uses pieces but is based on 
+abstract independent API (which is reused ViewModel too). Each document operation is represented 
+as a command, which stores the state and can be undone/redone.
 
 ### ViewModel aka RichTextAreaViewModel
 

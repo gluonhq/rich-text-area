@@ -20,11 +20,25 @@ import javafx.scene.Node;
 import javafx.scene.control.Control;
 import javafx.scene.control.SkinBase;
 
-import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * The RichTextArea control is a text input component that allows a user to enter multiple lines of
+ * rich text and other non-text objects like images or hyperlinks.
+ *
+ * Internally the data model is based on a {@link com.gluonhq.richtextarea.model.PieceTable} implementation.
+ * Pieces hold text and decorations that can be applied to style the text (like font or color) and
+ * the paragraph with such text (like paragraph alignment). Unlimited undo/redo operations are allowed.
+ *
+ * A {@link com.gluonhq.richtextarea.model.DecorationModel} is used to represent text and paragraph decorations for
+ * a given segment of content.
+ *
+ * A list of {@link com.gluonhq.richtextarea.model.DecorationModel} and the full text forms the {@link Document}, which
+ * is the model that ultimately the control renders.
+ *
+ */
 public class RichTextArea extends Control {
 
     public static final String STYLE_CLASS = "rich-text-area";
@@ -36,22 +50,19 @@ public class RichTextArea extends Control {
         getStyleClass().add(STYLE_CLASS);
     }
 
-    @Override
-    protected SkinBase<RichTextArea> createDefaultSkin() {
-        return new RichTextAreaSkin(this);
-    }
-
-    @Override public String getUserAgentStylesheet() {
-        return getClass().getResource("rich-text-area.css").toExternalForm();
-    }
+    // Properties
 
     // documentProperty
-    private final ObjectProperty<Document> documentProperty = new SimpleObjectProperty<>(this, "document", new Document()) {
-        @Override
-        protected void invalidated() {
-            System.out.println(get());
-        }
-    };
+    /**
+     * The {@link Document document} is the model that holds the full text and decorations that are being
+     * displayed by the control.
+     *
+     * By default, this property is set via {@link ActionFactory#newDocument()} or {@link ActionFactory#open(Document)},
+     * and gets updated only via {@link ActionFactory#save()}, unless {@link #autoSaveProperty()} is enabled, in which
+     * the document gets updated after every change.
+     *
+     * @return the document for this control
+     */
     public final ObjectProperty<Document> documentProperty() {
        return documentProperty;
     }
@@ -61,9 +72,16 @@ public class RichTextArea extends Control {
     public final void setDocument(Document value) {
         documentProperty.set(value);
     }
+    private final ObjectProperty<Document> documentProperty = new SimpleObjectProperty<>(this, "document", new Document());
 
     // autoSaveProperty
-    private final BooleanProperty autoSaveProperty = new SimpleBooleanProperty(this, "autoSave");
+    /**
+     * Property that allows saving every change done into the {@link Document document}.
+     * By default, it is disabled, and it is recommended to use the {@link ActionFactory#save()} action
+     * instead, on user's demand: If auto save is enabled, there might be some impact on performance.
+     *
+     * @return if auto saving is enabled or not
+     */
     public final BooleanProperty autoSaveProperty() {
        return autoSaveProperty;
     }
@@ -73,23 +91,33 @@ public class RichTextArea extends Control {
     public final void setAutoSave(boolean value) {
         autoSaveProperty.set(value);
     }
+    private final BooleanProperty autoSaveProperty = new SimpleBooleanProperty(this, "autoSave");
 
     // modifiedProperty
-    final ReadOnlyBooleanWrapper modifiedProperty = new ReadOnlyBooleanWrapper(this, "modified");
+    /**
+     * Indicates if the current {@link Document document} has unsaved changes or not.
+     *
+     * Unless {@link #autoSaveProperty()} is enabled, after any change of the document being edited with the control
+     * this property will be set to true, and will enable the {@link ActionFactory#save()} action.
+     *
+     * @return if the document is modified or not
+     */
     public final ReadOnlyBooleanProperty modifiedProperty() {
        return modifiedProperty.getReadOnlyProperty();
     }
     public final boolean isModified() {
        return modifiedProperty.get();
     }
+    final ReadOnlyBooleanWrapper modifiedProperty = new ReadOnlyBooleanWrapper(this, "modified");
 
     // editableProperty
-    private final BooleanProperty editableProperty = new SimpleBooleanProperty(this, "editable", true) {
-        @Override
-        protected void invalidated() {
-            pseudoClassStateChanged(PSEUDO_CLASS_READONLY, !get());
-        }
-    };
+    /**
+     * Indicates if the {@link Document document} is editable or not.
+     *
+     * By default, it is set to true.
+     *
+     * @return if the document is editable or not
+     */
     public final BooleanProperty editableProperty() {
        return editableProperty;
     }
@@ -99,27 +127,41 @@ public class RichTextArea extends Control {
     public final void setEditable(boolean value) {
         editableProperty.set(value);
     }
+    private final BooleanProperty editableProperty = new SimpleBooleanProperty(this, "editable", true) {
+        @Override
+        protected void invalidated() {
+            pseudoClassStateChanged(PSEUDO_CLASS_READONLY, !get());
+        }
+    };
 
     // selectionProperty
-    private final ReadOnlyObjectWrapper<Selection> selectionProperty = new ReadOnlyObjectWrapper<>(this, "selection", Selection.UNDEFINED);
+    /**
+     *  Contains the {@link Selection selection} of some fragment of the document, if any.
+     *
+     * @return the existing selection, if any
+     */
     public final ReadOnlyObjectProperty<Selection> selectionProperty() {
        return selectionProperty.getReadOnlyProperty();
     }
     public final Selection getSelection() {
        return selectionProperty.get();
     }
-    final void setSelection(Selection value) {
-        selectionProperty.set(Objects.requireNonNull(value));
-    }
+    private final ReadOnlyObjectWrapper<Selection> selectionProperty = new ReadOnlyObjectWrapper<>(this, "selection", Selection.UNDEFINED);
 
     // textLengthProperty
-    final ReadOnlyIntegerWrapper textLengthProperty = new ReadOnlyIntegerWrapper(this, "textLength");
+    /**
+     * Returns the current length of the {@link Document document}, and it gets updated after every change,
+     * even if the document has not been saved yet.
+     *
+     * @return the current length of the document
+     */
     public final ReadOnlyIntegerProperty textLengthProperty() {
         return textLengthProperty.getReadOnlyProperty();
     }
     public final int getTextLength() {
         return textLengthProperty.get();
     }
+    final ReadOnlyIntegerWrapper textLengthProperty = new ReadOnlyIntegerWrapper(this, "textLength");
 
     // contentAreaWidthProperty
     /**
@@ -134,8 +176,9 @@ public class RichTextArea extends Control {
      * In any case, text will be line wrapped as needed to satisfy this constraint.
      *
      * @defaultValue 0
+     *
+     * @return the width of the content area
      */
-    private final DoubleProperty contentAreaWidthProperty = new SimpleDoubleProperty(this, "contentAreaWidth", 0d);
     public final DoubleProperty contentAreaWidthProperty() {
         return contentAreaWidthProperty;
     }
@@ -145,10 +188,27 @@ public class RichTextArea extends Control {
     public final void setContentAreaWidth(double value) {
         contentAreaWidthProperty.set(value);
     }
+    private final DoubleProperty contentAreaWidthProperty = new SimpleDoubleProperty(this, "contentAreaWidth", 0d);
 
     // paragraphGraphicFactoryProperty
-    private final ObjectProperty<BiFunction<Integer, ParagraphDecoration.GraphicType, Node>> paragraphGraphicFactoryProperty =
-            new SimpleObjectProperty<>(this, "paragraphGraphicFactory", DefaultParagraphGraphicFactory.getFactory());
+    /**
+     * A paragraph can be decorated with a node to the left. This property allows adding the graphic for
+     * numbered or bulleted lists.
+     *
+     * Once the {@link ParagraphDecoration#getIndentationLevel() indentation level} and the
+     * {@link ParagraphDecoration.GraphicType graphic type} for a given paragraph are set,
+     * for instance with the {@link com.gluonhq.richtextarea.action.ParagraphDecorateAction},
+     * the {@link BiFunction} allows defining the node that will be used for the graphic with
+     * such indentation level and type of list.
+     *
+     * Numbered lists should use a {@link javafx.scene.control.Label} as node. The text of the label should contain,
+     * at least, an {@code "#"} as a wildcard for the index of paragraph, which will be automatically determined
+     * by the control.
+     *
+     * By default, the control provides a {@link DefaultParagraphGraphicFactory factory}.
+     *
+     * @return a factory to define the graphic decoration for each paragraph, if any
+     */
     public final ObjectProperty<BiFunction<Integer, ParagraphDecoration.GraphicType, Node>> paragraphGraphicFactoryProperty() {
        return paragraphGraphicFactoryProperty;
     }
@@ -158,10 +218,21 @@ public class RichTextArea extends Control {
     public final void setParagraphGraphicFactory(BiFunction<Integer, ParagraphDecoration.GraphicType, Node> value) {
         paragraphGraphicFactoryProperty.set(value);
     }
+    private final ObjectProperty<BiFunction<Integer, ParagraphDecoration.GraphicType, Node>> paragraphGraphicFactoryProperty =
+            new SimpleObjectProperty<>(this, "paragraphGraphicFactory", DefaultParagraphGraphicFactory.getFactory());
 
     // linkCallbackFactoryProperty
-    private final ObjectProperty<Function<Node, Consumer<String>>> linkCallbackFactoryProperty =
-            new SimpleObjectProperty<>(this, "linkCallbackFactory", DefaultLinkCallbackFactory.getFactory());
+    /**
+     * Allows setting a consumer that accepts a valid URL string, for a given node.
+     *
+     * Typically, this can be applied to {@link javafx.scene.text.Text} or {@link javafx.scene.image.ImageView} nodes
+     * with a link to a given URL.
+     *
+     * A default {@link DefaultLinkCallbackFactory factory} allows opening this link in
+     * the browser.
+     *
+     * @return a factory to process links to URL strings
+     */
     public final ObjectProperty<Function<Node, Consumer<String>>> linkCallbackFactoryProperty() {
        return linkCallbackFactoryProperty;
     }
@@ -171,10 +242,35 @@ public class RichTextArea extends Control {
     public final void setLinkCallbackFactory(Function<Node, Consumer<String>> value) {
         linkCallbackFactoryProperty.set(value);
     }
+    private final ObjectProperty<Function<Node, Consumer<String>>> linkCallbackFactoryProperty =
+            new SimpleObjectProperty<>(this, "linkCallbackFactory", DefaultLinkCallbackFactory.getFactory());
 
+    // public methods
 
+    /**
+     * The action factory that can be used from toolBars, menus or context menus to
+     * apply given actions, like {@link ActionFactory#save()}, {@link ActionFactory#copy()}
+     * or {@link ActionFactory#undo()}, to the {@link Document document}.
+     *
+     * @return the action factory
+     */
     public final ActionFactory getActionFactory() {
         return actionFactory;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected SkinBase<RichTextArea> createDefaultSkin() {
+        return new RichTextAreaSkin(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override public String getUserAgentStylesheet() {
+        return getClass().getResource("rich-text-area.css").toExternalForm();
     }
 
 }
