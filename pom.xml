@@ -135,15 +135,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>com.gluonhq</groupId>
-                <artifactId>gluonfx-maven-plugin</artifactId>
-                <version>${gluonfx.plugin.version}</version>
-                <configuration>
-<!--                    <target>${gluonfx.target}</target>-->
-                    <mainClass>${main.class}</mainClass>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>com.sandec.jpro</groupId>
                 <artifactId>jpro-maven-plugin</artifactId>
                 <version>${jpro.version}</version>
