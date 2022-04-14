@@ -9,6 +9,7 @@ import com.gluonhq.richtextarea.model.DecorationModel;
 import com.gluonhq.richtextarea.model.Document;
 import com.gluonhq.richtextarea.model.ImageDecoration;
 import com.gluonhq.richtextarea.model.ParagraphDecoration;
+import com.gluonhq.richtextarea.model.TableDecoration;
 import com.gluonhq.richtextarea.model.TextDecoration;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -98,14 +99,16 @@ public class Main extends Application {
         ParagraphDecoration right22 = ParagraphDecoration.builder().presets().alignment(TextAlignment.RIGHT).topInset(2).bottomInset(2).build();
         ParagraphDecoration left535 = ParagraphDecoration.builder().presets().alignment(TextAlignment.LEFT).topInset(5).bottomInset(3).spacing(5).build();
         ParagraphDecoration center42 = ParagraphDecoration.builder().presets().alignment(TextAlignment.CENTER).topInset(4).bottomInset(2).build();
+        TableDecoration tdec = new TableDecoration(2, 3, new TextAlignment[][]{{TextAlignment.CENTER, TextAlignment.LEFT, TextAlignment.RIGHT}, {TextAlignment.JUSTIFY, TextAlignment.RIGHT, TextAlignment.CENTER}});
+        ParagraphDecoration table = ParagraphDecoration.builder().presets().alignment(TextAlignment.CENTER).tableDecoration(tdec).build();
         decorations = List.of(
                 new DecorationModel(0, 21, bold14, center63),
                 new DecorationModel(21, 575, preset, justify22),
                 new DecorationModel(596, 18, bold14, center63),
                 new DecorationModel(614, 614, preset, right22),
-                new DecorationModel(1228, 25, bold14, center63),
-                new DecorationModel(1253, 764, preset, left535),
-                new DecorationModel(2017, 295, preset, center42)
+                new DecorationModel(1228, 27, bold14, table),
+                new DecorationModel(1255, 764, preset, left535),
+                new DecorationModel(2019, 295, preset, center42)
         );
     }
 
@@ -113,10 +116,10 @@ public class Main extends Application {
             "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.\n" +
             "Why do we use it?\n" +
             "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).\n" +
-            "Where does it come from?\n" +
+            "Where does\u200dit\u200dcome\u200dfrom?\u200d\u200d\n" +
             "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of \"de Finibus Bonorum et Malorum\" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, \"Lorem ipsum dolor sit amet..\", comes from a line in section 1.10.32.\n" +
             "The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested. Sections 1.10.32 and 1.10.33 from \"de Finibus Bonorum et Malorum\" by Cicero are also reproduced in their exact original form, accompanied by English versions from the 1914 translation by H. Rackham.\n",
-            decorations, 2312);
+            decorations, 2314);
 
 //    private final List<DecorationModel> decorations = List.of(
 //                new DecorationModel(0, 12, TextDecoration.builder().presets().build()),
@@ -214,6 +217,7 @@ public class Main extends Application {
                 new Separator(Orientation.VERTICAL),
                 actionImage(LineAwesomeSolid.IMAGE),
                 actionHyperlink(LineAwesomeSolid.LINK),
+                actionTable(LineAwesomeSolid.TABLE),
                 new Separator(Orientation.VERTICAL));
 
         ToolBar fontsToolbar = new ToolBar();
@@ -385,6 +389,65 @@ public class Main extends Application {
 
         // Request focus on the username field by default.
         dialog.setOnShown(e -> Platform.runLater(url::requestFocus));
+
+        return dialog;
+    }
+
+    private Button actionTable(Ikon ikon) {
+        Button button = new Button();
+        FontIcon icon = new FontIcon(ikon);
+        icon.setIconSize(20);
+        button.setGraphic(icon);
+        button.setOnAction(e -> {
+            final Dialog<TableDecoration> tableDialog = createTableDialog();
+            Optional<TableDecoration> result = tableDialog.showAndWait();
+            result.ifPresent(td -> editor.getActionFactory().insertTable(td).execute(e));
+        });
+        return button;
+    }
+
+    private Dialog<TableDecoration> createTableDialog() {
+        Dialog<TableDecoration> dialog = new Dialog<>();
+        dialog.setTitle("Table");
+
+        // Set the button types
+        ButtonType textButtonType = new ButtonType("Create", ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().add(textButtonType);
+
+        // Create the text and rows labels and fields.
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 20, 10, 10));
+
+        TextField rows = new TextField();
+        rows.setPromptText("Rows ");
+
+        grid.add(new Label("Rows:"), 0, 1);
+        grid.add(rows, 1, 1);
+
+        TextField cols = new TextField();
+        cols.setPromptText("Columns ");
+
+        grid.add(new Label("Columns:"), 0, 2);
+        grid.add(cols, 1, 2);
+
+        Node loginButton = dialog.getDialogPane().lookupButton(textButtonType);
+        loginButton.setDisable(true);
+        loginButton.disableProperty().bind(rows.textProperty().isEmpty().or(cols.textProperty().isEmpty()));
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == textButtonType) {
+                int r = Integer.parseInt(rows.getText());
+                int c = Integer.parseInt(cols.getText());
+                return new TableDecoration(r, c); // TODO: add cell alignment
+            }
+            return null;
+        });
+
+        // Request focus on the username field by default.
+        dialog.setOnShown(e -> Platform.runLater(rows::requestFocus));
 
         return dialog;
     }

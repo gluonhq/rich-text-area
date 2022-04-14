@@ -38,6 +38,8 @@ public class ParagraphDecoration implements Decoration {
     private int indentationLevel = -1;
     private GraphicType graphicType;
 
+    private TableDecoration tableDecoration;
+
     private ParagraphDecoration() {}
 
     /**
@@ -128,6 +130,14 @@ public class ParagraphDecoration implements Decoration {
         return graphicType;
     }
 
+    public boolean hasTableDecoration() {
+        return tableDecoration != null && tableDecoration.getRows() > 0 && tableDecoration.getColumns() > 0;
+    }
+
+    public TableDecoration getTableDecoration() {
+        return tableDecoration;
+    }
+
     /**
      * Returns a Builder that can be used to generate paragraph decorations with several
      * attributes
@@ -158,6 +168,7 @@ public class ParagraphDecoration implements Decoration {
         pd.leftInset = Objects.requireNonNullElse(leftInset, decoration.leftInset);
         pd.indentationLevel = indentationLevel < 0 ? decoration.indentationLevel : indentationLevel;
         pd.graphicType = Objects.requireNonNullElse(graphicType, decoration.graphicType);
+        pd.tableDecoration = Objects.requireNonNullElse(tableDecoration, decoration.tableDecoration);
         return pd;
     }
 
@@ -173,12 +184,13 @@ public class ParagraphDecoration implements Decoration {
                 Double.compare(that.leftInset, leftInset) == 0 &&
                 that.indentationLevel == indentationLevel &&
                 that.graphicType == graphicType &&
-                alignment == that.alignment;
+                that.alignment == alignment &&
+                that.tableDecoration == tableDecoration;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(spacing, alignment, topInset, rightInset, bottomInset, leftInset, indentationLevel, graphicType);
+        return Objects.hash(spacing, alignment, topInset, rightInset, bottomInset, leftInset, indentationLevel, graphicType, tableDecoration);
     }
 
     @Override
@@ -187,7 +199,7 @@ public class ParagraphDecoration implements Decoration {
                 "s=" + spacing +
                 ", a=" + alignment +
                 ", [" + topInset + ", " + rightInset + ", " + bottomInset + ", " + leftInset + "]" +
-                ", i=" + indentationLevel + ", type=" + graphicType + "}";
+                ", i=" + indentationLevel + ", type=" + graphicType + ", " + tableDecoration + "}";
     }
 
     public static class Builder {
@@ -196,6 +208,7 @@ public class ParagraphDecoration implements Decoration {
         private Double topInset, rightInset, bottomInset, leftInset;
         private int indentationLevel = -1;
         private GraphicType graphicType;
+        private TableDecoration tableDecoration;
 
         private Builder() {}
 
@@ -209,6 +222,7 @@ public class ParagraphDecoration implements Decoration {
             decoration.leftInset = this.leftInset;
             decoration.indentationLevel = this.indentationLevel;
             decoration.graphicType = this.graphicType;
+            decoration.tableDecoration = tableDecoration;
             return decoration;
         }
 
@@ -221,6 +235,7 @@ public class ParagraphDecoration implements Decoration {
             leftInset = 0d;
             indentationLevel = 0;
             graphicType = GraphicType.NONE;
+            tableDecoration = new TableDecoration();
             return this;
         }
 
@@ -233,6 +248,7 @@ public class ParagraphDecoration implements Decoration {
             this.leftInset = decoration.leftInset;
             this.indentationLevel = decoration.indentationLevel;
             this.graphicType = decoration.graphicType;
+            this.tableDecoration = decoration.tableDecoration;
             return this;
         }
 
@@ -291,6 +307,11 @@ public class ParagraphDecoration implements Decoration {
         public Builder graphicType(GraphicType graphicType) {
             this.graphicType = graphicType;
             this.indentationLevel = Math.max(graphicType == GraphicType.NONE ? 0 : 1, indentationLevel);
+            return this;
+        }
+
+        public Builder tableDecoration(TableDecoration tableDecoration) {
+            this.tableDecoration = tableDecoration;
             return this;
         }
     }

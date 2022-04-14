@@ -13,6 +13,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.gluonhq.richtextarea.model.TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR;
 import static com.gluonhq.richtextarea.model.TextBuffer.ZERO_WIDTH_TEXT;
 
 /**
@@ -305,8 +306,8 @@ public final class PieceTable extends AbstractTextBuffer {
     @Override
     public String toString() {
         String p = pieces.stream().map(piece -> " - " + piece.toString()).collect(Collectors.joining("\n", "\n", ""));
-        return "PieceTable{\n O=\"" + originalText.replaceAll("\n", "<n>").replaceAll(ZERO_WIDTH_TEXT, "<a>") + "\"" + "" +
-                ",\n A=\"" + additionBuffer.replaceAll("\n", "<n>").replaceAll(ZERO_WIDTH_TEXT, "<a>") + "\"" +
+        return "PieceTable{\n O=\"" + originalText.replaceAll("\n", "<n>").replaceAll(ZERO_WIDTH_TEXT, "<a>").replaceAll("" + ZERO_WIDTH_TABLE_SEPARATOR, "<t>") + "\"" + "" +
+                ",\n A=\"" + additionBuffer.replaceAll("\n", "<n>").replaceAll(ZERO_WIDTH_TEXT, "<a>").replaceAll("" + ZERO_WIDTH_TABLE_SEPARATOR, "<t>") + "\"" +
                 ",\n L=" + getTextLength() +
                 ", pieces ->" + p +
                 "\n}";
@@ -356,7 +357,8 @@ class PieceCharacterIterator implements CharacterIterator {
         }
         for (int i = 0; i < posArray.length; i++) {
             if (posArray[i] <= pos && pos < posArray[i + 1]) {
-                return pt.pieces.get(i).getText().charAt(pos - posArray[i]);
+                char c = pt.pieces.get(i).getText().charAt(pos - posArray[i]);
+                return c == ZERO_WIDTH_TABLE_SEPARATOR ? ' ' : c;
             }
         }
         return 0;

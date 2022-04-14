@@ -4,6 +4,7 @@ import com.gluonhq.richtextarea.RichTextArea;
 import com.gluonhq.richtextarea.model.Decoration;
 import com.gluonhq.richtextarea.model.Document;
 import com.gluonhq.richtextarea.model.ImageDecoration;
+import com.gluonhq.richtextarea.model.TableDecoration;
 import com.gluonhq.richtextarea.model.TextDecoration;
 import com.gluonhq.richtextarea.viewmodel.ActionCmdFactory;
 
@@ -74,6 +75,10 @@ public class ActionFactory {
             save = new BasicAction(control, action -> ACTION_CMD_FACTORY.save());
         }
         return save;
+    }
+
+    public Action insertTable(TableDecoration tableDecoration) {
+        return new BasicAction(control, action -> ACTION_CMD_FACTORY.insertTable(tableDecoration));
     }
 
     public Action decorate(Decoration decoration) {

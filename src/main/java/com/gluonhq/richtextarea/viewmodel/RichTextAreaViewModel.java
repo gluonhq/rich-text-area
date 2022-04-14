@@ -435,7 +435,7 @@ public class RichTextAreaViewModel {
         switch (direction) {
             case FORWARD:
                 if (wordSelection) {
-                    nextWord(c -> c != ' ' && c != '\t');
+                    nextWord(c -> c != ' ' && c != '\t' && c != TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR);
                 } else if (lineSelection) {
                     lineEnd();
                 } else if (paragraphSelection) {

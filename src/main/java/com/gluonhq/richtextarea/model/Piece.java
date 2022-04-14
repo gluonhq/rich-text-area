@@ -3,6 +3,7 @@ package com.gluonhq.richtextarea.model;
 import java.util.Objects;
 
 import static com.gluonhq.richtextarea.Tools.getFirstLetter;
+import static com.gluonhq.richtextarea.model.TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR;
 
 public final class Piece {
 
@@ -95,6 +96,8 @@ public final class Piece {
                 ", " + length +
                 "], " + decoration +
                 ", " + paragraphDecoration +
-                ", \"" + getText().replaceAll("\n", "<n>").replaceAll(TextBuffer.ZERO_WIDTH_TEXT, "<a>") + "\"}";
+                ", \"" + getText().replaceAll("\n", "<n>")
+                            .replaceAll(TextBuffer.ZERO_WIDTH_TEXT, "<a>")
+                            .replaceAll("" + ZERO_WIDTH_TABLE_SEPARATOR, "<t>")+ "\"}";
     }
 }
