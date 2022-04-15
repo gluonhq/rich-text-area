@@ -116,7 +116,7 @@ public class Main extends Application {
             "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.\n" +
             "Why do we use it?\n" +
             "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).\n" +
-            "Where does\u200dit\u200dcome\u200dfrom?\u200d\u200d\n" +
+            "Where does\u200bit\u200bcome\u200bfrom?\u200b\u200b\n" +
             "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of \"de Finibus Bonorum et Malorum\" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, \"Lorem ipsum dolor sit amet..\", comes from a line in section 1.10.32.\n" +
             "The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested. Sections 1.10.32 and 1.10.33 from \"de Finibus Bonorum et Malorum\" by Cicero are also reproduced in their exact original form, accompanied by English versions from the 1914 translation by H. Rackham.\n",
             decorations, 2314);
@@ -217,7 +217,7 @@ public class Main extends Application {
                 new Separator(Orientation.VERTICAL),
                 actionImage(LineAwesomeSolid.IMAGE),
                 actionHyperlink(LineAwesomeSolid.LINK),
-                actionTable(LineAwesomeSolid.TABLE),
+                actionTable(LineAwesomeSolid.TABLE, td -> editor.getActionFactory().insertTable(td)),
                 new Separator(Orientation.VERTICAL));
 
         ToolBar fontsToolbar = new ToolBar();
@@ -393,22 +393,23 @@ public class Main extends Application {
         return dialog;
     }
 
-    private Button actionTable(Ikon ikon) {
+    private Button actionTable(Ikon ikon, Function<TableDecoration, Action> actionFunction) {
         Button button = new Button();
         FontIcon icon = new FontIcon(ikon);
         icon.setIconSize(20);
         button.setGraphic(icon);
+        button.disableProperty().bind(actionFunction.apply(null).disabledProperty());
         button.setOnAction(e -> {
-            final Dialog<TableDecoration> tableDialog = createTableDialog();
+            final Dialog<TableDecoration> tableDialog = insertTableDialog();
             Optional<TableDecoration> result = tableDialog.showAndWait();
-            result.ifPresent(td -> editor.getActionFactory().insertTable(td).execute(e));
+            result.ifPresent(td -> actionFunction.apply(td).execute(e));
         });
         return button;
     }
 
-    private Dialog<TableDecoration> createTableDialog() {
+    private Dialog<TableDecoration> insertTableDialog() {
         Dialog<TableDecoration> dialog = new Dialog<>();
-        dialog.setTitle("Table");
+        dialog.setTitle("Insert table");
 
         // Set the button types
         ButtonType textButtonType = new ButtonType("Create", ButtonData.OK_DONE);
@@ -432,9 +433,22 @@ public class Main extends Application {
         grid.add(new Label("Columns:"), 0, 2);
         grid.add(cols, 1, 2);
 
-        Node loginButton = dialog.getDialogPane().lookupButton(textButtonType);
-        loginButton.setDisable(true);
-        loginButton.disableProperty().bind(rows.textProperty().isEmpty().or(cols.textProperty().isEmpty()));
+        Node tableButton = dialog.getDialogPane().lookupButton(textButtonType);
+        tableButton.setDisable(true);
+        tableButton.disableProperty().bind(Bindings.createBooleanBinding(
+                () -> {
+                    if (rows.getText().isEmpty() || cols.getText().isEmpty()) {
+                        return true;
+                    }
+                    try {
+                        Integer.parseInt(rows.getText());
+                        Integer.parseInt(cols.getText());
+                    } catch (NumberFormatException nfe) {
+                        return true;
+                    }
+                    return false;
+                },
+                rows.textProperty(), cols.textProperty()));
 
         dialog.getDialogPane().setContent(grid);
         dialog.setResultConverter(dialogButton -> {

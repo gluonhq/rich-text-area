@@ -36,9 +36,13 @@
     -fx-arc-height: 1;
 }
 
-.rich-text-area .paragraph-tile > .content-area > .layers > .text-flow {
+.rich-text-area .paragraph-tile > .content-area > .layer > .text-flow {
     /*-fx-background-color: #ff000010;*/
     /*-fx-padding: 2;*/
+}
+
+.rich-text-area .paragraph-tile > .content-area > HBox > .table {
+    -fx-grid-lines-visible: true;
 }
 
 .rich-text-area .caret {

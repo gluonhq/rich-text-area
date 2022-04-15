@@ -2,7 +2,6 @@ package com.gluonhq.richtextarea;
 
 import com.gluonhq.richtextarea.model.Paragraph;
 import com.gluonhq.richtextarea.model.ParagraphDecoration;
-import com.gluonhq.richtextarea.model.TextBuffer;
 import com.gluonhq.richtextarea.viewmodel.RichTextAreaViewModel;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -123,13 +122,13 @@ public class ParagraphTile extends HBox {
 
     private HBox createGridBox(List<Node> fragments, List<Integer> positions, List<IndexRangeColor> background, ParagraphDecoration decoration) {
         GridPane grid = new GridPane();
+        grid.getStyleClass().add("table");
         int r = decoration.getTableDecoration().getRows();
         int c = decoration.getTableDecoration().getColumns();
         TextAlignment[][] ta = decoration.getTableDecoration().getCellAlignment();
         for (int j = 0; j < c; j++) {
             ColumnConstraints cc = new ColumnConstraints();
-            cc.setMinWidth(100);
-//                cc.setPrefWidth(1.0 / (double) c * textFlow.getPrefWidth());
+            cc.setPercentWidth(100.0 / (double) c);
             grid.getColumnConstraints().add(cc);
         }
         int index = 0;
@@ -158,7 +157,6 @@ public class ParagraphTile extends HBox {
                 index++;
             }
         }
-        grid.setGridLinesVisible(true);
         HBox gridBox = new HBox(grid);
         gridBox.setPrefHeight(grid.getPrefHeight() + 1);
         gridBox.setPrefWidth(richTextAreaSkin.textFlowPrefWidthProperty.get());
@@ -308,7 +306,7 @@ public class ParagraphTile extends HBox {
 
             getChildren().addAll(textBackgroundColorPaths);
             getChildren().addAll(selectionShape, caretShape, textFlow);
-            getStyleClass().add("layers");
+            getStyleClass().add("layer");
         }
 
         @Override
