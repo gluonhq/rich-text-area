@@ -111,7 +111,15 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         entry( new KeyCodeCombination(V, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.paste()),
         entry( new KeyCodeCombination(Z, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.undo()),
         entry( new KeyCodeCombination(Z, SHORTCUT_DOWN, SHIFT_DOWN),                         e -> ACTION_CMD_FACTORY.redo()),
-        entry( new KeyCodeCombination(ENTER, SHIFT_ANY),                                     e -> ACTION_CMD_FACTORY.insertText("\n")),
+        entry( new KeyCodeCombination(ENTER, SHIFT_ANY),                                     e -> {
+            ParagraphDecoration decoration = viewModel.getDecorationAtParagraph();
+            if (decoration != null && decoration.hasTableDecoration()) {
+                // TODO: move and select down/up cell, including adding a new row
+                // For now:
+                return ACTION_CMD_FACTORY.caretMove(e.isShiftDown() ? Direction.BACK : Direction.FORWARD, false, false, false);
+            }
+            return ACTION_CMD_FACTORY.insertText("\n");
+        }),
         entry( new KeyCodeCombination(BACK_SPACE, SHIFT_ANY),                                e -> {
             int caret = viewModel.getCaretPosition();
             return viewModel.getParagraphWithCaret()
@@ -141,6 +149,10 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             if (decoration.getGraphicType() != ParagraphDecoration.GraphicType.NONE) {
                 int level = Math.max(decoration.getIndentationLevel() + (e.isShiftDown() ? -1 : 1), 0);
                 return ACTION_CMD_FACTORY.decorateParagraph(ParagraphDecoration.builder().fromDecoration(decoration).indentationLevel(level).build());
+            } else if (decoration.hasTableDecoration()) {
+                // TODO: move and select next/prev cell, including adding a new row
+                // For now:
+                return ACTION_CMD_FACTORY.caretMove(e.isShiftDown() ? Direction.BACK : Direction.FORWARD, false, false, false);
             }
             return null;
         })
@@ -522,7 +534,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         if (isCharOnly(e)) {
             if ("\t".equals(e.getCharacter())) {
                 ParagraphDecoration decoration = viewModel.getDecorationAtParagraph();
-                if (decoration.getGraphicType() != ParagraphDecoration.GraphicType.NONE) {
+                if (decoration != null &&
+                    (decoration.getGraphicType() != ParagraphDecoration.GraphicType.NONE || decoration.hasTableDecoration())) {
                     // processed via keyPressedListener
                     e.consume();
                     return;

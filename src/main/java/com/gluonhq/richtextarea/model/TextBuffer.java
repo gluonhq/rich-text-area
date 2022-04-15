@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 public interface TextBuffer {
 
     String ZERO_WIDTH_TEXT = "\u200b";
+    char ZERO_WIDTH_TABLE_SEPARATOR = '\u200b';
 
     int getTextLength();
     ReadOnlyIntegerProperty textLengthProperty();

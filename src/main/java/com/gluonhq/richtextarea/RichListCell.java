@@ -4,7 +4,6 @@ import com.gluonhq.richtextarea.model.ImageDecoration;
 import com.gluonhq.richtextarea.model.Paragraph;
 import com.gluonhq.richtextarea.model.TextBuffer;
 import com.gluonhq.richtextarea.model.TextDecoration;
-import javafx.collections.ObservableSet;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.ListCell;
@@ -15,22 +14,21 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Path;
-import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static com.gluonhq.richtextarea.model.TableDecoration.TABLE_SEPARATOR;
 
 class RichListCell extends ListCell<Paragraph> {
 
@@ -47,7 +45,6 @@ class RichListCell extends ListCell<Paragraph> {
         setFont(MIN_LF_FONT);
 
         paragraphTile = new ParagraphTile(richTextAreaSkin);
-        paragraphTile.getTextFlow().setPrefWidth(richTextAreaSkin.textFlowPrefWidthProperty.get());
         setText(null);
 
         addEventHandler(MouseEvent.DRAG_DETECTED, event -> {
@@ -116,14 +113,41 @@ class RichListCell extends ListCell<Paragraph> {
             var fragments = new ArrayList<Node>();
             var backgroundIndexRanges = new ArrayList<IndexRangeColor>();
             var length = new AtomicInteger();
+            var positions = new ArrayList<Integer>();
+            positions.add(item.getStart());
+            AtomicInteger tp = new AtomicInteger(item.getStart());
             richTextAreaSkin.getViewModel().walkFragments((text, decoration) -> {
                 if (decoration instanceof TextDecoration && !text.isEmpty()) {
-                    final Text textNode = buildText(text.replace("\n", TextBuffer.ZERO_WIDTH_TEXT), (TextDecoration) decoration);
-                    fragments.add(textNode);
-                    Color background = ((TextDecoration) decoration).getBackground();
-                    if (background != Color.TRANSPARENT) {
-                        backgroundIndexRanges.add(new IndexRangeColor(
-                                length.get(), length.get() + text.length(), background));
+                    if (item.getDecoration().hasTableDecoration()) {
+                        AtomicInteger s = new AtomicInteger();
+                        IntStream.iterate(text.indexOf(TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR),
+                                        index -> index >= 0,
+                                        index -> text.indexOf(TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR, index + 1))
+                                .boxed()
+                                .forEach(i -> {
+                                    String tableText = text.substring(s.getAndSet(i + 1), i + 1);
+                                    final Text textNode = buildText(tableText, (TextDecoration) decoration);
+                                    textNode.getProperties().put(TABLE_SEPARATOR, tp.get());
+                                    fragments.add(textNode);
+                                    positions.add(tp.addAndGet(tableText.length()));
+                                });
+                        if (s.get() < text.length()) {
+                            String tableText = text.substring(s.get()).replace("\n", TextBuffer.ZERO_WIDTH_TEXT);
+                            final Text textNode = buildText(tableText, (TextDecoration) decoration);
+                            textNode.getProperties().put(TABLE_SEPARATOR, tp.getAndAdd(tableText.length()));
+                            fragments.add(textNode);
+                            if (text.substring(s.get()).contains("\n")) {
+                                positions.add(tp.get());
+                            }
+                        }
+                    } else {
+                        final Text textNode = buildText(text.replace("\n", TextBuffer.ZERO_WIDTH_TEXT), (TextDecoration) decoration);
+                        fragments.add(textNode);
+                        Color background = ((TextDecoration) decoration).getBackground();
+                        if (background != Color.TRANSPARENT) {
+                            backgroundIndexRanges.add(new IndexRangeColor(
+                                    length.get(), length.get() + text.length(), background));
+                        }
                     }
                     length.addAndGet(text.length());
                 } else if (decoration instanceof ImageDecoration) {
@@ -132,37 +156,15 @@ class RichListCell extends ListCell<Paragraph> {
                     richTextAreaSkin.nonTextNodes.incrementAndGet();
                 }
             }, item.getStart(), item.getEnd());
-            paragraphTile.getTextFlow().getChildren().setAll(fragments);
-            paragraphTile.setParagraph(item);
-            addBackgroundPathsToLayers(paragraphTile.getTextFlow(), paragraphTile.getTextBackgroundColorPaths(), backgroundIndexRanges);
+            paragraphTile.setParagraph(item, fragments, positions, backgroundIndexRanges);
             setGraphic(paragraphTile);
             // required: update caret and selection
             paragraphTile.updateLayout();
         } else {
             // clean up listeners
-            paragraphTile.setParagraph(null);
+            paragraphTile.setParagraph(null, null, null, null);
             setGraphic(null);
-
         }
-    }
-
-    private void addBackgroundPathsToLayers(TextFlow textFlow, ObservableSet<Path> textBackgroundColorPaths, List<IndexRangeColor> backgroundIndexRanges) {
-        Map<Paint, Path> fillPathMap = backgroundIndexRanges.stream()
-                .map(indexRangeBackground -> {
-                    final Path path = new BackgroundColorPath(textFlow.rangeShape(indexRangeBackground.getStart(), indexRangeBackground.getEnd()));
-                    path.setStrokeWidth(0);
-                    path.setFill(indexRangeBackground.getColor());
-                    path.setLayoutX(paragraphTile.getTextFlowLayoutX());
-                    path.setLayoutY(paragraphTile.getTextFlowLayoutY());
-                    return path;
-                })
-                .collect(Collectors.toMap(Path::getFill, Function.identity(), (p1, p2) -> {
-                    Path union = (Path) Shape.union(p1, p2);
-                    union.setFill(p1.getFill());
-                    return union;
-                }));
-        textBackgroundColorPaths.removeIf(path -> !fillPathMap.containsValue(path));
-        textBackgroundColorPaths.addAll(fillPathMap.values());
     }
 
     private Text buildText(String content, TextDecoration decoration) {

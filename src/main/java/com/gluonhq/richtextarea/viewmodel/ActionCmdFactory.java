@@ -3,6 +3,7 @@ package com.gluonhq.richtextarea.viewmodel;
 import com.gluonhq.richtextarea.model.Document;
 import com.gluonhq.richtextarea.model.ImageDecoration;
 import com.gluonhq.richtextarea.model.ParagraphDecoration;
+import com.gluonhq.richtextarea.model.TableDecoration;
 import com.gluonhq.richtextarea.model.TextDecoration;
 import javafx.scene.input.KeyEvent;
 
@@ -58,6 +59,10 @@ public final class ActionCmdFactory {
 
     public ActionCmd insertText(String text) {
         return new ActionCmdInsertText(text);
+    }
+
+    public ActionCmd insertTable(TableDecoration tableDecoration) {
+        return new ActionCmdInsertTable(tableDecoration);
     }
 
     public ActionCmd removeText(int caretOffset) {

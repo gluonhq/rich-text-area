@@ -12,7 +12,16 @@ class InsertTextCmd extends AbstractEditCmd {
 
     @Override
     public void doRedo( RichTextAreaViewModel viewModel ) {
-        Objects.requireNonNull(viewModel).insert(content);
+        String text;
+        if (Objects.requireNonNull(viewModel).getDecorationAtParagraph() != null &&
+                viewModel.getDecorationAtParagraph().hasTableDecoration()) {
+            text = content.replace("\n", "");
+        } else {
+            text = content;
+        }
+        if (!text.isEmpty()) {
+            viewModel.insert(text);
+        }
     }
 
     @Override
@@ -22,6 +31,6 @@ class InsertTextCmd extends AbstractEditCmd {
 
     @Override
     public String toString() {
-        return "InsertTextCmd[" + super.toString() + ", " + content + "]";
+        return "InsertTextCmd[" + super.toString() + ", " + (content != null ? content.replace("\n", "<n>") : "") + "]";
     }
 }
