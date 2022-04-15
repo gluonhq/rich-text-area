@@ -5,6 +5,11 @@ import javafx.scene.text.TextAlignment;
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * TableDecoration is a {@link Decoration} that can be applied to a paragrpah in order to place
+ * a table with a number of rows and columns where text can be added, with a given text alignment
+ * defined per table cell.
+ */
 public class TableDecoration implements Decoration {
 
     public static final String TABLE_SEPARATOR = "table_separator";
@@ -33,14 +38,31 @@ public class TableDecoration implements Decoration {
         this.cellAlignment = cellAlignment != null ? cellAlignment : defaultCellAlignment;
     }
 
+    /**
+     * Returns the number of rows that define the table
+     *
+     * @return the number of rows
+     */
     public int getRows() {
         return rows;
     }
 
+    /**
+     * Returns the number of columns that define the table
+     *
+     * @return the number of columns
+     */
     public int getColumns() {
         return columns;
     }
 
+    /**
+     * Returns a two-dimensional array with the text alignment for each row and column.
+     *
+     * By default, the text alignment is set to {@link TextAlignment#LEFT}.
+     *
+     * @return the {@link TextAlignment} for each cell
+     */
     public TextAlignment[][] getCellAlignment() {
         return cellAlignment;
     }

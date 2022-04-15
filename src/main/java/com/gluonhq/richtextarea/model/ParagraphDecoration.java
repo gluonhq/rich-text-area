@@ -130,10 +130,20 @@ public class ParagraphDecoration implements Decoration {
         return graphicType;
     }
 
+    /**
+     * Returns true if the paragraph decoration has a {@link TableDecoration}
+     *
+     * @return true if the paragraph has a table
+     */
     public boolean hasTableDecoration() {
         return tableDecoration != null && tableDecoration.getRows() > 0 && tableDecoration.getColumns() > 0;
     }
 
+    /**
+     * Returns the {@link TableDecoration} for this paragraph
+     *
+     * @return the {@link TableDecoration} for this paragraph
+     */
     public TableDecoration getTableDecoration() {
         return tableDecoration;
     }
