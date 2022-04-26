@@ -111,7 +111,7 @@ public class ParagraphTile extends HBox {
                 contentPane.getChildren().add(gridBox);
             }
         } else {
-            Layer layer = new Layer(paragraph.getStart(), paragraph.getEnd());
+            Layer layer = new Layer(paragraph.getStart(), paragraph.getEnd(), false);
             layer.setContent(fragments, background, decoration);
             layers.add(layer);
             contentPane.getChildren().add(layer);
@@ -137,7 +137,7 @@ public class ParagraphTile extends HBox {
                 if (index + 1 >= positions.size()) {
                     break;
                 }
-                Layer layer = new Layer(positions.get(index), positions.get(index + 1));
+                Layer layer = new Layer(positions.get(index), positions.get(index + 1), true);
                 ParagraphDecoration pd = ParagraphDecoration.builder().fromDecoration(decoration).alignment(ta[i][j]).build();
                 int tableIndex = index;
                 layer.setContent(fragments.stream()
@@ -290,10 +290,12 @@ public class ParagraphTile extends HBox {
         private double textFlowLayoutX, textFlowLayoutY;
 
         private final int start, end;
+        private final boolean isTableCell;
 
-        public Layer(int start, int end) {
+        public Layer(int start, int end, boolean isTableCell) {
             this.start = start;
             this.end = end;
+            this.isTableCell = isTableCell;
             caretTimeline.setCycleCount(Timeline.INDEFINITE);
             textFlow.setFocusTraversable(false);
             textFlow.getStyleClass().setAll("text-flow");
@@ -362,7 +364,11 @@ public class ParagraphTile extends HBox {
                         if (e.getClickCount() == 2) {
                             viewModel.selectCurrentWord();
                         } else if (e.getClickCount() == 3) {
-                            viewModel.selectCurrentParagraph();
+                            if (isTableCell) {
+                                viewModel.setSelection(new Selection(start, end));
+                            } else {
+                                viewModel.selectCurrentParagraph();
+                            }
                         } else {
                             richTextAreaSkin.mouseDragStart = globalInsertionIndex;
                             viewModel.clearSelection();
