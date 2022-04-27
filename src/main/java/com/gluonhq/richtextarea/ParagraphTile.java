@@ -216,7 +216,7 @@ public class ParagraphTile extends HBox {
             nodePrefHeight = graphicNode.prefHeight(nodePrefWidth);
         }
 
-        graphicNode.setTranslateY((layer.getCaretY() - nodePrefHeight)/ 2d);
+        graphicNode.setTranslateY(Math.max(0d, (layer.getCaretY() - nodePrefHeight)/ 2d));
         double boxPrefWidth = spanPrefWidth + nodePrefWidth;
         graphicBox.setMinWidth(boxPrefWidth);
         graphicBox.setMaxWidth(boxPrefWidth);
