@@ -283,7 +283,7 @@ public final class PieceTable extends AbstractTextBuffer {
     static Collection<Piece> normalize(Collection<Piece> pieces) {
         return Objects.requireNonNull(pieces)
                   .stream()
-                  .filter(b -> b == null ||  !b.isEmpty())
+                  .filter(b -> b == null || !b.isEmpty())
                   .collect(Collectors.toList());
 
     }
@@ -902,10 +902,11 @@ class ParagraphDecorateCmd extends AbstractCommand<PieceTable> {
         final List<Piece> removals = new ArrayList<>();
 
         pt.walkPieces((piece, pieceIndex, textPosition) -> {
-            if (isPieceInSelection(piece, textPosition)) {
+            int pieceEndPosition = textPosition + piece.length + (start == pt.getTextLength() ? 0 : - 1);
+            if (start <= pieceEndPosition && (end >= pieceEndPosition || end >= textPosition)) {
                 startPieceIndex[0] = pieceIndex;
                 if (textPosition <= start) {
-                    int offset = start - textPosition;
+                    int offset = start == pt.getTextLength() ? 0 : start - textPosition;
                     int length;
                     if (textPosition + piece.length > end) {
                         length = Math.min(end - start, piece.length); // selection ends in current piece
