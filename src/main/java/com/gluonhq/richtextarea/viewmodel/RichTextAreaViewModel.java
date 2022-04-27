@@ -224,6 +224,8 @@ public class RichTextAreaViewModel {
             Document document = get();
             if (document != null) {
                 updateParagraphList();
+                // update decorationAtParagraph once the paragraph list is ready
+                getParagraphWithCaret().ifPresent(p -> setDecorationAtParagraph(p.getDecoration()));
             }
         }
     };
