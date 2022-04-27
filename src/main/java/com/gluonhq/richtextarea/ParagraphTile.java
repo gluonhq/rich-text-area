@@ -5,6 +5,7 @@ import com.gluonhq.richtextarea.model.ParagraphDecoration;
 import com.gluonhq.richtextarea.viewmodel.RichTextAreaViewModel;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
@@ -97,11 +98,11 @@ public class ParagraphTile extends HBox {
         contentPane.getChildren().clear();
         viewModel.caretPositionProperty().removeListener(caretPositionListener);
         viewModel.selectionProperty().removeListener(selectionListener);
+        this.paragraph = paragraph;
         if (paragraph == null) {
             contentPane.setPrefWidth(0);
             return;
         }
-        this.paragraph = paragraph;
         ParagraphDecoration decoration = paragraph.getDecoration();
         viewModel.caretPositionProperty().addListener(caretPositionListener);
         viewModel.selectionProperty().addListener(selectionListener);
@@ -109,14 +110,16 @@ public class ParagraphTile extends HBox {
             if (!fragments.isEmpty()) {
                 HBox gridBox = createGridBox(fragments, positions, background, decoration);
                 contentPane.getChildren().add(gridBox);
+                contentPane.layout();
             }
         } else {
-            Layer layer = new Layer(paragraph.getStart(), paragraph.getEnd());
+            Layer layer = new Layer(paragraph.getStart(), paragraph.getEnd(), false);
             layer.setContent(fragments, background, decoration);
             layers.add(layer);
             contentPane.getChildren().add(layer);
             updateGraphicBox(layer, control.getParagraphGraphicFactory());
             graphicBox.setPadding(new Insets(decoration.getTopInset(), 2, decoration.getBottomInset(), 0));
+            contentPane.layout();
         }
     }
 
@@ -137,7 +140,7 @@ public class ParagraphTile extends HBox {
                 if (index + 1 >= positions.size()) {
                     break;
                 }
-                Layer layer = new Layer(positions.get(index), positions.get(index + 1));
+                Layer layer = new Layer(positions.get(index), positions.get(index + 1), true);
                 ParagraphDecoration pd = ParagraphDecoration.builder().fromDecoration(decoration).alignment(ta[i][j]).build();
                 int tableIndex = index;
                 layer.setContent(fragments.stream()
@@ -216,7 +219,7 @@ public class ParagraphTile extends HBox {
             nodePrefHeight = graphicNode.prefHeight(nodePrefWidth);
         }
 
-        graphicNode.setTranslateY((layer.getCaretY() - nodePrefHeight)/ 2d);
+        graphicNode.setTranslateY(Math.max(0d, (layer.getCaretY() - nodePrefHeight)/ 2d));
         double boxPrefWidth = spanPrefWidth + nodePrefWidth;
         graphicBox.setMinWidth(boxPrefWidth);
         graphicBox.setMaxWidth(boxPrefWidth);
@@ -290,10 +293,12 @@ public class ParagraphTile extends HBox {
         private double textFlowLayoutX, textFlowLayoutY;
 
         private final int start, end;
+        private final boolean isTableCell;
 
-        public Layer(int start, int end) {
+        public Layer(int start, int end, boolean isTableCell) {
             this.start = start;
             this.end = end;
+            this.isTableCell = isTableCell;
             caretTimeline.setCycleCount(Timeline.INDEFINITE);
             textFlow.setFocusTraversable(false);
             textFlow.getStyleClass().setAll("text-flow");
@@ -316,13 +321,14 @@ public class ParagraphTile extends HBox {
 
         void setContent(List<Node> fragments, List<IndexRangeColor> background, ParagraphDecoration decoration) {
             textFlow.getChildren().setAll(fragments);
-            addBackgroundPathsToLayers(background);
             textFlow.setTextAlignment(decoration.getAlignment());
             textFlow.setLineSpacing(decoration.getSpacing());
             textFlow.setPadding(new Insets(decoration.getTopInset(), decoration.getRightInset(), decoration.getBottomInset(), decoration.getLeftInset()));
 
             textFlowLayoutX = 1d + decoration.getLeftInset();
             textFlowLayoutY = 1d + decoration.getTopInset();
+
+            Platform.runLater(() -> addBackgroundPathsToLayers(background));
         }
 
         void reset() {
@@ -362,7 +368,11 @@ public class ParagraphTile extends HBox {
                         if (e.getClickCount() == 2) {
                             viewModel.selectCurrentWord();
                         } else if (e.getClickCount() == 3) {
-                            viewModel.selectCurrentParagraph();
+                            if (isTableCell) {
+                                viewModel.setSelection(new Selection(start, end));
+                            } else {
+                                viewModel.selectCurrentParagraph();
+                            }
                         } else {
                             richTextAreaSkin.mouseDragStart = globalInsertionIndex;
                             viewModel.clearSelection();

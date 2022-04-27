@@ -315,8 +315,14 @@ public class ParagraphDecoration implements Decoration {
         }
 
         public Builder graphicType(GraphicType graphicType) {
+            if (this.graphicType != GraphicType.NONE && graphicType == GraphicType.NONE) {
+                // removing graphic type, moves one level back
+                this.indentationLevel = Math.max(0, indentationLevel - 1);
+            } else if (this.graphicType == GraphicType.NONE && graphicType != GraphicType.NONE) {
+                // applying graphic type requires at least level one
+                this.indentationLevel = Math.max(1, indentationLevel);
+            }
             this.graphicType = graphicType;
-            this.indentationLevel = Math.max(graphicType == GraphicType.NONE ? 0 : 1, indentationLevel);
             return this;
         }
 

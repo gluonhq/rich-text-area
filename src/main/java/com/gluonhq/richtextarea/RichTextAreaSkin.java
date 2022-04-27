@@ -113,7 +113,14 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         entry( new KeyCodeCombination(Z, SHORTCUT_DOWN, SHIFT_DOWN),                         e -> ACTION_CMD_FACTORY.redo()),
         entry( new KeyCodeCombination(ENTER, SHIFT_ANY),                                     e -> {
             ParagraphDecoration decoration = viewModel.getDecorationAtParagraph();
-            if (decoration != null && decoration.hasTableDecoration()) {
+            if (decoration != null && decoration.getGraphicType() != ParagraphDecoration.GraphicType.NONE) {
+                int level = decoration.getIndentationLevel();
+                Paragraph paragraph = viewModel.getParagraphWithCaret().orElse(null);
+                if (level > 0 && paragraph != null && paragraph.getEnd() - paragraph.getStart() < 1) {
+                    // on empty paragraphs, Enter is the same as shift+tab
+                    return ACTION_CMD_FACTORY.decorateParagraph(ParagraphDecoration.builder().fromDecoration(decoration).indentationLevel(level - 1).build());
+                }
+            } else if (decoration != null && decoration.hasTableDecoration()) {
                 // TODO: move and select down/up cell, including adding a new row
                 // For now:
                 return ACTION_CMD_FACTORY.caretMove(e.isShiftDown() ? Direction.BACK : Direction.FORWARD, false, false, false);
@@ -128,6 +135,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                         ParagraphDecoration decoration = viewModel.getDecorationAtParagraph();
                         if (decoration.getGraphicType() != ParagraphDecoration.GraphicType.NONE) {
                             return ACTION_CMD_FACTORY.decorateParagraph(ParagraphDecoration.builder().fromDecoration(decoration).graphicType(ParagraphDecoration.GraphicType.NONE).build());
+                        } else if (decoration.getIndentationLevel() > 0) {
+                            return ACTION_CMD_FACTORY.decorateParagraph(ParagraphDecoration.builder().fromDecoration(decoration).indentationLevel(decoration.getIndentationLevel() - 1).build());
                         }
                         return null;
                     })
@@ -146,10 +155,10 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         }),
         entry(new KeyCodeCombination(TAB, SHIFT_ANY),                                        e -> {
             ParagraphDecoration decoration = viewModel.getDecorationAtParagraph();
-            if (decoration.getGraphicType() != ParagraphDecoration.GraphicType.NONE) {
+            if (decoration != null && decoration.getGraphicType() != ParagraphDecoration.GraphicType.NONE) {
                 int level = Math.max(decoration.getIndentationLevel() + (e.isShiftDown() ? -1 : 1), 0);
                 return ACTION_CMD_FACTORY.decorateParagraph(ParagraphDecoration.builder().fromDecoration(decoration).indentationLevel(level).build());
-            } else if (decoration.hasTableDecoration()) {
+            } else if (decoration != null && decoration.hasTableDecoration()) {
                 // TODO: move and select next/prev cell, including adding a new row
                 // For now:
                 return ACTION_CMD_FACTORY.caretMove(e.isShiftDown() ? Direction.BACK : Direction.FORWARD, false, false, false);
