@@ -607,13 +607,13 @@ public class RichTextAreaViewModel {
     }
 
     private void lineStart() {
-        int pos = getNextRowPosition.apply(0d, false);
+        int pos = getNextRowPosition.apply(0d, null);
         setCaretPosition(pos);
     }
 
     private void lineEnd() {
-        int pos = getNextRowPosition.apply(Double.MAX_VALUE, false);
-        setCaretPosition(pos);
+        int pos = getNextRowPosition.apply(Double.MAX_VALUE, null);
+        setCaretPosition(Math.max(pos == getTextLength() ? pos : pos - 1, 0));
     }
 
     private void paragraphStart() {

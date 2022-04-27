@@ -475,13 +475,14 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     // So far the only way to find prev/next row location is to use the size of the caret,
     // which always has the height of the row. Adding line spacing to it allows us to find a point which
     // belongs to the desired row. Then using the `hitTest` we can find the related caret position.
-    private int getNextRowPosition(double x, boolean down) {
+    private int getNextRowPosition(double x, Boolean down) {
         ObservableList<Paragraph> items = paragraphListView.getItems();
         int caretPosition = viewModel.getCaretPosition();
-        int nextRowPosition = Math.min(viewModel.getTextLength(), paragraphListView.getNextRowPosition(x, down));
+        int nextRowPosition = Math.min(viewModel.getTextLength(),
+                paragraphListView.getNextRowPosition(x, down != null && down));
         // if the caret is at the top or bottom of the paragraph:
-        if ((down && nextRowPosition <= caretPosition) ||
-                (!down && nextRowPosition >= caretPosition)) {
+        if (down != null && ((down && nextRowPosition <= caretPosition) ||
+                (!down && nextRowPosition >= caretPosition))) {
             int paragraphWithCaretIndex = items.stream()
                     .filter(p -> p.getStart() <= caretPosition &&
                             caretPosition < (p.equals(lastParagraph) ? p.getEnd() + 1 : p.getEnd()))
