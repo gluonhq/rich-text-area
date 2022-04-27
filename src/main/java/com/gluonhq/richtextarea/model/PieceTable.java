@@ -639,7 +639,12 @@ class DeleteCmd extends AbstractCommand<PieceTable> {
                     removals.add(piece);
                 }
                 if (PieceTable.inRange(endPosition, textPosition, piece.length)) {
-                    additions.add(piece.pieceFrom(endPosition - textPosition));
+                    // the next piece after the deletion point should use the paragraph decoration from the previous piece, if any
+                    int offset = endPosition - textPosition;
+                    ParagraphDecoration paragraphDecoration = additions.get(additions.size() - 1).getParagraphDecoration();
+                    Piece nextPiece = piece.copy(piece.start + offset, piece.length - offset, piece.decoration,
+                            paragraphDecoration == null ? piece.paragraphDecoration : paragraphDecoration);
+                    additions.add(nextPiece);
                     return true;
                 }
             }
@@ -652,7 +657,7 @@ class DeleteCmd extends AbstractCommand<PieceTable> {
             pieceIndex = startPieceIndex[0];
             pt.pieces.addAll(pieceIndex, newPieces);
             pt.pieces.removeAll(oldPieces);
-            pt.textLengthProperty.set( pt.getTextLength() - length);
+            pt.textLengthProperty.set(pt.getTextLength() - length);
             pt.fire(new TextBuffer.DeleteEvent(deletePosition, length));
             execSuccess = true;
         }
@@ -905,8 +910,15 @@ class ParagraphDecorateCmd extends AbstractCommand<PieceTable> {
             int pieceEndPosition = textPosition + piece.length + (start == pt.getTextLength() ? 0 : - 1);
             if (start <= pieceEndPosition && (end >= pieceEndPosition || end >= textPosition)) {
                 startPieceIndex[0] = pieceIndex;
-                if (textPosition <= start) {
-                    int offset = start == pt.getTextLength() ? 0 : start - textPosition;
+                if (start == pt.getTextLength()) {
+                    int offset = start - textPosition;
+                    if (offset > 0) {
+                        additions.add(piece.copy(piece.start, offset));
+                    }
+                    additions.add(piece.copy(start, 0, piece.decoration, paragraphDecoration));
+                    removals.add(piece);
+                } else if (textPosition <= start) {
+                    int offset = start - textPosition;
                     int length;
                     if (textPosition + piece.length > end) {
                         length = Math.min(end - start, piece.length); // selection ends in current piece
@@ -934,7 +946,9 @@ class ParagraphDecorateCmd extends AbstractCommand<PieceTable> {
             return false;
         });
 
-        newPieces = PieceTable.normalize(additions);
+        newPieces = additions.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
         oldPieces = removals;
         if (newPieces.size() > 0 || oldPieces.size() > 0) {
             pieceIndex = startPieceIndex[0];

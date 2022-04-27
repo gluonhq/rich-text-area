@@ -35,7 +35,7 @@ public final class Piece {
     }
 
     public boolean isEmpty() {
-        return length <= 0 && paragraphDecoration.getGraphicType() == ParagraphDecoration.GraphicType.NONE && paragraphDecoration.getIndentationLevel() == 0;
+        return length <= 0;
     }
 
     // validate offset within piece
