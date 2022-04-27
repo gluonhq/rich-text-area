@@ -5,6 +5,7 @@ import com.gluonhq.richtextarea.model.ParagraphDecoration;
 import com.gluonhq.richtextarea.viewmodel.RichTextAreaViewModel;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
@@ -97,11 +98,11 @@ public class ParagraphTile extends HBox {
         contentPane.getChildren().clear();
         viewModel.caretPositionProperty().removeListener(caretPositionListener);
         viewModel.selectionProperty().removeListener(selectionListener);
+        this.paragraph = paragraph;
         if (paragraph == null) {
             contentPane.setPrefWidth(0);
             return;
         }
-        this.paragraph = paragraph;
         ParagraphDecoration decoration = paragraph.getDecoration();
         viewModel.caretPositionProperty().addListener(caretPositionListener);
         viewModel.selectionProperty().addListener(selectionListener);
@@ -109,6 +110,7 @@ public class ParagraphTile extends HBox {
             if (!fragments.isEmpty()) {
                 HBox gridBox = createGridBox(fragments, positions, background, decoration);
                 contentPane.getChildren().add(gridBox);
+                contentPane.layout();
             }
         } else {
             Layer layer = new Layer(paragraph.getStart(), paragraph.getEnd());
@@ -117,6 +119,7 @@ public class ParagraphTile extends HBox {
             contentPane.getChildren().add(layer);
             updateGraphicBox(layer, control.getParagraphGraphicFactory());
             graphicBox.setPadding(new Insets(decoration.getTopInset(), 2, decoration.getBottomInset(), 0));
+            contentPane.layout();
         }
     }
 
@@ -316,13 +319,14 @@ public class ParagraphTile extends HBox {
 
         void setContent(List<Node> fragments, List<IndexRangeColor> background, ParagraphDecoration decoration) {
             textFlow.getChildren().setAll(fragments);
-            addBackgroundPathsToLayers(background);
             textFlow.setTextAlignment(decoration.getAlignment());
             textFlow.setLineSpacing(decoration.getSpacing());
             textFlow.setPadding(new Insets(decoration.getTopInset(), decoration.getRightInset(), decoration.getBottomInset(), decoration.getLeftInset()));
 
             textFlowLayoutX = 1d + decoration.getLeftInset();
             textFlowLayoutY = 1d + decoration.getTopInset();
+
+            Platform.runLater(() -> addBackgroundPathsToLayers(background));
         }
 
         void reset() {
