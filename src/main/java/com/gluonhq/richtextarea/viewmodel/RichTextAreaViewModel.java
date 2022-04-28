@@ -313,11 +313,11 @@ public class RichTextAreaViewModel {
         moveCaretPosition(text.length());
     }
 
-    void remove(int caretOffset) {
+    void remove(int caretOffset, int length) {
         if (!removeSelection()) {
             int position = getCaretPosition() + caretOffset;
             if (position >= 0 && position <= getTextLength()) {
-                getTextBuffer().delete(position, 1);
+                getTextBuffer().delete(position, length);
                 setCaretPosition(position);
             }
         }
