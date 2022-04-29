@@ -65,6 +65,10 @@ public final class ActionCmdFactory {
         return new ActionCmdTable(tableDecoration);
     }
 
+    public ActionCmd deleteTable() {
+        return new ActionCmdTable(ActionCmdTable.TableOperation.DELETE_TABLE);
+    }
+
     public ActionCmd insertTableColumnBefore() {
         return new ActionCmdTable(ActionCmdTable.TableOperation.ADD_COLUMN_BEFORE);
     }

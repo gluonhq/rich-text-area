@@ -567,6 +567,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         if (isEditable && editableContextMenuItems == null) {
             tableContextMenuItems = FXCollections.observableArrayList(
                     createMenuItem("Insert table", ACTION_CMD_FACTORY.insertTable(new TableDecoration(1,2))),
+                    createMenuItem("Delete table", ACTION_CMD_FACTORY.deleteTable()),
                     new SeparatorMenuItem(),
                     createMenuItem("Add column before", ACTION_CMD_FACTORY.insertTableColumnBefore()),
                     createMenuItem("Add column after", ACTION_CMD_FACTORY.insertTableColumnAfter()),

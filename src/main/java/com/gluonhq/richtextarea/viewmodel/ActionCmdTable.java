@@ -1,6 +1,5 @@
 package com.gluonhq.richtextarea.viewmodel;
 
-import com.gluonhq.richtextarea.model.Paragraph;
 import com.gluonhq.richtextarea.model.ParagraphDecoration;
 import com.gluonhq.richtextarea.model.TableDecoration;
 import com.gluonhq.richtextarea.model.TextBuffer;
@@ -9,13 +8,17 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 class ActionCmdTable implements ActionCmd {
 
+    public static final Logger LOGGER = Logger.getLogger(RichTextAreaViewModel.class.getName());
+
     public enum TableOperation {
         CREATE_TABLE,
+        DELETE_TABLE,
         ADD_COLUMN_BEFORE,
         ADD_COLUMN_AFTER,
         DELETE_COLUMN,
@@ -62,6 +65,7 @@ class ActionCmdTable implements ActionCmd {
             commandManager.execute(new InsertAndDecorateTableCmd(text, ParagraphDecoration.builder().tableDecoration(tableDecoration).build()));
         } else if (tableOperation != TableOperation.CREATE_TABLE &&
                 viewModel.getDecorationAtParagraph() != null && viewModel.getDecorationAtParagraph().hasTableDecoration()) {
+            viewModel.clearSelection();
             // modify existing table by adding or removing a column or a row
             TableDecoration oldTableDecoration = viewModel.getDecorationAtParagraph().getTableDecoration();
             int caret = viewModel.getCaretPosition();
@@ -155,15 +159,24 @@ class ActionCmdTable implements ActionCmd {
                             commandManager.execute(new ReplaceAndDecorateTableCmd(0, text.length(), newText,
                                     ParagraphDecoration.builder().tableDecoration(newTableDecoration).build()));
                             positions = getTablePositions(newText, p.getStart());
-                            viewModel.setCaretPosition(positions.get(currentCol));
+                            viewModel.setCaretPosition(positions.get(Math.max(currentCol - 1, 0)));
                         }
                     }
                     break;
+                    case DELETE_TABLE: {
+                        viewModel.setCaretPosition(p.getStart());
+                        commandManager.execute(new RemoveAndDecorateTableCmd(0, p.getEnd() - p.getStart() - 1, ParagraphDecoration.builder().presets().build()));
+                        viewModel.setCaretPosition(Math.max(p.getStart() - 1, 0));
+                    }
                     default:
                         break;
                 }
             });
         }
+        viewModel.getParagraphWithCaret().filter(p -> p.getEnd() > 0 && p.getDecoration().hasTableDecoration()).ifPresent(p -> {
+            text = viewModel.getTextBuffer().getText(p.getStart(), p.getEnd());
+            printTable(text, viewModel.getDecorationAtParagraph().getTableDecoration());
+        });
     }
 
     @Override
@@ -208,5 +221,20 @@ class ActionCmdTable implements ActionCmd {
                 .collect(Collectors.toList());
         positions.add(start + text.length() - 1);
         return positions;
+    }
+
+    private void printTable(String text, TableDecoration tableDecoration) {
+        String tableText = "[" + text.replaceAll(""+TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR, "|").replaceAll("\n", "]");
+        List<Integer> tablePositions = getTablePositions("[" + text, 0);
+        int rows = tableDecoration.getRows();
+        int cols = tableDecoration.getColumns();
+        int start = 0;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < rows; i++) {
+            int end = tablePositions.get((i + 1) * cols - 1);
+            sb.append(tableText, start, end + 1).append("\n");
+            start = end;
+        }
+        LOGGER.fine("Table:\n" + sb);
     }
 }
