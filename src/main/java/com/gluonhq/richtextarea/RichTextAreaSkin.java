@@ -5,6 +5,7 @@ import com.gluonhq.richtextarea.model.ImageDecoration;
 import com.gluonhq.richtextarea.model.Paragraph;
 import com.gluonhq.richtextarea.model.ParagraphDecoration;
 import com.gluonhq.richtextarea.model.PieceTable;
+import com.gluonhq.richtextarea.model.TableDecoration;
 import com.gluonhq.richtextarea.model.TextBuffer;
 import com.gluonhq.richtextarea.model.TextDecoration;
 import com.gluonhq.richtextarea.viewmodel.ActionCmd;
@@ -30,6 +31,7 @@ import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.Skin;
@@ -171,6 +173,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final SortedList<Paragraph> paragraphSortedList = new SortedList<>(viewModel.getParagraphList(), Comparator.comparing(Paragraph::getStart));
 
     final ContextMenu contextMenu = new ContextMenu();
+    private ObservableList<MenuItem> tableContextMenuItems;
     private ObservableList<MenuItem> editableContextMenuItems;
     private ObservableList<MenuItem> nonEditableContextMenuItems;
     private final EventHandler<ContextMenuEvent> contextMenuEventEventHandler = e -> {
@@ -392,6 +395,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().focusedProperty().removeListener(focusListener);
         getSkinnable().removeEventHandler(DragEvent.ANY, dndHandler);
         contextMenu.getItems().clear();
+        tableContextMenuItems = null;
         editableContextMenuItems = null;
         nonEditableContextMenuItems = null;
     }
@@ -561,6 +565,20 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private void populateContextMenu(boolean isEditable) {
         if (isEditable && editableContextMenuItems == null) {
+            tableContextMenuItems = FXCollections.observableArrayList(
+                    createMenuItem("Insert table", ACTION_CMD_FACTORY.insertTable(new TableDecoration(1,2))),
+                    createMenuItem("Delete table", ACTION_CMD_FACTORY.deleteTable()),
+                    new SeparatorMenuItem(),
+                    createMenuItem("Add column before", ACTION_CMD_FACTORY.insertTableColumnBefore()),
+                    createMenuItem("Add column after", ACTION_CMD_FACTORY.insertTableColumnAfter()),
+                    createMenuItem("Delete column", ACTION_CMD_FACTORY.deleteTableColumn()),
+                    new SeparatorMenuItem(),
+                    createMenuItem("Add row above", ACTION_CMD_FACTORY.insertTableRowAbove()),
+                    createMenuItem("Add row below", ACTION_CMD_FACTORY.insertTableRowBelow()),
+                    createMenuItem("Delete row", ACTION_CMD_FACTORY.deleteTableRow())
+            );
+            Menu tableMenu = new Menu("Table");
+            tableMenu.getItems().addAll(tableContextMenuItems);
             editableContextMenuItems = FXCollections.observableArrayList(
                     createMenuItem("Undo", ACTION_CMD_FACTORY.undo()),
                     createMenuItem("Redo", ACTION_CMD_FACTORY.redo()),
@@ -569,7 +587,10 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                     createMenuItem("Cut", ACTION_CMD_FACTORY.cut()),
                     createMenuItem("Paste", ACTION_CMD_FACTORY.paste()),
                     new SeparatorMenuItem(),
-                    createMenuItem("Select All", ACTION_CMD_FACTORY.selectAll()));
+                    createMenuItem("Select All", ACTION_CMD_FACTORY.selectAll()),
+                    new SeparatorMenuItem(),
+                    tableMenu
+            );
         } else if (!isEditable && nonEditableContextMenuItems == null) {
             nonEditableContextMenuItems = FXCollections.observableArrayList(
                     createMenuItem("Copy", ACTION_CMD_FACTORY.copy()),

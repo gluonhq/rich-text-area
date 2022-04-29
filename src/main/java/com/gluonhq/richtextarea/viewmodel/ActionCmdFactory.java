@@ -62,7 +62,35 @@ public final class ActionCmdFactory {
     }
 
     public ActionCmd insertTable(TableDecoration tableDecoration) {
-        return new ActionCmdInsertTable(tableDecoration);
+        return new ActionCmdTable(tableDecoration);
+    }
+
+    public ActionCmd deleteTable() {
+        return new ActionCmdTable(ActionCmdTable.TableOperation.DELETE_TABLE);
+    }
+
+    public ActionCmd insertTableColumnBefore() {
+        return new ActionCmdTable(ActionCmdTable.TableOperation.ADD_COLUMN_BEFORE);
+    }
+
+    public ActionCmd insertTableColumnAfter() {
+        return new ActionCmdTable(ActionCmdTable.TableOperation.ADD_COLUMN_AFTER);
+    }
+
+    public ActionCmd deleteTableColumn() {
+        return new ActionCmdTable(ActionCmdTable.TableOperation.DELETE_COLUMN);
+    }
+
+    public ActionCmd insertTableRowAbove() {
+        return new ActionCmdTable(ActionCmdTable.TableOperation.ADD_ROW_ABOVE);
+    }
+
+    public ActionCmd insertTableRowBelow() {
+        return new ActionCmdTable(ActionCmdTable.TableOperation.ADD_ROW_BELOW);
+    }
+
+    public ActionCmd deleteTableRow() {
+        return new ActionCmdTable(ActionCmdTable.TableOperation.DELETE_ROW);
     }
 
     public ActionCmd removeText(int caretOffset) {
