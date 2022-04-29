@@ -191,12 +191,14 @@ public class ParagraphTile extends HBox {
             String text = numberedListLabel.getText();
             if (text != null) {
                 if (text.contains("#")) {
+                    // numbered list
                     AtomicInteger ordinal = new AtomicInteger();
                     viewModel.getParagraphList().stream()
-                            .filter(p -> p.getDecoration().getIndentationLevel() == indentationLevel)
                             .peek(p -> {
-                                if (p.getDecoration().getGraphicType() == ParagraphDecoration.GraphicType.BULLETED_LIST) {
-                                    // restart ordinal if previous paragraph with same indentation is a bulleted list
+                                if (p.getDecoration().getGraphicType() != ParagraphDecoration.GraphicType.NUMBERED_LIST ||
+                                        p.getDecoration().getIndentationLevel() != indentationLevel) {
+                                    // restart ordinal if previous paragraph has different indentation,
+                                    // or if it is not a numbered list
                                     ordinal.set(0);
                                 } else {
                                     ordinal.incrementAndGet();
