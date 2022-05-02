@@ -1,7 +1,12 @@
 package com.gluonhq.richtextarea.action;
 
 import com.gluonhq.richtextarea.RichTextArea;
-import com.gluonhq.richtextarea.model.*;
+import com.gluonhq.richtextarea.model.Decoration;
+import com.gluonhq.richtextarea.model.Document;
+import com.gluonhq.richtextarea.model.ImageDecoration;
+import com.gluonhq.richtextarea.model.ParagraphDecoration;
+import com.gluonhq.richtextarea.model.TableDecoration;
+import com.gluonhq.richtextarea.model.TextDecoration;
 import com.gluonhq.richtextarea.viewmodel.ActionCmdFactory;
 
 public class ActionFactory {
@@ -14,6 +19,7 @@ public class ActionFactory {
     }
 
     private Action undo;
+
     public Action undo() {
         if (undo == null) {
             undo = new BasicAction(control, action -> ACTION_CMD_FACTORY.undo());
@@ -22,6 +28,7 @@ public class ActionFactory {
     }
 
     private Action redo;
+
     public Action redo() {
         if (redo == null) {
             redo = new BasicAction(control, action -> ACTION_CMD_FACTORY.redo());
@@ -30,6 +37,7 @@ public class ActionFactory {
     }
 
     private Action copy;
+
     public Action copy() {
         if (copy == null) {
             copy = new BasicAction(control, action -> ACTION_CMD_FACTORY.copy());
@@ -38,6 +46,7 @@ public class ActionFactory {
     }
 
     private Action cut;
+
     public Action cut() {
         if (cut == null) {
             cut = new BasicAction(control, action -> ACTION_CMD_FACTORY.cut());
@@ -46,6 +55,7 @@ public class ActionFactory {
     }
 
     private Action paste;
+
     public Action paste() {
         if (paste == null) {
             paste = new BasicAction(control, action -> ACTION_CMD_FACTORY.paste());
@@ -54,6 +64,7 @@ public class ActionFactory {
     }
 
     private Action newDocument;
+
     public Action newDocument() {
         if (newDocument == null) {
             newDocument = new BasicAction(control, action -> ACTION_CMD_FACTORY.newDocument());
@@ -66,6 +77,7 @@ public class ActionFactory {
     }
 
     private Action save;
+
     public Action save() {
         if (save == null) {
             save = new BasicAction(control, action -> ACTION_CMD_FACTORY.save());
