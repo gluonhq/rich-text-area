@@ -268,6 +268,14 @@ public class RichTextAreaViewModel {
         return paragraphList;
     }
 
+    public boolean isEmptyParagraph(Paragraph paragraph) {
+        if (paragraph == null || paragraph.getEnd() - paragraph.getStart() < 1) {
+            return true;
+        }
+        return (paragraph.getEnd() - paragraph.getStart() == 1 &&
+                "\n".equals(getTextBuffer().getText(paragraph.getStart(), paragraph.getEnd())));
+    }
+
     public final void addChangeListener(Consumer<TextBuffer.Event> listener) {
         this.getTextBuffer().addChangeListener(listener);
     }

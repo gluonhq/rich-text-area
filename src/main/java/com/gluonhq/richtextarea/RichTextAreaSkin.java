@@ -118,7 +118,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             if (decoration != null && decoration.getGraphicType() != ParagraphDecoration.GraphicType.NONE) {
                 int level = decoration.getIndentationLevel();
                 Paragraph paragraph = viewModel.getParagraphWithCaret().orElse(null);
-                if (level > 0 && paragraph != null && paragraph.getEnd() - paragraph.getStart() < 1) {
+                if (level > 0 && paragraph != null && viewModel.isEmptyParagraph(paragraph)) {
                     // on empty paragraphs, Enter is the same as shift+tab
                     return ACTION_CMD_FACTORY.decorateParagraph(ParagraphDecoration.builder().fromDecoration(decoration).indentationLevel(level - 1).build());
                 }
