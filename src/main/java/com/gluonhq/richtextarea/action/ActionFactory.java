@@ -1,11 +1,7 @@
 package com.gluonhq.richtextarea.action;
 
 import com.gluonhq.richtextarea.RichTextArea;
-import com.gluonhq.richtextarea.model.Decoration;
-import com.gluonhq.richtextarea.model.Document;
-import com.gluonhq.richtextarea.model.ImageDecoration;
-import com.gluonhq.richtextarea.model.TableDecoration;
-import com.gluonhq.richtextarea.model.TextDecoration;
+import com.gluonhq.richtextarea.model.*;
 import com.gluonhq.richtextarea.viewmodel.ActionCmdFactory;
 
 public class ActionFactory {
@@ -87,6 +83,8 @@ public class ActionFactory {
                 return ACTION_CMD_FACTORY.decorateText((TextDecoration) decoration);
             } else if (decoration instanceof ImageDecoration) {
                 return ACTION_CMD_FACTORY.decorateImage((ImageDecoration) decoration);
+            } else if (decoration instanceof ParagraphDecoration) {
+                return ACTION_CMD_FACTORY.decorateParagraph((ParagraphDecoration) decoration);
             }
             throw new IllegalArgumentException("Decoration type not supported: " + decoration);
         });
