@@ -25,14 +25,14 @@ import java.util.Optional;
  *     ],
  *     "text": null,
  *     "texts": null,
- *     "category": "Smileys & People",
- *     "sort_order": 116,
+ *     "category": "People & Body",
+ *     "subcategory": "hand-single-finger",
+ *     "sort_order": 170,
  *     "added_in": "1.4",
  *     "has_img_apple": true,
  *     "has_img_google": true,
  *     "has_img_twitter": true,
  *     "has_img_facebook": false,
- *     "has_img_messenger": false,
  *     "skin_variations": {
  *         "1F3FB": {
  *             "unified": "261D-1F3FB",
@@ -44,7 +44,9 @@ import java.util.Optional;
  *             "has_img_google": false,
  *             "has_img_twitter": false,
  *             "has_img_facebook": false,
- *             "has_img_messenger": false,
+ *         }
+ *         ...
+ *         "1F3FB-1F3FC": {
  *             ...
  *         }
  *     },
@@ -79,7 +81,8 @@ public class Emoji {
     String text;
     List<String> texts;
       
-    String category ;
+    String category;
+    String subcategory;
     int sort_order;
     String added_in;
     
@@ -224,6 +227,14 @@ public class Emoji {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public String getSubcategory() {
+        return subcategory;
+    }
+
+    public void setSubcategory(String subcategory) {
+        this.subcategory = subcategory;
     }
 
     public int getSort_order() {

@@ -64,7 +64,7 @@ public class EmojiData {
     public static List<Emoji> emojiFromCategory(String category) {
         return EMOJI_MAP.values().stream()
                 .filter(emoji -> emoji.getCategory().isPresent())
-                .filter(emoji -> emoji.getCategory().get().equalsIgnoreCase(category))
+                .filter(emoji -> category.contains(emoji.getCategory().get()))
                 .sorted(Comparator.comparingInt(Emoji::getSort_order))
                 .collect(Collectors.toList());
     }
