@@ -155,6 +155,7 @@ public class ParagraphTile extends HBox {
                 if (j == 0) {
                     RowConstraints rc = new RowConstraints();
                     rc.setMinHeight(layer.prefHeight(100));
+                    rc.setMaxHeight(Double.MAX_VALUE);
                     grid.getRowConstraints().add(rc);
                 }
                 index++;
@@ -318,7 +319,16 @@ public class ParagraphTile extends HBox {
 
         @Override
         protected double computePrefHeight(double width) {
+            // take into account caret height: whether it is visible or not,
+            // the layer's height doesn't change
             return textFlow.prefHeight(textFlow.getPrefWidth()) + 1;
+        }
+
+        @Override
+        protected double computePrefWidth(double height) {
+            // take into account selection width: whether it is visible or not,
+            // the layer's width doesn't change
+            return textFlow.prefWidth(textFlow.getPrefHeight()) + 2;
         }
 
         void setContent(List<Node> fragments, List<IndexRangeColor> background, ParagraphDecoration decoration) {
