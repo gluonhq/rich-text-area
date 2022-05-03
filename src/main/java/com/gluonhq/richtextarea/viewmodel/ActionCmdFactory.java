@@ -1,5 +1,7 @@
 package com.gluonhq.richtextarea.viewmodel;
 
+import com.gluonhq.richtextarea.Selection;
+import com.gluonhq.richtextarea.model.Decoration;
 import com.gluonhq.richtextarea.model.Document;
 import com.gluonhq.richtextarea.model.ImageDecoration;
 import com.gluonhq.richtextarea.model.ParagraphDecoration;
@@ -114,6 +116,14 @@ public final class ActionCmdFactory {
 
     public ActionCmd caretMove(RichTextAreaViewModel.Direction direction, boolean changeSelection, boolean wordSelection, boolean lineSelection) {
         return new ActionCmdCaretMove(direction, changeSelection, wordSelection, lineSelection);
+    }
+
+    public ActionCmd insertAndDecorate(String content, Decoration decoration) {
+        return new ActionCmdInsertAndDecorate(content, decoration);
+    }
+
+    public ActionCmd selectCell(Selection selection) {
+        return new ActionCmdSelectCell(selection);
     }
 
 }
