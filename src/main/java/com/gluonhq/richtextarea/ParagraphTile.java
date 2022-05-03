@@ -234,7 +234,12 @@ public class ParagraphTile extends HBox {
             return;
         }
         layers.forEach(l -> {
-            if (l.getLayoutBounds().contains(e.getX(), e.getY())) {
+            if (l.isTableCell) {
+                Point2D localEvent = l.sceneToLocal(e.getSceneX(), e.getSceneY());
+                if (l.getLayoutBounds().contains(localEvent)) {
+                    l.mouseDraggedListener(e);
+                }
+            } else if (l.getLayoutBounds().contains(e.getX(), e.getY())) {
                 l.mousePressedListener(e);
             }
         });
@@ -242,7 +247,12 @@ public class ParagraphTile extends HBox {
 
     void mouseDraggedListener(MouseEvent e) {
         layers.forEach(l -> {
-            if (l.getLayoutBounds().contains(e.getX(), e.getY())) {
+            if (l.isTableCell) {
+                Point2D localEvent = l.sceneToLocal(e.getSceneX(), e.getSceneY());
+                if (l.getLayoutBounds().contains(localEvent)) {
+                    l.mouseDraggedListener(e);
+                }
+            } else if (l.getLayoutBounds().contains(e.getX(), e.getY())) {
                 l.mouseDraggedListener(e);
             }
         });
@@ -367,8 +377,9 @@ public class ParagraphTile extends HBox {
         }
 
         void mousePressedListener(MouseEvent e) {
+            Point2D localEvent = sceneToLocal(e.getSceneX(), e.getSceneY());
             if (e.getButton() == MouseButton.PRIMARY && !(e.isMiddleButtonDown() || e.isSecondaryButtonDown())) {
-                HitInfo hitInfo = textFlow.hitTest(new Point2D(e.getX() - textFlowLayoutX, e.getY() - textFlowLayoutY));
+                HitInfo hitInfo = textFlow.hitTest(new Point2D(localEvent.getX() - textFlowLayoutX, localEvent.getY() - textFlowLayoutY));
                 Selection prevSelection = viewModel.getSelection();
                 int prevCaretPosition = viewModel.getCaretPosition();
                 int insertionIndex = hitInfo.getInsertionIndex();
@@ -406,7 +417,8 @@ public class ParagraphTile extends HBox {
         }
 
         void mouseDraggedListener(MouseEvent e) {
-            HitInfo hitInfo = textFlow.hitTest(new Point2D(e.getX() - textFlowLayoutX, e.getY() - textFlowLayoutY));
+            Point2D localEvent = sceneToLocal(e.getSceneX(), e.getSceneY());
+            HitInfo hitInfo = textFlow.hitTest(new Point2D(localEvent.getX() - textFlowLayoutX, localEvent.getY() - textFlowLayoutY));
             if (hitInfo.getInsertionIndex() >= 0) {
                 int dragEnd = start + hitInfo.getInsertionIndex();
                 viewModel.setSelection(new Selection(richTextAreaSkin.mouseDragStart, dragEnd));
