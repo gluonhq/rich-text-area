@@ -20,18 +20,20 @@ class RemoveAndDecorateTableCmd extends AbstractEditCmd {
     @Override
     public void doRedo(RichTextAreaViewModel viewModel) {
         // 1. Remove
-        Objects.requireNonNull(viewModel);
-        viewModel.remove(caretOffset, length);
+        Objects.requireNonNull(viewModel).remove(caretOffset, length);
+
         // 2. Decorate
         if (decoration instanceof ParagraphDecoration) {
-            Objects.requireNonNull(viewModel).decorate(decoration);
+            viewModel.decorate(decoration);
         }
     }
 
     @Override
     public void doUndo(RichTextAreaViewModel viewModel) {
         // 1. Decorate
-        Objects.requireNonNull(viewModel).undoDecoration();
+        if (decoration instanceof ParagraphDecoration) {
+            Objects.requireNonNull(viewModel).undoDecoration();
+        }
         // 2. Remove
         viewModel.undo();
     }

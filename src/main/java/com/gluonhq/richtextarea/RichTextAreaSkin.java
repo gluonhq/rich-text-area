@@ -5,6 +5,7 @@ import com.gluonhq.richtextarea.model.ImageDecoration;
 import com.gluonhq.richtextarea.model.Paragraph;
 import com.gluonhq.richtextarea.model.ParagraphDecoration;
 import com.gluonhq.richtextarea.model.PieceTable;
+import com.gluonhq.richtextarea.model.Table;
 import com.gluonhq.richtextarea.model.TableDecoration;
 import com.gluonhq.richtextarea.model.TextBuffer;
 import com.gluonhq.richtextarea.model.TextDecoration;
@@ -54,6 +55,7 @@ import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -115,17 +117,26 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         entry( new KeyCodeCombination(Z, SHORTCUT_DOWN, SHIFT_DOWN),                         e -> ACTION_CMD_FACTORY.redo()),
         entry( new KeyCodeCombination(ENTER, SHIFT_ANY),                                     e -> {
             ParagraphDecoration decoration = viewModel.getDecorationAtParagraph();
+            Paragraph paragraph = viewModel.getParagraphWithCaret().orElse(null);
             if (decoration != null && decoration.getGraphicType() != ParagraphDecoration.GraphicType.NONE) {
                 int level = decoration.getIndentationLevel();
-                Paragraph paragraph = viewModel.getParagraphWithCaret().orElse(null);
                 if (level > 0 && paragraph != null && viewModel.isEmptyParagraph(paragraph)) {
                     // on empty paragraphs, Enter is the same as shift+tab
                     return ACTION_CMD_FACTORY.decorateParagraph(ParagraphDecoration.builder().fromDecoration(decoration).indentationLevel(level - 1).build());
                 }
-            } else if (decoration != null && decoration.hasTableDecoration()) {
-                // TODO: move and select down/up cell, including adding a new row
-                // For now:
-                return ACTION_CMD_FACTORY.caretMove(e.isShiftDown() ? Direction.BACK : Direction.FORWARD, false, false, false);
+            } else if (paragraph != null && paragraph.getStart() < paragraph.getEnd() &&
+                    decoration != null && decoration.hasTableDecoration()) {
+                int caretPosition = viewModel.getCaretPosition();
+                Table table = new Table(viewModel.getTextBuffer().getText(paragraph.getStart(), paragraph.getEnd()),
+                        paragraph.getStart(), decoration.getTableDecoration().getRows(), decoration.getTableDecoration().getColumns());
+                // move up/down rows
+                int nextCaretAt = table.getCaretAtNextRow(caretPosition, e.isShiftDown() ? Direction.UP : Direction.DOWN);
+                viewModel.setCaretPosition(nextCaretAt);
+                if (nextCaretAt == 0 || nextCaretAt == viewModel.getTextLength()) {
+                    // insert new line before/after the table and reset decoration
+                    return ACTION_CMD_FACTORY.insertAndDecorate("\n", ParagraphDecoration.builder().presets().build());
+                }
+                return null;
             }
             return ACTION_CMD_FACTORY.insertText("\n");
         }),
@@ -157,13 +168,27 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         }),
         entry(new KeyCodeCombination(TAB, SHIFT_ANY),                                        e -> {
             ParagraphDecoration decoration = viewModel.getDecorationAtParagraph();
+            Paragraph paragraph = viewModel.getParagraphWithCaret().orElse(null);
             if (decoration != null && decoration.getGraphicType() != ParagraphDecoration.GraphicType.NONE) {
                 int level = Math.max(decoration.getIndentationLevel() + (e.isShiftDown() ? -1 : 1), 0);
                 return ACTION_CMD_FACTORY.decorateParagraph(ParagraphDecoration.builder().fromDecoration(decoration).indentationLevel(level).build());
-            } else if (decoration != null && decoration.hasTableDecoration()) {
-                // TODO: move and select next/prev cell, including adding a new row
-                // For now:
-                return ACTION_CMD_FACTORY.caretMove(e.isShiftDown() ? Direction.BACK : Direction.FORWARD, false, false, false);
+            } else if (decoration != null && decoration.hasTableDecoration() &&
+                    paragraph != null && paragraph.getStart() < paragraph.getEnd()) {
+                int caretPosition = viewModel.getCaretPosition();
+                Table table = new Table(viewModel.getTextBuffer().getText(paragraph.getStart(), paragraph.getEnd()),
+                        paragraph.getStart(), decoration.getTableDecoration().getRows(), decoration.getTableDecoration().getColumns());
+                // select content of prev/next cell if non-empty, or move to prev/next cell
+                List<Integer> selectionAtNextCell = table.selectNextCell(caretPosition, e.isShiftDown() ? Direction.BACK : Direction.FORWARD);
+                int start = selectionAtNextCell.get(0);
+                viewModel.clearSelection();
+                viewModel.setCaretPosition(start);
+                if (selectionAtNextCell.size() == 2) {
+                    int end = selectionAtNextCell.get(1);
+                    if (start < end) {
+                        // select content
+                        return ACTION_CMD_FACTORY.selectCell(new Selection(start, end));
+                    }
+                }
             }
             return null;
         })

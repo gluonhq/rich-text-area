@@ -24,7 +24,7 @@ class InsertAndDecorateTableCmd extends AbstractEditCmd {
         }
 
         // move caret back to paragraph with table
-        viewModel.setCaretPosition(caretPosition + (content.startsWith("\n") ? 1 : 0));
+        viewModel.setCaretPosition(caretPosition + (content.length() > 1 && content.startsWith("\n") ? 1 : 0));
 
         // 2. Decorate
         if (decoration instanceof ParagraphDecoration) {
@@ -35,9 +35,13 @@ class InsertAndDecorateTableCmd extends AbstractEditCmd {
     @Override
     public void doUndo(RichTextAreaViewModel viewModel) {
         // 1. Decorate
-        Objects.requireNonNull(viewModel).undoDecoration();
+        if (decoration instanceof ParagraphDecoration) {
+            Objects.requireNonNull(viewModel).undoDecoration();
+        }
         // 2. Insert
-        viewModel.undo();
+        if (!content.isEmpty()) {
+            viewModel.undo();
+        }
     }
 
     @Override
