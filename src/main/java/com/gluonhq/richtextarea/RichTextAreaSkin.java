@@ -53,6 +53,7 @@ import javafx.scene.shape.Path;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.TextAlignment;
 
 import java.util.Comparator;
 import java.util.List;
@@ -142,18 +143,30 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         }),
         entry( new KeyCodeCombination(BACK_SPACE, SHIFT_ANY),                                e -> {
             int caret = viewModel.getCaretPosition();
-            return viewModel.getParagraphWithCaret()
-                    .filter(p -> p.getStart() == caret)
-                    .map(p -> {
-                        ParagraphDecoration decoration = viewModel.getDecorationAtParagraph();
-                        if (decoration.getGraphicType() != ParagraphDecoration.GraphicType.NONE) {
-                            return ACTION_CMD_FACTORY.decorateParagraph(ParagraphDecoration.builder().fromDecoration(decoration).graphicType(ParagraphDecoration.GraphicType.NONE).build());
-                        } else if (decoration.getIndentationLevel() > 0) {
-                            return ACTION_CMD_FACTORY.decorateParagraph(ParagraphDecoration.builder().fromDecoration(decoration).indentationLevel(decoration.getIndentationLevel() - 1).build());
+            Paragraph paragraph = viewModel.getParagraphWithCaret().orElse(null);
+            ParagraphDecoration decoration = viewModel.getDecorationAtParagraph();
+            if (decoration != null && paragraph != null) {
+                if (decoration.hasTableDecoration()) {
+                    Table table = new Table(viewModel.getTextBuffer().getText(paragraph.getStart(), paragraph.getEnd()),
+                            paragraph.getStart(), decoration.getTableDecoration().getRows(), decoration.getTableDecoration().getColumns());
+                    if (table.isCaretAtStartOfCell(caret)) {
+                        // check backspace at beginning of each cell to prevent moving text from one cell to the other.
+                        // and just move caret if cell was empty:
+                        if (table.isCaretAtEmptyCell(caret)) {
+                            return ACTION_CMD_FACTORY.caretMove(Direction.BACK, false, false, false);
                         }
                         return null;
-                    })
-                    .orElse(ACTION_CMD_FACTORY.removeText(-1));
+                    }
+                } else if (paragraph.getStart() == caret) {
+                    // check backspace at beginning of paragraph:
+                    if (decoration.getGraphicType() != ParagraphDecoration.GraphicType.NONE) {
+                        return ACTION_CMD_FACTORY.decorateParagraph(ParagraphDecoration.builder().fromDecoration(decoration).graphicType(ParagraphDecoration.GraphicType.NONE).build());
+                    } else if (decoration.getIndentationLevel() > 0) {
+                        return ACTION_CMD_FACTORY.decorateParagraph(ParagraphDecoration.builder().fromDecoration(decoration).indentationLevel(decoration.getIndentationLevel() - 1).build());
+                    }
+                }
+            }
+            return ACTION_CMD_FACTORY.removeText(-1);
         }),
         entry( new KeyCodeCombination(DELETE),                                               e -> ACTION_CMD_FACTORY.removeText(0)),
         entry( new KeyCodeCombination(B, SHORTCUT_DOWN),                                     e -> {
@@ -198,6 +211,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final SortedList<Paragraph> paragraphSortedList = new SortedList<>(viewModel.getParagraphList(), Comparator.comparing(Paragraph::getStart));
 
     final ContextMenu contextMenu = new ContextMenu();
+    private ObservableList<MenuItem> tableCellContextMenuItems;
     private ObservableList<MenuItem> tableContextMenuItems;
     private ObservableList<MenuItem> editableContextMenuItems;
     private ObservableList<MenuItem> nonEditableContextMenuItems;
@@ -420,6 +434,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().focusedProperty().removeListener(focusListener);
         getSkinnable().removeEventHandler(DragEvent.ANY, dndHandler);
         contextMenu.getItems().clear();
+        tableCellContextMenuItems = null;
         tableContextMenuItems = null;
         editableContextMenuItems = null;
         nonEditableContextMenuItems = null;
@@ -590,6 +605,16 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private void populateContextMenu(boolean isEditable) {
         if (isEditable && editableContextMenuItems == null) {
+            tableCellContextMenuItems = FXCollections.observableArrayList(
+                    createMenuItem("Delete cell contents", ACTION_CMD_FACTORY.deleteTableCell()),
+                    new SeparatorMenuItem(),
+                    createMenuItem("Align left", ACTION_CMD_FACTORY.alignTableCell(TextAlignment.LEFT)),
+                    createMenuItem("Centre", ACTION_CMD_FACTORY.alignTableCell(TextAlignment.CENTER)),
+                    createMenuItem("Justify", ACTION_CMD_FACTORY.alignTableCell(TextAlignment.JUSTIFY)),
+                    createMenuItem("Align right", ACTION_CMD_FACTORY.alignTableCell(TextAlignment.RIGHT))
+            );
+            Menu tableCellMenu = new Menu("Table Cell");
+            tableCellMenu.getItems().addAll(tableCellContextMenuItems);
             tableContextMenuItems = FXCollections.observableArrayList(
                     createMenuItem("Insert table", ACTION_CMD_FACTORY.insertTable(new TableDecoration(1,2))),
                     createMenuItem("Delete table", ACTION_CMD_FACTORY.deleteTable()),
@@ -600,7 +625,9 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                     new SeparatorMenuItem(),
                     createMenuItem("Add row above", ACTION_CMD_FACTORY.insertTableRowAbove()),
                     createMenuItem("Add row below", ACTION_CMD_FACTORY.insertTableRowBelow()),
-                    createMenuItem("Delete row", ACTION_CMD_FACTORY.deleteTableRow())
+                    createMenuItem("Delete row", ACTION_CMD_FACTORY.deleteTableRow()),
+                    new SeparatorMenuItem(),
+                    tableCellMenu
             );
             Menu tableMenu = new Menu("Table");
             tableMenu.getItems().addAll(tableContextMenuItems);
