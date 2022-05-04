@@ -1,5 +1,7 @@
 package com.gluonhq.richtextarea.viewmodel;
 
+import com.gluonhq.richtextarea.Selection;
+import com.gluonhq.richtextarea.model.Paragraph;
 import com.gluonhq.richtextarea.model.ParagraphDecoration;
 import com.gluonhq.richtextarea.model.Table;
 import com.gluonhq.richtextarea.model.TableDecoration;
@@ -7,6 +9,7 @@ import com.gluonhq.richtextarea.model.TextBuffer;
 import com.gluonhq.richtextarea.undo.CommandManager;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.scene.text.TextAlignment;
 
 import static com.gluonhq.richtextarea.viewmodel.RichTextAreaViewModel.Direction;
 
@@ -15,25 +18,38 @@ class ActionCmdTable implements ActionCmd {
     public enum TableOperation {
         CREATE_TABLE,
         DELETE_TABLE,
+
         ADD_COLUMN_BEFORE,
         ADD_COLUMN_AFTER,
         DELETE_COLUMN,
         ADD_ROW_ABOVE,
         ADD_ROW_BELOW,
-        DELETE_ROW
+        DELETE_ROW,
+
+        DELETE_CELL_CONTENT,
+        ALIGN_CELL_CONTENT
     }
     private final TableDecoration tableDecoration;
     private final TableOperation tableOperation;
+    private final TextAlignment textAlignment;
     private String text;
 
     public ActionCmdTable(TableDecoration tableDecoration) {
-        this.tableDecoration = tableDecoration;
-        this.tableOperation = TableOperation.CREATE_TABLE;
+        this(tableDecoration, TableOperation.CREATE_TABLE, null);
     }
 
     public ActionCmdTable(TableOperation tableOperation) {
-        this.tableDecoration = null;
+        this(null, tableOperation, null);
+    }
+
+    public ActionCmdTable(TextAlignment textAlignment) {
+        this(null, TableOperation.ALIGN_CELL_CONTENT, textAlignment);
+    }
+
+    ActionCmdTable(TableDecoration tableDecoration, TableOperation tableOperation, TextAlignment textAlignment) {
+        this.tableDecoration = tableDecoration;
         this.tableOperation = tableOperation;
+        this.textAlignment = textAlignment;
     }
 
     @Override
@@ -73,7 +89,6 @@ class ActionCmdTable implements ActionCmd {
                 Table table = new Table(text, p.getStart(), oldRows, oldColumns);
                 int currentRow = table.getCurrentRow(caret);
                 int currentCol = table.getCurrentColumn(caret);
-                System.out.println("currentCol = " + currentRow + " x " + currentCol);
                 switch (tableOperation) {
                     case ADD_ROW_BELOW:
                     case ADD_ROW_ABOVE: {
@@ -132,6 +147,17 @@ class ActionCmdTable implements ActionCmd {
                         commandManager.execute(new RemoveAndDecorateTableCmd(0, p.getEnd() - p.getStart() - 1, ParagraphDecoration.builder().presets().build()));
                         viewModel.setCaretPosition(Math.max(p.getStart() - 1, 0));
                     }
+                    case DELETE_CELL_CONTENT: {
+                        Selection cellSelection = table.getCellSelection(caret);
+                        if (cellSelection.isDefined()) {
+                            viewModel.setCaretPosition(cellSelection.getStart());
+                            commandManager.execute(new RemoveTextCmd(0, cellSelection.getEnd() - cellSelection.getStart()));
+                        }
+                    }
+                    case ALIGN_CELL_CONTENT: {
+                        oldTableDecoration.getCellAlignment()[currentRow][currentCol] = textAlignment;
+                        commandManager.execute(new DecorateCmd(ParagraphDecoration.builder().tableDecoration(oldTableDecoration).build()));
+                    }
                     default:
                         break;
                 }
@@ -171,10 +197,24 @@ class ActionCmdTable implements ActionCmd {
                             // delete row disabled if columns <= 1
                             return oldColumns <= 1;
                         }
+                        Paragraph paragraph = viewModel.getParagraphWithCaret().orElse(null);
+                        if (paragraph != null) {
+                            int caret = viewModel.getCaretPosition();
+                            text = viewModel.getTextBuffer().getText(paragraph.getStart(), paragraph.getEnd());
+                            Table table = new Table(text, paragraph.getStart(), oldRows, oldColumns);
+                            if (tableOperation == TableOperation.DELETE_CELL_CONTENT) {
+                                // disable if cell has no content
+                                return table.isCaretAtEmptyCell(caret);
+                            }
+                            if (tableOperation == TableOperation.ALIGN_CELL_CONTENT) {
+                                // disable if alignment is the same
+                                return (tableDecoration.getCellAlignment()[table.getCurrentRow(caret)][table.getCurrentColumn(caret)] == textAlignment);
+                            }
+                        }
                         return false;
                     }
                 },
-                viewModel.editableProperty(), viewModel.decorationAtParagraphProperty());
+                viewModel.editableProperty(), viewModel.decorationAtParagraphProperty(), viewModel.caretPositionProperty());
     }
 
 }

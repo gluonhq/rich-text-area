@@ -1,12 +1,33 @@
 package com.gluonhq.richtextarea.model;
 
+import com.gluonhq.richtextarea.Selection;
+
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static com.gluonhq.richtextarea.viewmodel.RichTextAreaViewModel.Direction;
 
+/**
+ * Table is a {@link Paragraph} with a single text string that contains
+ * {@link TextBuffer#ZERO_WIDTH_TABLE_SEPARATOR zero width separators} to
+ * indicate the cell separation, ending with an end of line character {@code "\n"}.
+ *
+ * The number of rows and columns of the table is defined by the {@link TableDecoration} that
+ * decorates the paragraph.
+ *
+ * For instance, the following string corresponds to a 1 row x 2 columns table:
+ *
+ * <pre>
+ * {@code some text|some more text<n>
+ * }</pre>
+ *
+ * The start of the paragraph defines the start of the first cell, and the end of line
+ * defines the end of the last cell. Zero width separators (in number of rows x columns - 1)
+ * define the separation of the inner cells.
+ */
 public class Table {
 
     public static final Logger LOGGER = Logger.getLogger(Table.class.getName());
@@ -16,6 +37,7 @@ public class Table {
     private final int rows;
     private final int columns;
     private final List<Integer> positions;
+    private final List<String> textCells;
 
     public Table(String text, int start, int rows, int columns) {
         this.text = text;
@@ -24,6 +46,7 @@ public class Table {
         this.columns = columns;
 
         positions = getTablePositions();
+        textCells = getTextForCells();
     }
 
     public int getRows() {
@@ -36,6 +59,24 @@ public class Table {
 
     public int getTableTextLength() {
         return text.length() - (text.endsWith("\n") ? 1 : 0);
+    }
+
+    public boolean isCaretAtStartOfCell(int caret) {
+        return caret == start || positions.stream().anyMatch(i -> i + 1 == caret);
+    }
+
+    public boolean isCaretAtEmptyCell(int caret) {
+       int currentCell = getCurrentCell(caret);
+       return textCells.get(currentCell).isEmpty();
+    }
+
+    public Selection getCellSelection(int caret) {
+        int currentCell = getCurrentCell(caret);
+        if (currentCell == 0) {
+            return new Selection(start, start + textCells.get(0).length());
+        } else {
+            return new Selection(positions.get(currentCell - 1) + 1, positions.get(currentCell));
+        }
     }
 
     public int getNextRow(int caret, Direction direction) {
@@ -67,15 +108,12 @@ public class Table {
         } else {
             // move caret to same column of previous row, or before start of paragraph
             return currentRow == 0 ?
-                    Math.max(start - 1, 0): positions.get((currentRow - 1) * columns + currentCol);
+                    Math.max(start - 1, 0) : positions.get((currentRow - 1) * columns + currentCol);
         }
     }
 
     public List<Integer> selectNextCell(int caret, Direction direction) {
-        int currentRow = getCurrentRow(caret);
-        int currentCol = getCurrentColumn(caret);
-        int currentCell = currentRow * columns + currentCol;
-        System.out.println(positions);
+        int currentCell = getCurrentCell(caret);
         if (direction == Direction.FORWARD) {
             // move caret to next cell, or after end of paragraph
             return currentCell < positions.size() - 1 ?
@@ -154,6 +192,12 @@ public class Table {
         LOGGER.fine("Table:\n" + sb);
     }
 
+    private int getCurrentCell(int caret) {
+        int currentRow = getCurrentRow(caret);
+        int currentCol = getCurrentColumn(caret);
+        return currentRow * columns + currentCol;
+    }
+
     private List<Integer> getTablePositions() {
         List<Integer> positions = IntStream.iterate(text.indexOf(TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR),
                         index -> index >= 0,
@@ -165,4 +209,9 @@ public class Table {
         return positions;
     }
 
+    private List<String> getTextForCells() {
+        return Stream.of(text.split("" + TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR))
+                .map(s -> s.replace("\n", ""))
+                .collect(Collectors.toList());
+    }
 }

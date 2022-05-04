@@ -8,6 +8,7 @@ import com.gluonhq.richtextarea.model.ParagraphDecoration;
 import com.gluonhq.richtextarea.model.TableDecoration;
 import com.gluonhq.richtextarea.model.TextDecoration;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.text.TextAlignment;
 
 public final class ActionCmdFactory {
 
@@ -93,6 +94,14 @@ public final class ActionCmdFactory {
 
     public ActionCmd deleteTableRow() {
         return new ActionCmdTable(ActionCmdTable.TableOperation.DELETE_ROW);
+    }
+
+    public ActionCmd deleteTableCell() {
+        return new ActionCmdTable(ActionCmdTable.TableOperation.DELETE_CELL_CONTENT);
+    }
+
+    public ActionCmd alignTableCell(TextAlignment textAlignment) {
+        return new ActionCmdTable(textAlignment);
     }
 
     public ActionCmd removeText(int caretOffset) {
