@@ -62,7 +62,7 @@ public class TextDecoration implements Decoration {
     /**
      * Gets the font family of the text.
      *
-     * @defaultValue Serif
+     * @defaultValue System
      *
      * @return the font family of the text
      */
@@ -212,7 +212,7 @@ public class TextDecoration implements Decoration {
         public Builder presets() {
             foreground = Color.BLACK;
             background = Color.TRANSPARENT;
-            fontFamily = "Serif";
+            fontFamily = "System";
             fontSize = 12.0;
             fontPosture = FontPosture.REGULAR;
             fontWeight = FontWeight.NORMAL;
