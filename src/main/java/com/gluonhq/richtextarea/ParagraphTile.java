@@ -237,7 +237,7 @@ public class ParagraphTile extends HBox {
             if (l.isTableCell) {
                 Point2D localEvent = l.sceneToLocal(e.getSceneX(), e.getSceneY());
                 if (l.getLayoutBounds().contains(localEvent)) {
-                    l.mouseDraggedListener(e);
+                    l.mousePressedListener(e);
                 }
             } else if (l.getLayoutBounds().contains(e.getX(), e.getY())) {
                 l.mousePressedListener(e);
