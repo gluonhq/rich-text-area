@@ -79,6 +79,10 @@ class RichListCell extends ListCell<Paragraph> {
                         if (richTextAreaSkin.anchorIndex == -1) {
                             richTextAreaSkin.mouseDragStart = textLength;
                         }
+                        // hide context menu
+                        if (richTextAreaSkin.contextMenu.isShowing()) {
+                            richTextAreaSkin.contextMenu.hide();
+                        }
                     });
         });
         addEventHandler(MouseEvent.MOUSE_RELEASED, event -> {
@@ -200,11 +204,13 @@ class RichListCell extends ListCell<Paragraph> {
             text.setFill(Color.BLUE);
             text.setCursor(Cursor.HAND);
             text.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
-                Function<Node, Consumer<String>> linkCallbackFactory = richTextAreaSkin.getSkinnable().getLinkCallbackFactory();
-                if (linkCallbackFactory != null) {
-                    Consumer<String> consumer = linkCallbackFactory.apply(text);
-                    if (consumer != null) {
-                        consumer.accept(url);
+                if (e.getButton() == MouseButton.PRIMARY) {
+                    Function<Node, Consumer<String>> linkCallbackFactory = richTextAreaSkin.getSkinnable().getLinkCallbackFactory();
+                    if (linkCallbackFactory != null) {
+                        Consumer<String> consumer = linkCallbackFactory.apply(text);
+                        if (consumer != null) {
+                            consumer.accept(url);
+                        }
                     }
                 }
             });
