@@ -70,7 +70,7 @@ public final class PieceTable extends AbstractTextBuffer {
     public String getText(final int start, final int end) {
 
         if (!inRange(start, 0, getTextLength())) {
-             throw new IllegalArgumentException("Start index is not in range");
+             throw new IllegalArgumentException("Start index " + start + " is not in range [0, " + getTextLength() + ")");
         }
         if ( end < 0 ) {
             throw new IllegalArgumentException("End index is not in range");
