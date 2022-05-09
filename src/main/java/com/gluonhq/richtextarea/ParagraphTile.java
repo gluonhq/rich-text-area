@@ -19,6 +19,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -234,12 +235,8 @@ public class ParagraphTile extends HBox {
             return;
         }
         layers.forEach(l -> {
-            if (l.isTableCell) {
-                Point2D localEvent = l.sceneToLocal(e.getSceneX(), e.getSceneY());
-                if (l.getLayoutBounds().contains(localEvent)) {
-                    l.mousePressedListener(e);
-                }
-            } else if (l.getLayoutBounds().contains(e.getX(), e.getY())) {
+            Point2D localEvent = l.screenToLocal(e.getScreenX(), e.getScreenY());
+            if (l.getLayoutBounds().contains(localEvent)) {
                 l.mousePressedListener(e);
             }
         });
@@ -247,13 +244,18 @@ public class ParagraphTile extends HBox {
 
     void mouseDraggedListener(MouseEvent e) {
         layers.forEach(l -> {
-            if (l.isTableCell) {
-                Point2D localEvent = l.sceneToLocal(e.getSceneX(), e.getSceneY());
+            Point2D localEvent = l.screenToLocal(e.getScreenX(), e.getScreenY());
+            if (e.getEventType() == MouseDragEvent.MOUSE_DRAG_OVER || l.isTableCell) {
+                // mouse drag from own cell
                 if (l.getLayoutBounds().contains(localEvent)) {
                     l.mouseDraggedListener(e);
                 }
-            } else if (l.getLayoutBounds().contains(e.getX(), e.getY())) {
-                l.mouseDraggedListener(e);
+            } else if (e.getEventType() == MouseEvent.MOUSE_DRAGGED) {
+                // synthetic event when mouse is outside the control:
+                // check only vertical bounds (layer can be indented)
+                if (l.getLayoutBounds().getMinY() <= localEvent.getY() && localEvent.getY() <= l.getLayoutBounds().getMaxY()) {
+                    l.mouseDraggedListener(e);
+                }
             }
         });
     }
@@ -377,7 +379,7 @@ public class ParagraphTile extends HBox {
         }
 
         void mousePressedListener(MouseEvent e) {
-            Point2D localEvent = sceneToLocal(e.getSceneX(), e.getSceneY());
+            Point2D localEvent = screenToLocal(e.getScreenX(), e.getScreenY());
             if (e.getButton() == MouseButton.PRIMARY && !(e.isMiddleButtonDown() || e.isSecondaryButtonDown())) {
                 HitInfo hitInfo = textFlow.hitTest(new Point2D(localEvent.getX() - textFlowLayoutX, localEvent.getY() - textFlowLayoutY));
                 Selection prevSelection = viewModel.getSelection();
@@ -417,7 +419,7 @@ public class ParagraphTile extends HBox {
         }
 
         void mouseDraggedListener(MouseEvent e) {
-            Point2D localEvent = sceneToLocal(e.getSceneX(), e.getSceneY());
+            Point2D localEvent = screenToLocal(e.getScreenX(), e.getScreenY());
             HitInfo hitInfo = textFlow.hitTest(new Point2D(localEvent.getX() - textFlowLayoutX, localEvent.getY() - textFlowLayoutY));
             if (hitInfo.getInsertionIndex() >= 0) {
                 int dragEnd = start + hitInfo.getInsertionIndex();
@@ -489,7 +491,8 @@ public class ParagraphTile extends HBox {
 
         private void updateCaretPosition(int caretPosition) {
             caretShape.getElements().clear();
-            if (!control.isFocused() || paragraph == null || caretPosition < start || getParagraphLimit() <= caretPosition) {
+            if ((!control.isFocused() && richTextAreaSkin.dragAndDropStart == -1) ||
+                    paragraph == null || caretPosition < start || getParagraphLimit() <= caretPosition) {
                 caretTimeline.stop();
                 return;
             }
