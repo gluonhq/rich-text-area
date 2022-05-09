@@ -136,6 +136,7 @@ public class ParagraphTile extends HBox {
         }
         int index = 0;
         for (int i = 0; i < r; i++) {
+            double prefHeight = 0d;
             for (int j = 0; j < c; j++) {
                 if (index + 1 >= positions.size()) {
                     break;
@@ -152,14 +153,13 @@ public class ParagraphTile extends HBox {
                 layer.updatePrefWidth(100);
                 layers.add(layer);
                 grid.add(layer, j, i);
-                if (j == 0) {
-                    RowConstraints rc = new RowConstraints();
-                    rc.setMinHeight(layer.prefHeight(100));
-                    rc.setMaxHeight(Double.MAX_VALUE);
-                    grid.getRowConstraints().add(rc);
-                }
+                prefHeight = Math.max(prefHeight, layer.prefHeight(100));
                 index++;
             }
+            RowConstraints rc = new RowConstraints();
+            rc.setMinHeight(prefHeight);
+            rc.setMaxHeight(Double.MAX_VALUE);
+            grid.getRowConstraints().add(rc);
         }
         HBox gridBox = new HBox(grid);
         gridBox.setPrefHeight(grid.getPrefHeight() + 1);
