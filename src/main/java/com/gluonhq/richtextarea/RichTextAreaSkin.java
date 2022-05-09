@@ -615,8 +615,10 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             );
             Menu tableCellMenu = new Menu("Table Cell");
             tableCellMenu.getItems().addAll(tableCellContextMenuItems);
+            MenuItem insertTableMenuItem = createMenuItem("Insert table", ACTION_CMD_FACTORY.insertTable(new TableDecoration(1, 2)));
+            tableCellMenu.disableProperty().bind(insertTableMenuItem.disableProperty().not());
             tableContextMenuItems = FXCollections.observableArrayList(
-                    createMenuItem("Insert table", ACTION_CMD_FACTORY.insertTable(new TableDecoration(1,2))),
+                    insertTableMenuItem,
                     createMenuItem("Delete table", ACTION_CMD_FACTORY.deleteTable()),
                     new SeparatorMenuItem(),
                     createMenuItem("Add column before", ACTION_CMD_FACTORY.insertTableColumnBefore()),
