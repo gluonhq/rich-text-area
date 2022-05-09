@@ -74,7 +74,6 @@ import static com.gluonhq.richtextarea.model.ParagraphDecoration.GraphicType.NUM
 import static javafx.scene.text.FontPosture.ITALIC;
 import static javafx.scene.text.FontPosture.REGULAR;
 import static javafx.scene.text.FontWeight.BOLD;
-import static javafx.scene.text.FontWeight.EXTRA_BOLD;
 import static javafx.scene.text.FontWeight.NORMAL;
 
 public class Main extends Application {
@@ -160,7 +159,9 @@ public class Main extends Application {
             }
         });
         presets.getSelectionModel().selectedItemProperty().addListener((observableValue, ov, nv) -> {
-            editor.getActionFactory().decorate(TextDecoration.builder().fontSize(nv.getFontSize()).fontWeight(nv.getWeight()).build()).execute(new ActionEvent());
+            editor.getActionFactory()
+                    .decorate(TextDecoration.builder().fontSize(nv.getFontSize()).fontWeight(nv.getWeight()).build(),
+                            ParagraphDecoration.builder().alignment(nv.getTextAlignment()).build()).execute(new ActionEvent());
         });
 
         ComboBox<String> fontFamilies = new ComboBox<>();
@@ -481,19 +482,21 @@ public class Main extends Application {
 
     private enum Presets {
 
-        DEFAULT("Default",12, NORMAL),
-        HEADER1("Header 1", 32, EXTRA_BOLD),
-        HEADER2("Header 2", 24, EXTRA_BOLD),
-        HEADER3("Header 3", 19, EXTRA_BOLD);
+        DEFAULT("Default",12, NORMAL, TextAlignment.LEFT),
+        HEADER1("Header 1", 32, BOLD, TextAlignment.CENTER),
+        HEADER2("Header 2", 24, BOLD, TextAlignment.LEFT),
+        HEADER3("Header 3", 19, BOLD, TextAlignment.LEFT);
 
         private final String name;
         private final int fontSize;
         private final FontWeight weight;
+        private final TextAlignment textAlignment;
 
-        Presets(String name, int fontSize, FontWeight weight) {
+        Presets(String name, int fontSize, FontWeight weight, TextAlignment textAlignment) {
             this.name = name;
             this.fontSize = fontSize;
             this.weight = weight;
+            this.textAlignment = textAlignment;
         }
 
         public String getName() {
@@ -506,6 +509,10 @@ public class Main extends Application {
 
         public FontWeight getWeight() {
             return weight;
+        }
+
+        public TextAlignment getTextAlignment() {
+            return textAlignment;
         }
     }
 }

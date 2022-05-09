@@ -3,10 +3,7 @@ package com.gluonhq.richtextarea.viewmodel;
 import com.gluonhq.richtextarea.Selection;
 import com.gluonhq.richtextarea.model.Decoration;
 import com.gluonhq.richtextarea.model.Document;
-import com.gluonhq.richtextarea.model.ImageDecoration;
-import com.gluonhq.richtextarea.model.ParagraphDecoration;
 import com.gluonhq.richtextarea.model.TableDecoration;
-import com.gluonhq.richtextarea.model.TextDecoration;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.text.TextAlignment;
 
@@ -108,17 +105,10 @@ public final class ActionCmdFactory {
         return new ActionCmdRemoveText(caretOffset);
     }
 
-    public ActionCmd decorateText(TextDecoration decoration) {
-        return new ActionCmdDecorateText(decoration);
+    public ActionCmd decorate(Decoration... decorations) {
+        return new ActionCmdDecorate(decorations);
     }
 
-    public ActionCmd decorateImage(ImageDecoration decoration) {
-        return new ActionCmdDecorateImage(decoration);
-    }
-
-    public ActionCmd decorateParagraph(ParagraphDecoration decoration) {
-        return new ActionCmdDecorateParagraph(decoration);
-    }
     public ActionCmd caretMove(RichTextAreaViewModel.Direction direction, KeyEvent event) {
         return new ActionCmdCaretMove(direction, event);
     }
