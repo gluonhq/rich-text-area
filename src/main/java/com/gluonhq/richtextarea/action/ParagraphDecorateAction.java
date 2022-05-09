@@ -35,7 +35,7 @@ public class ParagraphDecorateAction<T> extends DecorateAction<T> {
                 }
                 ParagraphDecoration newParagraphDecoration = builderTFunction.apply(builder, nv);
                 Platform.runLater(() ->  {
-                    ACTION_CMD_FACTORY.decorateParagraph(newParagraphDecoration).apply(viewModel);
+                    ACTION_CMD_FACTORY.decorate(newParagraphDecoration).apply(viewModel);
                     control.requestFocus();
                 });
                 updating = false;

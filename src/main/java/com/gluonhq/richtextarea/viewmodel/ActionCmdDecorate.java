@@ -1,23 +1,26 @@
 package com.gluonhq.richtextarea.viewmodel;
 
 import com.gluonhq.richtextarea.Selection;
+import com.gluonhq.richtextarea.model.Decoration;
+import com.gluonhq.richtextarea.model.ParagraphDecoration;
 import com.gluonhq.richtextarea.model.TextDecoration;
 import javafx.beans.binding.BooleanBinding;
 
+import java.util.List;
 import java.util.Objects;
 
-class ActionCmdDecorateText implements ActionCmd {
+class ActionCmdDecorate implements ActionCmd {
 
-    private final TextDecoration decoration;
+    private final List<Decoration> decorations;
 
-    public ActionCmdDecorateText(TextDecoration decoration) {
-        this.decoration = decoration;
+    public ActionCmdDecorate(Decoration... decorations) {
+        this.decorations = List.of(decorations);
     }
 
     @Override
     public void apply(RichTextAreaViewModel viewModel) {
         if (viewModel.isEditable()) {
-            viewModel.getCommandManager().execute(new DecorateCmd(Objects.requireNonNull(decoration)));
+            viewModel.getCommandManager().execute(new DecorateCmd(Objects.requireNonNull(decorations)));
         }
     }
 
