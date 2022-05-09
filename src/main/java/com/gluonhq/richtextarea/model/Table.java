@@ -3,6 +3,7 @@ package com.gluonhq.richtextarea.model;
 import com.gluonhq.richtextarea.Selection;
 
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -178,6 +179,9 @@ public class Table {
     }
 
     public void printTable() {
+        if (!LOGGER.isLoggable(Level.FINE)) {
+            return;
+        }
         String tableText = text.replaceAll("" + TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR, "|").replaceAll("\n", "]");
         int start = 0;
         StringBuilder sb = new StringBuilder();

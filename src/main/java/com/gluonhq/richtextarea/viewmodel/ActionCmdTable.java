@@ -147,6 +147,7 @@ class ActionCmdTable implements ActionCmd {
                         commandManager.execute(new RemoveAndDecorateTableCmd(0, p.getEnd() - p.getStart() - 1, ParagraphDecoration.builder().presets().build()));
                         viewModel.setCaretPosition(Math.max(p.getStart() - 1, 0));
                     }
+                    break;
                     case DELETE_CELL_CONTENT: {
                         Selection cellSelection = table.getCellSelection(caret);
                         if (cellSelection.isDefined()) {
@@ -154,10 +155,12 @@ class ActionCmdTable implements ActionCmd {
                             commandManager.execute(new RemoveTextCmd(0, cellSelection.getEnd() - cellSelection.getStart()));
                         }
                     }
+                    break;
                     case ALIGN_CELL_CONTENT: {
                         oldTableDecoration.getCellAlignment()[currentRow][currentCol] = textAlignment;
                         commandManager.execute(new DecorateCmd(ParagraphDecoration.builder().tableDecoration(oldTableDecoration).build()));
                     }
+                    break;
                     default:
                         break;
                 }
