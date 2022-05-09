@@ -123,7 +123,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 int level = decoration.getIndentationLevel();
                 if (level > 0 && paragraph != null && viewModel.isEmptyParagraph(paragraph)) {
                     // on empty paragraphs, Enter is the same as shift+tab
-                    return ACTION_CMD_FACTORY.decorateParagraph(ParagraphDecoration.builder().fromDecoration(decoration).indentationLevel(level - 1).build());
+                    return ACTION_CMD_FACTORY.decorate(ParagraphDecoration.builder().fromDecoration(decoration).indentationLevel(level - 1).build());
                 }
             } else if (paragraph != null && paragraph.getStart() < paragraph.getEnd() &&
                     decoration != null && decoration.hasTableDecoration()) {
@@ -160,9 +160,9 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 } else if (paragraph.getStart() == caret) {
                     // check backspace at beginning of paragraph:
                     if (decoration.getGraphicType() != ParagraphDecoration.GraphicType.NONE) {
-                        return ACTION_CMD_FACTORY.decorateParagraph(ParagraphDecoration.builder().fromDecoration(decoration).graphicType(ParagraphDecoration.GraphicType.NONE).build());
+                        return ACTION_CMD_FACTORY.decorate(ParagraphDecoration.builder().fromDecoration(decoration).graphicType(ParagraphDecoration.GraphicType.NONE).build());
                     } else if (decoration.getIndentationLevel() > 0) {
-                        return ACTION_CMD_FACTORY.decorateParagraph(ParagraphDecoration.builder().fromDecoration(decoration).indentationLevel(decoration.getIndentationLevel() - 1).build());
+                        return ACTION_CMD_FACTORY.decorate(ParagraphDecoration.builder().fromDecoration(decoration).indentationLevel(decoration.getIndentationLevel() - 1).build());
                     }
                 }
             }
@@ -172,19 +172,19 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         entry( new KeyCodeCombination(B, SHORTCUT_DOWN),                                     e -> {
             TextDecoration decoration = (TextDecoration) viewModel.getDecorationAtCaret();
             FontWeight fontWeight = decoration.getFontWeight() == BOLD ? NORMAL : BOLD;
-            return ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().fromDecoration(decoration).fontWeight(fontWeight).build());
+            return ACTION_CMD_FACTORY.decorate(TextDecoration.builder().fromDecoration(decoration).fontWeight(fontWeight).build());
         }),
         entry(new KeyCodeCombination(I, SHORTCUT_DOWN),                                      e -> {
             TextDecoration decoration = (TextDecoration) viewModel.getDecorationAtCaret();
             FontPosture fontPosture = decoration.getFontPosture() == ITALIC ? REGULAR : ITALIC;
-            return ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().fromDecoration(decoration).fontPosture(fontPosture).build());
+            return ACTION_CMD_FACTORY.decorate(TextDecoration.builder().fromDecoration(decoration).fontPosture(fontPosture).build());
         }),
         entry(new KeyCodeCombination(TAB, SHIFT_ANY),                                        e -> {
             ParagraphDecoration decoration = viewModel.getDecorationAtParagraph();
             Paragraph paragraph = viewModel.getParagraphWithCaret().orElse(null);
             if (decoration != null && decoration.getGraphicType() != ParagraphDecoration.GraphicType.NONE) {
                 int level = Math.max(decoration.getIndentationLevel() + (e.isShiftDown() ? -1 : 1), 0);
-                return ACTION_CMD_FACTORY.decorateParagraph(ParagraphDecoration.builder().fromDecoration(decoration).indentationLevel(level).build());
+                return ACTION_CMD_FACTORY.decorate(ParagraphDecoration.builder().fromDecoration(decoration).indentationLevel(level).build());
             } else if (decoration != null && decoration.hasTableDecoration() &&
                     paragraph != null && paragraph.getStart() < paragraph.getEnd()) {
                 int caretPosition = viewModel.getCaretPosition();
@@ -678,7 +678,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                     String url = file.toURI().toString();
                     // validate image before adding it
                     if (url != null && new Image(url).getException() == null) {
-                        ACTION_CMD_FACTORY.decorateImage(new ImageDecoration(url)).apply(viewModel);
+                        ACTION_CMD_FACTORY.decorate(new ImageDecoration(url)).apply(viewModel);
                     }
                 });
             } else if (dragboard.hasUrl()) {
@@ -686,13 +686,13 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 // validate if url is an image before adding it:
                 if (url != null) {
                     if (new Image(url).getException() == null) {
-                        ACTION_CMD_FACTORY.decorateImage(new ImageDecoration(url)).apply(viewModel);
+                        ACTION_CMD_FACTORY.decorate(new ImageDecoration(url)).apply(viewModel);
                     } else {
                         // add text and hyperlink
                         int caret = viewModel.getCaretPosition();
                         ACTION_CMD_FACTORY.insertText(url).apply(viewModel);
                         viewModel.setSelection(new Selection(caret, caret + url.length()));
-                        ACTION_CMD_FACTORY.decorateText(TextDecoration.builder().url(url).build()).apply(viewModel);
+                        ACTION_CMD_FACTORY.decorate(TextDecoration.builder().url(url).build()).apply(viewModel);
                     }
                 }
             } else if (dragboard.hasString()) {

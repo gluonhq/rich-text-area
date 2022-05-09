@@ -35,7 +35,7 @@ public class TextDecorateAction<T> extends DecorateAction<T> {
                 }
                 TextDecoration newTextDecoration = builderTFunction.apply(builder, nv);
                 Platform.runLater(() ->  {
-                    ACTION_CMD_FACTORY.decorateText(newTextDecoration).apply(viewModel);
+                    ACTION_CMD_FACTORY.decorate(newTextDecoration).apply(viewModel);
                     control.requestFocus();
                 });
                 updating = false;
