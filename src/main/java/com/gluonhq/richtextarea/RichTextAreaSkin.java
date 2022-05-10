@@ -322,7 +322,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             addEventHandler(DragEvent.DRAG_OVER, event -> {
                 if (dragAndDropStart != -1) {
                     Point2D localEvent = getContainer().screenToLocal(event.getScreenX(), event.getScreenY());
-                    if (!getContainer().getLayoutBounds().contains(localEvent)) {
+                    if (localEvent.getY() < getContainer().getLayoutBounds().getMinY() || localEvent.getY() > getContainer().getLayoutBounds().getMaxY()) {
                         virtualFlow.scrollPixels(localEvent.getY() <= getContainer().getLayoutBounds().getMinY() ? -5 : 5);
                     }
                 }
