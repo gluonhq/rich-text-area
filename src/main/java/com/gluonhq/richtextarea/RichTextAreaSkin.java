@@ -46,9 +46,11 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Region;
 import javafx.scene.shape.Path;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
@@ -279,6 +281,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
         private final RichVirtualFlow virtualFlow;
         private Group sheet;
+        private Region container;
 
         public ParagraphListView(RichTextArea control) {
             virtualFlow = new RichVirtualFlow(control);
@@ -290,29 +293,49 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 // can continue
                 if (anchorIndex != -1 && !getLayoutBounds().contains(e.getX(), e.getY())) {
                     // Translate listView event to a point (in listView coordinates) that could be over a listCell
-                    Point2D listPoint = getPointInListView(e);
+                    Point2D listPoint = localToScreen(getPointInListView(e));
+
                     getSheet().getChildren().stream()
                             .filter(RichListCell.class::isInstance)
-                            .filter(cell -> cell.getLayoutBounds().contains(cell.parentToLocal(listPoint)))
+                            .filter(cell -> cell.getLayoutBounds().contains(cell.screenToLocal(listPoint)))
                             .map(RichListCell.class::cast)
                             .findFirst()
                             .ifPresent(cell -> {
-                                Point2D cellPoint = cell.parentToLocal(listPoint);
+                                Point2D cellPoint = cell.screenToLocal(listPoint);
+                                Point2D cellScreenPoint = cell.localToScreen(cellPoint);
                                 MouseEvent mouseEvent = new MouseEvent(e.getSource(), e.getTarget(), e.getEventType(),
-                                        cellPoint.getX(), cellPoint.getY(), e.getScreenX(), e.getScreenY(),
+                                        cellPoint.getX(), cellPoint.getY(), cellScreenPoint.getX(), cellScreenPoint.getY(),
                                         MouseButton.PRIMARY, 1,
                                         false, false, false, false,
                                         true, false, false,
                                         false, false, false, null);
                                 cell.forwardDragEvent(mouseEvent);
                             });
+                    double y = e.getY();
+                    if (y < 0 || y > getHeight()) {
+                        // scroll some pixels to prevent mouse getting stuck in a cell
+                        virtualFlow.scrollPixels(y < 0 ? (y / 10) - 1 : (y - getHeight()) / 10 + 1);
+                    }
+                }
+            });
+
+            addEventHandler(DragEvent.DRAG_OVER, event -> {
+                if (dragAndDropStart != -1) {
+                    Point2D localEvent = getContainer().screenToLocal(event.getScreenX(), event.getScreenY());
+                    if (!getContainer().getLayoutBounds().contains(localEvent)) {
+                        virtualFlow.scrollPixels(localEvent.getY() <= getContainer().getLayoutBounds().getMinY() ? -5 : 5);
+                    }
                 }
             });
         }
 
         private Point2D getPointInListView(MouseEvent e) {
-            double deltaX = e.getX() < 0 ? e.getX() : e.getX() > getWidth() ? e.getX() - getSheet().getLayoutBounds().getWidth() + getInsets().getRight() : 0;
-            double deltaY = e.getY() < 0 ? e.getY() : e.getY() > getHeight() ? e.getY() - getSheet().getLayoutBounds().getHeight() + getInsets().getBottom() : 0;
+            double iniX = getInsets().getLeft();
+            double endX = iniX + getContainer().getLayoutBounds().getWidth() - getInsets().getRight();
+            double iniY = getInsets().getTop();
+            double endY = iniY + getContainer().getLayoutBounds().getHeight() - getInsets().getBottom();
+            double deltaX = e.getX() < iniX ? e.getX() - iniX : e.getX() > endX ? e.getX() - endX : 0;
+            double deltaY = e.getY() < iniY ? e.getY() - iniY : e.getY() > endY ? e.getY() - endY : 0;
             return new Point2D(e.getX() - deltaX, e.getY() - deltaY);
         }
 
@@ -321,6 +344,13 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 sheet = (Group) virtualFlow.lookup(".sheet");
             }
             return sheet;
+        }
+
+        private Region getContainer() {
+            if (container == null) {
+                container = (Region) virtualFlow.lookup(".clipped-container");
+            }
+            return container;
         }
 
         @Override
