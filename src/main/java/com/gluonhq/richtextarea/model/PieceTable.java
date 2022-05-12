@@ -550,7 +550,7 @@ class InsertCmd extends AbstractCommand<PieceTable> {
                             pt.getParagraphDecorationAtCaret(insertPosition) : pt.previousPieceParagraphDecoration(pieceIndex);
                     newPieces = PieceTable.normalize(List.of(
                             piece.pieceBefore(pieceOffset),
-                            pt.appendTextInternal(text, decoration, paragraphDecoration),
+                            pt.appendTextInternal(text, pt.decorationAtCaret != null ? pt.decorationAtCaret : decoration, paragraphDecoration),
                             piece.pieceFrom(pieceOffset)
                     ));
                     oldPiece = piece;
