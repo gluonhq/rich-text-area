@@ -1,5 +1,6 @@
 package com.gluonhq.richtextarea.viewmodel;
 
+import com.gluonhq.richtextarea.Selection;
 import com.gluonhq.richtextarea.model.Decoration;
 import com.gluonhq.richtextarea.model.ImageDecoration;
 import com.gluonhq.richtextarea.model.ParagraphDecoration;
@@ -23,26 +24,39 @@ class DecorateCmd extends AbstractEditCmd {
 
     @Override
     public void doRedo(RichTextAreaViewModel viewModel) {
+        Objects.requireNonNull(viewModel);
         if (!selection.isDefined() && decorations.size() == 1 && decorations.get(0) instanceof TextDecoration) {
-            prevDecoration = Objects.requireNonNull(viewModel).getDecorationAtCaret();
-            Objects.requireNonNull(viewModel).setDecorationAtCaret(decorations.get(0));
+            prevDecoration = viewModel.getDecorationAtCaret();
+            viewModel.setDecorationAtCaret(decorations.get(0));
         } else {
+            Selection prevSelection = selection;
+            if (!selection.isDefined() && decorations.stream().anyMatch(ParagraphDecoration.class::isInstance)) {
+                // select current paragraph before applying all decorations
+                viewModel.getParagraphWithCaret().ifPresent(p -> {
+                    selection = new Selection(p.getStart(), p.getEnd());
+                    viewModel.setSelection(selection);
+                });
+            }
             decorations.forEach(decoration -> {
                 if (selection.isDefined() || decoration instanceof ImageDecoration || decoration instanceof ParagraphDecoration) {
-                    Objects.requireNonNull(viewModel).decorate(decoration);
+                    viewModel.decorate(decoration);
                 } else {
-                    Objects.requireNonNull(viewModel).setDecorationAtCaret(decoration);
+                    viewModel.setDecorationAtCaret(decoration);
                 }
             });
+            if (prevSelection != selection) {
+                viewModel.setSelection(prevSelection);
+            }
         }
     }
 
     @Override
     public void doUndo(RichTextAreaViewModel viewModel) {
+        Objects.requireNonNull(viewModel);
         if (prevDecoration != null && prevDecoration instanceof TextDecoration) {
-            Objects.requireNonNull(viewModel).setDecorationAtCaret(prevDecoration);
+            viewModel.setDecorationAtCaret(prevDecoration);
         }
-        decorations.forEach(decoration -> Objects.requireNonNull(viewModel).undoDecoration());
+        decorations.forEach(decoration -> viewModel.undoDecoration());
     }
 
     @Override
