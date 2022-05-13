@@ -8,6 +8,7 @@ import com.gluonhq.richtextarea.model.TextDecoration;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 class DecorateCmd extends AbstractEditCmd {
 
@@ -26,27 +27,36 @@ class DecorateCmd extends AbstractEditCmd {
     public void doRedo(RichTextAreaViewModel viewModel) {
         Objects.requireNonNull(viewModel);
         if (!selection.isDefined() && decorations.size() == 1 && decorations.get(0) instanceof TextDecoration) {
+            // one single textDecoration, without selection, it is applied at caret only (to decorate next characters)
             prevDecoration = viewModel.getDecorationAtCaret();
             viewModel.setDecorationAtCaret(decorations.get(0));
         } else {
+            // if decoration at caret is part of a list, it should be applied at the end
+            Optional<Decoration> decorationAtCaret = decorations.stream()
+                    .filter(decoration -> !selection.isDefined() && decoration instanceof TextDecoration)
+                    .findFirst();
+
             Selection prevSelection = selection;
             if (!selection.isDefined() && decorations.stream().anyMatch(ParagraphDecoration.class::isInstance)) {
-                // select current paragraph before applying all decorations
+                // select current paragraph before applying all decorations, without EOL character
                 viewModel.getParagraphWithCaret().ifPresent(p -> {
-                    selection = new Selection(p.getStart(), p.getEnd());
+                    selection = new Selection(p.getStart(), p.getEnd() - (p.getEnd() == viewModel.getTextLength() ? 0 : 1));
                     viewModel.setSelection(selection);
                 });
             }
-            decorations.forEach(decoration -> {
-                if (selection.isDefined() || decoration instanceof ImageDecoration || decoration instanceof ParagraphDecoration) {
-                    viewModel.decorate(decoration);
-                } else {
-                    viewModel.setDecorationAtCaret(decoration);
-                }
-            });
+            // apply decorations
+            decorations.stream()
+                    .filter(decoration -> selection.isDefined() ||
+                            decoration instanceof ImageDecoration || decoration instanceof ParagraphDecoration)
+                    .forEach(viewModel::decorate);
+
+            // restore selection if needed
             if (prevSelection != selection) {
                 viewModel.setSelection(prevSelection);
             }
+
+            // finally, set decoration at caret if present
+            decorationAtCaret.ifPresent(viewModel::setDecorationAtCaret);
         }
     }
 
