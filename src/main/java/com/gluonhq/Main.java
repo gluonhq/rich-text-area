@@ -159,9 +159,13 @@ public class Main extends Application {
             }
         });
         presets.getSelectionModel().selectedItemProperty().addListener((observableValue, ov, nv) -> {
+            // presets should define all decoration attributes.
+            // For now just they set only font size and weight for text, and alignment for paragraphs,
+            // so the rest of attributes come for the Builder::presets
             editor.getActionFactory()
-                    .decorate(TextDecoration.builder().fontSize(nv.getFontSize()).fontWeight(nv.getWeight()).build(),
-                            ParagraphDecoration.builder().alignment(nv.getTextAlignment()).build()).execute(new ActionEvent());
+                    .decorate(TextDecoration.builder().presets().fontSize(nv.getFontSize()).fontWeight(nv.getWeight()).build(),
+                            ParagraphDecoration.builder().presets().alignment(nv.getTextAlignment()).build()).execute(new ActionEvent());
+            editor.requestFocus();
         });
 
         ComboBox<String> fontFamilies = new ComboBox<>();
