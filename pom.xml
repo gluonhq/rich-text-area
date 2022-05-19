@@ -29,7 +29,7 @@
         <attachVersion>4.0.13</attachVersion>
         <mapsVersion>2.0.0-ea+5</mapsVersion>
         <connectVersion>2.0.1</connectVersion>
-        <javafxVersion>17.0.0.1</javafxVersion>
+        <javafxVersion>18</javafxVersion>
         <controlsfxVersion>11.1.0</controlsfxVersion>
         <javafx-maven-plugin-version>0.0.8</javafx-maven-plugin-version>
         <gluonfx-maven-plugin-version>1.0.7</gluonfx-maven-plugin-version>

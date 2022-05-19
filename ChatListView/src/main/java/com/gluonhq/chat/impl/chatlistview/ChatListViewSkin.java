@@ -7,8 +7,13 @@ import com.gluonhq.chat.impl.chatlistview.util.Properties;
 import javafx.animation.PauseTransition;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.WeakInvalidationListener;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.collections.WeakListChangeListener;
 import javafx.concurrent.Service;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.skin.ListViewSkin;
 import javafx.util.Duration;
 
 public class ChatListViewSkin<T> extends ListViewSkin<T> {
@@ -16,18 +21,34 @@ public class ChatListViewSkin<T> extends ListViewSkin<T> {
     private static final double THRESHOLD = 0.2;
     
     private final ChatListView<T> control;
-    private final VirtualFlow<ListCell<T>> chatVirtualFlow;
+    private final ChatVirtualFlow<T> chatVirtualFlow;
     
     private boolean lockedByBatchOperation = false;
     private boolean lockedByTrailMessage = false;
 
+    private final InvalidationListener itemsChangeListener = observable -> updateListViewItems();
+
+    private final WeakInvalidationListener
+            weakItemsChangeListener = new WeakInvalidationListener(itemsChangeListener);
+
+    private ObservableList<T> listViewItems;
+    private final ListChangeListener<T> listViewItemsListener = c -> {
+        while (c.next()) {
+            if (c.wasAdded()) {
+                processInputData(c.getFrom(), c.getAddedSize());
+            }
+        }
+    };
+    private final WeakListChangeListener<T> weakListViewItemsListener =
+            new WeakListChangeListener<T>(listViewItemsListener);
+
     public ChatListViewSkin(final ChatListView<T> control) {
         super(control);
         this.control = control;
-        
-        chatVirtualFlow = getVirtualFlow();
 
-        chatVirtualFlow.getVbar().valueProperty().addListener((obs, ov, nv) -> {
+        chatVirtualFlow = (ChatVirtualFlow<T>) getVirtualFlow();
+
+        chatVirtualFlow.getVerticalBar().valueProperty().addListener((obs, ov, nv) -> {
             if (lockedByBatchOperation || lockedByTrailMessage) {
                 return;
             }
@@ -55,20 +76,29 @@ public class ChatListViewSkin<T> extends ListViewSkin<T> {
                 control.setUnreadMessages(-1);
             }
         });
-        
+
+        updateListViewItems();
+        control.itemsProperty().addListener(weakItemsChangeListener);
+        registerChangeListener(control.itemsProperty(), o -> updateListViewItems());
+
         control.stackFromBottomProperty().addListener((obs, ov, nv) -> {
             chatVirtualFlow.setStackFromBottom(nv);
         });
         chatVirtualFlow.setStackFromBottom(control.isStackFromBottom());
-        chatVirtualFlow.getVbar().visibleProperty().addListener(new InvalidationListener() {
+        chatVirtualFlow.getVerticalBar().visibleProperty().addListener(new InvalidationListener() {
             @Override
             public void invalidated(Observable o) {
-                if (chatVirtualFlow.getVbar().isVisible()) {
-                    chatVirtualFlow.getVbar().setValue(control.isStackFromBottom() ? 1 : 0);
-                    chatVirtualFlow.getVbar().visibleProperty().removeListener(this);
+                if (chatVirtualFlow.getVerticalBar().isVisible()) {
+                    chatVirtualFlow.getVerticalBar().setValue(control.isStackFromBottom() ? 1 : 0);
+                    chatVirtualFlow.getVerticalBar().visibleProperty().removeListener(this);
                 }
             }
         });
+    }
+
+    @Override
+    protected ChatVirtualFlow<T> createVirtualFlow() {
+        return new ChatVirtualFlow<>();
     }
 
     @Override
@@ -78,11 +108,23 @@ public class ChatListViewSkin<T> extends ListViewSkin<T> {
             checkItemNotVisible();
             lockedByTrailMessage = false;
         }
-    }   
+    }
+
+    private void updateListViewItems() {
+        if (listViewItems != null) {
+            listViewItems.removeListener(weakListViewItemsListener);
+        }
+
+        this.listViewItems = getSkinnable().getItems();
+
+        if (listViewItems != null) {
+            listViewItems.addListener(weakListViewItemsListener);
+        }
+    }
     
-    @Override
     protected void processInputData(int index, int size) {
-        super.processInputData(index, size);
+        // TODO: necessary?
+        chatVirtualFlow.recreateCells();
 
         // Check for possible batch of items added at the beginning of the list.
         lockedByTrailMessage = index > 0;
@@ -92,7 +134,7 @@ public class ChatListViewSkin<T> extends ListViewSkin<T> {
         }
         control.getProperties().put(Properties.DATA_INSERTED, false);
                 
-        ListCell<T> firstCell = chatVirtualFlow.getFirstVisibleCellWithinViewPort();
+        ListCell<T> firstCell = chatVirtualFlow.getFirstVisibleCellWithinViewport();
         if (firstCell != null) {
             double offsetY = chatVirtualFlow.getCellPosition(firstCell);
 
@@ -113,7 +155,17 @@ public class ChatListViewSkin<T> extends ListViewSkin<T> {
             pause.play();
         }
     }
-    
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        getSkinnable().itemsProperty().removeListener(weakItemsChangeListener);
+        if (listViewItems != null) {
+            listViewItems.removeListener(weakListViewItemsListener);
+            listViewItems = null;
+        }
+    }
+
     /**
      * When data is inserted at the beginning of the list, the viewport doesn't
      * change its position, only reflects a new scrollbar position.
@@ -145,8 +197,8 @@ public class ChatListViewSkin<T> extends ListViewSkin<T> {
             return false;
         }
         
-        final double range = chatVirtualFlow.getVbar().getMax() - chatVirtualFlow.getVbar().getMin();
-        final double limit = chatVirtualFlow.getVbar().getMin() + THRESHOLD * range;
+        final double range = chatVirtualFlow.getVerticalBar().getMax() - chatVirtualFlow.getVerticalBar().getMin();
+        final double limit = chatVirtualFlow.getVerticalBar().getMin() + THRESHOLD * range;
         return control.isStackFromBottom() ? newValue <= limit : newValue >= limit;
     }
     
