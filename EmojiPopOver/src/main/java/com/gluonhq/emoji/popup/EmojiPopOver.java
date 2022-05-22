@@ -27,7 +27,7 @@ import org.controlsfx.control.textfield.CustomTextField;
 import org.controlsfx.glyphfont.FontAwesome;
 import com.gluonhq.emoji.Emoji;
 import com.gluonhq.emoji.EmojiData;
-import com.gluonhq.emoji.popup.util.EmojiImageUtils;
+import com.gluonhq.emoji.util.EmojiImageUtils;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;

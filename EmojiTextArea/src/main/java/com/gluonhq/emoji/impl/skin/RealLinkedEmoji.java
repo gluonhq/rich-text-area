@@ -5,8 +5,7 @@ import javafx.scene.Node;
 
 import java.util.Optional;
 
-import static com.gluonhq.emoji.popup.util.EmojiImageUtils.emojiView;
-
+import static com.gluonhq.emoji.util.EmojiImageUtils.emojiView;
 
 /**
  * A custom object which contains a file path to an image file.

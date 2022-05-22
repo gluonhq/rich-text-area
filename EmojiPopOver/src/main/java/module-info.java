@@ -4,5 +4,4 @@ module com.gluonhq.emoji.popup {
     requires com.gluonhq.emoji;
 
     exports  com.gluonhq.emoji.popup;
-    exports  com.gluonhq.emoji.popup.util;
 }

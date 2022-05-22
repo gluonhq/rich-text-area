@@ -1,10 +1,10 @@
-package com.gluonhq.emoji.popup.util;
+package com.gluonhq.emoji.util;
 
+import com.gluonhq.emoji.Emoji;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Screen;
-import com.gluonhq.emoji.Emoji;
 
 public class EmojiImageUtils {
 

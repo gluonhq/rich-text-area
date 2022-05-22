@@ -9,7 +9,7 @@ import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.service.ImageUtils;
 import com.gluonhq.chat.service.Service;
 import com.gluonhq.emoji.EmojiData;
-import com.gluonhq.emoji.popup.util.EmojiImageUtils;
+import com.gluonhq.emoji.util.EmojiImageUtils;
 import javafx.animation.PauseTransition;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;

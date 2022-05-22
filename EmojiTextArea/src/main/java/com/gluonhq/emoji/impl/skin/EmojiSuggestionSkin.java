@@ -2,7 +2,7 @@ package com.gluonhq.emoji.impl.skin;
 
 import com.gluonhq.emoji.Emoji;
 import com.gluonhq.emoji.event.EmojiEvent;
-import com.gluonhq.emoji.popup.util.EmojiImageUtils;
+import com.gluonhq.emoji.util.EmojiImageUtils;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
