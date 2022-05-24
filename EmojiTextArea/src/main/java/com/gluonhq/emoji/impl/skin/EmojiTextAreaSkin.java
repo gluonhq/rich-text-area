@@ -5,6 +5,7 @@ import com.gluonhq.emoji.Emoji;
 import com.gluonhq.emoji.EmojiData;
 import com.gluonhq.emoji.control.EmojiTextArea;
 import com.gluonhq.emoji.popup.EmojiPopOver;
+import com.gluonhq.emoji.popup.EmojiSkinTone;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -115,6 +116,8 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
         });
         updateSide();
         getSkinnable().emojiSideProperty().addListener(o -> updateSide());
+        popOver.setSkinTone(getSkinnable().getSkinTone());
+        getSkinnable().skinToneProperty().bindBidirectional(popOver.skinToneProperty());
 
         emojiButton = new Button(EmojiData.emojiForText("smile"));
         emojiButton.getStyleClass().add("emoji-button");

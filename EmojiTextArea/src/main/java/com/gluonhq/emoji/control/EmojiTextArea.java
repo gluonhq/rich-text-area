@@ -1,6 +1,7 @@
 package com.gluonhq.emoji.control;
 
 import com.gluonhq.emoji.impl.skin.EmojiTextAreaSkin;
+import com.gluonhq.emoji.popup.EmojiSkinTone;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -38,6 +39,18 @@ public class EmojiTextArea extends Control {
     }
     public final void setEmojiSide(Side value) {
         emojiSide.set(value);
+    }
+
+    // Defines the preferred skin tone
+    private final ObjectProperty<EmojiSkinTone> skinToneProperty = new SimpleObjectProperty<>(this, "skinTone", EmojiSkinTone.NO_SKIN_TONE);
+    public final ObjectProperty<EmojiSkinTone> skinToneProperty() {
+        return skinToneProperty;
+    }
+    public final EmojiSkinTone getSkinTone() {
+        return skinToneProperty.get();
+    }
+    public final void setSkinTone(EmojiSkinTone value) {
+        skinToneProperty.set(value);
     }
 
     /**

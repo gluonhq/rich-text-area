@@ -166,26 +166,60 @@
 }
 
 /** Hover Panel **/
-.hover-panel {
-    -fx-padding: 1.0em;
-    -fx-spacing: 0.5em;
+.foot-box {
+    -fx-alignment: center;
     -fx-background-color: grey, white;
     -fx-background-insets: 0 0 0 0, 0.5 0 0 0;
+    -fx-padding: 1.0em;
+}
+.foot-box > .hover-panel {
+    -fx-spacing: 0.5em;
 }
 
-.hover-panel > .image-pane {
+.foot-box > .hover-panel > .image-pane {
     -fx-pref-height: 32px;
 }
 
-.hover-panel > .labels > .label {
+.foot-box > .hover-panel > .labels > .label {
     -fx-font-family: "Roboto";
 }
 
-.hover-panel > .labels > .name {
+.foot-box > .hover-panel > .labels > .name {
     -fx-font-weight: bold;
-}
-
-.hover-panel >.labels > .code-name {
     -fx-font-size: 0.933em;
 }
 
+.foot-box > .hover-panel >.labels > .code-name {
+    -fx-font-size: 0.9em;
+}
+
+.foot-box > .skin-button {
+    -fx-background-color: white;
+    -fx-background-radius: 10px;
+    -fx-padding: 4;
+    -fx-alignment: CENTER;
+}
+
+.foot-box > .skin-button:hover  {
+    -fx-background-color: rgba(150, 200, 200, 0.25);
+}
+
+.popup-box {
+    -fx-alignment: center;
+    -fx-spacing: 1;
+}
+
+.popup-box > .item {
+    -fx-background-color: white;
+    -fx-background-radius: 10px;
+    -fx-padding: 4;
+    -fx-alignment: CENTER;
+}
+
+.popup-box > .item:selected {
+    -fx-background-color: rgba(150, 200, 200, 0.5);
+}
+
+.popup-box > .item:hover {
+    -fx-background-color: rgba(150, 200, 200, 0.25);
+}

@@ -22,7 +22,7 @@ public enum EmojiCategory {
     EmojiCategory(List<String> resourceNames, String styleClass) {
         ResourceBundle resourceBundle = ResourceBundle.getBundle("com.gluonhq.emoji.popup.emoji-popover", Locale.getDefault());
         
-        this.name = resourceNames.stream().map(resourceBundle::getString).collect(Collectors.joining(","));
+        this.name = resourceNames.stream().map(resourceBundle::getString).collect(Collectors.joining(", "));
         this.styleClass = styleClass;
     }
     
