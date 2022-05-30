@@ -63,7 +63,7 @@ public class TextUtils {
                         (isVariantSeparator(ch) && !isZWJ(nch) && nch != 0x20E3) ||
                         (ch == 0xE007F) ||
                         (isEmoji(nch) && !isCountryFlag(nch) && !isEmojiConnector(ch))) {
-                    EmojiData.emojiFromUnicode(sbChain.toString().toUpperCase(Locale.ROOT))
+                    EmojiData.emojiFromCodepoints(sbChain.toString().toUpperCase(Locale.ROOT))
                             .ifPresent(e -> list.add(EmojiImageUtils.emojiView(e, imageSize, getImageOffset(imageSize))));
                     sbChain.setLength(0);
                 }

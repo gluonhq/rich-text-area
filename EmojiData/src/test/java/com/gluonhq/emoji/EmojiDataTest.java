@@ -4,13 +4,13 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static com.gluonhq.emoji.EmojiData.emojiFromUnicode;
+import static com.gluonhq.emoji.EmojiData.emojiForText;
+import static com.gluonhq.emoji.EmojiData.emojiFromCodeName;
+import static com.gluonhq.emoji.EmojiData.emojiFromCodepoints;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static com.gluonhq.emoji.EmojiData.emojiForText;
-import static com.gluonhq.emoji.EmojiData.emojiFromCodeName;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EmojiDataTest {
@@ -43,7 +43,7 @@ public class EmojiDataTest {
 
     @Test
     public void emojiFromUnicodeTest() {
-        Optional<Emoji> wavingHands = emojiFromUnicode("1F44B");
+        Optional<Emoji> wavingHands = emojiFromCodepoints("1F44B");
         assertFalse(wavingHands.isEmpty());
         Emoji emoji = assertDoesNotThrow(wavingHands::get);
         assertNotNull(emoji);
@@ -53,7 +53,7 @@ public class EmojiDataTest {
 
     @Test
     public void emojiForSkinToneTest() {
-        Optional<Emoji> wavingHandsTone = emojiFromUnicode("1F44B-1F3FC");
+        Optional<Emoji> wavingHandsTone = emojiFromCodepoints("1F44B-1F3FC");
         assertFalse(wavingHandsTone.isEmpty());
         Emoji emoji = assertDoesNotThrow(wavingHandsTone::get);
         assertNotNull(emoji);
@@ -63,7 +63,7 @@ public class EmojiDataTest {
 
     @Test
     public void emojiForCountryFlagTest() {
-        Optional<Emoji> scotland = emojiFromUnicode("1F3F4-E0067-E0062-E0073-E0063-E0074-E007F");
+        Optional<Emoji> scotland = emojiFromCodepoints("1F3F4-E0067-E0062-E0073-E0063-E0074-E007F");
         assertFalse(scotland.isEmpty());
         Emoji emoji = assertDoesNotThrow(scotland::get);
         assertNotNull(emoji);
@@ -73,13 +73,13 @@ public class EmojiDataTest {
 
     @Test
     public void invalidTwoEmojisUnicodeTest() {
-        Optional<Emoji> twoEmojis = emojiFromUnicode("1F603-1F606");
+        Optional<Emoji> twoEmojis = emojiFromCodepoints("1F603-1F606");
         assertTrue(twoEmojis.isEmpty());
     }
 
     @Test
     public void validEmojiConnectorUnicodeTest() {
-        Optional<Emoji> family = emojiFromUnicode("1F9D1-200D-1F91D-200D-1F9D1");
+        Optional<Emoji> family = emojiFromCodepoints("1F9D1-200D-1F91D-200D-1F9D1");
         assertFalse(family.isEmpty());
         Emoji emoji = assertDoesNotThrow(family::get);
         assertNotNull(emoji);
@@ -89,7 +89,7 @@ public class EmojiDataTest {
 
     @Test
     public void invalidTwoFlagsUnicodeTest() {
-        Optional<Emoji> twoFlags = emojiFromUnicode("1F1E6-1F1E8-1F1E6-1F1E9");
+        Optional<Emoji> twoFlags = emojiFromCodepoints("1F1E6-1F1E8-1F1E6-1F1E9");
         assertTrue(twoFlags.isEmpty());
     }
 }

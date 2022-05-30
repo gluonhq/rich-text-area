@@ -54,11 +54,27 @@ public class EmojiData {
         }
     }
 
-    public static Optional<Emoji> emojiFromUnicode(String unicodeText) {
-        Emoji value = EMOJI_UNICODE_MAP.get(unicodeText);
+    /**
+     * Returns Emoji from unicode string
+     * @param unicodeText Unicode string representation
+     * @return Emoji found for the string
+     */
+    public static Optional<Emoji> emojiFromUnicodeString(String unicodeText) {
+        return EMOJI_MAP.values().stream()
+                .filter(emoji -> emoji.character().equals(unicodeText))
+                .findFirst();
+    }
+
+    /**
+     * Returns Emoji from its hex code point string representation.
+     * @param codePoint A string of one or more hex code points, concatenated using "-".
+     * @return Emoji found for the codepoint string
+     */
+    public static Optional<Emoji> emojiFromCodepoints(String codePoint) {
+        Emoji value = EMOJI_UNICODE_MAP.get(codePoint);
         if (value == null) {
             // try to qualify it
-            value = EMOJI_UNICODE_MAP.get(unicodeText + "-FE0F");
+            value = EMOJI_UNICODE_MAP.get(codePoint + "-FE0F");
         }
         return Optional.ofNullable(value);
     }
