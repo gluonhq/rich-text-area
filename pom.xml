@@ -17,7 +17,7 @@
         <javafx.version>18</javafx.version>
         <javafx.plugin.version>0.0.8</javafx.plugin.version>
         <main.class>com.gluonhq.Main</main.class>
-        <jpro.version>2022.1.0</jpro.version>
+        <jpro.version>2022.1.2</jpro.version>
     </properties>
 
     <dependencies>
