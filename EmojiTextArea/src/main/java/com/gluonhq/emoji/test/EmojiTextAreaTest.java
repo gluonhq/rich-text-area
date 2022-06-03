@@ -1,6 +1,7 @@
 package com.gluonhq.emoji.test;
 
 import com.gluonhq.emoji.control.EmojiTextArea;
+import com.gluonhq.emoji.popup.EmojiSkinTone;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -19,7 +20,8 @@ public class EmojiTextAreaTest extends Application {
         stackPane.setAlignment(Pos.CENTER);
         borderPane.setCenter(stackPane);
         EmojiTextArea textArea = new EmojiTextArea();
-        test.setOnAction(e -> textArea.setText("His there"));
+        textArea.setSkinTone(EmojiSkinTone.MEDIUM_SKIN_TONE);
+        test.setOnAction(e -> textArea.setText("Text and \uD83D\uDE00"));
         borderPane.setBottom(textArea);
         final Scene scene = new Scene(borderPane, 800, 500);
         primaryStage.setScene(scene);

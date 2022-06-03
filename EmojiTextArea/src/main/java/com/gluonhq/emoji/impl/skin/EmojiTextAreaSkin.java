@@ -5,7 +5,7 @@ import com.gluonhq.emoji.Emoji;
 import com.gluonhq.emoji.EmojiData;
 import com.gluonhq.emoji.control.EmojiTextArea;
 import com.gluonhq.emoji.popup.EmojiPopOver;
-import com.gluonhq.emoji.popup.EmojiSkinTone;
+import com.gluonhq.emoji.util.TextUtils;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -102,16 +102,7 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
         popOver = new EmojiPopOver();
         // TODO: Find a way to perform this elegantly
         popOver.setOnAction(e -> {
-            final Emoji emoji = (Emoji) e.getSource();
-            final RealLinkedEmoji realLinkedEmoji = new RealLinkedEmoji(emoji);
-            ReadOnlyStyledDocument<ParStyle, Either<String, LinkedEmoji>, TextStyle> ros =
-                    ReadOnlyStyledDocument.fromSegment(
-                            Either.right(realLinkedEmoji),
-                            ParStyle.EMPTY,
-                            TextStyle.EMPTY,
-                            textarea.getSegOps()
-                    );
-            textarea.replaceSelection(ros);
+            textarea.replaceSelection(getStyledDocumentFromEmoji((Emoji) e.getSource()));
             textarea.requestFocus();
         });
         updateSide();
@@ -137,6 +128,7 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
                 isReplacing.set(true);
 //                System.out.println("skin Replacing text :::" + ov + "::: with ::" + nv + "::");
                 control.setText(nv);
+                updateTextArea(nv);
                 isReplacing.set(false);
             }
         });
@@ -144,7 +136,7 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
             if (!isReplacing.get()) {
                 isReplacing.set(true);
 //                System.out.println("Replace text :::" + nv + "::: from ::" + ov + "::");
-                textarea.replaceText(nv);
+                updateTextArea(nv);
                 isReplacing.set(false);
             }
         });
@@ -178,6 +170,27 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
 //        KeyboardService.create().ifPresent(k ->
 //                k.forNode(textarea, control.textProperty(), fontSize, front, back));
 
+    }
+
+    private void updateTextArea(String text) {
+        textarea.clear();
+        TextUtils.convertToStringAndEmojiObjects(text).forEach(o -> {
+            if (o instanceof String) {
+                textarea.appendText((String) o);
+            } else {
+                textarea.replaceSelection(getStyledDocumentFromEmoji((Emoji) o));
+            }
+        });
+        textarea.insertText(textarea.getCaretPosition(), " ");
+    }
+
+    private ReadOnlyStyledDocument<ParStyle, Either<String, LinkedEmoji>, TextStyle> getStyledDocumentFromEmoji(Emoji emoji) {
+        final RealLinkedEmoji realLinkedEmoji = new RealLinkedEmoji(emoji);
+        return ReadOnlyStyledDocument.fromSegment(
+                        Either.right(realLinkedEmoji),
+                        ParStyle.EMPTY,
+                        TextStyle.EMPTY,
+                        textarea.getSegOps());
     }
 
     private void updateSide() {

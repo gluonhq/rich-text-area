@@ -1,5 +1,6 @@
 package com.gluonhq.emoji.util;
 
+import com.gluonhq.emoji.Emoji;
 import com.gluonhq.emoji.EmojiData;
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
@@ -24,7 +25,29 @@ public class TextUtils {
      * @return a list of nodes
      */
     public static List<Node> convertToTextAndImageNodes(String text) {
-        List<Node> list = new ArrayList<>();
+        return convertToStringAndEmojiObjects(text)
+                .stream()
+                .map(o -> {
+                    if (o instanceof String) {
+                        return getTextNode((String) o);
+                    } else {
+                        Emoji emoji = (Emoji) o;
+                        return EmojiImageUtils.emojiView(emoji, imageSize, getImageOffset(imageSize));
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Parses a text string and returns a list of objects: all possible emojis found are
+     * replaced with {@link Emoji} objects, while the rest
+     * of the text is added as {@link String} objects.
+     *
+     * @param text a valid string of text, that might contain emoji unicode
+     * @return a list of objects
+     */
+    public static List<Object> convertToStringAndEmojiObjects(String text) {
+        List<Object> list = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
         StringBuilder sbChain = new StringBuilder();
         List<Integer> codePoints = text.codePoints().boxed().collect(Collectors.toList());
@@ -35,7 +58,7 @@ public class TextUtils {
             // or if current codepoint is not an emoji, but next codepoint is variant separator
             if (isEmoji(ch) || isEmojiConnector(ch) || (!isEmoji(ch) && isVariantSeparator(nch))) {
                 if (sb.length() > 0) {
-                    list.add(getTextNode(sb.toString()));
+                    list.add(sb.toString());
                     sb.setLength(0);
                 }
 
@@ -64,7 +87,7 @@ public class TextUtils {
                         (ch == 0xE007F) ||
                         (isEmoji(nch) && !isCountryFlag(nch) && !isEmojiConnector(ch))) {
                     EmojiData.emojiFromCodepoints(sbChain.toString().toUpperCase(Locale.ROOT))
-                            .ifPresent(e -> list.add(EmojiImageUtils.emojiView(e, imageSize, getImageOffset(imageSize))));
+                            .ifPresent(list::add);
                     sbChain.setLength(0);
                 }
             } else {
@@ -72,7 +95,7 @@ public class TextUtils {
             }
         }
         if (sb.length() > 0) {
-            list.add(getTextNode(sb.toString()));
+            list.add(sb.toString());
             sb.setLength(0);
         }
         return list;
