@@ -122,13 +122,36 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
 
         spacing.addListener(o -> control.requestLayout());
 
+        // The default textarea.paste() behavior adds the text to the textarea,
+        // and then we need to update it again to replace the emojis, which is inconvenient.
+        // Instead, we overrule that behavior to add the text directly to the control,
+        // which will in turn call updateTextArea.
+        textarea.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+            if ((e.getCode() == KeyCode.V && e.isShortcutDown()) ||
+                    (e.getCode() == KeyCode.INSERT && e.isShiftDown()) ||
+                    e.getCode() == KeyCode.PASTE) {
+                    e.consume();
+                Clipboard clipboard = Clipboard.getSystemClipboard();
+                if (clipboard.hasString()) {
+                    IndexRange selection = textarea.getSelection();
+                    int caretPosition = textarea.getCaretPosition();
+                    String leftText = textarea.getText(0, selection != null ? selection.getStart() : caretPosition);
+                    String rightText = "";
+                    int to = selection != null ? selection.getEnd() : caretPosition;
+                    if (to < textarea.getLength()) {
+                        rightText = textarea.getText(to, textarea.getLength());
+                    }
+                    control.setText(leftText + clipboard.getString() + rightText);
+                }
+            }
+        });
+
         BooleanProperty isReplacing = new SimpleBooleanProperty();
         textarea.textProperty().addListener((obs, ov, nv) -> {
             if (!isReplacing.get()) {
                 isReplacing.set(true);
 //                System.out.println("skin Replacing text :::" + ov + "::: with ::" + nv + "::");
                 control.setText(nv);
-                updateTextArea(nv);
                 isReplacing.set(false);
             }
         });
@@ -181,7 +204,6 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
                 textarea.replaceSelection(getStyledDocumentFromEmoji((Emoji) o));
             }
         });
-        textarea.insertText(textarea.getCaretPosition(), " ");
     }
 
     private ReadOnlyStyledDocument<ParStyle, Either<String, LinkedEmoji>, TextStyle> getStyledDocumentFromEmoji(Emoji emoji) {
