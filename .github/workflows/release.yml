@@ -347,6 +347,7 @@ jobs:
           APP_VERSION: ${{needs.create-release.outputs.app_version}}
 
       - name: Codesign
+        if: ${{ false }}
         uses: erwin1/code-sign-action@master
         with:
           certificate: '${{ secrets.WINDOWS_CERTIFICATE }}'
