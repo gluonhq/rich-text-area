@@ -187,6 +187,17 @@
             <groupId>com.gluonhq</groupId>
             <artifactId>equation</artifactId>
             <version>0.9.16</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.signal</groupId>
+                    <artifactId>zkgroup-java</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.signal</groupId>
+            <artifactId>zkgroup-java</artifactId>
+            <version>0.8.2-gluon-8</version>
         </dependency>
 
         <dependency>

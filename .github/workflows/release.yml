@@ -119,6 +119,7 @@ jobs:
 
 
   linux-native:
+    if: ${{ false }}
     runs-on: ubuntu-18.04
     needs: create-release
     steps:
@@ -250,6 +251,7 @@ jobs:
 
 
   macos-native:
+    if: ${{ false }}
     runs-on: macos-latest
     needs: create-release
     steps:
