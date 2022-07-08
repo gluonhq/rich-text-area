@@ -357,6 +357,17 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
         private static final int LINE_SIZE = 22;
         private static final int MIN_WIDTH = 250;
 
+        private final KeyCodeCombination OPTION_DEL_KEY_COMBINATION = new KeyCodeCombination(KeyCode.BACK_SPACE, KeyCombination.ALT_DOWN);
+        private final KeyCodeCombination COMMAND_DEL_KEY_COMBINATION = new KeyCodeCombination(KeyCode.BACK_SPACE, KeyCombination.SHORTCUT_DOWN);
+        private final KeyCodeCombination OPTION_RIGHT_KEY_COMBINATION = new KeyCodeCombination(KeyCode.RIGHT, KeyCombination.ALT_DOWN);
+        private final KeyCodeCombination SHIFT_OPTION_RIGHT_KEY_COMBINATION = new KeyCodeCombination(KeyCode.RIGHT, KeyCombination.ALT_DOWN, KeyCombination.SHIFT_DOWN);
+        private final KeyCodeCombination OPTION_LEFT_KEY_COMBINATION = new KeyCodeCombination(KeyCode.LEFT, KeyCombination.ALT_DOWN);
+        private final KeyCodeCombination SHIFT_OPTION_LEFT_KEY_COMBINATION = new KeyCodeCombination(KeyCode.LEFT, KeyCombination.ALT_DOWN, KeyCombination.SHIFT_DOWN);
+        private final KeyCodeCombination COMMAND_RIGHT_KEY_COMBINATION = new KeyCodeCombination(KeyCode.RIGHT, KeyCombination.SHORTCUT_DOWN);
+        private final KeyCodeCombination SHIFT_COMMAND_RIGHT_KEY_COMBINATION = new KeyCodeCombination(KeyCode.RIGHT, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN);
+        private final KeyCodeCombination COMMAND_LEFT_KEY_COMBINATION = new KeyCodeCombination(KeyCode.LEFT, KeyCombination.SHORTCUT_DOWN);
+        private final KeyCodeCombination SHIFT_COMMAND_LEFT_KEY_COMBINATION = new KeyCodeCombination(KeyCode.LEFT, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN);
+
         EmojiStyledTextArea() {
             super(ParStyle.EMPTY,
                     (paragraph, style) -> paragraph.setStyle(style.toCss()),
@@ -453,8 +464,40 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
                     }
                     e.consume();
                 }
+                if (System.getProperty("os.name").startsWith("Mac")) {
+                    if (COMMAND_DEL_KEY_COMBINATION.match(e)) {
+                        updateTextArea(textarea.getText().substring(getCaretPosition()));
+                        textarea.moveTo(0);
+                        e.consume();
+                    } else if (OPTION_DEL_KEY_COMBINATION.match(e)) {
+                        String text = textarea.getText().trim();
+                        int indexOf = Math.max(text.lastIndexOf(" "), 0);
+                        updateTextArea(text.substring(0, indexOf));
+                        e.consume();
+                    } else if (OPTION_RIGHT_KEY_COMBINATION.match(e) || SHIFT_OPTION_RIGHT_KEY_COMBINATION.match(e) ) {
+                        int caretPosition = textarea.getCaretPosition();
+                        if (textarea.getText().charAt(caretPosition) == ' ') {
+                            caretPosition++;
+                        }
+                        int indexOfNextWhitespace = textarea.getText().indexOf(" ", caretPosition);
+                        textarea.moveTo(indexOfNextWhitespace, e.isShiftDown() ? SelectionPolicy.ADJUST : SelectionPolicy.CLEAR);
+                        e.consume();
+                    } else if (OPTION_LEFT_KEY_COMBINATION.match(e) || SHIFT_OPTION_LEFT_KEY_COMBINATION.match(e)) {
+                        final int caretPosition = textarea.getCaretPosition();
+                        String substring = textarea.getText().substring(0, caretPosition).trim();
+                        int indexOfPreviousWhitespace = substring.lastIndexOf(" ") + 1;
+                        textarea.moveTo(indexOfPreviousWhitespace, e.isShiftDown() ? SelectionPolicy.ADJUST : SelectionPolicy.CLEAR);
+                        e.consume();
+                    } else if (COMMAND_RIGHT_KEY_COMBINATION.match(e) || SHIFT_COMMAND_RIGHT_KEY_COMBINATION.match(e)) {
+                        textarea.moveTo(textarea.getText().length(), e.isShiftDown() ? SelectionPolicy.ADJUST : SelectionPolicy.CLEAR);
+                        e.consume();
+                    } else if (COMMAND_LEFT_KEY_COMBINATION.match(e) || SHIFT_COMMAND_LEFT_KEY_COMBINATION.match(e)) {
+                        textarea.moveTo(0, e.isShiftDown() ? SelectionPolicy.ADJUST : SelectionPolicy.CLEAR);
+                        e.consume();
+                    }
+                }
             });
-            
+
             addEventHandler(KeyEvent.KEY_PRESSED, e -> {
                 // Need a delay for the text property to be updated
                 Platform.runLater(() -> checkAndShowPopup(e));
