@@ -1,0 +1,71 @@
+name: Publish Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install xmlstarlet
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Java 11 and Apache Maven
+        uses: actions/setup-java@v3
+        with:
+          java-version: 11
+          distribution: 'temurin'
+          server-id: ossrh
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_CENTRAL_TOKEN
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+      - name: Configure GIT
+        run: |
+          git config --global user.name "Gluon Bot"
+          git config --global user.email "githubbot@gluonhq.com"
+
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Publish to Maven Central
+        id: deploy
+        run: |
+          mvn -DskipTests=true -B -U -ntp -frta -Prelease deploy
+          echo ::set-output name=exit_code::$?
+        env:
+          MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          MAVEN_CENTRAL_TOKEN: ${{ secrets.SONATYPE_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Create GitHub release
+        if: steps.deploy.outputs.exit_code == 0
+        uses: softprops/action-gh-release@v1
+        with:
+          token: ${{ secrets.PAT }}
+          generate_release_notes: true
+
+      - name: Commit next development version
+        if: steps.deploy.outputs.exit_code == 0
+        run: |
+          TAG=${GITHUB_REF/refs\/tags\//}
+          NEW_PROJECT_VERSION=${TAG%.*}.$((${TAG##*.} + 1))
+          echo "Update project version to next snapshot version"
+          mvn versions:set -DnewVersion=$NEW_PROJECT_VERSION-SNAPSHOT -DgenerateBackupPoms=false
+          git commit pom.xml -m "Prepare development of $NEW_PROJECT_VERSION"
+          git push https://gluon-bot:$PAT@github.com/$GITHUB_REPOSITORY HEAD:master
+        shell: bash
+        env:
+          PAT: ${{ secrets.PAT }}
