@@ -1,0 +1,137 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>rich-text-area-control</artifactId>
+    <packaging>jar</packaging>
+
+    <parent>
+        <groupId>com.gluonhq</groupId>
+        <artifactId>rich-text-area</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <name>RichTextArea</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.8.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.3.2</version>
+                <executions>
+                    <execution>
+                        <id>javadoc</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <additionalJOption>-javafx</additionalJOption>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M5</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.junit.jupiter</groupId>
+                        <artifactId>junit-jupiter-engine</artifactId>
+                        <version>5.8.2</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+
+    <developers>
+        <developer>
+            <name>Eugene Ryzhikov</name>
+            <email>eugene.ryzhikov@gluonhq.com</email>
+            <organization>Gluon</organization>
+            <organizationUrl>https://www.gluonhq.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>José Pereda</name>
+            <email>jose.pereda@gluonhq.com</email>
+            <organization>Gluon</organization>
+            <organizationUrl>https://www.gluonhq.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Abhinay Agarwal</name>
+            <email>abhinay.agarwal@gluonhq.com</email>
+            <organization>Gluon</organization>
+            <organizationUrl>https://www.gluonhq.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://github.com/gluonhq/rich-text-area</url>
+        <connection>scm:git:git://github.com/gluonhq/rich-text-area.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:gluonhq/rich-text-area.git</developerConnection>
+    </scm>
+
+    <organization>
+        <name>Gluon</name>
+        <url>https://www.gluonhq.com</url>
+    </organization>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/gluonhq/rich-text-area/issues</url>
+    </issueManagement>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <!-- Publish the versioned snapshots here -->
+            <id>gluon-nexus</id>
+            <name>Gluon Snapshots</name>
+            <url>https://nexus.gluonhq.com/nexus/content/repositories/public-snapshots/</url>
+        </snapshotRepository>
+
+        <repository>
+            <!-- Publish the versioned releases here -->
+            <id>gluon-nexus</id>
+            <name>Gluon Releases</name>
+            <url>https://nexus.gluonhq.com/nexus/content/repositories/releases/</url>
+        </repository>
+    </distributionManagement>
+
+</project>

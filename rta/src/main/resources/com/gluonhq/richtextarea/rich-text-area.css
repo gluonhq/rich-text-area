@@ -1,0 +1,100 @@
+/*
+ * Copyright (c) 2022, Gluon
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL GLUON BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+.rich-text-area .paragraph-list-view {
+}
+
+.rich-text-area .paragraph-tile {
+    /*-fx-background-color: #000ff010;*/
+}
+
+.rich-text-area .paragraph-tile > .content-area {
+    /*-fx-background-color: #000ff010;*/
+}
+
+.rich-text-area .paragraph-tile > .graphic-box {
+    /*-fx-background-color: #000ff010;*/
+}
+.rich-text-area .paragraph-tile > .graphic-box > .numbered-list-label {
+    -fx-text-fill: black;
+}
+.rich-text-area .paragraph-tile > .graphic-box > .bulleted-list-shape-1 {
+    -fx-fill: black;
+    -fx-stroke: black;
+}
+.rich-text-area .paragraph-tile > .graphic-box > .bulleted-list-shape-2 {
+    -fx-fill: transparent;
+    -fx-stroke: black;
+}
+.rich-text-area .paragraph-tile > .graphic-box > .bulleted-list-shape-3 {
+    -fx-fill: black;
+    -fx-stroke: black;
+    -fx-arc-width: 1;
+    -fx-arc-height: 1;
+}
+.rich-text-area .paragraph-tile > .graphic-box > .bulleted-list-shape-4 {
+    -fx-fill: transparent;
+    -fx-stroke: black;
+    -fx-arc-width: 1;
+    -fx-arc-height: 1;
+}
+
+.rich-text-area .paragraph-tile > .content-area > .layer > .text-flow {
+    /*-fx-background-color: #ff000010;*/
+    /*-fx-padding: 2;*/
+}
+
+.rich-text-area .paragraph-tile > .content-area > HBox > .table {
+    -fx-grid-lines-visible: true;
+}
+
+.rich-text-area .caret {
+    -fx-stroke: rgba(71, 145, 245, 0.9);
+}
+
+.rich-text-area .selection {
+    -fx-stroke: transparent;
+    -fx-fill: rgba(71, 145, 245, 0.3);
+}
+
+.list-cell {
+    -fx-padding: 0em;
+}
+.list-cell,
+.list-cell:odd {
+    -fx-background: white;
+}
+
+.list-cell:filled:selected,
+.list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected,
+.list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:focused {
+    -fx-background: white;
+    -fx-background-color: white;
+    -fx-table-cell-border-color: white;
+    -fx-background-insets: 0;
+}
