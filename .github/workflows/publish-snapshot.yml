@@ -29,7 +29,7 @@ jobs:
       - name: Publish Snapshots to Gluon Nexus
         id: deploy
         run: |
-          mvn -B -ntp deploy
+          mvn -B -ntp -frta deploy
         env:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
