@@ -6,14 +6,14 @@ Gluon presents a new JavaFX control, created with Java and JavaFX standard APIs,
 
 Based on the combination of VirtualFlow and multiple TextFlow controls, the RichTextArea control has features like:
 
-– Any part of the content can be selected and can have any styling (all font attributes, foreground or background color, …). This can be changed at any time. Selection of caret navigation of words, lines or paragraphs and can be done via mouse and keyboard platform-standard keys (arrows and key modifiers).
-– Any paragraph can be styled with text alignment, line separation, indentation, bulleted or numbered list.
-– Has support for non-text nodes like images that can be added at any point, even via drag and drop
-– Has support for event handling of hyperlinks and image custom actions
-– Copy/cut/paste, unlimited undo and redo are supported.
-– Save/open documents to persist and restore the content with its different styles.
-– Inline table support
-– … (and more to come)
+- Any part of the content can be selected and can have any styling (all font attributes, foreground or background color, …). This can be changed at any time. Selection of caret navigation of words, lines or paragraphs and can be done via mouse and keyboard platform-standard keys (arrows and key modifiers).
+- Any paragraph can be styled with text alignment, line separation, indentation, bulleted or numbered list.
+- Has support for non-text nodes like images that can be added at any point, even via drag and drop
+- Has support for event handling of hyperlinks and image custom actions
+- Copy/cut/paste, unlimited undo and redo are supported.
+- Save/open documents to persist and restore the content with its different styles.
+- Inline table support
+- … (and more to come)
 
 ### License
 
