@@ -13,7 +13,7 @@
         <version>1.0.0</version>
     </parent>
 
-    <name>RichTextArea</name>
+    <name>Rich Text Area control</name>
 
     <properties>
         <gpg.plugin.version>1.6</gpg.plugin.version>

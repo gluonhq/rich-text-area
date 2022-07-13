@@ -13,12 +13,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>11</maven.compiler.release>
         <javafx.version>18</javafx.version>
-        <javafx.plugin.version>0.0.8</javafx.plugin.version>
     </properties>
 
     <modules>
         <module>rta</module>
-        <module>samples</module>
     </modules>
 
     <developers>
