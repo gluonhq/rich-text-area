@@ -9,7 +9,7 @@
 
     <parent>
         <groupId>com.gluonhq</groupId>
-        <artifactId>rich-text-area</artifactId>
+        <artifactId>rich-text-area-parent</artifactId>
         <version>1.0.0</version>
     </parent>
 
