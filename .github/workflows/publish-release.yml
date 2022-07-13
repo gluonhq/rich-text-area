@@ -36,7 +36,7 @@ jobs:
       - name: Publish to Maven Central
         id: deploy
         run: |
-          mvn -DskipTests=true -B -U -ntp -frta -Prelease deploy
+          mvn -DskipTests=true -B -U -ntp -Prelease deploy
           echo ::set-output name=exit_code::$?
         env:
           MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
@@ -49,16 +49,3 @@ jobs:
         with:
           token: ${{ secrets.PAT }}
           generate_release_notes: true
-
-      - name: Commit next development version
-        if: steps.deploy.outputs.exit_code == 0
-        run: |
-          TAG=${GITHUB_REF/refs\/tags\//}
-          NEW_PROJECT_VERSION=${TAG%.*}.$((${TAG##*.} + 1))
-          echo "Update project version to next snapshot version"
-          mvn versions:set -DnewVersion=$NEW_PROJECT_VERSION-SNAPSHOT -DgenerateBackupPoms=false
-          git commit pom.xml -m "Prepare development of $NEW_PROJECT_VERSION"
-          git push https://gluon-bot:$PAT@github.com/$GITHUB_REPOSITORY HEAD:master
-        shell: bash
-        env:
-          PAT: ${{ secrets.PAT }}

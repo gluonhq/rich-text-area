@@ -4,16 +4,18 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>com.gluonhq</groupId>
     <artifactId>rich-text-area-samples</artifactId>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <parent>
-        <groupId>com.gluonhq</groupId>
-        <artifactId>rich-text-area</artifactId>
-        <version>1.0.0</version>
-    </parent>
+    <name>Rich Text Area samples</name>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>11</maven.compiler.release>
+        <javafx.version>18</javafx.version>
+        <javafx.plugin.version>0.0.8</javafx.plugin.version>
         <main.class>com.gluonhq.richtextarea.samples.RichTextEditorDemo</main.class>
         <jpro.version>2022.1.0</jpro.version>
     </properties>
@@ -21,7 +23,7 @@
     <dependencies>
         <dependency>
             <groupId>com.gluonhq</groupId>
-            <artifactId>rich-text-area-control</artifactId>
+            <artifactId>rich-text-area</artifactId>
             <version>1.0.0</version>
         </dependency>
         <dependency>
@@ -83,15 +85,6 @@
     </pluginRepositories>
 
     <repositories>
-        <repository>
-            <id>gluon-nexus-snapshots</id>
-            <name>Gluon Snapshots</name>
-            <url>https://nexus.gluonhq.com/nexus/content/repositories/public-snapshots/</url>
-        </repository>
-        <repository>
-            <id>gluon-nexus-releases</id>
-            <url>https://nexus.gluonhq.com/nexus/content/repositories/releases/</url>
-        </repository>
         <repository>
             <id>jpro - sandec repository</id>
             <url>https://sandec.jfrog.io/artifactory/repo</url>

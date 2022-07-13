@@ -4,16 +4,16 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>rich-text-area-control</artifactId>
+    <artifactId>rich-text-area</artifactId>
     <packaging>jar</packaging>
 
     <parent>
         <groupId>com.gluonhq</groupId>
-        <artifactId>rich-text-area</artifactId>
+        <artifactId>rich-text-area-parent</artifactId>
         <version>1.0.0</version>
     </parent>
 
-    <name>RichTextArea</name>
+    <name>Rich Text Area control</name>
 
     <properties>
         <gpg.plugin.version>1.6</gpg.plugin.version>
