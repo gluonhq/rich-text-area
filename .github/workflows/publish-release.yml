@@ -33,13 +33,6 @@ jobs:
           git config --global user.name "Gluon Bot"
           git config --global user.email "githubbot@gluonhq.com"
 
-      - name: Cache Maven packages
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-
       - name: Publish to Maven Central
         id: deploy
         run: |
