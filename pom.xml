@@ -8,6 +8,11 @@
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
+    <name>Rich Text Area Parent</name>
+    <description>Rich text control for JavaFX</description>
+    <inceptionYear>2022</inceptionYear>
+    <url>https://github.com/gluonhq/rich-text-area</url>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>11</maven.compiler.release>
@@ -56,6 +61,14 @@
         <system>GitHub</system>
         <url>https://github.com/gluonhq/rich-text-area/issues</url>
     </issueManagement>
+
+    <licenses>
+        <license>
+            <name>GNU GENERAL PUBLIC LICENSE, Version 3</name>
+            <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <distributionManagement>
         <snapshotRepository>
