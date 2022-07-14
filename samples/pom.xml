@@ -1,20 +1,19 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
     <modelVersion>4.0.0</modelVersion>
-
-    <groupId>com.gluonhq</groupId>
     <artifactId>rich-text-area-samples</artifactId>
-    <version>1.0.0</version>
     <packaging>jar</packaging>
+
+    <parent>
+        <groupId>com.gluonhq</groupId>
+        <artifactId>rich-text-area-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
 
     <name>Rich Text Area samples</name>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>11</maven.compiler.release>
-        <javafx.version>18</javafx.version>
         <javafx.plugin.version>0.0.8</javafx.plugin.version>
         <main.class>com.gluonhq.richtextarea.samples.RichTextEditorDemo</main.class>
         <jpro.version>2022.1.0</jpro.version>
@@ -24,7 +23,7 @@
         <dependency>
             <groupId>com.gluonhq</groupId>
             <artifactId>rich-text-area</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
@@ -51,11 +50,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-            </plugin>
-            <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>${javafx.plugin.version}</version>
@@ -72,6 +66,14 @@
                     <!-- noRenderJobs>true</noRenderJobs -->
                     <mainClassName>${main.class}</mainClassName>
                     <openingPath>/</openingPath>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.0.0-M2</version>
+                <configuration>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
         </plugins>
