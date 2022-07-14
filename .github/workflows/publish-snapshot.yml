@@ -27,7 +27,7 @@ jobs:
           ver=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           if [[ $ver == *"SNAPSHOT"* ]]
           then
-              mvn -B -ntp -frta deploy
+              mvn -B -ntp deploy -pl '!samples'
           fi
         shell: bash
         env:
