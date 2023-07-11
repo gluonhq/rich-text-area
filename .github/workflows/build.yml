@@ -1,17 +1,18 @@
-name: Publish Snapshot
-
+name: Build
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Set up JDK
+      - name: Setup Java
         uses: actions/setup-java@v3
         with:
           java-version: 17
@@ -21,13 +22,15 @@ jobs:
           server-username: MAVEN_USERNAME
           server-password: MAVEN_CENTRAL_TOKEN
 
-      - name: Publish Snapshot to Sonatype
-        id: deploy
+      - name: Build project
         run: |
-          # Find version
-          ver=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout -frta)
-          if [[ $ver == *"SNAPSHOT"* ]]
-          then
+          mvn -B -ntp verify -f rta
+
+      - name: Publish Snapshots
+        if: github.ref == 'refs/heads/main'
+        run: |
+          ver=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          if [[ $ver == *"SNAPSHOT"* ]]; then
               mvn -B -ntp deploy -f rta
           fi
         shell: bash

@@ -38,7 +38,7 @@ jobs:
       - name: Publish to Maven Central
         id: deploy
         run: |
-          mvn -DskipTests=true -B -U -ntp -Prelease deploy -f rta
+          mvn -q -Prelease deploy -f rta
           echo ::set-output name=exit_code::$?
         env:
           MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
