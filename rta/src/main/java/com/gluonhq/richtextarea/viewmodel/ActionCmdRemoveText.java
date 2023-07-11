@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,15 +32,27 @@ import javafx.beans.binding.BooleanBinding;
 class ActionCmdRemoveText implements ActionCmd {
 
     private final int caretOffset;
+    private final RichTextAreaViewModel.Remove remove;
 
     public ActionCmdRemoveText(int caretOffset) {
+        this(caretOffset, RichTextAreaViewModel.Remove.LETTER);
+    }
+
+    public ActionCmdRemoveText(int caretOffset, RichTextAreaViewModel.Remove remove) {
         this.caretOffset = caretOffset;
+        this.remove = remove;
     }
 
     @Override
     public void apply(RichTextAreaViewModel viewModel) {
         if (viewModel.isEditable()) {
-            viewModel.getCommandManager().execute(new RemoveTextCmd(caretOffset));
+            if (remove == RichTextAreaViewModel.Remove.WORD) {
+                viewModel.removeWord();
+            } else if (remove == RichTextAreaViewModel.Remove.LINE) {
+                viewModel.removeLine();
+            } else {
+                viewModel.getCommandManager().execute(new RemoveTextCmd(caretOffset));
+            }
         }
     }
 

@@ -29,6 +29,7 @@ package com.gluonhq.richtextarea;
 
 import com.gluonhq.richtextarea.model.Paragraph;
 import com.gluonhq.richtextarea.model.ParagraphDecoration;
+import com.gluonhq.richtextarea.model.TextDecoration;
 import com.gluonhq.richtextarea.viewmodel.RichTextAreaViewModel;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -305,6 +306,10 @@ public class ParagraphTile extends HBox {
         return layers.stream().anyMatch(Layer::hasCaret);
     }
 
+    void resetCaret() {
+        layers.stream().filter(Layer::hasCaret).findFirst().ifPresent(Layer::reset);
+    }
+
     int getNextRowPosition(double x, boolean down) {
         return layers.stream()
                 .findFirst()
@@ -323,8 +328,8 @@ public class ParagraphTile extends HBox {
     private class Layer extends Pane {
 
         private final Timeline caretTimeline = new Timeline(
-                new KeyFrame(Duration.ZERO        , e -> setCaretVisibility(false)),
-                new KeyFrame(Duration.seconds(0.5), e -> setCaretVisibility(true)),
+                new KeyFrame(Duration.ZERO        , e -> setCaretVisibility(true)),
+                new KeyFrame(Duration.seconds(0.5), e -> setCaretVisibility(false)),
                 new KeyFrame(Duration.seconds(1.0))
         );
 
@@ -360,7 +365,7 @@ public class ParagraphTile extends HBox {
         protected double computePrefHeight(double width) {
             // take into account caret height: whether it is visible or not,
             // the layer's height doesn't change
-            return textFlow.prefHeight(textFlow.getPrefWidth()) + 1;
+            return Math.max(caretShape.getLayoutBounds().getHeight(), textFlow.prefHeight(textFlow.getPrefWidth()) + 1);
         }
 
         @Override
@@ -493,7 +498,7 @@ public class ParagraphTile extends HBox {
                     .map(Text.class::cast)
                     .findFirst()
                     .orElse(null);
-            return Font.font(textNode != null ? textNode.getFont().getSize() : 12d);
+            return Font.font(textNode != null ? textNode.getFont().getSize() : 14d);
         }
 
         int getNextRowPosition(double x, boolean down) {
@@ -537,10 +542,17 @@ public class ParagraphTile extends HBox {
                                 .findFirst()
                                 .map(MoveTo::getX)
                                 .orElse(0d);
-                        caretShape.getElements().add(new LineTo(originX, 16));
+                        // Default caret size for font size 14 is 18.49
+                        double caretSize = 18.0;
+                        if (viewModel.getDecorationAtCaret() instanceof TextDecoration) {
+                            TextDecoration td = (TextDecoration) viewModel.getDecorationAtCaret();
+                            caretSize = td.getFontSize() * 1.2;
+                        }
+                        caretShape.getElements().add(new LineTo(originX, caretSize));
                     }
                     richTextAreaSkin.lastValidCaretPosition = caretPosition;
                     caretTimeline.play();
+                    updateCaretOrigin();
                 }
             }
             caretShape.setLayoutX(textFlowLayoutX);
@@ -585,6 +597,14 @@ public class ParagraphTile extends HBox {
             } else if (change.wasRemoved()) {
                 getChildren().remove(change.getElementRemoved());
             }
+        }
+
+        private void updateCaretOrigin() {
+            Platform.runLater(() -> {
+                Bounds sceneBounds = caretShape.localToScene(caretShape.getBoundsInLocal());
+                final Bounds boundsInRTA = richTextAreaSkin.getSkinnable().sceneToLocal(sceneBounds);
+                richTextAreaSkin.caretOriginProperty.set(new Point2D(boundsInRTA.getMinX(), boundsInRTA.getMinY()));
+            });
         }
     }
 }

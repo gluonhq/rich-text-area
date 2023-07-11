@@ -2,18 +2,19 @@ name: Maven Verify
 
 on:
   pull_request:
-    branches: [master]
+    branches: [main]
 
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Set up JDK 11
+    - name: Set up JDK
       uses: actions/setup-java@v2
       with:
-        java-version: '11'
-        distribution: 'temurin'
+        java-version: 17
+        distribution: 'oracle'
+        cache: 'maven'
 
     - name: Verify with Maven
-      run: mvn -B verify
+      run: mvn -B verify -f rta

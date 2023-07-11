@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,10 +27,11 @@
  */
 package com.gluonhq.richtextarea.model;
 
+import com.gluonhq.richtextarea.Tools;
+
 import java.util.Objects;
 
 import static com.gluonhq.richtextarea.Tools.getFirstLetter;
-import static com.gluonhq.richtextarea.model.TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR;
 
 public final class Piece {
 
@@ -73,9 +74,14 @@ public final class Piece {
         }
     }
 
-    public String getText() {
-        String buffer = BufferType.ORIGINAL == bufferType ? source.originalText : source.additionBuffer;
-        return length == 0 ? "" : buffer.substring(start, start + length);
+    public String getInternalText() {
+        UnitBuffer buffer = BufferType.ORIGINAL == bufferType ? source.originalText : source.additionBuffer;
+        return length == 0 ? "" : buffer.getInternalText().substring(start, start + length);
+    }
+
+    public Unit getUnit() {
+        UnitBuffer buffer = BufferType.ORIGINAL == bufferType ? source.originalText : source.additionBuffer;
+        return length == 0 ? new TextUnit("") : buffer.getUnitWithRange(start, start + length);
     }
 
     public Decoration getDecoration() {
@@ -119,12 +125,8 @@ public final class Piece {
     @Override
     public String toString() {
         return "Piece{type=" + getFirstLetter(bufferType.name()) +
-                ", [" + start +
-                ", " + length +
-                "], " + decoration +
+                ", [" + start + ", " + length + "], " + decoration +
                 ", " + paragraphDecoration +
-                ", \"" + getText().replaceAll("\n", "<n>")
-                            .replaceAll(TextBuffer.ZERO_WIDTH_TEXT, "<a>")
-                            .replaceAll("" + ZERO_WIDTH_TABLE_SEPARATOR, "<t>")+ "\"}";
+                ", \"" + Tools.formatTextWithAnchors(getInternalText()) + "\"}";
     }
 }

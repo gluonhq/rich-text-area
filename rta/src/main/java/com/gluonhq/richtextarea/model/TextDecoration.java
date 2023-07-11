@@ -240,7 +240,7 @@ public class TextDecoration implements Decoration {
             foreground = Color.BLACK;
             background = Color.TRANSPARENT;
             fontFamily = "System";
-            fontSize = 12.0;
+            fontSize = 14.0;
             fontPosture = FontPosture.REGULAR;
             fontWeight = FontWeight.NORMAL;
             strikethrough = false;

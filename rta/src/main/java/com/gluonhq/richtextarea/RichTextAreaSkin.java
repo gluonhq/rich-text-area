@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
  */
 package com.gluonhq.richtextarea;
 
+import com.gluonhq.richtextarea.model.Decoration;
 import com.gluonhq.richtextarea.model.Document;
 import com.gluonhq.richtextarea.model.ImageDecoration;
 import com.gluonhq.richtextarea.model.Paragraph;
@@ -43,13 +44,24 @@ import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.ObjectBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
+import javafx.css.CssMetaData;
+import javafx.css.Styleable;
+import javafx.css.StyleableProperty;
+import javafx.css.StyleablePropertyFactory;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
@@ -73,21 +85,25 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Path;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -113,9 +129,9 @@ import static javafx.scene.input.KeyCode.V;
 import static javafx.scene.input.KeyCode.X;
 import static javafx.scene.input.KeyCode.Z;
 import static javafx.scene.input.KeyCombination.ALT_ANY;
+import static javafx.scene.input.KeyCombination.ALT_DOWN;
 import static javafx.scene.input.KeyCombination.CONTROL_ANY;
 import static javafx.scene.input.KeyCombination.SHIFT_ANY;
-import static javafx.scene.input.KeyCombination.SHIFT_DOWN;
 import static javafx.scene.input.KeyCombination.SHORTCUT_ANY;
 import static javafx.scene.input.KeyCombination.SHORTCUT_DOWN;
 import static javafx.scene.text.FontPosture.ITALIC;
@@ -143,8 +159,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         entry( new KeyCodeCombination(C, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.copy()),
         entry( new KeyCodeCombination(X, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.cut()),
         entry( new KeyCodeCombination(V, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.paste()),
-        entry( new KeyCodeCombination(Z, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.undo()),
-        entry( new KeyCodeCombination(Z, SHORTCUT_DOWN, SHIFT_DOWN),                         e -> ACTION_CMD_FACTORY.redo()),
+        entry( new KeyCodeCombination(Z, SHORTCUT_DOWN, SHIFT_ANY),                          e -> e.isShiftDown() ? ACTION_CMD_FACTORY.redo() : ACTION_CMD_FACTORY.undo()),
         entry( new KeyCodeCombination(ENTER, SHIFT_ANY),                                     e -> {
             ParagraphDecoration decoration = viewModel.getDecorationAtParagraph();
             Paragraph paragraph = viewModel.getParagraphWithCaret().orElse(null);
@@ -166,6 +181,10 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                     // insert new line before/after the table and reset decoration
                     return ACTION_CMD_FACTORY.insertAndDecorate("\n", ParagraphDecoration.builder().presets().build());
                 }
+                return null;
+            }
+            if (getSkinnable().getOnAction() != null && !e.isShiftDown()) {
+                getSkinnable().getOnAction().handle(new ActionEvent());
                 return null;
             }
             return ACTION_CMD_FACTORY.insertText("\n");
@@ -196,6 +215,21 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 }
             }
             return ACTION_CMD_FACTORY.removeText(-1);
+        }),
+        entry( new KeyCodeCombination(BACK_SPACE, SHORTCUT_DOWN, SHIFT_ANY),                 e -> {
+            if (Tools.MAC) {
+                // CMD + BACKSPACE or CMD + SHIFT + BACKSPACE removes line in Mac
+                return ACTION_CMD_FACTORY.removeText(0, RichTextAreaViewModel.Remove.LINE);
+            }
+            // CTRL + BACKSPACE removes word in Windows and Linux
+            // SHIFT + CTRL + BACKSPACE removes line in Windows and Linux
+            return ACTION_CMD_FACTORY.removeText(0, e.isShiftDown() ? RichTextAreaViewModel.Remove.LINE : RichTextAreaViewModel.Remove.WORD);
+        }),
+        entry( new KeyCodeCombination(BACK_SPACE, ALT_DOWN),                                 e -> {
+            if (Tools.MAC) {
+                return ACTION_CMD_FACTORY.removeText(0, RichTextAreaViewModel.Remove.WORD);
+            }
+            return null;
         }),
         entry( new KeyCodeCombination(DELETE),                                               e -> ACTION_CMD_FACTORY.removeText(0)),
         entry( new KeyCodeCombination(B, SHORTCUT_DOWN),                                     e -> {
@@ -236,6 +270,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         })
     );
 
+    private static final Point2D DEFAULT_POINT_2D = new Point2D(-1, -1);
+
     private final ParagraphListView paragraphListView;
     private final SortedList<Paragraph> paragraphSortedList = new SortedList<>(viewModel.getParagraphList(), Comparator.comparing(Paragraph::getStart));
 
@@ -259,6 +295,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     int dragAndDropStart = -1;
     int anchorIndex = -1;
     Paragraph lastParagraph = null;
+
+    private final Text promptNode;
 
     final DoubleProperty textFlowPrefWidthProperty = new SimpleDoubleProperty() {
         @Override
@@ -284,9 +322,20 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         }
     };
 
+    private ObjectBinding<Font> promptFontBinding;
+    private BooleanBinding promptVisibleBinding;
+
     private final ChangeListener<Number> caretChangeListener;
+    private final ChangeListener<Number> internalCaretChangeListener;
+
     private final InvalidationListener focusListener;
     private final EventHandler<DragEvent> dndHandler = this::dndListener;
+
+    private final ChangeListener<Boolean> tableAllowedListener;
+
+    private final ResourceBundle resources;
+
+    final ObjectProperty<Point2D> caretOriginProperty = new SimpleObjectProperty<>(this, "caretOrigin", DEFAULT_POINT_2D);
 
     private class RichVirtualFlow extends VirtualFlow<ListCell<Paragraph>> {
 
@@ -407,6 +456,15 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                     .orElse(-1);
         }
 
+        void resetCaret() {
+            getSheet().getChildren().stream()
+                    .filter(RichListCell.class::isInstance)
+                    .map(RichListCell.class::cast)
+                    .filter(RichListCell::hasCaret)
+                    .findFirst()
+                    .ifPresent(RichListCell::resetCaret);
+        }
+
         void updateLayout() {
             // force updateItem call to recalculate backgroundPath positions
             virtualFlow.rebuildCells();
@@ -416,30 +474,42 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             final Bounds vfBounds = virtualFlow.localToScene(virtualFlow.getBoundsInLocal());
             double viewportMinY = vfBounds.getMinY();
             double viewportMaxY = vfBounds.getMaxY();
-            virtualFlow.lookupAll(".caret").stream()
-                    .filter(Path.class::isInstance)
-                    .map(Path.class::cast)
-                    .filter(path -> !path.getElements().isEmpty())
-                    .findFirst()
-                    .ifPresentOrElse(caret -> {
-                            final Bounds bounds = caret.localToScene(caret.getBoundsInLocal());
-                            double minY = bounds.getMinY();
-                            double maxY = bounds.getMaxY();
-                            if (!(maxY <= viewportMaxY && minY >= viewportMinY)) {
-                                // If caret is not fully visible, scroll line by line as needed
-                                virtualFlow.scrollPixels(maxY > viewportMaxY ?
-                                        maxY - viewportMaxY + 1 : minY - viewportMinY - 1);
-                            }
-                        }, () -> {
-                            // In case no caret was found (paragraph is not in a listCell yet),
-                            // scroll directly to the paragraph
-                            viewModel.getParagraphWithCaret().ifPresent(this::scrollTo);
-                        });
+            caret().ifPresentOrElse(caret -> {
+                final Bounds bounds = caret.localToScene(caret.getBoundsInLocal());
+                double minY = bounds.getMinY();
+                double maxY = bounds.getMaxY();
+                if (!(maxY <= viewportMaxY && minY >= viewportMinY)) {
+                    // If caret is not fully visible, scroll line by line as needed
+                    virtualFlow.scrollPixels(maxY > viewportMaxY ?
+                            maxY - viewportMaxY + 1 : minY - viewportMinY - 1);
+                }
+            }, () -> {
+                // In case no caret was found (paragraph is not in a listCell yet),
+                // scroll directly to the paragraph
+                viewModel.getParagraphWithCaret().ifPresent(this::scrollTo);
+            });
         }
+    }
+
+
+    // --- prompt text fill
+    private final StyleableProperty<Paint> promptTextFill = FACTORY.createStyleablePaintProperty(getSkinnable(), "promptTextFill", "-fx-prompt-text-fill", c -> {
+        final RichTextAreaSkin skin = (RichTextAreaSkin) c.getSkin();
+        return skin.promptTextFill;
+    }, Color.GRAY);
+    protected final void setPromptTextFill(Paint value) {
+        promptTextFill.setValue(value);
+    }
+    protected final Paint getPromptTextFill() {
+        return promptTextFill.getValue();
+    }
+    protected final ObjectProperty<Paint> promptTextFillProperty() {
+        return (ObjectProperty<Paint>) promptTextFill;
     }
 
     protected RichTextAreaSkin(final RichTextArea control) {
         super(control);
+        resources = ResourceBundle.getBundle("com.gluonhq.richtextarea.rich-text-area");
 
         paragraphListView = new ParagraphListView(control);
         paragraphListView.setItems(paragraphSortedList);
@@ -452,8 +522,19 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             paragraphListView.updateLayout();
         };
 
+        tableAllowedListener = (obs, ov, nv) -> viewModel.setTableAllowed(nv);
         caretChangeListener = (obs, ov, nv) -> viewModel.getParagraphWithCaret()
                 .ifPresent(paragraph -> Platform.runLater(paragraphListView::scrollIfNeeded));
+        internalCaretChangeListener = (obs, ov, nv) -> {
+            int caret = nv.intValue();
+            int externalCaret = caret;
+            if (caret > -1) {
+                String text = viewModel.getTextBuffer().getText(0, caret);
+                externalCaret = text.length();
+            }
+            getSkinnable().caretPosition.set(externalCaret);
+        };
+
         focusListener = o -> paragraphListView.updateLayout();
 
         control.documentProperty().addListener((obs, ov, nv) -> {
@@ -466,6 +547,10 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             }
             setup(nv);
         });
+
+        // set prompt text
+        promptNode = new Text();
+        setupPromptNode();
         setup(control.getDocument());
     }
 
@@ -478,11 +563,17 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     public void dispose() {
         viewModel.clearSelection();
         viewModel.caretPositionProperty().removeListener(caretChangeListener);
+        viewModel.caretPositionProperty().removeListener(internalCaretChangeListener);
         viewModel.removeChangeListener(textChangeListener);
         viewModel.documentProperty().removeListener(documentChangeListener);
         viewModel.autoSaveProperty().unbind();
         lastValidCaretPosition = -1;
+        promptNode.textProperty().unbind();
+        promptNode.fillProperty().unbind();
+        promptNode.visibleProperty().unbind();
+        promptNode.fontProperty().unbind();
         getSkinnable().editableProperty().removeListener(this::editableChangeListener);
+        getSkinnable().tableAllowedProperty().removeListener(tableAllowedListener);
         getSkinnable().textLengthProperty.unbind();
         getSkinnable().modifiedProperty.unbind();
         getSkinnable().setOnKeyPressed(null);
@@ -516,17 +607,42 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             return;
         }
         viewModel.caretPositionProperty().addListener(caretChangeListener);
+        viewModel.caretPositionProperty().addListener(internalCaretChangeListener);
         viewModel.setTextBuffer(new PieceTable(document));
-        lastValidCaretPosition = document.getCaretPosition();
+        lastValidCaretPosition = viewModel.getTextBuffer().getInternalPosition(document.getCaretPosition());
         viewModel.setCaretPosition(lastValidCaretPosition);
+        viewModel.setDecorationAtParagraph(viewModel.getTextBuffer().getParagraphDecorationAtCaret(lastValidCaretPosition));
         viewModel.addChangeListener(textChangeListener);
         viewModel.setDocument(document);
         viewModel.documentProperty().addListener(documentChangeListener);
         viewModel.autoSaveProperty().bind(getSkinnable().autoSaveProperty());
+        promptNode.textProperty().bind(getSkinnable().promptTextProperty());
+        promptNode.fillProperty().bind(promptTextFillProperty());
+        if (promptVisibleBinding == null) {
+            promptVisibleBinding = Bindings.createBooleanBinding(
+                    () -> {
+                        Point2D point2D = caretOriginProperty.get();
+                        boolean visible = viewModel.getTextLength() == 0 && viewModel.getCaretPosition() == 0 &&
+                                point2D.getX() > DEFAULT_POINT_2D.getX() && point2D.getY() > DEFAULT_POINT_2D.getY();
+                        if (visible) {
+                            updatePromptNodeLocation();
+                        }
+                        return visible;
+                    },
+                    viewModel.caretPositionProperty(), viewModel.textLengthProperty(), caretOriginProperty);
+        }
+        promptNode.visibleProperty().bind(promptVisibleBinding);
+        if (promptFontBinding == null) {
+            promptFontBinding = Bindings.createObjectBinding(this::getPromptNodeFont,
+                    viewModel.decorationAtCaretProperty(), viewModel.decorationAtParagraphProperty());
+        }
+        promptNode.fontProperty().bind(promptFontBinding);
         getSkinnable().textLengthProperty.bind(viewModel.textLengthProperty());
         getSkinnable().modifiedProperty.bind(viewModel.savedProperty().not());
         getSkinnable().setOnContextMenuRequested(contextMenuEventEventHandler);
         getSkinnable().editableProperty().addListener(this::editableChangeListener);
+        getSkinnable().tableAllowedProperty().addListener(tableAllowedListener);
+        viewModel.setTableAllowed(getSkinnable().isTableAllowed());
         getSkinnable().setOnKeyPressed(this::keyPressedListener);
         getSkinnable().setOnKeyTyped(this::keyTypedListener);
         getSkinnable().widthProperty().addListener(controlPrefWidthListener);
@@ -535,6 +651,44 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         refreshTextFlow();
         requestLayout();
         editableChangeListener(null); // sets up all related listeners
+    }
+
+    private void setupPromptNode() {
+        promptNode.setMouseTransparent(true);
+        promptNode.setManaged(false);
+        promptNode.setVisible(false);
+        promptNode.getStyleClass().add("prompt");
+        double promptNodeWidth = promptNode.prefWidth(-1);
+        double promptNodeHeight = promptNode.prefHeight(promptNodeWidth);
+        promptNode.resize(promptNodeWidth, promptNodeHeight);
+        getChildren().add(promptNode);
+    }
+
+    private Font getPromptNodeFont() {
+        Decoration decorationAtCaret = viewModel.getDecorationAtCaret();
+        if (decorationAtCaret instanceof TextDecoration) {
+            TextDecoration textDecoration = (TextDecoration) decorationAtCaret;
+            return Font.font(
+                    textDecoration.getFontFamily(),
+                    textDecoration.getFontWeight(),
+                    textDecoration.getFontPosture(),
+                    textDecoration.getFontSize()
+            );
+        }
+        return Font.font(14);
+    }
+
+    private void updatePromptNodeLocation() {
+        double promptNodeWidth = promptNode.prefWidth(-1);
+        TextAlignment alignment = viewModel.getDecorationAtParagraph().getAlignment();
+        Point2D origin = caretOriginProperty.get();
+        double x = origin.getX();
+        if (alignment == TextAlignment.CENTER) {
+            x -= promptNodeWidth / 2;
+        } else if (alignment == TextAlignment.RIGHT) {
+            x -= promptNodeWidth;
+        }
+        promptNode.relocate(x, origin.getY());
     }
 
     // TODO Need more optimal way of rendering text fragments.
@@ -571,6 +725,14 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private void requestLayout() {
         paragraphListView.refresh();
         getSkinnable().requestLayout();
+    }
+
+    private Optional<Path> caret() {
+        return paragraphListView.lookupAll(".caret").stream()
+                .filter(Path.class::isInstance)
+                .map(Path.class::cast)
+                .filter(path -> !path.getElements().isEmpty())
+                .findFirst();
     }
 
     // So far the only way to find prev/next row location is to use the size of the caret,
@@ -618,8 +780,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         char c = e.getCharacter().isEmpty()? 0: e.getCharacter().charAt(0);
         return isPrintableChar(c) &&
                !e.isControlDown() &&
-               !e.isMetaDown() &&
-               !e.isAltDown();
+               !e.isMetaDown();
     }
 
     private void execute(ActionCmd action) {
@@ -652,61 +813,64 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                     return;
                 }
             }
+            paragraphListView.resetCaret();
             if (viewModel.getSelection().isDefined()) {
-                execute(ACTION_CMD_FACTORY.removeText(-1));
+                execute(ACTION_CMD_FACTORY.replaceText(e.getCharacter()));
+            } else {
+                execute(ACTION_CMD_FACTORY.insertText(e.getCharacter()));
             }
-            execute(ACTION_CMD_FACTORY.insertText(e.getCharacter()));
             e.consume();
         }
     }
 
     private void populateContextMenu(boolean isEditable) {
         if (isEditable && editableContextMenuItems == null) {
-            tableCellContextMenuItems = FXCollections.observableArrayList(
-                    createMenuItem("Delete cell contents", ACTION_CMD_FACTORY.deleteTableCell()),
-                    new SeparatorMenuItem(),
-                    createMenuItem("Align left", ACTION_CMD_FACTORY.alignTableCell(TextAlignment.LEFT)),
-                    createMenuItem("Centre", ACTION_CMD_FACTORY.alignTableCell(TextAlignment.CENTER)),
-                    createMenuItem("Justify", ACTION_CMD_FACTORY.alignTableCell(TextAlignment.JUSTIFY)),
-                    createMenuItem("Align right", ACTION_CMD_FACTORY.alignTableCell(TextAlignment.RIGHT))
-            );
-            Menu tableCellMenu = new Menu("Table Cell");
-            tableCellMenu.getItems().addAll(tableCellContextMenuItems);
-            MenuItem insertTableMenuItem = createMenuItem("Insert table", ACTION_CMD_FACTORY.insertTable(new TableDecoration(1, 2)));
-            tableCellMenu.disableProperty().bind(insertTableMenuItem.disableProperty().not());
-            tableContextMenuItems = FXCollections.observableArrayList(
-                    insertTableMenuItem,
-                    createMenuItem("Delete table", ACTION_CMD_FACTORY.deleteTable()),
-                    new SeparatorMenuItem(),
-                    createMenuItem("Add column before", ACTION_CMD_FACTORY.insertTableColumnBefore()),
-                    createMenuItem("Add column after", ACTION_CMD_FACTORY.insertTableColumnAfter()),
-                    createMenuItem("Delete column", ACTION_CMD_FACTORY.deleteTableColumn()),
-                    new SeparatorMenuItem(),
-                    createMenuItem("Add row above", ACTION_CMD_FACTORY.insertTableRowAbove()),
-                    createMenuItem("Add row below", ACTION_CMD_FACTORY.insertTableRowBelow()),
-                    createMenuItem("Delete row", ACTION_CMD_FACTORY.deleteTableRow()),
-                    new SeparatorMenuItem(),
-                    tableCellMenu
-            );
-            Menu tableMenu = new Menu("Table");
-            tableMenu.getItems().addAll(tableContextMenuItems);
             editableContextMenuItems = FXCollections.observableArrayList(
-                    createMenuItem("Undo", ACTION_CMD_FACTORY.undo()),
-                    createMenuItem("Redo", ACTION_CMD_FACTORY.redo()),
+                    createMenuItem(resources.getString("rta.context.menu.undo"), ACTION_CMD_FACTORY.undo()),
+                    createMenuItem(resources.getString("rta.context.menu.redo"), ACTION_CMD_FACTORY.redo()),
                     new SeparatorMenuItem(),
-                    createMenuItem("Copy", ACTION_CMD_FACTORY.copy()),
-                    createMenuItem("Cut", ACTION_CMD_FACTORY.cut()),
-                    createMenuItem("Paste", ACTION_CMD_FACTORY.paste()),
+                    createMenuItem(resources.getString("rta.context.menu.copy"), ACTION_CMD_FACTORY.copy()),
+                    createMenuItem(resources.getString("rta.context.menu.cut"), ACTION_CMD_FACTORY.cut()),
+                    createMenuItem(resources.getString("rta.context.menu.paste"), ACTION_CMD_FACTORY.paste()),
                     new SeparatorMenuItem(),
-                    createMenuItem("Select All", ACTION_CMD_FACTORY.selectAll()),
-                    new SeparatorMenuItem(),
-                    tableMenu
-            );
+                    createMenuItem(resources.getString("rta.context.menu.selectall"), ACTION_CMD_FACTORY.selectAll()));
+
+            if (getSkinnable().isTableAllowed()) {
+                tableCellContextMenuItems = FXCollections.observableArrayList(
+                        createMenuItem(resources.getString("rta.context.menu.table.cell.delete"), ACTION_CMD_FACTORY.deleteTableCell()),
+                        new SeparatorMenuItem(),
+                        createMenuItem(resources.getString("rta.context.menu.table.cell.alignleft"), ACTION_CMD_FACTORY.alignTableCell(TextAlignment.LEFT)),
+                        createMenuItem(resources.getString("rta.context.menu.table.cell.centre"), ACTION_CMD_FACTORY.alignTableCell(TextAlignment.CENTER)),
+                        createMenuItem(resources.getString("rta.context.menu.table.cell.justify"), ACTION_CMD_FACTORY.alignTableCell(TextAlignment.JUSTIFY)),
+                        createMenuItem(resources.getString("rta.context.menu.table.cell.alignright"), ACTION_CMD_FACTORY.alignTableCell(TextAlignment.RIGHT))
+                );
+                Menu tableCellMenu = new Menu(resources.getString("rta.context.menu.table.cell"));
+                tableCellMenu.getItems().addAll(tableCellContextMenuItems);
+                MenuItem insertTableMenuItem = createMenuItem(resources.getString("rta.context.menu.table.insert"), ACTION_CMD_FACTORY.insertTable(new TableDecoration(1, 2)));
+                tableCellMenu.disableProperty().bind(insertTableMenuItem.disableProperty().not());
+                tableContextMenuItems = FXCollections.observableArrayList(
+                        insertTableMenuItem,
+                        createMenuItem(resources.getString("rta.context.menu.table.delete"), ACTION_CMD_FACTORY.deleteTable()),
+                        new SeparatorMenuItem(),
+                        createMenuItem(resources.getString("rta.context.menu.table.column.before"), ACTION_CMD_FACTORY.insertTableColumnBefore()),
+                        createMenuItem(resources.getString("rta.context.menu.table.column.after"), ACTION_CMD_FACTORY.insertTableColumnAfter()),
+                        createMenuItem(resources.getString("rta.context.menu.table.column.delete"), ACTION_CMD_FACTORY.deleteTableColumn()),
+                        new SeparatorMenuItem(),
+                        createMenuItem(resources.getString("rta.context.menu.table.row.above"), ACTION_CMD_FACTORY.insertTableRowAbove()),
+                        createMenuItem(resources.getString("rta.context.menu.table.row.below"), ACTION_CMD_FACTORY.insertTableRowBelow()),
+                        createMenuItem(resources.getString("rta.context.menu.table.row.delete"), ACTION_CMD_FACTORY.deleteTableRow()),
+                        new SeparatorMenuItem(),
+                        tableCellMenu
+                );
+                Menu tableMenu = new Menu(resources.getString("rta.context.menu.table"));
+                tableMenu.getItems().addAll(tableContextMenuItems);
+                editableContextMenuItems.addAll(new SeparatorMenuItem(), tableMenu);
+            }
         } else if (!isEditable && nonEditableContextMenuItems == null) {
             nonEditableContextMenuItems = FXCollections.observableArrayList(
-                    createMenuItem("Copy", ACTION_CMD_FACTORY.copy()),
+                    createMenuItem(resources.getString("rta.context.menu.copy"), ACTION_CMD_FACTORY.copy()),
                     new SeparatorMenuItem(),
-                    createMenuItem("Select All", ACTION_CMD_FACTORY.selectAll()));
+                    createMenuItem(resources.getString("rta.context.menu.selectall"), ACTION_CMD_FACTORY.selectAll()));
         }
         contextMenu.getItems().setAll(isEditable ? editableContextMenuItems : nonEditableContextMenuItems);
     }
@@ -760,4 +924,13 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         }
     }
 
+    private static final StyleablePropertyFactory<RichTextArea> FACTORY = new StyleablePropertyFactory<>(SkinBase.getClassCssMetaData());
+
+    public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
+        return FACTORY.getCssMetaData();
+    }
+
+    @Override public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
+        return getClassCssMetaData();
+    }
 }

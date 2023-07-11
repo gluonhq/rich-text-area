@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,38 +27,64 @@
  */
 package com.gluonhq.richtextarea.viewmodel;
 
+import com.gluonhq.emoji.Emoji;
 import com.gluonhq.richtextarea.Selection;
+import com.gluonhq.richtextarea.model.Block;
+import com.gluonhq.richtextarea.model.BlockUnit;
+import com.gluonhq.richtextarea.model.EmojiUnit;
+import com.gluonhq.richtextarea.model.UnitBuffer;
 
 import java.util.Objects;
 
+class SelectAndReplaceCmd extends AbstractEditCmd {
 
-/**
- * Abstract command add context store/restore operations
- * to already existing undo/redo framework
- */
-abstract class AbstractEditCmd extends com.gluonhq.richtextarea.undo.AbstractCommand<RichTextAreaViewModel> {
+    private final UnitBuffer content;
+    private final Selection selection;
 
-    private int caretPosition;
-    Selection selection;
-
-
-    protected void storeContext( RichTextAreaViewModel viewModel ) {
-        Objects.requireNonNull(viewModel);
-        this.caretPosition = viewModel.getCaretPosition();
-        this.selection = viewModel.getSelection();
+    public SelectAndReplaceCmd(Selection selection, String content) {
+        this.selection = selection;
+        this.content = UnitBuffer.convertTextToUnits(content);
     }
 
-    protected void restoreContext( RichTextAreaViewModel viewModel ) {
+    public SelectAndReplaceCmd(Selection selection, Emoji content) {
+        this.selection = selection;
+        this.content = new UnitBuffer(new EmojiUnit(content));
+    }
+
+    public SelectAndReplaceCmd(Selection selection, Block content) {
+        this.selection = selection;
+        this.content = new UnitBuffer(new BlockUnit(content));
+    }
+
+    @Override
+    public void doRedo(RichTextAreaViewModel viewModel) {
         Objects.requireNonNull(viewModel);
-        viewModel.setCaretPosition(caretPosition);
-        viewModel.setSelection(selection);
+
+        // 1. select
+        if (selection != null) {
+            viewModel.setSelection(selection);
+        }
+
+        // 2. delete selection
+        viewModel.remove(-1, 1);
+
+        // 3. insert content
+        if (content != null) {
+            viewModel.insert(content.getText());
+        }
+    }
+
+    @Override
+    public void doUndo(RichTextAreaViewModel viewModel) {
+        // 1. insert content
+        Objects.requireNonNull(viewModel).undo();
+
+        // 2. delete selection
+        viewModel.undo();
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " { " +
-                "c=" + caretPosition +
-                ", s=[" + selection.getStart() + "," + selection.getEnd() + "] " +
-                "}";
+        return "SelectAndReplaceCmd[" + super.toString() + ", " + content + ", " + selection + "]";
     }
 }

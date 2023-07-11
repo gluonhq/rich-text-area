@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,19 +27,24 @@
  */
 package com.gluonhq.richtextarea.model;
 
+import com.gluonhq.richtextarea.Tools;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static com.gluonhq.richtextarea.model.TextBuffer.ZERO_WIDTH_TEXT;
 
 /**
  * A Document is the basic model that contains all the information required for the {@link com.gluonhq.richtextarea.RichTextArea}
  * control, in order to render all the rich content, including decorated text, images and other non-text objects.
  *
- * A document is basically a string with the full text, and a list of {@link DecorationModel} that contain the text and
+ * A document is basically a string with the full raw text, and a list of {@link DecorationModel} that contain the text and
  * paragraph decorations for one or more fragments of the text, where a fragment can be defined as the longest
  * substring of the text that shares the same text and paragraph decorations.
+ *
+ * The document can be serialized/deserialized, and therefore the full raw text should contain all characters that define it,
+ * whether these can be rendered by a text editor or not. All the indices used by the Document model (like start/length of
+ * decorations or caret position) should refer to their position within the full raw text.
+ *
  */
 public class Document {
 
@@ -70,7 +75,9 @@ public class Document {
     }
 
     /**
-     * Returns the full text of the document
+     * Returns the full raw text of the document.
+     *
+     * This can include unicode characters that may or may not be rendered by an editor
      *
      * @return a string with the full text of the document
      */
@@ -80,7 +87,9 @@ public class Document {
 
     /**
      * Returns the list of {@link DecorationModel} that define the fragments of text
-     * that share the same decorations
+     * that share the same decorations.
+     *
+     * The range of each {@link Decoration} is defined based on the full raw text.
      *
      * @return the list of {@link DecorationModel}
      */
@@ -90,7 +99,7 @@ public class Document {
 
     /**
      * Returns the caret position in order to restore the caret when the document
-     * is opened
+     * is opened, in terms of the full raw text, and not the rendered or visible text.
      *
      * @return the caret position when document was saved
      */
@@ -115,7 +124,7 @@ public class Document {
     @Override
     public String toString() {
         return "Document{" +
-                "text='" + text.replaceAll("\n", "<n>").replaceAll(ZERO_WIDTH_TEXT, "<a>")  + '\'' +
+                "text='" + Tools.formatTextWithAnchors(text) + '\'' +
                 ", decorationList=" + (decorationList == null ? "null" : "{" +
                     decorationList.stream().map(decorationModel -> " - " + decorationModel.toString()).collect(Collectors.joining("\n", "\n", ""))) +
                 "\n}, caretPosition=" + caretPosition +

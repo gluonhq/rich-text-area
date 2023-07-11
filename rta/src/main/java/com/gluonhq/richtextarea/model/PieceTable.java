@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,8 @@
  */
 package com.gluonhq.richtextarea.model;
 
+import com.gluonhq.richtextarea.Selection;
+import com.gluonhq.richtextarea.Tools;
 import com.gluonhq.richtextarea.undo.AbstractCommand;
 import com.gluonhq.richtextarea.undo.CommandManager;
 
@@ -49,8 +51,8 @@ import static com.gluonhq.richtextarea.model.TextBuffer.ZERO_WIDTH_TEXT;
  */
 public final class PieceTable extends AbstractTextBuffer {
 
-    final String originalText;
-    String additionBuffer = "";
+    final UnitBuffer originalText;
+    UnitBuffer additionBuffer = new UnitBuffer();
 
     final List<Piece> pieces = new ArrayList<>();
     private final CommandManager<PieceTable> commander = new CommandManager<>(this);
@@ -59,18 +61,37 @@ public final class PieceTable extends AbstractTextBuffer {
     TextDecoration decorationAtCaret;
 
     /**
-     * Creates piece table using original text
+     * Creates a piece table using the original text of a document, and
+     * sets the original unit buffer, that will contain one or more units.
+     * A document contains 0, 1 or more decorations.
+     * If there is no decoration present, for each unit a piece is defined, that
+     * spans over the length of the unit.
+     * If there are decorations, for each one, units are defined, pieces are defined, that spans over its length
      * @param document model with decorated text to start with
      */
     public PieceTable(Document document) {
-        this.originalText = Objects.requireNonNull(Objects.requireNonNull(document).getText());
-        if (document.getDecorations() == null) {
-            pieces.add(new Piece(PieceTable.this, Piece.BufferType.ORIGINAL, 0, originalText.length()));
-        } else {
-            document.getDecorations().forEach(d ->
-                    pieces.add(new Piece(PieceTable.this, Piece.BufferType.ORIGINAL, d.getStart(), d.getLength(), d.getDecoration(), d.getParagraphDecoration())));
+        String text = Objects.requireNonNull(Objects.requireNonNull(document).getText());
+        List<DecorationModel> decorations = document.getDecorations();
+        if (decorations == null || decorations.isEmpty()) {
+            decorations = List.of(new DecorationModel(0, text.length(), null, null));
         }
-        textLengthProperty.set(pieces.stream().mapToInt(b -> b.length).sum());
+        this.originalText = new UnitBuffer(List.of());
+        // For each decoration in the document:
+        decorations.forEach(d -> {
+            // parse text that spans the decoration into units
+            UnitBuffer units = UnitBuffer.convertTextToUnits(text.substring(d.getStart(), d.getStart() + d.getLength()));
+            if (units.isEmpty()) {
+                units.append(new TextUnit(""));
+            }
+            AtomicInteger accum = new AtomicInteger(d.getStart());
+            // For each unit present:
+            units.getUnitList().forEach(unit -> {
+                originalText.append(unit);
+                // create a new piece that spans the unit
+                pieces.add(new Piece(PieceTable.this, Piece.BufferType.ORIGINAL, accum.getAndAdd(unit.length()), unit.length(), d.getDecoration(), d.getParagraphDecoration()));
+            });
+        });
+        textLengthProperty.set(originalText.length());
         pieceCharacterIterator = new PieceCharacterIterator(this);
     }
 
@@ -81,9 +102,7 @@ public final class PieceTable extends AbstractTextBuffer {
      */
     @Override
     public String getText() {
-        return pieces.stream()
-                     .map(Piece::getText)
-                     .reduce("", (s1,s2) -> s1+s2);
+        return getText(0, getTextLength());
     }
 
     /**
@@ -95,24 +114,94 @@ public final class PieceTable extends AbstractTextBuffer {
      */
     @Override
     public String getText(final int start, final int end) {
-
-        if (!inRange(start, 0, getTextLength())) {
+        if (getTextLength() > 0 && !inRange(start, 0, getTextLength())) {
              throw new IllegalArgumentException("Start index " + start + " is not in range [0, " + getTextLength() + ")");
         }
-        if ( end < 0 ) {
+        if (end < 0) {
             throw new IllegalArgumentException("End index is not in range");
         }
-        int realEnd = Math.min(end,getTextLength());
-
+        StringBuilder textSB = new StringBuilder();
         StringBuilder sb = new StringBuilder();
-        for (Piece value : pieces) {
-            if (sb.length() > realEnd) {
-                break;
+        walkPieces((p, i, tp) -> {
+            Unit unit = p.getUnit();
+            sb.append(p.getInternalText());
+            if (start <= tp + p.length && end > tp && !unit.isEmpty()) {
+                String text = sb.substring(Math.max(start, tp), Math.min(end, tp + p.length));
+                if (!text.isEmpty()) {
+                    textSB.append(unit instanceof TextUnit ? text : unit.getText());
+                }
             }
-            sb.append(value.getText());
-        }
-        return sb.substring(start, realEnd);
+            return (end <= tp);
+        });
+        return textSB.toString();
+    }
 
+    private int s0, s1;
+
+    /**
+     * Converts a position or index referred to the exportable text into the
+     * position of internal text
+     *
+     * @param position the index from exportable text
+     * @return an index from internal text
+     */
+    @Override
+    public int getInternalPosition(int position) {
+        if (position < 0) {
+            return position;
+        }
+        s0 = -1;
+        StringBuilder sb = new StringBuilder();
+        walkPieces((p, i, tp) -> {
+            Unit unit = p.getUnit();
+            int sbMin = sb.length();
+            int sbMax = sbMin + unit.getText().length();
+            if (sbMin <= position && position <= sbMax) {
+                s0 = tp + p.length;
+            }
+            sb.append(unit.getText());
+            return (s0 > -1);
+        });
+        return s0;
+    }
+
+    /**
+     * Converts the indices of a selection of exportable text into the
+     * indices of a selection of internal text
+     *
+     * @param selection a selection with indices from exportable text
+     * @return a selection with indices from internal text
+     */
+    @Override
+    public Selection getInternalSelection(Selection selection) {
+        if (selection == null) {
+            throw new IllegalArgumentException("Selection can't be null");
+        }
+        if (!selection.isDefined()) {
+            return Selection.UNDEFINED;
+        }
+        int start = selection.getStart();
+        int end = selection.getEnd();
+        if (end < 0) {
+            throw new IllegalArgumentException("End index is not in range");
+        }
+        s0 = -1;
+        s1 = -1;
+        StringBuilder sb = new StringBuilder();
+        walkPieces((p, i, tp) -> {
+            Unit unit = p.getUnit();
+            int sbMin = sb.length();
+            int sbMax = sbMin + unit.getText().length();
+            if (sbMin <= start && start <= sbMax) {
+                s0 = tp;
+            }
+            if (sbMin <= end && end <= sbMax) {
+                s1 = tp + p.length;
+            }
+            sb.append(unit.getText());
+            return (s0 > -1 && s1 > -1);
+        });
+        return new Selection(s0, s1);
     }
 
     @Override
@@ -122,13 +211,14 @@ public final class PieceTable extends AbstractTextBuffer {
             AtomicInteger start = new AtomicInteger();
             DecorationModel dm = null;
             for (Piece piece : pieces) {
+                int length = piece.getUnit().getText().length();
                 if (mergedList.isEmpty()) {
-                    dm = new DecorationModel(start.addAndGet(piece.start), piece.length, piece.getDecoration(), piece.getParagraphDecoration());
+                    dm = new DecorationModel(start.addAndGet(piece.start), length, piece.getDecoration(), piece.getParagraphDecoration());
                 } else if (piece.getDecoration().equals(dm.getDecoration()) && piece.getParagraphDecoration().equals(dm.getParagraphDecoration())) {
                     mergedList.remove(mergedList.size() - 1);
-                    dm = new DecorationModel(dm.getStart(), dm.getLength() + piece.length, dm.getDecoration(), dm.getParagraphDecoration());
+                    dm = new DecorationModel(dm.getStart(), dm.getLength() + length, dm.getDecoration(), dm.getParagraphDecoration());
                 } else {
-                    dm = new DecorationModel(start.addAndGet(dm.getLength()), piece.length, piece.getDecoration(), piece.getParagraphDecoration());
+                    dm = new DecorationModel(start.addAndGet(dm.getLength()), length, piece.getDecoration(), piece.getParagraphDecoration());
                 }
                 mergedList.add(dm);
             }
@@ -157,11 +247,14 @@ public final class PieceTable extends AbstractTextBuffer {
     }
 
     // internal append
-    Piece appendTextInternal(String text, Decoration decoration, ParagraphDecoration paragraphDecoration) {
+    List<Piece> appendInternal(UnitBuffer unitBuffer, Decoration decoration, ParagraphDecoration paragraphDecoration) {
         int pos = additionBuffer.length();
-        additionBuffer += text;
-        textLengthProperty.set(getTextLength() + text.length());
-        return new Piece(this, Piece.BufferType.ADDITION, pos, text.length(), decoration, paragraphDecoration);
+        textLengthProperty.set(getTextLength() + unitBuffer.length());
+        AtomicInteger accum = new AtomicInteger(pos);
+        return unitBuffer.getUnitList().stream()
+                .peek(unit -> additionBuffer.append(unit))
+                .map(unit -> new Piece(this, Piece.BufferType.ADDITION, accum.getAndAdd(unit.length()), unit.length(), decoration, paragraphDecoration))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -187,20 +280,21 @@ public final class PieceTable extends AbstractTextBuffer {
     }
 
     /**
-     * Walks through text fragments. Each fragment is represented by related text and decoration
+     * Walks through unit fragments. Each fragment is represented by related text and decoration
      * @param onFragment callback to get fragment info
      * @param start the initial position of the fragment
      * @param end the end position of the fragment (not included)
      */
     @Override
-    public void walkFragments(BiConsumer<String, Decoration> onFragment, int start, int end) {
+    public void walkFragments(BiConsumer<Unit, Decoration> onFragment, int start, int end) {
         StringBuilder sb = new StringBuilder();
         walkPieces((p, i, tp) -> {
-            sb.append(p.getText());
-            if (start <= tp + p.length && end > tp && !p.getText().isEmpty()) {
+            Unit unit = p.getUnit();
+            sb.append(p.getInternalText());
+            if (start <= tp + p.length && end > tp && !unit.isEmpty()) {
                 String text = sb.substring(Math.max(start, tp), Math.min(end, tp + p.length));
                 if (!text.isEmpty()) {
-                    onFragment.accept(text, p.getDecoration());
+                    onFragment.accept(unit instanceof TextUnit ? new TextUnit(text) : unit, p.getDecoration());
                 }
             }
             return (end <= tp);
@@ -333,10 +427,12 @@ public final class PieceTable extends AbstractTextBuffer {
     @Override
     public String toString() {
         String p = pieces.stream().map(piece -> " - " + piece.toString()).collect(Collectors.joining("\n", "\n", ""));
-        return "PieceTable{\n O=\"" + originalText.replaceAll("\n", "<n>").replaceAll(ZERO_WIDTH_TEXT, "<a>").replaceAll("" + ZERO_WIDTH_TABLE_SEPARATOR, "<t>") + "\"" + "" +
-                ",\n A=\"" + additionBuffer.replaceAll("\n", "<n>").replaceAll(ZERO_WIDTH_TEXT, "<a>").replaceAll("" + ZERO_WIDTH_TABLE_SEPARATOR, "<t>") + "\"" +
+        return "PieceTable{\n O=\"" + Tools.formatTextWithAnchors(originalText.getInternalText()) + "\"" + "" +
+                ",\n A=\"" + Tools.formatTextWithAnchors(additionBuffer.getInternalText()) + "\"" +
                 ",\n L=" + getTextLength() +
                 ", pieces ->" + p +
+                ",\n OU -> " + originalText.getUnitList() +
+                ",\n AU -> " + additionBuffer.getUnitList() +
                 "\n}";
     }
 }
@@ -365,7 +461,7 @@ class PieceCharacterIterator implements CharacterIterator {
         lineFeedList = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
         pt.walkPieces((p, i, tp) -> {
-            sb.append(p.getText());
+            sb.append(p.getInternalText());
             String text = sb.substring(tp);
             IntStream.iterate(text.indexOf(LF),
                             index -> index >= 0,
@@ -384,7 +480,7 @@ class PieceCharacterIterator implements CharacterIterator {
         }
         for (int i = 0; i < posArray.length; i++) {
             if (posArray[i] <= pos && pos < posArray[i + 1]) {
-                char c = pt.pieces.get(i).getText().charAt(pos - posArray[i]);
+                char c = pt.pieces.get(i).getInternalText().charAt(pos - posArray[i]);
                 return c == ZERO_WIDTH_TABLE_SEPARATOR ? ' ' : c;
             }
         }
@@ -492,47 +588,47 @@ abstract class AbstractPTCmd extends AbstractCommand<PieceTable> {}
 
 class AppendCmd extends AbstractPTCmd {
 
-    private final String text;
-    private Piece newPiece;
+    private final UnitBuffer unitBuffer;
+    private List<Piece> newPieces;
     private boolean execSuccess = false;
 
     AppendCmd(String text) {
-        this.text = Objects.requireNonNull(text);
+        this.unitBuffer = UnitBuffer.convertTextToUnits(Objects.requireNonNull(text));
     }
 
     @Override
     protected void doUndo(PieceTable pt) {
         if (execSuccess) {
-            pt.pieces.remove(newPiece);
-            pt.fire(new TextBuffer.DeleteEvent(pt.getTextLength() - text.length(), text.length()));
-            pt.textLengthProperty.set( pt.getTextLength() - text.length());
+            pt.pieces.removeAll(newPieces);
+            pt.fire(new TextBuffer.DeleteEvent(pt.getTextLength() - unitBuffer.length(), unitBuffer.length()));
+            pt.textLengthProperty.set(pt.getTextLength() - unitBuffer.length());
         }
     }
 
     @Override
     protected void doRedo(PieceTable pt) {
-        if (!text.isEmpty()) {
+        if (!unitBuffer.isEmpty()) {
             int pos = pt.getTextLength();
-            newPiece = pt.appendTextInternal(text,
+            newPieces = pt.appendInternal(unitBuffer,
                     pt.decorationAtCaret != null ?
                     pt.decorationAtCaret : pt.previousPieceDecoration(pt.pieces.size()),
                     pt.getParagraphDecorationAtCaret(pos) != null ?
                     pt.getParagraphDecorationAtCaret(pos) : pt.previousPieceParagraphDecoration(pt.pieces.size()));
-            pt.pieces.add(newPiece);
-            pt.fire(new TextBuffer.InsertEvent(text, pos));
+            pt.pieces.addAll(newPieces);
+            pt.fire(new TextBuffer.InsertEvent(unitBuffer.getInternalText(), pos));
             execSuccess = true;
         }
     }
 
     @Override
     public String toString() {
-        return "AppendCmd[\"" + text + "\"]";
+        return "AppendCmd[\"" + unitBuffer + "\"]";
     }
 }
 
 class InsertCmd extends AbstractCommand<PieceTable> {
 
-    private final String text;
+    private final UnitBuffer unitBuffer;
     private final int insertPosition;
 
     private Collection<Piece> newPieces;
@@ -541,7 +637,7 @@ class InsertCmd extends AbstractCommand<PieceTable> {
     private boolean execSuccess = false;
 
     InsertCmd(String text, int insertPosition) {
-        this.text = Objects.requireNonNull(text);
+        this.unitBuffer = UnitBuffer.convertTextToUnits(Objects.requireNonNull(text));
         this.insertPosition = insertPosition;
     }
 
@@ -550,15 +646,14 @@ class InsertCmd extends AbstractCommand<PieceTable> {
         if (execSuccess) {
             pt.pieces.add(opPieceIndex, oldPiece);
             pt.pieces.removeAll(newPieces);
-            pt.fire(new TextBuffer.DeleteEvent(insertPosition, text.length()));
-            pt.textLengthProperty.set(pt.getTextLength() - text.length());
+            pt.fire(new TextBuffer.DeleteEvent(insertPosition, unitBuffer.length()));
+            pt.textLengthProperty.set(pt.getTextLength() - unitBuffer.length());
         }
     }
 
     @Override
     protected void doRedo(PieceTable pt) {
-
-        if (text.isEmpty()) {
+        if (unitBuffer.isEmpty()) {
             return; // no need to insert empty text
         }
 
@@ -567,7 +662,7 @@ class InsertCmd extends AbstractCommand<PieceTable> {
         }
 
         if (insertPosition == pt.getTextLength()) {
-            pt.append(text);
+            pt.append(unitBuffer.getInternalText());
         } else {
             pt.walkPieces((piece, pieceIndex, textPosition) -> {
                 if (PieceTable.inRange(insertPosition, textPosition, piece.length)) {
@@ -575,17 +670,17 @@ class InsertCmd extends AbstractCommand<PieceTable> {
                     final Decoration decoration = pieceOffset > 0 ? (TextDecoration) piece.getDecoration() : pt.previousPieceDecoration(pieceIndex);
                     final ParagraphDecoration paragraphDecoration = pt.getParagraphDecorationAtCaret(insertPosition) != null ?
                             pt.getParagraphDecorationAtCaret(insertPosition) : pt.previousPieceParagraphDecoration(pieceIndex);
-                    newPieces = PieceTable.normalize(List.of(
-                            piece.pieceBefore(pieceOffset),
-                            pt.appendTextInternal(text, pt.decorationAtCaret != null ? pt.decorationAtCaret : decoration, paragraphDecoration),
-                            piece.pieceFrom(pieceOffset)
-                    ));
+                    List<Piece> pieces = pt.appendInternal(unitBuffer, pt.decorationAtCaret != null ? pt.decorationAtCaret : decoration, paragraphDecoration);
+                    List<Piece> allPieces = new ArrayList<>(List.of(piece.pieceBefore(pieceOffset)));
+                    allPieces.addAll(pieces);
+                    allPieces.add(piece.pieceFrom(pieceOffset));
+                    newPieces = PieceTable.normalize(allPieces);
                     oldPiece = piece;
                     pt.pieces.addAll(pieceIndex, newPieces);
                     pt.pieces.remove(oldPiece);
                     opPieceIndex = pieceIndex;
 
-                    pt.fire(new TextBuffer.InsertEvent(text, insertPosition));
+                    pt.fire(new TextBuffer.InsertEvent(unitBuffer.getInternalText(), insertPosition));
                     execSuccess = true;
                     return true;
                 }
@@ -596,7 +691,7 @@ class InsertCmd extends AbstractCommand<PieceTable> {
 
     @Override
     public String toString() {
-        return "InsertCmd[\"" + text + "\" at " + insertPosition + "]";
+        return "InsertCmd[\"" + unitBuffer + "\" at " + insertPosition + "]";
     }
 }
 
@@ -611,9 +706,9 @@ class DeleteCmd extends AbstractCommand<PieceTable> {
     private Collection<Piece> oldPieces;
 
     /**
-     * Command to delete text starting from an index position to a given length.
+     * Command to delete units starting from an index position to a given length.
      * @param deletePosition position from where delete operation is to be executed. Normally, this is position of the caret.
-     * @param length Length of the text following the deletePosition to delete.
+     * @param length Length of the unit following the deletePosition to delete.
      */
     DeleteCmd(int deletePosition, int length) {
         this.deletePosition = deletePosition;
@@ -627,11 +722,10 @@ class DeleteCmd extends AbstractCommand<PieceTable> {
             pt.pieces.removeAll(newPieces);
 
             String text = oldPieces.stream()
-              .map(Piece::getText)
+              .map(Piece::getInternalText)
               .reduce( "", (id, s) -> id + s );
-
-            pt.fire(new TextBuffer.InsertEvent(text, deletePosition));
             pt.textLengthProperty.set(pt.getTextLength() + length);
+            pt.fire(new TextBuffer.InsertEvent(text, deletePosition));
         }
     }
 
@@ -700,10 +794,11 @@ class DeleteCmd extends AbstractCommand<PieceTable> {
 class ImageDecorateCmd extends AbstractCommand<PieceTable> {
 
     private final ImageDecoration decoration;
+    private final UnitBuffer unitBuffer;
     private final int insertPosition;
 
     private boolean execSuccess = false;
-    private Piece newPiece;
+    private List<Piece> newPiece;
     private Piece oldPiece;
     private int opPieceIndex;
     private Collection<Piece> newPieces = new ArrayList<>();
@@ -716,18 +811,19 @@ class ImageDecorateCmd extends AbstractCommand<PieceTable> {
     ImageDecorateCmd(ImageDecoration decoration, int insertPosition) {
         this.decoration = decoration;
         this.insertPosition = insertPosition;
+        this.unitBuffer = new UnitBuffer(new ImageUnit(decoration.getUrl()));
     }
 
     @Override
     protected void doUndo(PieceTable pt) {
         if (execSuccess) {
             if (newPiece != null) {
-                pt.pieces.remove(newPiece);
-                pt.fire(new TextBuffer.DeleteEvent(pt.getTextLength() - 1, 1));
+                pt.pieces.removeAll(newPiece);
+                pt.fire(new TextBuffer.DeleteEvent(pt.getTextLength() - 1, unitBuffer.length()));
             } else {
                 pt.pieces.add(opPieceIndex, oldPiece);
                 pt.pieces.removeAll(newPieces);
-                pt.fire(new TextBuffer.DeleteEvent(insertPosition, 1));
+                pt.fire(new TextBuffer.DeleteEvent(insertPosition, unitBuffer.length()));
             }
             pt.textLengthProperty.set(pt.getTextLength() - 1);
         }
@@ -744,25 +840,25 @@ class ImageDecorateCmd extends AbstractCommand<PieceTable> {
 
         if (insertPosition == pt.getTextLength()) {
             int pos = pt.getTextLength();
-            newPiece = pt.appendTextInternal(ZERO_WIDTH_TEXT, decoration, paragraphDecoration);
-            pt.pieces.add(newPiece);
+            newPiece = pt.appendInternal(unitBuffer, decoration, paragraphDecoration);
+            pt.pieces.addAll(newPiece);
             pt.fire(new TextBuffer.InsertEvent(ZERO_WIDTH_TEXT, pos));
             execSuccess = true;
         } else {
             pt.walkPieces((piece, pieceIndex, textPosition) -> {
                 if (PieceTable.inRange(insertPosition, textPosition, piece.length)) {
                     int pieceOffset = insertPosition - textPosition;
-                    newPieces = PieceTable.normalize(List.of(
-                            piece.pieceBefore(pieceOffset),
-                            pt.appendTextInternal(ZERO_WIDTH_TEXT, decoration, paragraphDecoration),
-                            piece.pieceFrom(pieceOffset)
-                    ));
+                    List<Piece> pieces = pt.appendInternal(unitBuffer, decoration, paragraphDecoration);
+                    List<Piece> allPieces = new ArrayList<>(List.of(piece.pieceBefore(pieceOffset)));
+                    allPieces.addAll(pieces);
+                    allPieces.add(piece.pieceFrom(pieceOffset));
+                    newPieces = PieceTable.normalize(allPieces);
                     oldPiece = piece;
                     pt.pieces.addAll(pieceIndex, newPieces);
                     pt.pieces.remove(oldPiece);
                     opPieceIndex = pieceIndex;
 
-                    pt.fire(new TextBuffer.InsertEvent(ZERO_WIDTH_TEXT, insertPosition));
+                    pt.fire(new TextBuffer.InsertEvent(unitBuffer.getInternalText(), insertPosition));
                     execSuccess = true;
                     return true;
                 }

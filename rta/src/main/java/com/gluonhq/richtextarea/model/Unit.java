@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023, Gluon
+ * Copyright (c) 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,38 +25,39 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.gluonhq.richtextarea.viewmodel;
+package com.gluonhq.richtextarea.model;
 
-import javafx.beans.binding.BooleanBinding;
+/**
+ * Defines an object that can be inserted into a PieceTable. It can be mainly a
+ * text string, but also other non-text objects like emojis or images
+ */
+public interface Unit {
 
-import java.util.Objects;
+    /**
+     * Gets the exportable text of the unit. It is useful for clipboard or
+     * serializing the document, but shouldn't be used internally to do Piece
+     * operations
+     * @return a string with the exportable text content
+     */
+    String getText();
 
-class ActionCmdInsertText implements ActionCmd {
+    /**
+     * Gets the internal text. For text units, matches the exportable text.
+     * For non-text units, this is used as an anchor point
+     * @return a string with the internal text representation
+     */
+    String getInternalText();
 
-    private final String content;
+    /**
+     * Gets the internal length of the unit. Useful for Piece operations
+     * @return an integer value of the internal number of positions that the unit spans
+     */
+    int length();
 
-    public ActionCmdInsertText(String content) {
-        this.content = content;
-    }
+    /**
+     * Check if unit is null or its content is empty
+     * @return boolean true if null or empty unit
+     */
+    boolean isEmpty();
 
-    @Override
-    public void apply(RichTextAreaViewModel viewModel) {
-        if (viewModel.isEditable()) {
-            String text;
-            if (Objects.requireNonNull(viewModel).getDecorationAtParagraph() != null &&
-                    viewModel.getDecorationAtParagraph().hasTableDecoration()) {
-                text = content.replace("\n", "");
-            } else {
-                text = content;
-            }
-            if (!text.isEmpty()) {
-                viewModel.getCommandManager().execute(new InsertCmd(text));
-            }
-        }
-    }
-
-    @Override
-    public BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
-        return viewModel.editableProperty().not();
-    }
 }

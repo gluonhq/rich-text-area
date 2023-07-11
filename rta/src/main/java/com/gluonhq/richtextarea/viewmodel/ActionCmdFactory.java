@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,9 @@
  */
 package com.gluonhq.richtextarea.viewmodel;
 
+import com.gluonhq.emoji.Emoji;
 import com.gluonhq.richtextarea.Selection;
+import com.gluonhq.richtextarea.model.Block;
 import com.gluonhq.richtextarea.model.Decoration;
 import com.gluonhq.richtextarea.model.Document;
 import com.gluonhq.richtextarea.model.TableDecoration;
@@ -47,6 +49,7 @@ public final class ActionCmdFactory {
     private final ActionCmd save = new ActionCmdSave();
 
     private final ActionCmd selectAll = new ActionCmdSelectAll();
+    private final ActionCmd selectNone = new ActionCmdSelectNone();
 
     public ActionCmd copy() {
         return copy;
@@ -84,8 +87,32 @@ public final class ActionCmdFactory {
         return selectAll;
     }
 
+    public ActionCmd selectNone() {
+        return selectNone;
+    }
+
+    public ActionCmd selectAndDecorate(Selection selection, Decoration decoration) {
+        return new ActionCmdSelectAndDecorate(selection, decoration);
+    }
+
     public ActionCmd insertText(String text) {
         return new ActionCmdInsertText(text);
+    }
+
+    public ActionCmd insertEmoji(Emoji emoji) {
+        return new ActionCmdInsertEmoji(emoji, null);
+    }
+
+    public ActionCmd selectAndInsertEmoji(Selection selection, Emoji emoji) {
+        return new ActionCmdInsertEmoji(emoji, selection);
+    }
+
+    public ActionCmd insertBlock(Block block) {
+        return new ActionCmdInsertBlock(block, null);
+    }
+
+    public ActionCmd selectAndInsertBlock(Selection selection, Block block) {
+        return new ActionCmdInsertBlock(block, selection);
     }
 
     public ActionCmd insertTable(TableDecoration tableDecoration) {
@@ -130,6 +157,14 @@ public final class ActionCmdFactory {
 
     public ActionCmd removeText(int caretOffset) {
         return new ActionCmdRemoveText(caretOffset);
+    }
+
+    public ActionCmd removeText(int caretOffset, RichTextAreaViewModel.Remove remove) {
+        return new ActionCmdRemoveText(caretOffset, remove);
+    }
+
+    public ActionCmd replaceText(String text) {
+        return new ActionCmdReplaceText(text);
     }
 
     public ActionCmd decorate(Decoration... decorations) {

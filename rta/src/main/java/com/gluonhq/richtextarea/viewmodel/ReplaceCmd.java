@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023, Gluon
+ * Copyright (c) 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,36 +27,52 @@
  */
 package com.gluonhq.richtextarea.viewmodel;
 
-import javafx.beans.binding.BooleanBinding;
+import com.gluonhq.emoji.Emoji;
+import com.gluonhq.richtextarea.model.Block;
+import com.gluonhq.richtextarea.model.BlockUnit;
+import com.gluonhq.richtextarea.model.EmojiUnit;
+import com.gluonhq.richtextarea.model.UnitBuffer;
 
 import java.util.Objects;
 
-class ActionCmdInsertText implements ActionCmd {
+class ReplaceCmd extends AbstractEditCmd {
 
-    private final String content;
+    private final UnitBuffer content;
 
-    public ActionCmdInsertText(String content) {
-        this.content = content;
+    public ReplaceCmd(String content) {
+        this.content = UnitBuffer.convertTextToUnits(content);
+    }
+
+    public ReplaceCmd(Emoji content) {
+        this.content = new UnitBuffer(new EmojiUnit(content));
+    }
+
+    public ReplaceCmd(Block content) {
+        this.content = new UnitBuffer(new BlockUnit(content));
     }
 
     @Override
-    public void apply(RichTextAreaViewModel viewModel) {
-        if (viewModel.isEditable()) {
-            String text;
-            if (Objects.requireNonNull(viewModel).getDecorationAtParagraph() != null &&
-                    viewModel.getDecorationAtParagraph().hasTableDecoration()) {
-                text = content.replace("\n", "");
-            } else {
-                text = content;
-            }
-            if (!text.isEmpty()) {
-                viewModel.getCommandManager().execute(new InsertCmd(text));
-            }
+    public void doRedo(RichTextAreaViewModel viewModel) {
+        // 1. delete selection
+        Objects.requireNonNull(viewModel).remove(-1, 1);
+
+        // 2. insert content
+        if (content != null) {
+            viewModel.insert(content.getText());
         }
     }
 
     @Override
-    public BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
-        return viewModel.editableProperty().not();
+    public void doUndo(RichTextAreaViewModel viewModel) {
+        // 1. insert content
+        Objects.requireNonNull(viewModel).undo();
+
+        // 2. delete selection
+        viewModel.undo();
+    }
+
+    @Override
+    public String toString() {
+        return "ReplaceCmd[" + super.toString() + ", " + content + "]";
     }
 }

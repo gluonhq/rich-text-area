@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023, Gluon
+ * Copyright (c) 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,38 +25,47 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.gluonhq.richtextarea.viewmodel;
+package com.gluonhq.richtextarea.model;
 
-import javafx.beans.binding.BooleanBinding;
+/**
+ * Block is an unbreakable object that can be added to the PieceTable
+ *
+ */
+public class BlockUnit implements Unit {
 
-import java.util.Objects;
+    private final Block block;
 
-class ActionCmdInsertText implements ActionCmd {
+    public BlockUnit(Block block) {
+        this.block = block;
 
-    private final String content;
-
-    public ActionCmdInsertText(String content) {
-        this.content = content;
     }
 
     @Override
-    public void apply(RichTextAreaViewModel viewModel) {
-        if (viewModel.isEditable()) {
-            String text;
-            if (Objects.requireNonNull(viewModel).getDecorationAtParagraph() != null &&
-                    viewModel.getDecorationAtParagraph().hasTableDecoration()) {
-                text = content.replace("\n", "");
-            } else {
-                text = content;
-            }
-            if (!text.isEmpty()) {
-                viewModel.getCommandManager().execute(new InsertCmd(text));
-            }
-        }
+    public String getText() {
+        return TextBuffer.ZERO_WIDTH_NO_BREAK_SPACE_TEXT + block.getContent() + TextBuffer.ZERO_WIDTH_NO_BREAK_SPACE_TEXT;
     }
 
     @Override
-    public BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
-        return viewModel.editableProperty().not();
+    public String getInternalText() {
+        return TextBuffer.OBJECT_REPLACEMENT_CHARACTER_TEXT;
+    }
+
+    @Override
+    public int length() {
+        return 1;
+    }
+
+    public Block getBlock() {
+        return block;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return block == null || getText() == null || getText().isEmpty();
+    }
+
+    @Override
+    public String toString() {
+        return "BU{" + (isEmpty() ? "" : "'" + block.getContent() + "'") + "}";
     }
 }

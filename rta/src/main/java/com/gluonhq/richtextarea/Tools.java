@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
  */
 package com.gluonhq.richtextarea;
 
+import com.gluonhq.richtextarea.model.TextBuffer;
 import javafx.scene.control.IndexRange;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -100,5 +101,13 @@ public class Tools {
         helperText.setText(TEXT_CONTENT);
         helperText.setBoundsType(TEXT_BOUNDS_TYPE);
         return height;
+    }
+
+    public static String formatTextWithAnchors(String text) {
+        return text.replaceAll("\n", "<n>")
+                .replaceAll(TextBuffer.ZERO_WIDTH_TEXT, "<a>")
+                .replaceAll(TextBuffer.OBJECT_REPLACEMENT_CHARACTER_TEXT, "<b>")
+                .replaceAll(TextBuffer.EMOJI_ANCHOR_TEXT, "<e>")
+                .replaceAll("" + TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR, "<t>");
     }
 }

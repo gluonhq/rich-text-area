@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,39 +25,49 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.gluonhq.richtextarea.viewmodel;
+package com.gluonhq.richtextarea.model;
 
-import java.util.Objects;
+import com.gluonhq.emoji.Emoji;
 
-class InsertTextCmd extends AbstractEditCmd {
+/**
+ * Emoji object that can be added to the PieceTable
+ */
+public class EmojiUnit implements Unit {
 
-    private final String content;
+    private final Emoji emoji;
 
-    public InsertTextCmd(String content) {
-        this.content = content;
+    public EmojiUnit(Emoji emoji) {
+        this.emoji = emoji;
     }
 
     @Override
-    public void doRedo( RichTextAreaViewModel viewModel ) {
-        String text;
-        if (Objects.requireNonNull(viewModel).getDecorationAtParagraph() != null &&
-                viewModel.getDecorationAtParagraph().hasTableDecoration()) {
-            text = content.replace("\n", "");
-        } else {
-            text = content;
-        }
-        if (!text.isEmpty()) {
-            viewModel.insert(text);
-        }
+    public String getText() {
+        return emoji.character();
     }
 
     @Override
-    public void doUndo( RichTextAreaViewModel viewModel ) {
-        Objects.requireNonNull(viewModel).undo();
+    public String getInternalText() {
+        return TextBuffer.EMOJI_ANCHOR_TEXT;
+    }
+
+    @Override
+    public int length() {
+        // Emoji unit in PieceTable counts as one position.
+        return 1;
+    }
+
+    public Emoji getEmoji() {
+        return emoji;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return emoji == null || getText() == null || getText().isEmpty();
     }
 
     @Override
     public String toString() {
-        return "InsertTextCmd[" + super.toString() + ", " + (content != null ? content.replace("\n", "<n>") : "") + "]";
+        return "EU{" + (isEmpty() ? "" : emoji.getUnified()) + "}";
     }
+
 }
