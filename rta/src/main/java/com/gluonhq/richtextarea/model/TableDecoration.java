@@ -163,7 +163,9 @@ public class TableDecoration implements Decoration {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TableDecoration that = (TableDecoration) o;
-        return rows == that.rows && columns == that.columns && Arrays.deepEquals(cellAlignment, that.cellAlignment);
+        return rows == that.rows &&
+                columns == that.columns &&
+                Arrays.deepEquals(cellAlignment, that.cellAlignment);
     }
 
     @Override
