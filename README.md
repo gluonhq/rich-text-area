@@ -1,6 +1,6 @@
 [![Gluon](.github/assets/gluon_logo.svg)](https://gluonhq.com)
 
-[![Build](https://github.com/gluonhq/rich-text-area/actions/workflows/pr-checks.yml/badge.svg)](https://github.com/gluonhq/rich-text-area/actions/workflows/pr-checks.yml)
+[![Build](https://github.com/gluonhq/rich-text-area/actions/workflows/build.yml/badge.svg)](https://github.com/gluonhq/rich-text-area/actions/workflows/build.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/com.gluonhq/rich-text-area)](https://search.maven.org/#search|ga|1|com.gluonhq.rich-text-area)
 [![License](https://img.shields.io/github/license/gluonhq/rich-text-area)](https://opensource.org/licenses/GPL-3.0)
 [![javadoc](https://javadoc.io/badge2/com.gluonhq/rich-text-area/javadoc.svg?color=blue)](https://javadoc.io/doc/com.gluonhq/rich-text-area)
