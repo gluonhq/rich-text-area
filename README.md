@@ -58,9 +58,17 @@ and then simply create an instance and add it to your JavaFX application:
 
 ### Samples
 
-#### RichTextEditor sample
+Several demo samples, from basic to full-featured samples can be found in the samples folder.
 
-One possible use of the RichTextArea control is as a RichTextEditor. The sample includes a number of menus and toolbars that allow the user apply actions over selections or at the caret location.
+See [sample's readme](samples/README.md) for the complete lists of samples and their description.
+
+One of this samples is the [FullFeaturedDemo sample](samples/src/main/java/com/gluonhq/richtextarea/samples/FullFeaturedDemo.java).
+
+#### FullFeaturedDemo sample
+
+One possible use of the RichTextArea control is as a rich text editor. 
+
+The sample includes a number of menus and toolbars that allow the user apply actions over selections or at the caret location.
 
 #### Instructions
 
@@ -69,6 +77,8 @@ To run this sample, using Java 17+, do as follows:
     mvn javafx:run -fsamples
 
 ![rta_editor.png](.github/assets/rta_editor.png)
+
+As mentioned, other samples can be found [here](samples).
 
 ## Issues and Contributions
 

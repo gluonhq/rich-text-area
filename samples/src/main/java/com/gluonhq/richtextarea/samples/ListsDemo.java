@@ -47,7 +47,7 @@ import java.util.List;
  * Sample with a list generated with custom numbered and bulleted decorations
  * created via {@link RichTextArea#paragraphGraphicFactoryProperty()}.
  */
-public class SimpleRTAWithListsDemo extends Application {
+public class ListsDemo extends Application {
 
     private static final String title = "This is a list\n";
     private static final StringBuilder fullText = new StringBuilder(title);
@@ -84,7 +84,7 @@ public class SimpleRTAWithListsDemo extends Application {
 
         BorderPane root = new BorderPane(editor);
         Scene scene = new Scene(root, 600, 500);
-        scene.getStylesheets().add(SimpleRTAWithTextDemo.class.getResource("simplertawithlistsdemo.css").toExternalForm());
+        scene.getStylesheets().add(HighlightDemo.class.getResource("listsDemo.css").toExternalForm());
         stage.setScene(scene);
         stage.setTitle("RTA: Numbered and bulleted list");
         stage.show();

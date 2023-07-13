@@ -112,15 +112,15 @@ import static javafx.scene.text.FontWeight.NORMAL;
  * <p>
  * For more basic test cases with single features, check the rest of the samples.
  */
-public class RichTextEditorDemo extends Application {
+public class FullFeaturedDemo extends Application {
 
     static {
-        try (InputStream resourceAsStream = RichTextEditorDemo.class.getResourceAsStream("/logging.properties")) {
+        try (InputStream resourceAsStream = FullFeaturedDemo.class.getResourceAsStream("/logging.properties")) {
             if (resourceAsStream != null) {
                 LogManager.getLogManager().readConfiguration(resourceAsStream);
             }
         } catch (IOException ex) {
-            Logger.getLogger(RichTextEditorDemo.class.getName()).log(Level.SEVERE, "Error opening logging.properties file", ex);
+            Logger.getLogger(FullFeaturedDemo.class.getName()).log(Level.SEVERE, "Error opening logging.properties file", ex);
         }
     }
 
@@ -318,7 +318,7 @@ public class RichTextEditorDemo extends Application {
         root.setBottom(statusBar);
 
         Scene scene = new Scene(root, 960, 580);
-        scene.getStylesheets().add(RichTextEditorDemo.class.getResource("richtexteditordemo.css").toExternalForm());
+        scene.getStylesheets().add(FullFeaturedDemo.class.getResource("fullFeaturedDemo.css").toExternalForm());
         stage.titleProperty().bind(Bindings.createStringBinding(() -> "Rich Text Editor Demo" + (editor.isModified() ? " *" : ""), editor.modifiedProperty()));
         stage.setScene(scene);
         stage.show();

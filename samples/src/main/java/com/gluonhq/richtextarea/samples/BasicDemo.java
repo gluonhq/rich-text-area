@@ -64,9 +64,9 @@ import java.util.List;
  * 2x1 table.
  * <p>
  * To apply the rest of the control features, some UI is needed for user interaction. See
- * the {@link RichTextEditorDemo} sample for a complete and advanced showcase.
+ * the {@link FullFeaturedDemo} sample for a complete and advanced showcase.
  */
-public class SimpleRTADemo extends Application {
+public class BasicDemo extends Application {
 
     /**
      * Defines the text and paragraph decorations, based on the default presets,

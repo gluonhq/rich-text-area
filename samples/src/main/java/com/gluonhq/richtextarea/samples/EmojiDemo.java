@@ -50,9 +50,9 @@ import java.util.stream.Collectors;
  * emojis.
  * <p>
  * This sample doesn't include a control to select interactively emojis (See
- * {@link SimpleRTAWithEmojiPopupDemo} for that).
+ * {@link EmojiPopupDemo} for that).
  */
-public class SimpleRTAWithEmojiDemo extends Application {
+public class EmojiDemo extends Application {
 
     private static final String text =
             "Document with emojis \ud83d\ude03!\n" +
@@ -83,7 +83,7 @@ public class SimpleRTAWithEmojiDemo extends Application {
 
         BorderPane root = new BorderPane(editor);
         Scene scene = new Scene(root, 800, 300);
-        scene.getStylesheets().add(SimpleRTAWithEmojiDemo.class.getResource("simplertawithemojidemo.css").toExternalForm());
+        scene.getStylesheets().add(EmojiDemo.class.getResource("emojiDemo.css").toExternalForm());
         stage.setScene(scene);
         stage.setTitle("RTA: Text and emojis");
         stage.show();

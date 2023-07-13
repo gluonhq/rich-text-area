@@ -28,7 +28,6 @@
 package com.gluonhq.richtextarea.samples;
 
 import com.gluonhq.emoji.Emoji;
-import com.gluonhq.emoji.EmojiData;
 import com.gluonhq.emoji.EmojiSkinTone;
 import com.gluonhq.richtextarea.RichTextArea;
 import com.gluonhq.richtextarea.model.DecorationModel;
@@ -41,21 +40,18 @@ import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * This basic sample shows how to use the RichTextArea control to render text and
  * emojis, including a popup control to select interactively emojis.
  */
-public class SimpleRTAWithEmojiPopupDemo extends Application {
+public class EmojiPopupDemo extends Application {
 
     /**
      * Defines the text and paragraph decorations, based on the default presets,
@@ -100,7 +96,7 @@ public class SimpleRTAWithEmojiPopupDemo extends Application {
         root.getStyleClass().add("root-box");
 
         Scene scene = new Scene(root, 600, 300);
-        scene.getStylesheets().add(SimpleRTAWithEmojiPopupDemo.class.getResource("simplertawithemojipopupdemo.css").toExternalForm());
+        scene.getStylesheets().add(EmojiPopupDemo.class.getResource("emojiPopupDemo.css").toExternalForm());
         stage.setScene(scene);
         stage.setTitle("RTA: Text and emoji popup");
         stage.show();
