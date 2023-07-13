@@ -222,7 +222,7 @@ public class ParagraphDecoration implements Decoration {
                 that.indentationLevel == indentationLevel &&
                 that.graphicType == graphicType &&
                 that.alignment == alignment &&
-                that.tableDecoration == tableDecoration;
+                Objects.equals(that.tableDecoration, tableDecoration);
     }
 
     @Override

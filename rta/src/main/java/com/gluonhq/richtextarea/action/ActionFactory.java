@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,10 @@
  */
 package com.gluonhq.richtextarea.action;
 
+import com.gluonhq.emoji.Emoji;
 import com.gluonhq.richtextarea.RichTextArea;
+import com.gluonhq.richtextarea.Selection;
+import com.gluonhq.richtextarea.model.Block;
 import com.gluonhq.richtextarea.model.Decoration;
 import com.gluonhq.richtextarea.model.Document;
 import com.gluonhq.richtextarea.model.TableDecoration;
@@ -107,6 +110,42 @@ public class ActionFactory {
             save = new BasicAction(control, action -> ACTION_CMD_FACTORY.save());
         }
         return save;
+    }
+
+    private Action selectAll;
+    public Action selectAll() {
+        if (selectAll == null) {
+            selectAll = new BasicAction(control, action -> ACTION_CMD_FACTORY.selectAll());
+        }
+        return selectAll;
+    }
+
+    private Action selectNone;
+    public Action selectNone() {
+        if (selectNone == null) {
+            selectNone = new BasicAction(control, action -> ACTION_CMD_FACTORY.selectNone());
+        }
+        return selectNone;
+    }
+
+    public Action selectAndDecorate(Selection selection, Decoration decoration) {
+        return new BasicAction(control, action -> ACTION_CMD_FACTORY.selectAndDecorate(selection, decoration));
+    }
+
+    public Action insertEmoji(Emoji emoji) {
+        return new BasicAction(control, action -> ACTION_CMD_FACTORY.insertEmoji(emoji));
+    }
+
+    public Action selectAndInsertEmoji(Selection selection, Emoji emoji) {
+        return new BasicAction(control, action -> ACTION_CMD_FACTORY.selectAndInsertEmoji(selection, emoji));
+    }
+
+    public Action insertBlock(Block block) {
+        return new BasicAction(control, action -> ACTION_CMD_FACTORY.insertBlock(block));
+    }
+
+    public Action selectAndInsertBlock(Selection selection, Block block) {
+        return new BasicAction(control, action -> ACTION_CMD_FACTORY.selectAndInsertBlock(selection, block));
     }
 
     public Action insertTable(TableDecoration tableDecoration) {

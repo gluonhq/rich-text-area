@@ -27,36 +27,44 @@
  */
 package com.gluonhq.richtextarea.viewmodel;
 
-import javafx.beans.binding.BooleanBinding;
+import com.gluonhq.emoji.Emoji;
+import com.gluonhq.richtextarea.model.Block;
+import com.gluonhq.richtextarea.model.BlockUnit;
+import com.gluonhq.richtextarea.model.EmojiUnit;
+import com.gluonhq.richtextarea.model.UnitBuffer;
 
 import java.util.Objects;
 
-class ActionCmdInsertText implements ActionCmd {
+class InsertCmd extends AbstractEditCmd {
 
-    private final String content;
+    private final UnitBuffer content;
 
-    public ActionCmdInsertText(String content) {
-        this.content = content;
+    public InsertCmd(String content) {
+        this.content = UnitBuffer.convertTextToUnits(content);
+    }
+
+    public InsertCmd(Emoji content) {
+        this.content = new UnitBuffer(new EmojiUnit(content));
+    }
+
+    public InsertCmd(Block content) {
+        this.content = new UnitBuffer(new BlockUnit(content));
     }
 
     @Override
-    public void apply(RichTextAreaViewModel viewModel) {
-        if (viewModel.isEditable()) {
-            String text;
-            if (Objects.requireNonNull(viewModel).getDecorationAtParagraph() != null &&
-                    viewModel.getDecorationAtParagraph().hasTableDecoration()) {
-                text = content.replace("\n", "");
-            } else {
-                text = content;
-            }
-            if (!text.isEmpty()) {
-                viewModel.getCommandManager().execute(new InsertCmd(text));
-            }
+    public void doRedo( RichTextAreaViewModel viewModel ) {
+        if (content != null) {
+            viewModel.insert(content.getText());
         }
     }
 
     @Override
-    public BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
-        return viewModel.editableProperty().not();
+    public void doUndo( RichTextAreaViewModel viewModel ) {
+        Objects.requireNonNull(viewModel).undo();
+    }
+
+    @Override
+    public String toString() {
+        return "InsertCmd[" + super.toString() + ", " + content + "]";
     }
 }

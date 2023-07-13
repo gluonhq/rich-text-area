@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
  */
 package com.gluonhq.richtextarea.model;
 
+import com.gluonhq.richtextarea.Selection;
 import javafx.beans.property.ReadOnlyIntegerProperty;
 
 import java.text.CharacterIterator;
@@ -37,12 +38,17 @@ import java.util.function.Consumer;
 public interface TextBuffer {
 
     String ZERO_WIDTH_TEXT = "\u200b";
+    String ZERO_WIDTH_NO_BREAK_SPACE_TEXT = "\ufeff";
+    String OBJECT_REPLACEMENT_CHARACTER_TEXT = "\ufffc";
+    String EMOJI_ANCHOR_TEXT = "\u2063";
     char ZERO_WIDTH_TABLE_SEPARATOR = '\u200b';
 
     int getTextLength();
     ReadOnlyIntegerProperty textLengthProperty();
     String getText();
     String getText(int start, int end);
+    int getInternalPosition(int position);
+    Selection getInternalSelection(Selection selection);
     List<DecorationModel> getDecorationModelList();
 
     CharacterIterator getCharacterIterator();
@@ -65,7 +71,7 @@ public interface TextBuffer {
     void undo();
     void redo();
 
-    void walkFragments(BiConsumer<String, Decoration> onFragment, int start, int end);
+    void walkFragments(BiConsumer<Unit, Decoration> onFragment, int start, int end);
 
     void addChangeListener(Consumer<TextBuffer.Event> listener);
     void removeChangeListener(Consumer<TextBuffer.Event> listener);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023, Gluon
+ * Copyright (c) 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,38 +25,41 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.gluonhq.richtextarea.viewmodel;
+package com.gluonhq.richtextarea.model;
 
-import javafx.beans.binding.BooleanBinding;
+/**
+ * String object that can be added to the PieceTable
+ */
+public class TextUnit implements Unit {
 
-import java.util.Objects;
+    private final String text;
 
-class ActionCmdInsertText implements ActionCmd {
-
-    private final String content;
-
-    public ActionCmdInsertText(String content) {
-        this.content = content;
+    public TextUnit(String text) {
+        this.text = text;
     }
 
     @Override
-    public void apply(RichTextAreaViewModel viewModel) {
-        if (viewModel.isEditable()) {
-            String text;
-            if (Objects.requireNonNull(viewModel).getDecorationAtParagraph() != null &&
-                    viewModel.getDecorationAtParagraph().hasTableDecoration()) {
-                text = content.replace("\n", "");
-            } else {
-                text = content;
-            }
-            if (!text.isEmpty()) {
-                viewModel.getCommandManager().execute(new InsertCmd(text));
-            }
-        }
+    public String getText() {
+        return text;
     }
 
     @Override
-    public BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
-        return viewModel.editableProperty().not();
+    public String getInternalText() {
+        return text;
+    }
+
+    @Override
+    public int length() {
+        return isEmpty() ? 0 : text.length();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return text == null || text.isEmpty();
+    }
+
+    @Override
+    public String toString() {
+        return "TU{'" + (isEmpty() ? "" : text.replace("\n", "<n>")) + "'}";
     }
 }

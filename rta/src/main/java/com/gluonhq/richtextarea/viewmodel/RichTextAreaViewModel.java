@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,8 @@ import com.gluonhq.richtextarea.model.Paragraph;
 import com.gluonhq.richtextarea.model.ParagraphDecoration;
 import com.gluonhq.richtextarea.model.TextBuffer;
 import com.gluonhq.richtextarea.model.TextDecoration;
+import com.gluonhq.richtextarea.model.Unit;
+import com.gluonhq.richtextarea.model.UnitBuffer;
 import com.gluonhq.richtextarea.undo.CommandManager;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -53,6 +55,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DataFormat;
 
 import java.text.BreakIterator;
 import java.util.ArrayList;
@@ -68,11 +71,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static com.gluonhq.richtextarea.RichTextArea.RTA_DATA_FORMAT;
+
 public class RichTextAreaViewModel {
 
     public static final Logger LOGGER = Logger.getLogger(RichTextAreaViewModel.class.getName());
 
     public enum Direction { FORWARD, BACK, UP, DOWN }
+    public enum Remove { LETTER, WORD, LINE }
 
     private final CommandManager<RichTextAreaViewModel> commandManager = new CommandManager<>(this, this::updateProperties);
     private BreakIterator wordIterator;
@@ -80,6 +86,8 @@ public class RichTextAreaViewModel {
 
     private final ObservableList<Paragraph> paragraphList = FXCollections.observableArrayList();
     Paragraph lastParagraph;
+    private final BiFunction<Double, Boolean, Integer> getNextRowPosition;
+
     /// PROPERTIES ///////////////////////////////////////////////////////////////
 
     // textBufferProperty
@@ -120,8 +128,6 @@ public class RichTextAreaViewModel {
             }
         }
     };
-    private final BiFunction<Double, Boolean, Integer> getNextRowPosition;
-
     public final IntegerProperty caretPositionProperty() {
         return caretPositionProperty;
     }
@@ -206,6 +212,18 @@ public class RichTextAreaViewModel {
     }
     public final void setEditable(boolean value) {
         editableProperty.set(value);
+    }
+
+    // tableAllowedProperty
+    private final BooleanProperty tableAllowedProperty = new SimpleBooleanProperty(this, "tableAllowed", true);
+    public final BooleanProperty tableAllowedProperty() {
+       return tableAllowedProperty;
+    }
+    public final boolean isTableAllowed() {
+       return tableAllowedProperty.get();
+    }
+    public final void setTableAllowed(boolean value) {
+        tableAllowedProperty.set(value);
     }
 
     // decorationAtCaretProperty
@@ -345,7 +363,7 @@ public class RichTextAreaViewModel {
             getTextBuffer().insert(text, caretPosition);
             // text (with 0+ LF) inserted to some paragraph or as new paragraphs
         }
-        moveCaretPosition(text.length());
+        moveCaretPosition(UnitBuffer.convertTextToUnits(text).getInternalText().length());
     }
 
     void remove(int caretOffset, int length) {
@@ -419,7 +437,8 @@ public class RichTextAreaViewModel {
         if (selection.isDefined()) {
             String selectedText = getTextBuffer().getText(selection.getStart(), selection.getEnd());
             final ClipboardContent content = new ClipboardContent();
-            content.putString(selectedText);
+            content.put(RTA_DATA_FORMAT, selectedText);
+            content.putString(selectedText.replaceAll(TextBuffer.ZERO_WIDTH_NO_BREAK_SPACE_TEXT, ""));
             if (cutText) {
                 commandManager.execute(new RemoveTextCmd(0));
             }
@@ -453,15 +472,24 @@ public class RichTextAreaViewModel {
             if (url != null) {
                 if (!getSelection().isDefined()) {
                     int caret = getCaretPosition();
-                    commandManager.execute(new InsertTextCmd(url));
+                    commandManager.execute(new InsertCmd(url));
                     setSelection(new Selection(caret, caret + url.length()));
                 }
                 commandManager.execute(new DecorateCmd(TextDecoration.builder().url(url).build()));
             }
-        } else if (clipboardHasString()) {
-            final String text = Clipboard.getSystemClipboard().getString();
+        } else {
+            String text = null;
+            if (Clipboard.getSystemClipboard().hasContent(RTA_DATA_FORMAT)) {
+                text = (String) Clipboard.getSystemClipboard().getContent(RTA_DATA_FORMAT);
+            } else if (clipboardHasString()) {
+                text = Clipboard.getSystemClipboard().getString();
+            }
             if (text != null) {
-                commandManager.execute(new InsertTextCmd(text));
+                if (getSelection().isDefined()) {
+                    commandManager.execute(new ReplaceCmd(text));
+                } else {
+                    commandManager.execute(new InsertCmd(text));
+                }
             }
         }
     }
@@ -528,7 +556,7 @@ public class RichTextAreaViewModel {
         LOGGER.log(Level.FINE, getTextBuffer().toString());
     }
 
-    public void walkFragments(BiConsumer<String, Decoration> onFragment, int start, int end) {
+    public void walkFragments(BiConsumer<Unit, Decoration> onFragment, int start, int end) {
         getTextBuffer().walkFragments(onFragment, start, end);
     }
 
@@ -600,10 +628,22 @@ public class RichTextAreaViewModel {
         moveCaret(Direction.FORWARD, true, false, false, true);
     }
 
-    private void previousWord() {
+    void removeWord() {
+        int wordPos = previousWordPosition();
+        int finalPos = getCaretPosition() - wordPos;
+        commandManager.execute(new RemoveTextCmd(-finalPos, finalPos));
+    }
+
+    void removeLine() {
+        int pos = getNextRowPosition.apply(0d, null);
+        int finalPos = getCaretPosition() - pos;
+        commandManager.execute(new RemoveTextCmd(-finalPos, finalPos));
+    }
+
+    private int previousWordPosition() {
         int textLength = getTextLength();
         if (textLength <= 0) {
-            return;
+            return 0;
         }
         if (wordIterator == null) {
             wordIterator = BreakIterator.getWordInstance();
@@ -616,7 +656,11 @@ public class RichTextAreaViewModel {
                 !Character.isLetterOrDigit(getTextBuffer().charAt(Tools.clamp(0, position, textLength - 1)))) {
             position = wordIterator.preceding(Tools.clamp(0, position, textLength));
         }
-        setCaretPosition(Tools.clamp(0, position, textLength));
+        return Tools.clamp(0, position, textLength);
+    }
+
+    private void previousWord() {
+        setCaretPosition(previousWordPosition());
     }
 
     private void nextWord(Predicate<Character> filter) {
@@ -680,7 +724,9 @@ public class RichTextAreaViewModel {
     }
 
     private Document getCurrentDocument() {
-        return new Document(getTextBuffer().getText(), getTextBuffer().getDecorationModelList(), getCaretPosition());
+        // text and indices should be based on the exportable text
+        int caret = getTextBuffer().getText(0, getCaretPosition()).length();
+        return new Document(getTextBuffer().getText(), getTextBuffer().getDecorationModelList(), caret);
     }
 
     void newDocument() {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023, Gluon
+ * Copyright (c) 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,11 +31,11 @@ import javafx.beans.binding.BooleanBinding;
 
 import java.util.Objects;
 
-class ActionCmdInsertText implements ActionCmd {
+class ActionCmdReplaceText implements ActionCmd {
 
     private final String content;
 
-    public ActionCmdInsertText(String content) {
+    public ActionCmdReplaceText(String content) {
         this.content = content;
     }
 
@@ -49,9 +49,7 @@ class ActionCmdInsertText implements ActionCmd {
             } else {
                 text = content;
             }
-            if (!text.isEmpty()) {
-                viewModel.getCommandManager().execute(new InsertCmd(text));
-            }
+            viewModel.getCommandManager().execute(new ReplaceCmd(text));
         }
     }
 

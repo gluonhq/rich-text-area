@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
  */
 package com.gluonhq.richtextarea;
 
+import com.gluonhq.emoji.EmojiSkinTone;
 import com.gluonhq.richtextarea.action.ActionFactory;
 import com.gluonhq.richtextarea.model.Document;
 import com.gluonhq.richtextarea.model.ParagraphDecoration;
@@ -42,10 +43,15 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.css.PseudoClass;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Control;
 import javafx.scene.control.SkinBase;
+import javafx.scene.input.DataFormat;
 
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -69,6 +75,7 @@ import java.util.function.Function;
 public class RichTextArea extends Control {
 
     public static final String STYLE_CLASS = "rich-text-area";
+    public static final DataFormat RTA_DATA_FORMAT = new DataFormat("text/rich-text-area");
     private static final PseudoClass PSEUDO_CLASS_READONLY = PseudoClass.getPseudoClass("readonly");
 
     private final ActionFactory actionFactory = new ActionFactory(this);
@@ -271,6 +278,84 @@ public class RichTextArea extends Control {
     }
     private final ObjectProperty<Function<Node, Consumer<String>>> linkCallbackFactoryProperty =
             new SimpleObjectProperty<>(this, "linkCallbackFactory", DefaultLinkCallbackFactory.getFactory());
+
+    /**
+     * Defines the action to be performed when enter is pressed. If no action is set,
+     * a new line will be added by default.
+     */
+    private final ObjectProperty<EventHandler<ActionEvent>> onAction = new SimpleObjectProperty<>(this, "onAction");
+
+    public final ObjectProperty<EventHandler<ActionEvent>> onActionProperty() {
+        return onAction;
+    }
+
+    public final EventHandler<ActionEvent> getOnAction() {
+        return onAction.get();
+    }
+
+    public final void setOnAction(EventHandler<ActionEvent> value) {
+        onAction.set(value);
+    }
+
+    /**
+     * Defines the preferred skin tone that will be used
+     */
+    private final ObjectProperty<EmojiSkinTone> skinToneProperty = new SimpleObjectProperty<>(this, "skinTone", EmojiSkinTone.NO_SKIN_TONE);
+
+    public final ObjectProperty<EmojiSkinTone> skinToneProperty() {
+        return skinToneProperty;
+    }
+
+    public final EmojiSkinTone getSkinTone() {
+        return skinToneProperty.get();
+    }
+
+    public final void setSkinTone(EmojiSkinTone value) {
+        skinToneProperty.set(value);
+    }
+
+    /**
+     * The current position of the caret within the text.
+     */
+    final ReadOnlyIntegerWrapper caretPosition = new ReadOnlyIntegerWrapper(this, "caretPosition", 0);
+    public final int getCaretPosition() { return caretPosition.get(); }
+    public final ReadOnlyIntegerProperty caretPositionProperty() { return caretPosition.getReadOnlyProperty(); }
+
+    /**
+     * Defines if tables can be inserted into the document or not. By default, it is allowed
+     */
+    private final BooleanProperty tableAllowedProperty = new SimpleBooleanProperty(this, "tableAllowed", true);
+    public final BooleanProperty tableAllowedProperty() {
+       return tableAllowedProperty;
+    }
+    public final boolean isTableAllowed() {
+       return tableAllowedProperty.get();
+    }
+    public final void setTableAllowed(boolean value) {
+        tableAllowedProperty.set(value);
+    }
+
+    /**
+     * The prompt text to display in the {@code Document}. If set to null or an empty string, no
+     * prompt text is displayed.
+     *
+     * Prompt text changes are not handled by the command manager and therefore cannot be undone/redone.
+     *
+     * @defaultValue An empty String
+     */
+    private StringProperty promptText = new SimpleStringProperty(this, "promptText", "") {
+        @Override protected void invalidated() {
+            // Strip out newlines
+            String txt = get();
+            if (txt != null && txt.contains("\n")) {
+                txt = txt.replace("\n", "");
+                set(txt);
+            }
+        }
+    };
+    public final StringProperty promptTextProperty() { return promptText; }
+    public final String getPromptText() { return promptText.get(); }
+    public final void setPromptText(String value) { promptText.set(value); }
 
     // public methods
 

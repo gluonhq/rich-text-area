@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,11 +27,22 @@
  */
 package com.gluonhq.richtextarea;
 
+import com.gluonhq.emoji.Emoji;
+import com.gluonhq.emoji.EmojiData;
+import com.gluonhq.emoji.EmojiSkinTone;
+import com.gluonhq.emoji.util.TextUtils;
+import com.gluonhq.richtextarea.model.Block;
+import com.gluonhq.richtextarea.model.BlockUnit;
+import com.gluonhq.richtextarea.model.EmojiUnit;
 import com.gluonhq.richtextarea.model.ImageDecoration;
 import com.gluonhq.richtextarea.model.Paragraph;
 import com.gluonhq.richtextarea.model.TextBuffer;
 import com.gluonhq.richtextarea.model.TextDecoration;
+import com.gluonhq.richtextarea.model.TextUnit;
+import com.gluonhq.richtextarea.model.Unit;
+import javafx.geometry.VPos;
 import javafx.scene.Cursor;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.ListCell;
 import javafx.scene.image.Image;
@@ -45,14 +56,11 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.gluonhq.richtextarea.model.TableDecoration.TABLE_SEPARATOR;
@@ -147,9 +155,11 @@ class RichListCell extends ListCell<Paragraph> {
             var positions = new ArrayList<Integer>();
             positions.add(item.getStart());
             AtomicInteger tp = new AtomicInteger(item.getStart());
-            richTextAreaSkin.getViewModel().walkFragments((text, decoration) -> {
-                if (decoration instanceof TextDecoration && !text.isEmpty()) {
+            richTextAreaSkin.getViewModel().walkFragments((unit, decoration) -> {
+                if (decoration instanceof TextDecoration && !unit.isEmpty()) {
                     if (item.getDecoration().hasTableDecoration()) {
+                        // TODO REFACTORING: deal with units inside table cells
+                        String text = unit.getText();
                         AtomicInteger s = new AtomicInteger();
                         IntStream.iterate(text.indexOf(TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR),
                                         index -> index >= 0,
@@ -172,15 +182,18 @@ class RichListCell extends ListCell<Paragraph> {
                             }
                         }
                     } else {
-                        final Text textNode = buildText(text.replace("\n", TextBuffer.ZERO_WIDTH_TEXT), (TextDecoration) decoration);
-                        fragments.add(textNode);
+                        final Node node = buildNode(unit, (TextDecoration) decoration);
+                        fragments.add(node);
                         Color background = ((TextDecoration) decoration).getBackground();
                         if (background != Color.TRANSPARENT) {
                             backgroundIndexRanges.add(new IndexRangeColor(
-                                    length.get(), length.get() + text.length(), background));
+                                    length.get(), length.get() + unit.length(), background));
                         }
                     }
-                    length.addAndGet(text.length());
+                    length.addAndGet(unit.length());
+                    if (unit instanceof EmojiUnit) {
+                        richTextAreaSkin.nonTextNodes.incrementAndGet();
+                    }
                 } else if (decoration instanceof ImageDecoration) {
                     fragments.add(buildImage((ImageDecoration) decoration));
                     length.incrementAndGet();
@@ -195,6 +208,26 @@ class RichListCell extends ListCell<Paragraph> {
             // clean up listeners
             paragraphTile.setParagraph(null, null, null, null);
             setGraphic(null);
+        }
+    }
+
+    private Node buildNode(Unit unit, TextDecoration decoration) {
+        if (unit instanceof TextUnit) {
+            return buildText(unit.getText(), decoration);
+        } else if (unit instanceof BlockUnit) {
+            Block block = ((BlockUnit) unit).getBlock();
+            Text text = buildText(block.getContent(), decoration);
+            text.setTextOrigin(VPos.TOP);
+            return new Group(text);
+        } else if (unit instanceof EmojiUnit) {
+            Emoji emoji = ((EmojiUnit) unit).getEmoji();
+            EmojiSkinTone tone = richTextAreaSkin.getSkinnable().getSkinTone();
+            double emojiSize = Math.ceil(decoration.getFontSize() * TextUtils.EMOJI_SIZE_FONT_FACTOR);
+            return TextUtils.convertUnifiedToImageNode(tone != null ?
+                    EmojiData.emojiWithTone(emoji, tone).getUnified() :
+                    emoji.getUnified(), emojiSize);
+        } else {
+            throw new RuntimeException("Error: Unit " + unit + " not supported yet");
         }
     }
 
@@ -285,6 +318,10 @@ class RichListCell extends ListCell<Paragraph> {
         return getParagraphTile()
                 .map(ParagraphTile::hasCaret)
                 .orElse(false);
+    }
+
+    public void resetCaret() {
+        getParagraphTile().ifPresent(ParagraphTile::resetCaret);
     }
 
     public int getNextRowPosition(double x, boolean down) {

@@ -204,8 +204,8 @@ class ActionCmdTable implements ActionCmd {
     public BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
         return Bindings.createBooleanBinding(
                 () -> {
-                    if (!viewModel.isEditable()) {
-                        // table options disabled if control is not editable
+                    if (!viewModel.isEditable() || !viewModel.isTableAllowed()) {
+                        // table options disabled if control is not editable or if tables are not allowed
                         return true;
                     }
                     if (tableOperation == TableOperation.CREATE_TABLE) {

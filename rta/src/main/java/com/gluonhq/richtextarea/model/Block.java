@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023, Gluon
+ * Copyright (c) 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,38 +25,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.gluonhq.richtextarea.viewmodel;
+package com.gluonhq.richtextarea.model;
 
-import javafx.beans.binding.BooleanBinding;
-
-import java.util.Objects;
-
-class ActionCmdInsertText implements ActionCmd {
+public class Block {
 
     private final String content;
 
-    public ActionCmdInsertText(String content) {
+    public Block(String content) {
         this.content = content;
     }
 
-    @Override
-    public void apply(RichTextAreaViewModel viewModel) {
-        if (viewModel.isEditable()) {
-            String text;
-            if (Objects.requireNonNull(viewModel).getDecorationAtParagraph() != null &&
-                    viewModel.getDecorationAtParagraph().hasTableDecoration()) {
-                text = content.replace("\n", "");
-            } else {
-                text = content;
-            }
-            if (!text.isEmpty()) {
-                viewModel.getCommandManager().execute(new InsertCmd(text));
-            }
-        }
+    public String getContent() {
+        return content;
     }
 
     @Override
-    public BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
-        return viewModel.editableProperty().not();
+    public String toString() {
+        return "Block{'" + content + "'}";
     }
 }

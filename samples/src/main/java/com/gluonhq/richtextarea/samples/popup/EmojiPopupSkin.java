@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023, Gluon
+ * Copyright (c) 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,38 +25,43 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.gluonhq.richtextarea.viewmodel;
+package com.gluonhq.richtextarea.samples.popup;
 
-import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.Bindings;
+import javafx.scene.Node;
+import javafx.scene.control.Skin;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 
-import java.util.Objects;
+public class EmojiPopupSkin implements Skin<EmojiPopup> {
+    private final BorderPane content;
+    private final StackPane stackPane;
+    private final EmojiPopup emojiPopup;
 
-class ActionCmdInsertText implements ActionCmd {
-
-    private final String content;
-
-    public ActionCmdInsertText(String content) {
-        this.content = content;
+    public EmojiPopupSkin(EmojiPopup emojiPopup) {
+        this.emojiPopup = emojiPopup;
+        stackPane = emojiPopup.getRoot();
+        stackPane.setPickOnBounds(false);
+        Bindings.bindContent(stackPane.getStyleClass(), emojiPopup.getStyleClass());
+        content = new BorderPane();
+        emojiPopup.contentNodeProperty().addListener((obs, ov, nv) -> content.setCenter(nv));
+        content.setCenter(emojiPopup.getContentNode());
+        content.getStyleClass().add("content");
+        stackPane.getChildren().add(content);
+    }
+    
+    @Override
+    public EmojiPopup getSkinnable() {
+        return emojiPopup;
     }
 
     @Override
-    public void apply(RichTextAreaViewModel viewModel) {
-        if (viewModel.isEditable()) {
-            String text;
-            if (Objects.requireNonNull(viewModel).getDecorationAtParagraph() != null &&
-                    viewModel.getDecorationAtParagraph().hasTableDecoration()) {
-                text = content.replace("\n", "");
-            } else {
-                text = content;
-            }
-            if (!text.isEmpty()) {
-                viewModel.getCommandManager().execute(new InsertCmd(text));
-            }
-        }
+    public Node getNode() {
+        return stackPane;
     }
 
     @Override
-    public BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
-        return viewModel.editableProperty().not();
+    public void dispose() {
+
     }
 }

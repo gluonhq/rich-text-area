@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023, Gluon
+ * Copyright (c) 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,30 +27,30 @@
  */
 package com.gluonhq.richtextarea.viewmodel;
 
+import com.gluonhq.emoji.Emoji;
+import com.gluonhq.richtextarea.Selection;
 import javafx.beans.binding.BooleanBinding;
 
 import java.util.Objects;
 
-class ActionCmdInsertText implements ActionCmd {
+class ActionCmdInsertEmoji implements ActionCmd {
 
-    private final String content;
+    private final Emoji content;
+    private final Selection selection;
 
-    public ActionCmdInsertText(String content) {
+    public ActionCmdInsertEmoji(Emoji content, Selection selection) {
         this.content = content;
+        this.selection = selection;
     }
 
     @Override
     public void apply(RichTextAreaViewModel viewModel) {
-        if (viewModel.isEditable()) {
-            String text;
-            if (Objects.requireNonNull(viewModel).getDecorationAtParagraph() != null &&
-                    viewModel.getDecorationAtParagraph().hasTableDecoration()) {
-                text = content.replace("\n", "");
+        if (Objects.requireNonNull(viewModel).isEditable() && content != null) {
+            if (selection != null) {
+                viewModel.getCommandManager().execute(new SelectAndReplaceCmd(
+                        viewModel.getTextBuffer().getInternalSelection(selection), content));
             } else {
-                text = content;
-            }
-            if (!text.isEmpty()) {
-                viewModel.getCommandManager().execute(new InsertCmd(text));
+                viewModel.getCommandManager().execute(new InsertCmd(content));
             }
         }
     }

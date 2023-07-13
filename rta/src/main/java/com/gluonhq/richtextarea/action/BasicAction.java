@@ -47,11 +47,13 @@ import java.util.function.Function;
 class BasicAction implements Action {
 
     private RichTextAreaViewModel viewModel;
+    private final RichTextArea control;
     private final Function<Action, ActionCmd> actionCmdFunction;
 
     private final BooleanProperty disabledImplProperty = new SimpleBooleanProperty(this, "disabledImpl", false);
 
     public BasicAction(RichTextArea control, Function<Action, ActionCmd> actionCmdFunction) {
+        this.control = control;
         this.actionCmdFunction = Objects.requireNonNull(actionCmdFunction);
         if (control.getSkin() != null) {
             initialize(control.getSkin());
@@ -85,7 +87,21 @@ class BasicAction implements Action {
 
     @Override
     public void execute(ActionEvent event) {
-        Platform.runLater(() -> getActionCmd().apply(viewModel));
+        if (viewModel != null) {
+            Platform.runLater(() -> getActionCmd().apply(viewModel));
+        } else {
+            control.skinProperty().addListener(new InvalidationListener() {
+                @Override
+                public void invalidated(Observable observable) {
+                    if (control.getSkin() != null) {
+                        if (viewModel != null) {
+                            Platform.runLater(() -> getActionCmd().apply(viewModel));
+                        }
+                        control.skinProperty().removeListener(this);
+                    }
+                }
+            });
+        }
     }
 
     @Override

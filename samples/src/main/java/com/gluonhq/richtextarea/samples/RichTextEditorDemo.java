@@ -27,6 +27,7 @@
  */
 package com.gluonhq.richtextarea.samples;
 
+import com.gluonhq.emoji.Emoji;
 import com.gluonhq.richtextarea.RichTextArea;
 import com.gluonhq.richtextarea.action.Action;
 import com.gluonhq.richtextarea.action.DecorateAction;
@@ -38,6 +39,7 @@ import com.gluonhq.richtextarea.model.ImageDecoration;
 import com.gluonhq.richtextarea.model.ParagraphDecoration;
 import com.gluonhq.richtextarea.model.TableDecoration;
 import com.gluonhq.richtextarea.model.TextDecoration;
+import com.gluonhq.richtextarea.samples.popup.EmojiPopup;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -70,6 +72,7 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -85,7 +88,6 @@ import org.kordamp.ikonli.lineawesome.LineAwesomeSolid;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -183,7 +185,7 @@ public class RichTextEditorDemo extends Application {
 
         ComboBox<String> fontFamilies = new ComboBox<>();
         fontFamilies.getItems().setAll(Font.getFamilies());
-        fontFamilies.setValue("System");
+        fontFamilies.setValue("Arial");
         fontFamilies.setPrefWidth(100);
         new TextDecorateAction<>(editor, fontFamilies.valueProperty(), TextDecoration::getFontFamily, (builder, a) -> builder.fontFamily(a).build());
 
@@ -205,7 +207,7 @@ public class RichTextEditorDemo extends Application {
                 return Double.parseDouble(s);
             }
         });
-        fontSize.setValue(12.0);
+        fontSize.setValue(14.0);
 
         final ColorPicker textForeground = new ColorPicker();
         textForeground.getStyleClass().add("foreground");
@@ -224,6 +226,11 @@ public class RichTextEditorDemo extends Application {
         toolbar.getItems().setAll(
                 actionButton(LineAwesomeSolid.FILE,  editor.getActionFactory().newDocument()),
                 actionButton(LineAwesomeSolid.FOLDER_OPEN, editor.getActionFactory().open(document)),
+                actionButton(LineAwesomeSolid.FOLDER_OPEN, editor.getActionFactory()
+                        .open(new Document("Emoji: \uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74\uDB40\uDC7F! and \ufeff@name\ufeff!",
+                                List.of(new DecorationModel(0, 35,
+                                        TextDecoration.builder().presets().build(),
+                                        ParagraphDecoration.builder().presets().build())), 35))),
                 actionButton(LineAwesomeSolid.SAVE,  editor.getActionFactory().save()),
                 new Separator(Orientation.VERTICAL),
                 actionButton(LineAwesomeSolid.CUT,   editor.getActionFactory().cut()),
@@ -234,6 +241,7 @@ public class RichTextEditorDemo extends Application {
                 actionButton(LineAwesomeSolid.REDO,  editor.getActionFactory().redo()),
                 new Separator(Orientation.VERTICAL),
                 actionImage(LineAwesomeSolid.IMAGE),
+                actionEmoji(),
                 actionHyperlink(LineAwesomeSolid.LINK),
                 actionTable(LineAwesomeSolid.TABLE, td -> editor.getActionFactory().insertTable(td)),
                 new Separator(Orientation.VERTICAL));
@@ -297,6 +305,7 @@ public class RichTextEditorDemo extends Application {
         MenuBar menuBar = new MenuBar(fileMenu, editMenu);
 //        menuBar.setUseSystemMenuBar(true);
 
+        editor.setPromptText("Hello!");
         BorderPane root = new BorderPane(editor);
         root.setTop(new VBox(menuBar, toolbar, fontsToolbar, paragraphToolbar));
         root.setBottom(statusBar);
@@ -356,6 +365,24 @@ public class RichTextEditorDemo extends Application {
             }
         });
         return button;
+    }
+
+    private Button actionEmoji() {
+        Region region = new Region();
+        region.getStyleClass().addAll("icon", "emoji-outline");
+        Button emojiButton = new Button(null, region);
+        emojiButton.getStyleClass().add("emoji-button");
+        emojiButton.setOnAction(e -> {
+            EmojiPopup emojiPopup = new EmojiPopup();
+            emojiPopup.setSkinTone(editor.getSkinTone());
+            editor.skinToneProperty().bindBidirectional(emojiPopup.skinToneProperty());
+            emojiPopup.setOnAction(ev -> {
+                Emoji emoji = (Emoji) ev.getSource();
+                editor.getActionFactory().insertEmoji(emoji).execute(new ActionEvent());
+            });
+            emojiPopup.show(emojiButton);
+        });
+        return emojiButton;
     }
 
     private Button actionHyperlink(Ikon ikon) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -208,7 +208,7 @@ public class PieceTableTests {
     }
 
     @Test
-    @DisplayName("Partial text from mutiple pieces")
+    @DisplayName("Partial text from multiple pieces")
     public void getPartialTextFromMultiplePieces() {
         PieceTable pt = new PieceTable(FACE_MODEL);
         pt.insert("Even ", 0);
@@ -228,7 +228,7 @@ public class PieceTableTests {
         pt.decorate(1, 2, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
         Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals("r"))
+                .filter(piece -> piece.getInternalText().equals("r"))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontWeight() == FontWeight.BOLD)
         );
     }
@@ -241,7 +241,7 @@ public class PieceTableTests {
         pt.decorate(1, 2, TextDecoration.builder().fontPosture(FontPosture.ITALIC).build());
         Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals("r"))
+                .filter(piece -> piece.getInternalText().equals("r"))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontPosture() == FontPosture.ITALIC)
         );
     }
@@ -254,7 +254,7 @@ public class PieceTableTests {
         pt.decorate(1, 2, TextDecoration.builder().foreground(Color.AQUA).build());
         Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals("r"))
+                .filter(piece -> piece.getInternalText().equals("r"))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getForeground() == Color.AQUA)
         );
     }
@@ -267,7 +267,7 @@ public class PieceTableTests {
         pt.decorate(1, 2, TextDecoration.builder().background(Color.AQUA).build());
         Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals("r"))
+                .filter(piece -> piece.getInternalText().equals("r"))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getBackground() == Color.AQUA)
         );
     }
@@ -280,7 +280,7 @@ public class PieceTableTests {
         pt.decorate(1, 2, TextDecoration.builder().fontSize(10).build());
         Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals("r"))
+                .filter(piece -> piece.getInternalText().equals("r"))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontSize() == 10)
         );
     }
@@ -293,7 +293,7 @@ public class PieceTableTests {
         pt.decorate(1, 2, TextDecoration.builder().fontFamily("Serif").build());
         Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals("r"))
+                .filter(piece -> piece.getInternalText().equals("r"))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontFamily().equals("Serif"))
         );
     }
@@ -306,7 +306,7 @@ public class PieceTableTests {
         pt.decorate(0, 1, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
         Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals("O"))
+                .filter(piece -> piece.getInternalText().equals("O"))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontWeight() == FontWeight.BOLD)
         );
     }
@@ -319,7 +319,7 @@ public class PieceTableTests {
         pt.decorate(text.length() - 1, text.length(), TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
         Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals("t"))
+                .filter(piece -> piece.getInternalText().equals("t"))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontWeight() == FontWeight.BOLD)
         );
     }
@@ -333,7 +333,7 @@ public class PieceTableTests {
         pt.decorate(1, 2, TextDecoration.builder().fontPosture(FontPosture.ITALIC).build());
         Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals("r"))
+                .filter(piece -> piece.getInternalText().equals("r"))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontWeight() == FontWeight.BOLD &&
                         ((TextDecoration) piece.getDecoration()).getFontPosture() == FontPosture.ITALIC)
                 
@@ -349,7 +349,7 @@ public class PieceTableTests {
         pt.decorate(1, 2, TextDecoration.builder().fontSize(20).build());
         Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals("r"))
+                .filter(piece -> piece.getInternalText().equals("r"))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontWeight() == FontWeight.BOLD &&
                         ((TextDecoration) piece.getDecoration()).getFontSize() == 20)
 
@@ -364,16 +364,16 @@ public class PieceTableTests {
         pt.decorate(18, 21, TextDecoration.builder().fontPosture(FontPosture.ITALIC).build());
         Assertions.assertEquals("Original Text One Two Three", pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals("One "))
+                .filter(piece -> piece.getInternalText().equals("One "))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontWeight() == FontWeight.BOLD)
         );
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals("Two"))
+                .filter(piece -> piece.getInternalText().equals("Two"))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontWeight() == FontWeight.BOLD &&
                         ((TextDecoration) piece.getDecoration()).getFontPosture() == FontPosture.ITALIC)
         );
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals(" Three"))
+                .filter(piece -> piece.getInternalText().equals(" Three"))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontWeight() == FontWeight.BOLD)
         );
     }
@@ -388,7 +388,7 @@ public class PieceTableTests {
         pt.decorate(9, 15, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
         Assertions.assertEquals("Original Bigger Bigger Text", pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals("Bigger"))
+                .filter(piece -> piece.getInternalText().equals("Bigger"))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontWeight() == FontWeight.BOLD)
         );
     }
@@ -402,15 +402,15 @@ public class PieceTableTests {
         pt.decorate(6, 18, TextDecoration.builder().fontWeight(FontWeight.BOLD).build());
         Assertions.assertEquals("Original Bigger Text", pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals("al "))
+                .filter(piece -> piece.getInternalText().equals("al "))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontWeight() == FontWeight.BOLD)
         );
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals("Bigger "))
+                .filter(piece -> piece.getInternalText().equals("Bigger "))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontWeight() == FontWeight.BOLD)
         );
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals("Te"))
+                .filter(piece -> piece.getInternalText().equals("Te"))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontWeight() == FontWeight.BOLD)
         );
     }
@@ -425,16 +425,16 @@ public class PieceTableTests {
         pt.decorate(9, 15, TextDecoration.builder().fontPosture(FontPosture.ITALIC).build());
         Assertions.assertEquals("Original Bigger Text", pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals("al "))
+                .filter(piece -> piece.getInternalText().equals("al "))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontWeight() == FontWeight.BOLD)
         );
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals("Bigger"))
+                .filter(piece -> piece.getInternalText().equals("Bigger"))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontWeight() == FontWeight.BOLD &&
                                    ((TextDecoration) piece.getDecoration()).getFontPosture() == FontPosture.ITALIC)
         );
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals("Te"))
+                .filter(piece -> piece.getInternalText().equals("Te"))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontWeight() == FontWeight.BOLD)
         );
     }
@@ -450,7 +450,7 @@ public class PieceTableTests {
         pt.decorate(9, 15, TextDecoration.builder().fontPosture(FontPosture.ITALIC).build());
         Assertions.assertEquals("Original Bigger Bigger Text", pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals("Bigger"))
+                .filter(piece -> piece.getInternalText().equals("Bigger"))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontWeight() == FontWeight.BOLD &&
                                    ((TextDecoration) piece.getDecoration()).getFontPosture() == FontPosture.ITALIC)
         );
@@ -467,7 +467,7 @@ public class PieceTableTests {
         pt.decorate(9, 15, TextDecoration.builder().foreground(Color.AQUA).build());
         Assertions.assertEquals("Original Bigger Bigger Text", pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals("Bigger"))
+                .filter(piece -> piece.getInternalText().equals("Bigger"))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontSize() == 20 &&
                         ((TextDecoration) piece.getDecoration()).getForeground() == Color.AQUA)
         );
@@ -482,7 +482,7 @@ public class PieceTableTests {
         pt.append(appended);
         Assertions.assertEquals(FACE_MODEL.getText() + appended, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals(appended))
+                .filter(piece -> piece.getInternalText().equals(appended))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontSize() == 20));
     }
 
@@ -498,7 +498,7 @@ public class PieceTableTests {
                 pt.getText()
         );
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals(insert))
+                .filter(piece -> piece.getInternalText().equals(insert))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontSize() == 20));
     }
 
@@ -515,7 +515,7 @@ public class PieceTableTests {
                 pt.getText()
         );
         Assertions.assertTrue(pt.pieces.stream()
-                .filter(piece -> piece.getText().equals(insert))
+                .filter(piece -> piece.getInternalText().equals(insert))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontSize() == defaultFontSize));
     }
 
