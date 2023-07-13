@@ -1,0 +1,36 @@
+.root-box {
+    -fx-alignment: bottom-right;
+    -fx-padding: 20;
+}
+
+.root-box > .rich-text-area {
+    -fx-background-color: whitesmoke;
+    -fx-padding: 0;
+}
+
+.root-box > .rich-text-area > .paragraph-list-view {
+    -fx-padding: 10;
+    -fx-background-color: lightgreen;
+    -fx-border-color: darkgreen;
+}
+
+.root-box > .rich-text-area > .paragraph-list-view > .virtual-flow > .clipped-container > .sheet > .list-cell,
+.root-box > .rich-text-area > .paragraph-list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:odd {
+    -fx-background: transparent;
+    -fx-background-color: transparent;
+}
+
+.root-box > .emoji-button {
+    -fx-padding: 5.5;
+}
+
+.root-box > .emoji-button > .icon.emoji-outline {
+    -fx-shape: "m12 18.663a6.817 6.817 0 0 1 -5.491-2.7.75.75 0 1 1 1.207-.89 5.31 5.31 0 0 0 4.284 2.09 5.3 5.3 0 0 0 4.3-2.105.75.75 0 1 1 1.211.884 6.8 6.8 0 0 1 -5.511 2.721zm0-16.163a9.188 9.188 0 0 0 -9.5 9.5 9.188 9.188 0 0 0 9.5 9.5 9.188 9.188 0 0 0 9.5-9.5 9.188 9.188 0 0 0 -9.5-9.5m0-1.5a10.7 10.7 0 0 1 11 11 10.7 10.7 0 0 1 -11 11 10.7 10.7 0 0 1 -11-11 10.7 10.7 0 0 1 11-11zm-3.5 7c-.828 0-1.5.9-1.5 2s.672 2 1.5 2 1.5-.895 1.5-2-.672-2-1.5-2zm7 0c-.828 0-1.5.9-1.5 2s.672 2 1.5 2 1.5-.895 1.5-2-.672-2-1.5-2z";
+    -fx-background-color: black;
+    -fx-min-width: 18px;
+    -fx-pref-width: 18px;
+    -fx-max-width: 18px;
+    -fx-min-height: 18px;
+    -fx-pref-height: 18px;
+    -fx-max-height: 18px;
+}

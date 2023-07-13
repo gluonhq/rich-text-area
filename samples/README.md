@@ -1,8 +1,8 @@
-# The Rich Text Area Samples
+# The RichTextArea Samples
 
 ## SimpleRTADemo
 
-The most simple use case of the Rich Text Area control.
+The most simple use case of the RichTextArea control.
 
 ### Usage
 
@@ -14,7 +14,7 @@ mvn javafx:run -fsamples -Dmain.class=com.gluonhq.richtextarea.samples.SimpleRTA
 
 ## SimpleRTAWithTextDemo
 
-A simple use case of the Rich Text Area control, showing some text and highlighting some keywords programmatically.
+A simple use case of the RichTextArea control, showing some text and highlighting some keywords.
 
 ### Usage
 
@@ -26,7 +26,7 @@ mvn javafx:run -fsamples -Dmain.class=com.gluonhq.richtextarea.samples.SimpleRTA
 
 ## SimpleRTAWithListsDemo
 
-A simple use case of the Rich Text Area control, showing lists with different indentation, crated programmatically.
+A simple use case of the RichTextArea control, showing lists with different indentation and list styling.
 
 ### Usage
 
@@ -36,9 +36,21 @@ To run this sample, using Java 17+, do as follows:
 mvn javafx:run -fsamples -Dmain.class=com.gluonhq.richtextarea.samples.SimpleRTAWithListsDemo
 ```
 
+## SimpleRTAWithActionsDemo
+
+A simple use case of the RichTextArea control, showing how basic actions can be applied.
+
+### Usage
+
+To run this sample, using Java 17+, do as follows:
+
+```
+mvn javafx:run -fsamples -Dmain.class=com.gluonhq.richtextarea.samples.SimpleRTAWithActionsDemo
+```
+
 ## SimpleRTAWithEmojiDemo
 
-A simple use case of the Rich Text Area control, showing text and emojis.
+A simple use case of the RichTextArea control, showing text and emojis.
 
 ### Usage
 
@@ -48,9 +60,21 @@ To run this sample, using Java 17+, do as follows:
 mvn javafx:run -fsamples -Dmain.class=com.gluonhq.richtextarea.samples.SimpleRTAWithEmojiDemo
 ```
 
+## SimpleRTAWithEmojiPopupDemo
+
+A simple use case of the RichTextArea control, in combination with an emoji popup control.
+
+### Usage
+
+To run this sample, using Java 17+, do as follows:
+
+```
+mvn javafx:run -fsamples -Dmain.class=com.gluonhq.richtextarea.samples.SimpleRTAWithEmojiPopupDemo
+```
+
 ## RichTextEditorDemo
 
-A complete use case of the Rich Text Area control as a RichTextEditor. 
+A complete use case of the RichTextArea control as a rich text editor. 
 The sample includes a number of menus and toolbars that allow the user to apply actions over selections or at the caret location.
 
 ### Usage

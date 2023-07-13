@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,6 +105,13 @@ import static javafx.scene.text.FontPosture.REGULAR;
 import static javafx.scene.text.FontWeight.BOLD;
 import static javafx.scene.text.FontWeight.NORMAL;
 
+/**
+ * This is an advance sample that shows how to create a rich text editor, by using
+ * the RichTextArea control and adding actions for the user interaction, via toolbars and
+ * menus, and most of the features of the control are showcased in this sample.
+ * <p>
+ * For more basic test cases with single features, check the rest of the samples.
+ */
 public class RichTextEditorDemo extends Application {
 
     static {
