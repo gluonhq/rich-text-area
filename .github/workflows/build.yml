@@ -29,7 +29,7 @@ jobs:
       - name: Publish Snapshots
         if: github.ref == 'refs/heads/main'
         run: |
-          ver=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          ver=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout -f rta)
           if [[ $ver == *"SNAPSHOT"* ]]; then
               mvn -B -ntp deploy -f rta
           fi
