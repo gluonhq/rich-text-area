@@ -24,6 +24,8 @@ Based on the combination of VirtualFlow and multiple TextFlow controls, the Rich
 - Emoji support
 - … (and more to come)
 
+![rta_editor.png](.github/assets/rta_editor.png)
+
 ### License
 
 The RichTextArea control is available for free under the GPLv3 license. If you create an Open Source application, you can use our software for free.
@@ -58,25 +60,7 @@ and then simply create an instance and add it to your JavaFX application:
 
 ### Samples
 
-Several demo samples, from basic to full-featured samples can be found in the [samples folder](samples).
-
-One of these samples is the [FullFeaturedDemo sample](samples/src/main/java/com/gluonhq/richtextarea/samples/FullFeaturedDemo.java).
-
-#### FullFeaturedDemo sample
-
-One possible use of the RichTextArea control is as a rich text editor. 
-
-The sample includes a number of menus and toolbars that allow the user apply actions over selections or at the caret location.
-
-#### Instructions
-
-To run this sample, using Java 17+, do as follows:
-
-    mvn javafx:run -fsamples
-
-![rta_editor.png](.github/assets/rta_editor.png)
-
-As mentioned, other samples can be found [here](samples).
+Multiple samples, from basic to full-featured can be found in the [samples folder](samples).
 
 ## Issues and Contributions
 
