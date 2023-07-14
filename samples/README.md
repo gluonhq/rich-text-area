@@ -41,6 +41,8 @@ To run this sample, using Java 17+, do as follows:
 mvn javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.BasicDemo
 ```
 
+![rta_editor.png](../.github/assets/BasicDemo.png)
+
 ## HighlightDemo
 
 The [HighlightDemo](/samples/src/main/java/com/gluonhq/richtextarea/samples/HighlightDemo.java) shows how to use the 
@@ -55,6 +57,8 @@ To run this sample, using Java 17+, do as follows:
 mvn javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.HighlightDemo
 ```
 
+![rta_editor.png](../.github/assets/HighlightDemo.png)
+
 ## ListsDemo
 
 The [ListsDemo](/samples/src/main/java/com/gluonhq/richtextarea/samples/ListsDemo.java) shows a list, generated with 
@@ -67,6 +71,8 @@ To run this sample, using Java 17+, do as follows:
 ```
 mvn javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.ListsDemo
 ```
+
+![rta_editor.png](../.github/assets/ListsDemo.png)
 
 ## ActionsDemo
 
@@ -87,6 +93,8 @@ To run this sample, using Java 17+, do as follows:
 mvn javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.ActionsDemo
 ```
 
+![rta_editor.png](../.github/assets/ActionsDemo.png)
+
 ## EmojiDemo
 
 The [EmojiDemo](/samples/src/main/java/com/gluonhq/richtextarea/samples/EmojiDemo.java) shows how to use the 
@@ -102,6 +110,8 @@ To run this sample, using Java 17+, do as follows:
 mvn javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.EmojiDemo
 ```
 
+![rta_editor.png](../.github/assets/EmojiDemo.png)
+
 ## EmojiPopupDemo
 
 The [EmojiPopupDemo](/samples/src/main/java/com/gluonhq/richtextarea/samples/EmojiPopupDemo.java) shows how to use the
@@ -114,6 +124,8 @@ To run this sample, using Java 17+, do as follows:
 ```
 mvn javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.EmojiPopupDemo
 ```
+
+![rta_editor.png](../.github/assets/EmojiPopupDemo.png)
 
 ## FullFeaturedDemo
 
