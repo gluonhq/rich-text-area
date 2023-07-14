@@ -36,26 +36,24 @@ The RichTextArea control is available for free under the GPLv3 license. If you c
 To use the RichTextArea control in your project add the following dependency:
 
 ```
-    <dependencies>
-        <dependency>
-            <groupId>com.gluonhq</groupId>
-            <artifactId>rich-text-area</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-    </dependencies>
+<dependency>
+    <groupId>com.gluonhq</groupId>
+    <artifactId>rich-text-area</artifactId>
+    <version>1.0.0</version>
+</dependency>
  ```
 
 and then simply create an instance and add it to your JavaFX application:
 
 ```
-    @Override
-    public void start(Stage stage) {
-        RichTextArea editor = new RichTextArea();
-        BorderPane root = new BorderPane(editor);
-        Scene scene = new Scene(root, 800, 600);
-        stage.setScene(scene);
-        stage.show();
-    }
+@Override
+public void start(Stage stage) {
+    RichTextArea editor = new RichTextArea();
+    BorderPane root = new BorderPane(editor);
+    Scene scene = new Scene(root, 800, 600);
+    stage.setScene(scene);
+    stage.show();
+}
 ```
 
 ### Samples
