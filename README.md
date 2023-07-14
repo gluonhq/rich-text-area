@@ -58,11 +58,9 @@ and then simply create an instance and add it to your JavaFX application:
 
 ### Samples
 
-Several demo samples, from basic to full-featured samples can be found in the samples folder.
+Several demo samples, from basic to full-featured samples can be found in the [samples folder](samples).
 
-See [sample's readme](samples/README.md) for the complete lists of samples and their description.
-
-One of this samples is the [FullFeaturedDemo sample](samples/src/main/java/com/gluonhq/richtextarea/samples/FullFeaturedDemo.java).
+One of these samples is the [FullFeaturedDemo sample](samples/src/main/java/com/gluonhq/richtextarea/samples/FullFeaturedDemo.java).
 
 #### FullFeaturedDemo sample
 
