@@ -77,13 +77,13 @@ public final class PieceTable extends AbstractTextBuffer {
         }
         this.originalText = new UnitBuffer(List.of());
         // For each decoration in the document:
+        AtomicInteger accum = new AtomicInteger(0);
         decorations.forEach(d -> {
-            // parse text that spans the decoration into units
+            // parse external text that spans the decoration into units
             UnitBuffer units = UnitBuffer.convertTextToUnits(text.substring(d.getStart(), d.getStart() + d.getLength()));
             if (units.isEmpty()) {
                 units.append(new TextUnit(""));
             }
-            AtomicInteger accum = new AtomicInteger(d.getStart());
             // For each unit present:
             units.getUnitList().forEach(unit -> {
                 originalText.append(unit);
