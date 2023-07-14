@@ -1,0 +1,22 @@
+.rich-text-area {
+    -fx-background-color: whitesmoke;
+    -fx-padding: 20;
+}
+
+.rich-text-area > .paragraph-list-view {
+    -fx-padding: 10;
+    -fx-background-color: lightyellow;
+    -fx-border-color: darkred;
+}
+
+.rich-text-area > .paragraph-list-view > .virtual-flow > .clipped-container > .sheet > .list-cell > .paragraph-tile > .graphic-box {
+    -fx-padding: 0 4 0 0;
+}
+
+.rich-text-area > .paragraph-list-view > .virtual-flow > .clipped-container > .sheet > .list-cell,
+.rich-text-area > .paragraph-list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:odd,
+.rich-text-area > .paragraph-list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:odd,
+.rich-text-area > .paragraph-list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected {
+    -fx-background: transparent;
+    -fx-background-color: transparent;
+}
