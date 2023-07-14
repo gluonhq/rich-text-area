@@ -7,7 +7,7 @@
 
 ## BasicDemo
 
-The [BasicDemo](samples/src/main/java/com/gluonhq/richtextarea/samples/BasicDemo.java) is the most simple use case of 
+The [BasicDemo](/samples/src/main/java/com/gluonhq/richtextarea/samples/BasicDemo.java) is the most simple use case of 
 the RichTextArea control: it shows a prompt message, and the user can add text.
 
 While all the control features are available, there are no menus or toolbars included, so user interaction is limited 
