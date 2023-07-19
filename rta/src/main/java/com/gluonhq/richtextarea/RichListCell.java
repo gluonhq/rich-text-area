@@ -158,27 +158,36 @@ class RichListCell extends ListCell<Paragraph> {
             richTextAreaSkin.getViewModel().walkFragments((unit, decoration) -> {
                 if (decoration instanceof TextDecoration && !unit.isEmpty()) {
                     if (item.getDecoration().hasTableDecoration()) {
-                        // TODO REFACTORING: deal with units inside table cells
-                        String text = unit.getText();
-                        AtomicInteger s = new AtomicInteger();
-                        IntStream.iterate(text.indexOf(TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR),
-                                        index -> index >= 0,
-                                        index -> text.indexOf(TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR, index + 1))
-                                .boxed()
-                                .forEach(i -> {
-                                    String tableText = text.substring(s.getAndSet(i + 1), i + 1);
-                                    final Text textNode = buildText(tableText, (TextDecoration) decoration);
-                                    textNode.getProperties().put(TABLE_SEPARATOR, tp.get());
-                                    fragments.add(textNode);
-                                    positions.add(tp.addAndGet(tableText.length()));
-                                });
-                        if (s.get() < text.length()) {
-                            String tableText = text.substring(s.get()).replace("\n", TextBuffer.ZERO_WIDTH_TEXT);
-                            final Text textNode = buildText(tableText, (TextDecoration) decoration);
-                            textNode.getProperties().put(TABLE_SEPARATOR, tp.getAndAdd(tableText.length()));
-                            fragments.add(textNode);
-                            if (text.substring(s.get()).contains("\n")) {
-                                positions.add(tp.get());
+                        if (unit instanceof TextUnit) {
+                            String text = unit.getText();
+                            AtomicInteger s = new AtomicInteger();
+                            IntStream.iterate(text.indexOf(TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR),
+                                            index -> index >= 0,
+                                            index -> text.indexOf(TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR, index + 1))
+                                    .boxed()
+                                    .forEach(i -> {
+                                        String tableText = text.substring(s.getAndSet(i + 1), i + 1);
+                                        final Text textNode = buildText(tableText, (TextDecoration) decoration);
+                                        textNode.getProperties().put(TABLE_SEPARATOR, tp.get());
+                                        fragments.add(textNode);
+                                        positions.add(tp.addAndGet(tableText.length()));
+                                    });
+                            if (s.get() < text.length()) {
+                                String tableText = text.substring(s.get()).replace("\n", TextBuffer.ZERO_WIDTH_TEXT);
+                                final Text textNode = buildText(tableText, (TextDecoration) decoration);
+                                textNode.getProperties().put(TABLE_SEPARATOR, tp.getAndAdd(tableText.length()));
+                                fragments.add(textNode);
+                                if (text.substring(s.get()).contains("\n")) {
+                                    positions.add(tp.get());
+                                }
+                            }
+                        } else {
+                            final Node node = buildNode(unit, (TextDecoration) decoration);
+                            node.getProperties().put(TABLE_SEPARATOR, tp.getAndIncrement());
+                            fragments.add(node);
+                            length.addAndGet(unit.length());
+                            if (unit instanceof EmojiUnit) {
+                                richTextAreaSkin.nonTextNodes.incrementAndGet();
                             }
                         }
                     } else {
