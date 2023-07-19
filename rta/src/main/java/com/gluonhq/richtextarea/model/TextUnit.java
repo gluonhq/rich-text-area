@@ -27,6 +27,8 @@
  */
 package com.gluonhq.richtextarea.model;
 
+import com.gluonhq.richtextarea.Tools;
+
 /**
  * String object that can be added to the PieceTable
  */
@@ -60,6 +62,6 @@ public class TextUnit implements Unit {
 
     @Override
     public String toString() {
-        return "TU{'" + (isEmpty() ? "" : text.replace("\n", "<n>")) + "'}";
+        return "TU{'" + (isEmpty() ? "" : Tools.formatTextWithAnchors(text)) + "'}";
     }
 }
