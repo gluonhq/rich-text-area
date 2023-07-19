@@ -1,0 +1,16 @@
+.rich-text-area {
+    -fx-background-color: whitesmoke;
+    -fx-padding: 20;
+}
+
+.rich-text-area > .paragraph-list-view {
+    -fx-padding: 10;
+    -fx-background-color: lightsteelblue;
+    -fx-border-color: navy;
+}
+
+.rich-text-area > .paragraph-list-view > .virtual-flow > .clipped-container > .sheet > .list-cell,
+.rich-text-area > .paragraph-list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:odd {
+    -fx-background: transparent;
+    -fx-background-color: transparent;
+}

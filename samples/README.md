@@ -127,6 +127,21 @@ mvn javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.EmojiPopupDemo
 
 ![rta_editor.png](../.github/assets/EmojiPopupDemo.png)
 
+## TableDemo
+
+The [TableDemo](/samples/src/main/java/com/gluonhq/richtextarea/samples/TableDemo.java) shows how to use the
+RichTextArea control to render a table, embedded into the text, including text and emojis.
+
+### Usage
+
+To run this sample, using Java 17+, do as follows:
+
+```
+mvn javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.TableDemo
+```
+
+![rta_editor.png](../.github/assets/TableDemo.png)
+
 ## FullFeaturedDemo
 
 The [FullFeaturedDemo](/samples/src/main/java/com/gluonhq/richtextarea/samples/FullFeaturedDemo.java) shows a complete
