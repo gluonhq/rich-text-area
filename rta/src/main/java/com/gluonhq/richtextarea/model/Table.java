@@ -28,6 +28,7 @@
 package com.gluonhq.richtextarea.model;
 
 import com.gluonhq.richtextarea.Selection;
+import com.gluonhq.richtextarea.Tools;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -64,6 +65,11 @@ public class Table {
     private final int start;
     private final int rows;
     private final int columns;
+
+    /**
+     * list of global indices of the table separator chars '\u200b', referred to the
+     * start of the document
+     */
     private final List<Integer> positions;
     private final List<String> textCells;
 
@@ -199,7 +205,7 @@ public class Table {
         for (int i = rows - 1; i >= 0; i--) {
             // remove text from current column, for each row
             int posStart = currentCol == 0 && i == 0 ? 0 : positions.get(i * columns + currentCol - 1) - start;
-            int posEnd = positions.get(i * columns + currentCol) - start;
+            int posEnd = positions.get(i * columns + currentCol) - start + (currentCol == 0 && i == 0 ? 1 : 0);
             newText = newText.substring(0, posStart) + newText.substring(posEnd);
         }
         return newText;
@@ -229,7 +235,7 @@ public class Table {
         return currentRow * columns + currentCol;
     }
 
-    private List<Integer> getTablePositions() {
+    List<Integer> getTablePositions() {
         List<Integer> positions = IntStream.iterate(text.indexOf(TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR),
                         index -> index >= 0,
                         index -> text.indexOf(TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR, index + 1))
