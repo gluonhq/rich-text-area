@@ -117,6 +117,65 @@ public class UnitBuffer {
     }
 
     /**
+     * Inserts a Unit into the buffer after a given position within its
+     * internal length, splitting in two the unit found at that position,
+     * if needed
+     * @param unit the unit to insert into this buffer
+     * @param position the position within the buffer range
+     */
+    public void insert(Unit unit, int position) {
+        if (unit == null) {
+            return;
+        }
+        if (position < 0 || position > length()) {
+            return;
+        }
+        int accum = 0;
+        List<Unit> buffer = new ArrayList<>();
+        for (Unit u : unitList) {
+            buffer.add(u);
+            if (u.isEmpty()) continue;
+            if (accum <= position && position <= accum + u.length()) {
+                if (u instanceof TextUnit) {
+                    buffer.remove(u);
+                    String substring0 = u.getText().substring(0, position - accum);
+                    if (substring0.length() > 0) {
+                        buffer.add(new TextUnit(substring0));
+                    }
+                    buffer.add(unit);
+                    String substring1 = u.getText().substring(position - accum);
+                    if (substring1.length() > 0) {
+                        buffer.add(new TextUnit(substring1));
+                    }
+                } else {
+                    buffer.add(unit);
+                }
+                accum += unit.length();
+            }
+            accum += u.length();
+        }
+        unitList.clear();
+        unitList.addAll(buffer);
+    }
+
+    /**
+     * Removes content from the buffer of a given range within its
+     * internal length, splitting in two the units found at the limits,
+     * if needed
+     * @param start the initial position of the range
+     * @param end the end position of the range
+     */
+    public void remove(int start, int end) {
+        if (Math.min(start, end) < 0 || Math.max(start, end) > length()) {
+            return;
+        }
+        TextUnit unit = new TextUnit("\u2065");
+        insert(unit, Math.max(start, end));
+        insert(unit, Math.min(start, end));
+        unitList.subList(unitList.indexOf(unit), unitList.lastIndexOf(unit) + 1).clear();
+    }
+
+    /**
      * Gives the list of units of this buffer
      * @return the list of units
      */
@@ -141,8 +200,7 @@ public class UnitBuffer {
      */
     public Unit getUnitWithRange(int start, int end) {
         int accum = 0;
-        for (int i = 0; i < unitList.size(); i++) {
-            Unit unit = unitList.get(i);
+        for (Unit unit : unitList) {
             if (unit.isEmpty()) continue;
             if (accum <= start && end <= accum + unit.length()) {
                 return unit;

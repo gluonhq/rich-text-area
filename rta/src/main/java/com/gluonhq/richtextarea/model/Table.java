@@ -61,7 +61,7 @@ public class Table {
 
     public static final Logger LOGGER = Logger.getLogger(Table.class.getName());
 
-    private final String text;
+    private final UnitBuffer text;
     private final int start;
     private final int rows;
     private final int columns;
@@ -73,7 +73,7 @@ public class Table {
     private final List<Integer> positions;
     private final List<String> textCells;
 
-    public Table(String text, int start, int rows, int columns) {
+    public Table(UnitBuffer text, int start, int rows, int columns) {
         this.text = text;
         this.start = start;
         this.rows = rows;
@@ -92,7 +92,7 @@ public class Table {
     }
 
     public int getTableTextLength() {
-        return text.length() - (text.endsWith("\n") ? 1 : 0);
+        return text.length() - (text.getInternalText().endsWith("\n") ? 1 : 0);
     }
 
     public boolean isCaretAtStartOfCell(int caret) {
@@ -171,20 +171,20 @@ public class Table {
     }
 
     public int getCurrentRow(int caret) {
-        return (int) text.substring(0, caret - start).codePoints()
+        return (int) text.getInternalText().substring(0, caret - start).codePoints()
                 .filter(c -> c == TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR)
                 .count() / columns;
     }
 
     public int getCurrentColumn(int caret) {
-        return (int) text.substring(0, caret - start).codePoints()
+        return (int) text.getInternalText().substring(0, caret - start).codePoints()
                 .filter(c -> c == TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR)
                 .count() % columns;
     }
 
-    public String addColumnAndGetTableText(int caret, Direction direction) {
+    public UnitBuffer addColumnAndGetTableText(int caret, Direction direction) {
         int currentCol = getCurrentColumn(caret);
-        String newText = text.endsWith("\n") ? text.substring(0, text.length() - 1) : text;
+        UnitBuffer buffer = new UnitBuffer(text.getUnitList());
         for (int i = rows - 1; i >= 0; i--) {
             int pos;
             if (direction == Direction.FORWARD) {
@@ -194,28 +194,33 @@ public class Table {
                 // add separator to beginning of current column, for each row
                 pos = currentCol == 0 && i == 0 ? 0 : positions.get(i * columns + currentCol - 1) - start;
             }
-            newText = newText.substring(0, pos) + TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR + newText.substring(pos);
+            buffer.insert(new TextUnit(TextBuffer.ZERO_WIDTH_TEXT), pos);
         }
-        return newText;
+        removeLineFeed(buffer);
+        return buffer;
     }
 
-    public String removeColumnAndGetText(int caret) {
+    public UnitBuffer removeColumnAndGetText(int caret) {
         int currentCol = getCurrentColumn(caret);
-        String newText = text.endsWith("\n") ? text.substring(0, text.length() - 1) : text;
+        UnitBuffer buffer = new UnitBuffer(text.getUnitList());
         for (int i = rows - 1; i >= 0; i--) {
             // remove text from current column, for each row
             int posStart = currentCol == 0 && i == 0 ? 0 : positions.get(i * columns + currentCol - 1) - start;
             int posEnd = positions.get(i * columns + currentCol) - start + (currentCol == 0 && i == 0 ? 1 : 0);
-            newText = newText.substring(0, posStart) + newText.substring(posEnd);
+            buffer.remove(posStart, posEnd);
         }
-        return newText;
+        removeLineFeed(buffer);
+        return buffer;
     }
 
     public void printTable() {
         if (!LOGGER.isLoggable(Level.FINE)) {
             return;
         }
-        String tableText = text.replaceAll("" + TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR, "|").replaceAll("\n", "]");
+        String tableText = text.getInternalText()
+                .replaceAll("" + TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR, "|")
+                .replaceAll(TextBuffer.EMOJI_ANCHOR_TEXT, "\u24D4")
+                .replaceAll("\n", "]");
         int start = 0;
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < rows; i++) {
@@ -229,6 +234,15 @@ public class Table {
         LOGGER.fine("Table:\n" + sb);
     }
 
+    private static void removeLineFeed(UnitBuffer buffer) {
+        Unit unit = buffer.getUnitList().get(buffer.getUnitList().size() - 1);
+        String internalText = unit.getInternalText();
+        if (unit instanceof TextUnit && internalText.endsWith("\n")) {
+            buffer.getUnitList().remove(unit);
+            buffer.getUnitList().add(new TextUnit(internalText.substring(0, internalText.length() - 1)));
+        }
+    }
+
     private int getCurrentCell(int caret) {
         int currentRow = getCurrentRow(caret);
         int currentCol = getCurrentColumn(caret);
@@ -236,9 +250,10 @@ public class Table {
     }
 
     List<Integer> getTablePositions() {
-        List<Integer> positions = IntStream.iterate(text.indexOf(TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR),
+        String internalText = text.getInternalText();
+        List<Integer> positions = IntStream.iterate(internalText.indexOf(TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR),
                         index -> index >= 0,
-                        index -> text.indexOf(TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR, index + 1))
+                        index -> internalText.indexOf(TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR, index + 1))
                 .boxed()
                 .map(i -> i + start)
                 .collect(Collectors.toList());
@@ -247,7 +262,7 @@ public class Table {
     }
 
     private List<String> getTextForCells() {
-        return Stream.of(text.split("" + TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR))
+        return Stream.of(text.getInternalText().split("" + TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR))
                 .map(s -> s.replace("\n", ""))
                 .collect(Collectors.toList());
     }
