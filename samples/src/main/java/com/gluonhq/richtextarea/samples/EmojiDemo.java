@@ -41,9 +41,11 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static javafx.scene.text.FontPosture.ITALIC;
+import static javafx.scene.text.FontWeight.BOLD;
 
 /**
  * This basic sample shows how to use the RichTextArea control to render text and
@@ -54,16 +56,21 @@ import java.util.stream.Collectors;
  */
 public class EmojiDemo extends Application {
 
-    private static final String text =
-            "Document with emojis \ud83d\ude03!\n" +
+    private static final String title =
+            "Document with emojis \ud83d\ude03!\n";
+     private static final String text =
             "\uD83D\uDC4B\uD83C\uDFFC, this is some random text with some emojis " +
             "like \uD83E\uDDD1\uD83C\uDFFC\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1\uD83C\uDFFD or " +
             "\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74\uDB40\uDC7F.\n" +
             "These are emojis with skin tone or hair style, like:\n";
 
-    private static final StringBuilder fullText = new StringBuilder(text);
+    private static final StringBuilder fullText = new StringBuilder(title + text);
     private static final TextDecoration preset =
             TextDecoration.builder().presets().fontFamily("Arial").fontSize(14).build();
+    private static final TextDecoration bold16 =
+            TextDecoration.builder().presets().fontFamily("Arial").fontWeight(BOLD).fontSize(16).build();
+    private static final TextDecoration italic =
+            TextDecoration.builder().presets().fontFamily("Arial").fontPosture(ITALIC).fontSize(14).build();
     private static final ParagraphDecoration parPreset =
             ParagraphDecoration.builder().presets().build();
 
@@ -99,10 +106,13 @@ public class EmojiDemo extends Application {
     }
 
     private List<DecorationModel> getDecorations() {
-        List<DecorationModel> decorations = new ArrayList<>();
-        // decoration for text
-        decorations.add(new DecorationModel(0, fullText.length(), preset, parPreset));
-        return decorations;
+        int titleLength = title.length();
+        int textLength = text.length();
+        int endLength = fullText.length() - textLength - titleLength;
+        return List.of(
+                new DecorationModel(0, titleLength, bold16, parPreset),
+                new DecorationModel(titleLength, textLength, preset, parPreset),
+                new DecorationModel(titleLength + textLength, endLength, italic, parPreset));
     }
 
 }
