@@ -339,6 +339,12 @@ class RichListCell extends ListCell<Paragraph> {
                 .orElse(-1);
     }
 
+    public int getNextTableCellPosition(boolean down) {
+        return getParagraphTile()
+                .map(tile -> tile.getNextTableCellPosition(down))
+                .orElse(-1);
+    }
+
     private Optional<ParagraphTile> getParagraphTile() {
         if (getGraphic() instanceof ParagraphTile) {
             return Optional.of((ParagraphTile) getGraphic());

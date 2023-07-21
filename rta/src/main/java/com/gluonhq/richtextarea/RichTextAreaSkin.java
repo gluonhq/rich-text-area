@@ -144,7 +144,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     interface ActionBuilder extends Function<KeyEvent, ActionCmd>{}
 
     // TODO need to find a better way to find next row caret position
-    private final RichTextAreaViewModel viewModel = new RichTextAreaViewModel(this::getNextRowPosition);
+    private final RichTextAreaViewModel viewModel = new RichTextAreaViewModel(this::getNextRowPosition, this::getNextTableCellPosition);
 
     private static final ActionCmdFactory ACTION_CMD_FACTORY = new ActionCmdFactory();
 
@@ -452,6 +452,16 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                     .map(RichListCell.class::cast)
                     .filter(RichListCell::hasCaret)
                     .mapToInt(cell -> cell.getNextRowPosition(x, down))
+                    .findFirst()
+                    .orElse(-1);
+        }
+
+        int getNextTableCellPosition(boolean down) {
+            return getSheet().getChildren().stream()
+                    .filter(RichListCell.class::isInstance)
+                    .map(RichListCell.class::cast)
+                    .filter(RichListCell::hasCaret)
+                    .mapToInt(cell -> cell.getNextTableCellPosition(down))
                     .findFirst()
                     .orElse(-1);
         }
@@ -766,6 +776,15 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                         Math.max(0, prevParagraph.getEnd() - 1) : 0;
             }
         }
+        return nextRowPosition;
+    }
+
+    private int getNextTableCellPosition(Boolean down) {
+        ObservableList<Paragraph> items = paragraphListView.getItems();
+        int caretPosition = viewModel.getCaretPosition();
+        int nextRowPosition = Math.min(viewModel.getTextLength(),
+                paragraphListView.getNextTableCellPosition(down != null && down));
+        System.out.println("nextRowPosition = " + nextRowPosition);
         return nextRowPosition;
     }
 
