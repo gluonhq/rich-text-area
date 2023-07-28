@@ -213,6 +213,13 @@ public class Table {
         return buffer;
     }
 
+    /**
+     * prints the table for debugging purposes in a matrix form
+     * [ ... | ... |
+     * ... | ... |
+     * ... | ... ]
+     * Emoji anchors are replaced with ⓔ
+     */
     public void printTable() {
         if (!LOGGER.isLoggable(Level.FINE)) {
             return;
