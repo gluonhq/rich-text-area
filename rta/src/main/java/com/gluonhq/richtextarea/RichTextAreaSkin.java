@@ -47,11 +47,9 @@ import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -787,12 +785,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     private int getNextTableCellPosition(Boolean down) {
-        ObservableList<Paragraph> items = paragraphListView.getItems();
-        int caretPosition = viewModel.getCaretPosition();
-        int nextRowPosition = Math.min(viewModel.getTextLength(),
+        return Math.min(viewModel.getTextLength(),
                 paragraphListView.getNextTableCellPosition(down != null && down));
-        System.out.println("nextRowPosition = " + nextRowPosition);
-        return nextRowPosition;
     }
 
     private static boolean isPrintableChar(char c) {
