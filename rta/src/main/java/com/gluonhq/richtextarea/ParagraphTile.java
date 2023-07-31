@@ -158,9 +158,12 @@ public class ParagraphTile extends HBox {
         int r = decoration.getTableDecoration().getRows();
         int c = decoration.getTableDecoration().getColumns();
         TextAlignment[][] ta = decoration.getTableDecoration().getCellAlignment();
+        Double[] columnPrefWidth = decoration.getTableDecoration().getColumnsPrefWidth();
         for (int j = 0; j < c; j++) {
             ColumnConstraints cc = new ColumnConstraints();
-            cc.setPercentWidth(100.0 / (double) c);
+            cc.setMinWidth(columnPrefWidth[j]);
+            cc.setPrefWidth(columnPrefWidth[j]);
+            cc.setMaxWidth(columnPrefWidth[j]);
             grid.getColumnConstraints().add(cc);
         }
         int index = 0;
@@ -179,7 +182,7 @@ public class ParagraphTile extends HBox {
                             return (positions.get(tableIndex) <= p && p < positions.get(tableIndex + 1));
                         })
                         .collect(Collectors.toList()), background, pd);
-                layer.updatePrefWidth(100);
+                layer.updatePrefWidth(columnPrefWidth[j]);
                 layers.add(layer);
                 grid.add(layer, j, i);
                 prefHeight = Math.max(prefHeight, layer.prefHeight(100));

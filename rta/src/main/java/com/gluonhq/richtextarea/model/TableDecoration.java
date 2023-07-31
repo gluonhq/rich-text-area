@@ -1,7 +1,7 @@
 package com.gluonhq.richtextarea.model;
 
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,15 +35,17 @@ import java.util.Objects;
 /**
  * TableDecoration is a {@link Decoration} that can be applied to a paragraph in order to place
  * a table with a number of rows and columns where text can be added, with a given text alignment
- * defined per table cell.
+ * defined per table cell, and a given preferred width per column.
  */
 public class TableDecoration implements Decoration {
 
     public static final String TABLE_SEPARATOR = "table_separator";
+    private static final double COLUMN_PREF_WIDTH = 100d;
 
     private final int rows;
     private final int columns;
     private final TextAlignment[][] cellAlignment;
+    private final Double[] columnsPrefWidth;
 
     public TableDecoration() {
         this(0, 0, null);
@@ -54,6 +56,10 @@ public class TableDecoration implements Decoration {
     }
 
     public TableDecoration(int rows, int columns, TextAlignment[][] cellAlignment) {
+        this(rows, columns, cellAlignment, null);
+    }
+
+    public TableDecoration(int rows, int columns, TextAlignment[][] cellAlignment, Double[] columnsPrefWidth) {
         this.rows = rows;
         this.columns = columns;
         TextAlignment[][] defaultCellAlignment = new TextAlignment[rows][columns];
@@ -63,6 +69,9 @@ public class TableDecoration implements Decoration {
             }
         }
         this.cellAlignment = cellAlignment != null ? cellAlignment : defaultCellAlignment;
+        Double[] defaultColumnsPrefWidth = new Double[columns];
+        Arrays.fill(defaultColumnsPrefWidth, COLUMN_PREF_WIDTH);
+        this.columnsPrefWidth = columnsPrefWidth != null ? columnsPrefWidth : defaultColumnsPrefWidth;
     }
 
     /**
@@ -88,10 +97,20 @@ public class TableDecoration implements Decoration {
      *
      * By default, the text alignment is set to {@link TextAlignment#LEFT}.
      *
-     * @return the {@link TextAlignment} for each cell
+     * @return an array with the {@link TextAlignment} for each cell
      */
     public TextAlignment[][] getCellAlignment() {
         return cellAlignment;
+    }
+
+    /**
+     * Returns an array with the preferred width for each column.
+     * By default, each column is set to 100 pixels
+     *
+     * @return an array with the pref width of each column
+     */
+    public Double[] getColumnsPrefWidth() {
+        return columnsPrefWidth;
     }
 
     public static TableDecoration fromTableDecorationInsertingRow(TableDecoration tableDecoration, int row) {
@@ -105,7 +124,7 @@ public class TableDecoration implements Decoration {
                         TextAlignment.LEFT : tableDecoration.getCellAlignment()[rowIndex][j];
             }
         }
-        return new TableDecoration(rows + 1, columns, newCellAlignment);
+        return new TableDecoration(rows + 1, columns, newCellAlignment, tableDecoration.getColumnsPrefWidth());
     }
 
     public static TableDecoration fromTableDecorationDeletingRow(TableDecoration tableDecoration, int row) {
@@ -123,7 +142,7 @@ public class TableDecoration implements Decoration {
                 newCellAlignment[rowIndex][j] = tableDecoration.getCellAlignment()[i][j];
             }
         }
-        return new TableDecoration(rows - 1, columns, newCellAlignment);
+        return new TableDecoration(rows - 1, columns, newCellAlignment, tableDecoration.getColumnsPrefWidth());
     }
 
     public static TableDecoration fromTableDecorationInsertingColumn(TableDecoration tableDecoration, int column) {
@@ -137,7 +156,13 @@ public class TableDecoration implements Decoration {
                         TextAlignment.LEFT : tableDecoration.getCellAlignment()[i][colIndex];
             }
         }
-        return new TableDecoration(rows, columns + 1, newCellAlignment);
+        Double[] newColumnsPrefWidth = new Double[columns + 1];
+        for (int j = 0; j < columns + 1; j++) {
+            int colIndex = j > column ? j - 1 : j;
+            newColumnsPrefWidth[j] = j == column ?
+                    COLUMN_PREF_WIDTH : tableDecoration.getColumnsPrefWidth()[colIndex];
+        }
+        return new TableDecoration(rows, columns + 1, newCellAlignment, newColumnsPrefWidth);
     }
 
     public static TableDecoration fromTableDecorationDeletingColumn(TableDecoration tableDecoration, int column) {
@@ -155,7 +180,17 @@ public class TableDecoration implements Decoration {
                 newCellAlignment[i][colIndex] = tableDecoration.getCellAlignment()[i][j];
             }
         }
-        return new TableDecoration(rows, columns - 1, newCellAlignment);
+        Double[] newColumnsPrefWidth = new Double[columns + 1];
+        for (int j = 0; j < columns + 1; j++) {
+            int colIndex = j;
+            if (j == column) {
+                continue;
+            } else if (j > column) {
+                colIndex = j - 1;
+            }
+            newColumnsPrefWidth[colIndex] = tableDecoration.getColumnsPrefWidth()[j];
+        }
+        return new TableDecoration(rows, columns - 1, newCellAlignment, newColumnsPrefWidth);
     }
 
     @Override
@@ -165,18 +200,19 @@ public class TableDecoration implements Decoration {
         TableDecoration that = (TableDecoration) o;
         return rows == that.rows &&
                 columns == that.columns &&
-                Arrays.deepEquals(cellAlignment, that.cellAlignment);
+                Arrays.deepEquals(cellAlignment, that.cellAlignment) &&
+                Arrays.deepEquals(columnsPrefWidth, that.columnsPrefWidth);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(rows, columns);
-        result = 31 * result + Arrays.deepHashCode(cellAlignment);
+        result = 31 * result + Arrays.deepHashCode(cellAlignment) + Arrays.deepHashCode(columnsPrefWidth);
         return result;
     }
 
     @Override
     public String toString() {
-        return "TabDec[" + rows + " x " + columns + "] - " + Arrays.deepToString(cellAlignment);
+        return "TabDec[" + rows + " x " + columns + "] - " + Arrays.deepToString(cellAlignment) + " - " + Arrays.deepToString(columnsPrefWidth);
     }
 }
