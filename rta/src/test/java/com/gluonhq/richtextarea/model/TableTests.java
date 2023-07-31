@@ -27,15 +27,12 @@
  */
 package com.gluonhq.richtextarea.model;
 
-import com.gluonhq.richtextarea.Selection;
 import com.gluonhq.richtextarea.viewmodel.RichTextAreaViewModel;
-import javafx.scene.text.FontWeight;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class TableTests {
 
@@ -47,7 +44,7 @@ public class TableTests {
                     ParagraphDecoration.builder().tableDecoration(tableDecoration).build())),
             0);
 
-   private static final Document FACE_MODEL_WITH_EMOJI = new Document(
+    private static final Document FACE_MODEL_WITH_EMOJI = new Document(
             "One \ud83d\ude00\u200bText\u200bname!\u200bend\n",
             List.of(new DecorationModel(0, 22,
                     TextDecoration.builder().presets().build(),
@@ -59,7 +56,7 @@ public class TableTests {
     public void originalTextIntact() {
         PieceTable pt = new PieceTable(FACE_MODEL);
         Assertions.assertEquals(FACE_MODEL.getText(), pt.getText());
-        Table table = new Table(FACE_MODEL.getText(), 0, 1, 4);
+        Table table = new Table(pt.originalText, 0, 1, 4);
         Assertions.assertEquals(pt.getTextLength() - 1, table.getTableTextLength()); // 18
     }
 
@@ -68,8 +65,8 @@ public class TableTests {
     public void originalTextIntactWithEmoji() {
         PieceTable pt = new PieceTable(FACE_MODEL_WITH_EMOJI);
         Assertions.assertEquals(FACE_MODEL_WITH_EMOJI.getText(), pt.getText());
-        Table table = new Table(FACE_MODEL_WITH_EMOJI.getText(), 0, 1, 4);
-        Assertions.assertEquals(pt.getTextLength(), table.getTableTextLength()); // 21
+        Table table = new Table(pt.originalText, 0, 1, 4);
+        Assertions.assertEquals(pt.getTextLength() - 1, table.getTableTextLength()); // 21
     }
 
     @Test
@@ -77,7 +74,7 @@ public class TableTests {
     public void tablePositions1x4() {
         PieceTable pt = new PieceTable(FACE_MODEL);
         Assertions.assertEquals(FACE_MODEL.getText(), pt.getText());
-        Table table = new Table(FACE_MODEL.getText(), 0, 1, 4);
+        Table table = new Table(pt.originalText, 0, 1, 4);
         List<Integer> tablePositions = table.getTablePositions();
         Assertions.assertEquals(table.getRows() * table.getColumns(), tablePositions.size()); // 4
         Assertions.assertEquals("[3, 8, 14, 18]", tablePositions.toString());
@@ -96,12 +93,12 @@ public class TableTests {
     public void tableEmojiPositions1x4() {
         PieceTable pt = new PieceTable(FACE_MODEL_WITH_EMOJI);
         Assertions.assertEquals(FACE_MODEL_WITH_EMOJI.getText(), pt.getText());
-        Table table = new Table(FACE_MODEL_WITH_EMOJI.getText(), 0, 1, 4);
+        Table table = new Table(pt.originalText, 0, 1, 4);
         List<Integer> tablePositions = table.getTablePositions();
         Assertions.assertEquals(table.getRows() * table.getColumns(), tablePositions.size()); // 4
-        Assertions.assertEquals("[6, 11, 17, 21]", tablePositions.toString());
+        Assertions.assertEquals("[5, 10, 16, 20]", tablePositions.toString());
         int col = 0;
-        for (int i = 0; i <= 21; i++) {
+        for (int i = 0; i <= 20; i++) {
             Assertions.assertEquals(0, table.getCurrentRow(i));
             Assertions.assertEquals(col, table.getCurrentColumn(i));
             if (i == tablePositions.get(col)) {
@@ -115,7 +112,7 @@ public class TableTests {
     public void tablePositions2x2() {
         PieceTable pt = new PieceTable(FACE_MODEL);
         Assertions.assertEquals(FACE_MODEL.getText(), pt.getText());
-        Table table = new Table(FACE_MODEL.getText(), 0, 2, 2);
+        Table table = new Table(pt.originalText, 0, 2, 2);
         List<Integer> tablePositions = table.getTablePositions();
         Assertions.assertEquals(table.getRows() * table.getColumns(), tablePositions.size()); // 4
         Assertions.assertEquals("[3, 8, 14, 18]", tablePositions.toString());
@@ -126,15 +123,15 @@ public class TableTests {
         }
     }
 
-@Test
+    @Test
     @DisplayName("Table: 2x2 table with emoji")
     public void tableEmojiPositions2x2() {
         PieceTable pt = new PieceTable(FACE_MODEL_WITH_EMOJI);
         Assertions.assertEquals(FACE_MODEL_WITH_EMOJI.getText(), pt.getText());
-        Table table = new Table(FACE_MODEL_WITH_EMOJI.getText(), 0, 2, 2);
+        Table table = new Table(pt.originalText, 0, 2, 2);
         List<Integer> tablePositions = table.getTablePositions();
         Assertions.assertEquals(table.getRows() * table.getColumns(), tablePositions.size()); // 4
-        Assertions.assertEquals("[6, 11, 17, 21]", tablePositions.toString());
+        Assertions.assertEquals("[5, 10, 16, 20]", tablePositions.toString());
         for (int i = 0; i <= 21; i++) {
             Assertions.assertEquals(i <= tablePositions.get(1) ? 0 : 1, table.getCurrentRow(i));
             Assertions.assertEquals(i <= tablePositions.get(0) ||
@@ -147,13 +144,13 @@ public class TableTests {
     public void addColumnToTable2x2() {
         PieceTable pt = new PieceTable(FACE_MODEL);
         Assertions.assertEquals(FACE_MODEL.getText(), pt.getText());
-        Table table = new Table(FACE_MODEL.getText(), 0, 2, 2);
-        String newText = table.addColumnAndGetTableText(0, RichTextAreaViewModel.Direction.BACK);
-        Assertions.assertEquals("\u200bOne\u200bText\u200b\u200bname!\u200bend", newText);
-        newText = table.addColumnAndGetTableText(0, RichTextAreaViewModel.Direction.FORWARD);
-        Assertions.assertEquals("One\u200b\u200bText\u200bname!\u200b\u200bend", newText);
-        newText = table.addColumnAndGetTableText(4, RichTextAreaViewModel.Direction.FORWARD);
-        Assertions.assertEquals("One\u200bText\u200b\u200bname!\u200bend\u200b", newText);
+        Table table = new Table(pt.originalText, 0, 2, 2);
+        UnitBuffer newBuffer = table.addColumnAndGetTableText(0, RichTextAreaViewModel.Direction.BACK);
+        Assertions.assertEquals("\u200bOne\u200bText\u200b\u200bname!\u200bend", newBuffer.getText());
+        newBuffer = table.addColumnAndGetTableText(0, RichTextAreaViewModel.Direction.FORWARD);
+        Assertions.assertEquals("One\u200b\u200bText\u200bname!\u200b\u200bend", newBuffer.getText());
+        newBuffer = table.addColumnAndGetTableText(4, RichTextAreaViewModel.Direction.FORWARD);
+        Assertions.assertEquals("One\u200bText\u200b\u200bname!\u200bend\u200b", newBuffer.getText());
     }
 
     @Test
@@ -161,13 +158,13 @@ public class TableTests {
     public void addColumnToTableEmoji2x2() {
         PieceTable pt = new PieceTable(FACE_MODEL_WITH_EMOJI);
         Assertions.assertEquals(FACE_MODEL_WITH_EMOJI.getText(), pt.getText());
-        Table table = new Table(FACE_MODEL_WITH_EMOJI.getText(), 0, 2, 2);
-        String newText = table.addColumnAndGetTableText(0, RichTextAreaViewModel.Direction.BACK);
-        Assertions.assertEquals("\u200bOne \ud83d\ude00\u200bText\u200b\u200bname!\u200bend", newText);
-        newText = table.addColumnAndGetTableText(0, RichTextAreaViewModel.Direction.FORWARD);
-        Assertions.assertEquals("One \ud83d\ude00\u200b\u200bText\u200bname!\u200b\u200bend", newText);
-        newText = table.addColumnAndGetTableText(7, RichTextAreaViewModel.Direction.FORWARD);
-        Assertions.assertEquals("One \ud83d\ude00\u200bText\u200b\u200bname!\u200bend\u200b", newText);
+        Table table = new Table(pt.originalText, 0, 2, 2);
+        UnitBuffer newBuffer = table.addColumnAndGetTableText(0, RichTextAreaViewModel.Direction.BACK);
+        Assertions.assertEquals("\u200bOne \ud83d\ude00\u200bText\u200b\u200bname!\u200bend", newBuffer.getText());
+        newBuffer = table.addColumnAndGetTableText(0, RichTextAreaViewModel.Direction.FORWARD);
+        Assertions.assertEquals("One \ud83d\ude00\u200b\u200bText\u200bname!\u200b\u200bend", newBuffer.getText());
+        newBuffer = table.addColumnAndGetTableText(7, RichTextAreaViewModel.Direction.FORWARD);
+        Assertions.assertEquals("One \ud83d\ude00\u200bText\u200b\u200bname!\u200bend\u200b", newBuffer.getText());
     }
 
     @Test
@@ -175,11 +172,11 @@ public class TableTests {
     public void removeColumnFromTable2x2() {
         PieceTable pt = new PieceTable(FACE_MODEL);
         Assertions.assertEquals(FACE_MODEL.getText(), pt.getText());
-        Table table = new Table(FACE_MODEL.getText(), 0, 2, 2);
-        String newText = table.removeColumnAndGetText(0);
-        Assertions.assertEquals("Text\u200bend", newText);
-        newText = table.removeColumnAndGetText(4);
-        Assertions.assertEquals("One\u200bname!", newText);
+        Table table = new Table(pt.originalText, 0, 2, 2);
+        UnitBuffer newBuffer = table.removeColumnAndGetText(0);
+        Assertions.assertEquals("Text\u200bend", newBuffer.getText());
+        newBuffer = table.removeColumnAndGetText(4);
+        Assertions.assertEquals("One\u200bname!", newBuffer.getText());
     }
 
     @Test
@@ -187,11 +184,11 @@ public class TableTests {
     public void removeColumnFromTableEmoji2x2() {
         PieceTable pt = new PieceTable(FACE_MODEL_WITH_EMOJI);
         Assertions.assertEquals(FACE_MODEL_WITH_EMOJI.getText(), pt.getText());
-        Table table = new Table(FACE_MODEL_WITH_EMOJI.getText(), 0, 2, 2);
-        String newText = table.removeColumnAndGetText(0);
-        Assertions.assertEquals("Text\u200bend", newText);
-        newText = table.removeColumnAndGetText(7);
-        Assertions.assertEquals("One \ud83d\ude00\u200bname!", newText);
+        Table table = new Table(pt.originalText, 0, 2, 2);
+        UnitBuffer newBuffer = table.removeColumnAndGetText(0);
+        Assertions.assertEquals("Text\u200bend", newBuffer.getText());
+        newBuffer = table.removeColumnAndGetText(7);
+        Assertions.assertEquals("One \ud83d\ude00\u200bname!", newBuffer.getText());
     }
 
 }
