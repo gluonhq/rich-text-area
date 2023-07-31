@@ -104,6 +104,10 @@ import static javafx.scene.text.FontPosture.ITALIC;
 import static javafx.scene.text.FontPosture.REGULAR;
 import static javafx.scene.text.FontWeight.BOLD;
 import static javafx.scene.text.FontWeight.NORMAL;
+import static javafx.scene.text.TextAlignment.CENTER;
+import static javafx.scene.text.TextAlignment.JUSTIFY;
+import static javafx.scene.text.TextAlignment.LEFT;
+import static javafx.scene.text.TextAlignment.RIGHT;
 
 /**
  * This is an advance sample that shows how to create a rich text editor, by using
@@ -127,15 +131,17 @@ public class FullFeaturedDemo extends Application {
     private final List<DecorationModel> decorations;
 
     {
-        TextDecoration bold14 = TextDecoration.builder().presets().fontWeight(BOLD).fontSize(14).build();
-        TextDecoration preset = TextDecoration.builder().presets().build();
-        ParagraphDecoration center63 = ParagraphDecoration.builder().presets().alignment(TextAlignment.CENTER).topInset(6).bottomInset(3).build();
-        ParagraphDecoration justify22 = ParagraphDecoration.builder().presets().alignment(TextAlignment.JUSTIFY).topInset(2).bottomInset(2).build();
-        ParagraphDecoration right22 = ParagraphDecoration.builder().presets().alignment(TextAlignment.RIGHT).topInset(2).bottomInset(2).build();
-        ParagraphDecoration left535 = ParagraphDecoration.builder().presets().alignment(TextAlignment.LEFT).topInset(5).bottomInset(3).spacing(5).build();
-        ParagraphDecoration center42 = ParagraphDecoration.builder().presets().alignment(TextAlignment.CENTER).topInset(4).bottomInset(2).build();
-        TableDecoration tdec = new TableDecoration(2, 3, new TextAlignment[][]{{TextAlignment.CENTER, TextAlignment.LEFT, TextAlignment.RIGHT}, {TextAlignment.JUSTIFY, TextAlignment.RIGHT, TextAlignment.CENTER}});
-        ParagraphDecoration table = ParagraphDecoration.builder().presets().alignment(TextAlignment.CENTER).tableDecoration(tdec).build();
+        TextDecoration bold14 = TextDecoration.builder().presets().fontFamily("Arial").fontWeight(BOLD).fontSize(14).build();
+        TextDecoration preset = TextDecoration.builder().presets().fontFamily("Arial").build();
+        ParagraphDecoration center63 = ParagraphDecoration.builder().presets().alignment(CENTER).topInset(6).bottomInset(3).build();
+        ParagraphDecoration justify22 = ParagraphDecoration.builder().presets().alignment(JUSTIFY).topInset(2).bottomInset(2).build();
+        ParagraphDecoration right22 = ParagraphDecoration.builder().presets().alignment(RIGHT).topInset(2).bottomInset(2).build();
+        ParagraphDecoration left535 = ParagraphDecoration.builder().presets().alignment(LEFT).topInset(5).bottomInset(3).spacing(5).build();
+        ParagraphDecoration center42 = ParagraphDecoration.builder().presets().alignment(CENTER).topInset(4).bottomInset(2).build();
+        TableDecoration tdec = new TableDecoration(2, 3,
+                new TextAlignment[][]{{CENTER, LEFT, RIGHT}, {JUSTIFY, RIGHT, CENTER}},
+                new Double[] {100d, 50d, 150d});
+        ParagraphDecoration table = ParagraphDecoration.builder().presets().alignment(CENTER).tableDecoration(tdec).build();
         decorations = List.of(
                 new DecorationModel(0, 21, bold14, center63),
                 new DecorationModel(21, 575, preset, justify22),
@@ -192,7 +198,7 @@ public class FullFeaturedDemo extends Application {
 
         ComboBox<String> fontFamilies = new ComboBox<>();
         fontFamilies.getItems().setAll(Font.getFamilies());
-        fontFamilies.setValue("Arial");
+        fontFamilies.setValue("System");
         fontFamilies.setPrefWidth(100);
         new TextDecorateAction<>(editor, fontFamilies.valueProperty(), TextDecoration::getFontFamily, (builder, a) -> builder.fontFamily(a).build());
 
@@ -269,10 +275,10 @@ public class FullFeaturedDemo extends Application {
 
         ToolBar paragraphToolbar = new ToolBar();
         paragraphToolbar.getItems().setAll(
-                createToggleButton(LineAwesomeSolid.ALIGN_LEFT, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == TextAlignment.LEFT, (builder, a) -> builder.alignment(TextAlignment.LEFT).build())),
-                createToggleButton(LineAwesomeSolid.ALIGN_CENTER, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == TextAlignment.CENTER, (builder, a) -> builder.alignment(a ? TextAlignment.CENTER : TextAlignment.LEFT).build())),
-                createToggleButton(LineAwesomeSolid.ALIGN_RIGHT, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == TextAlignment.RIGHT, (builder, a) -> builder.alignment(a ? TextAlignment.RIGHT : TextAlignment.LEFT).build())),
-                createToggleButton(LineAwesomeSolid.ALIGN_JUSTIFY, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == TextAlignment.JUSTIFY, (builder, a) -> builder.alignment(a ? TextAlignment.JUSTIFY : TextAlignment.LEFT).build())),
+                createToggleButton(LineAwesomeSolid.ALIGN_LEFT, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == LEFT, (builder, a) -> builder.alignment(LEFT).build())),
+                createToggleButton(LineAwesomeSolid.ALIGN_CENTER, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == CENTER, (builder, a) -> builder.alignment(a ? CENTER : LEFT).build())),
+                createToggleButton(LineAwesomeSolid.ALIGN_RIGHT, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == RIGHT, (builder, a) -> builder.alignment(a ? RIGHT : LEFT).build())),
+                createToggleButton(LineAwesomeSolid.ALIGN_JUSTIFY, property -> new ParagraphDecorateAction<>(editor, property, d -> d.getAlignment() == JUSTIFY, (builder, a) -> builder.alignment(a ? JUSTIFY : LEFT).build())),
                 new Separator(Orientation.VERTICAL),
                 createSpinner("Spacing", p -> new ParagraphDecorateAction<>(editor, p, v -> (int) v.getSpacing(), (builder, a) -> builder.spacing(a).build())),
                 new Separator(Orientation.VERTICAL),
@@ -533,10 +539,10 @@ public class FullFeaturedDemo extends Application {
 
     private enum Presets {
 
-        DEFAULT("Default",12, NORMAL, TextAlignment.LEFT),
-        HEADER1("Header 1", 32, BOLD, TextAlignment.CENTER),
-        HEADER2("Header 2", 24, BOLD, TextAlignment.LEFT),
-        HEADER3("Header 3", 19, BOLD, TextAlignment.LEFT);
+        DEFAULT("Default",12, NORMAL, LEFT),
+        HEADER1("Header 1", 32, BOLD, CENTER),
+        HEADER2("Header 2", 24, BOLD, LEFT),
+        HEADER3("Header 3", 19, BOLD, LEFT);
 
         private final String name;
         private final int fontSize;
