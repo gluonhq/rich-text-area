@@ -161,9 +161,7 @@ public class ParagraphTile extends HBox {
         Double[] columnPrefWidth = decoration.getTableDecoration().getColumnsPrefWidth();
         for (int j = 0; j < c; j++) {
             ColumnConstraints cc = new ColumnConstraints();
-            cc.setMinWidth(columnPrefWidth[j]);
             cc.setPrefWidth(columnPrefWidth[j]);
-            cc.setMaxWidth(columnPrefWidth[j]);
             grid.getColumnConstraints().add(cc);
         }
         int index = 0;
