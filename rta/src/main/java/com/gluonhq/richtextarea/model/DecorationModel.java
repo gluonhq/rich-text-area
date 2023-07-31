@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -91,8 +91,8 @@ public class DecorationModel {
         if (o == null || getClass() != o.getClass()) return false;
         DecorationModel that = (DecorationModel) o;
         return start == that.start && length == that.length &&
-                decoration.equals(that.decoration) &&
-                paragraphDecoration.equals(that.paragraphDecoration);
+                Objects.equals(decoration, that.decoration) &&
+                Objects.equals(paragraphDecoration, that.paragraphDecoration);
     }
 
     @Override
