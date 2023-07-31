@@ -33,6 +33,8 @@ import com.gluonhq.richtextarea.model.ParagraphDecoration;
 import com.gluonhq.richtextarea.model.Table;
 import com.gluonhq.richtextarea.model.TableDecoration;
 import com.gluonhq.richtextarea.model.TextBuffer;
+import com.gluonhq.richtextarea.model.TextUnit;
+import com.gluonhq.richtextarea.model.UnitBuffer;
 import com.gluonhq.richtextarea.undo.CommandManager;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -112,8 +114,9 @@ class ActionCmdTable implements ActionCmd {
             int oldRows = oldTableDecoration.getRows();
 
             viewModel.getParagraphWithCaret().ifPresent(p -> {
-                text = viewModel.getTextBuffer().getText(p.getStart(), p.getEnd());
-                Table table = new Table(text, p.getStart(), oldRows, oldColumns);
+                UnitBuffer buffer = new UnitBuffer();
+                viewModel.walkFragments((u, d) -> buffer.append(u), p.getStart(), p.getEnd());
+                Table table = new Table(buffer, p.getStart(), oldRows, oldColumns);
                 int currentRow = table.getCurrentRow(caret);
                 int currentCol = table.getCurrentColumn(caret);
                 switch (tableOperation) {
@@ -150,22 +153,22 @@ class ActionCmdTable implements ActionCmd {
                         // add a column
                         int newCol = table.getNextColumn(caret, direction);
                         TableDecoration newTableDecoration = TableDecoration.fromTableDecorationInsertingColumn(oldTableDecoration, newCol);
-                        String newText = table.addColumnAndGetTableText(caret, direction);
+                        UnitBuffer newBuffer = table.addColumnAndGetTableText(caret, direction);
                         viewModel.setCaretPosition(p.getStart());
-                        commandManager.execute(new ReplaceAndDecorateTableCmd(0, table.getTableTextLength(), newText,
+                        commandManager.execute(new ReplaceAndDecorateTableCmd(0, table.getTableTextLength(), newBuffer.getText(),
                                 ParagraphDecoration.builder().tableDecoration(newTableDecoration).build()));
-                        viewModel.setCaretPosition(new Table(newText, p.getStart(), oldRows, oldColumns + 1).getCaretAtColumn(newCol));
+                        viewModel.setCaretPosition(new Table(newBuffer, p.getStart(), oldRows, oldColumns + 1).getCaretAtColumn(newCol));
                     }
                     break;
                     case DELETE_COLUMN: {
                         if (oldColumns > 1) {
                             // remove a column
                             TableDecoration newTableDecoration = TableDecoration.fromTableDecorationDeletingColumn(oldTableDecoration, currentCol);
-                            String newText = table.removeColumnAndGetText(caret);
+                            UnitBuffer newBuffer = table.removeColumnAndGetText(caret);
                             viewModel.setCaretPosition(p.getStart());
-                            commandManager.execute(new ReplaceAndDecorateTableCmd(0, table.getTableTextLength(), newText,
+                            commandManager.execute(new ReplaceAndDecorateTableCmd(0, table.getTableTextLength(), newBuffer.getText(),
                                     ParagraphDecoration.builder().tableDecoration(newTableDecoration).build()));
-                            viewModel.setCaretPosition(new Table(newText, p.getStart(), oldRows, oldColumns - 1).getCaretAtColumn(Math.max(currentCol - 1, 0)));
+                            viewModel.setCaretPosition(new Table(newBuffer, p.getStart(), oldRows, oldColumns - 1).getCaretAtColumn(Math.max(currentCol - 1, 0)));
                         }
                     }
                     break;
@@ -194,9 +197,11 @@ class ActionCmdTable implements ActionCmd {
             });
         }
         viewModel.getParagraphWithCaret().filter(p -> p.getEnd() > 0 && p.getDecoration().hasTableDecoration()).ifPresent(p -> {
-            text = viewModel.getTextBuffer().getText(p.getStart(), p.getEnd());
             TableDecoration tableDecoration = viewModel.getDecorationAtParagraph().getTableDecoration();
-            new Table("[" + text, 0, tableDecoration.getRows(), tableDecoration.getColumns()).printTable();
+            UnitBuffer buffer = new UnitBuffer();
+            viewModel.walkFragments((u, d) -> buffer.append(u), p.getStart(), p.getEnd());
+            buffer.getUnitList().add(0, new TextUnit("["));
+            new Table(buffer, 0, tableDecoration.getRows(), tableDecoration.getColumns()).printTable();
         });
     }
 
@@ -230,8 +235,9 @@ class ActionCmdTable implements ActionCmd {
                         Paragraph paragraph = viewModel.getParagraphWithCaret().orElse(null);
                         if (paragraph != null) {
                             int caret = viewModel.getCaretPosition();
-                            text = viewModel.getTextBuffer().getText(paragraph.getStart(), paragraph.getEnd());
-                            Table table = new Table(text, paragraph.getStart(), oldRows, oldColumns);
+                            UnitBuffer buffer = new UnitBuffer();
+                            viewModel.walkFragments((u, d) -> buffer.append(u), paragraph.getStart(), paragraph.getEnd());
+                            Table table = new Table(buffer, paragraph.getStart(), oldRows, oldColumns);
                             if (tableOperation == TableOperation.DELETE_CELL_CONTENT) {
                                 // disable if cell has no content
                                 return table.isCaretAtEmptyCell(caret);

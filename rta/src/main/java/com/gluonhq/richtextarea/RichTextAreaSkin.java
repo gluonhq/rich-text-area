@@ -37,6 +37,7 @@ import com.gluonhq.richtextarea.model.Table;
 import com.gluonhq.richtextarea.model.TableDecoration;
 import com.gluonhq.richtextarea.model.TextBuffer;
 import com.gluonhq.richtextarea.model.TextDecoration;
+import com.gluonhq.richtextarea.model.UnitBuffer;
 import com.gluonhq.richtextarea.viewmodel.ActionCmd;
 import com.gluonhq.richtextarea.viewmodel.ActionCmdFactory;
 import com.gluonhq.richtextarea.viewmodel.RichTextAreaViewModel;
@@ -153,8 +154,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         entry( new KeyCodeCombination(LEFT,  SHIFT_ANY, ALT_ANY, CONTROL_ANY, SHORTCUT_ANY), e -> ACTION_CMD_FACTORY.caretMove(Direction.BACK, e)),
         entry( new KeyCodeCombination(DOWN,  SHIFT_ANY, ALT_ANY, SHORTCUT_ANY),              e -> ACTION_CMD_FACTORY.caretMove(Direction.DOWN, e)),
         entry( new KeyCodeCombination(UP,    SHIFT_ANY, ALT_ANY, SHORTCUT_ANY),              e -> ACTION_CMD_FACTORY.caretMove(Direction.UP, e)),
-        entry( new KeyCodeCombination(HOME,  SHIFT_ANY),                                     e -> ACTION_CMD_FACTORY.caretMove(Direction.FORWARD, e.isShiftDown(), false, true)),
-        entry( new KeyCodeCombination(END,   SHIFT_ANY),                                     e -> ACTION_CMD_FACTORY.caretMove(Direction.BACK, e.isShiftDown(), false, true)),
+        entry( new KeyCodeCombination(HOME,  SHIFT_ANY),                                     e -> ACTION_CMD_FACTORY.caretMove(Direction.BACK, e.isShiftDown(), false, true)),
+        entry( new KeyCodeCombination(END,   SHIFT_ANY),                                     e -> ACTION_CMD_FACTORY.caretMove(Direction.FORWARD, e.isShiftDown(), false, true)),
         entry( new KeyCodeCombination(A, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.selectAll()),
         entry( new KeyCodeCombination(C, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.copy()),
         entry( new KeyCodeCombination(X, SHORTCUT_DOWN),                                     e -> ACTION_CMD_FACTORY.cut()),
@@ -172,7 +173,9 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             } else if (paragraph != null && paragraph.getStart() < paragraph.getEnd() &&
                     decoration != null && decoration.hasTableDecoration()) {
                 int caretPosition = viewModel.getCaretPosition();
-                Table table = new Table(viewModel.getTextBuffer().getText(paragraph.getStart(), paragraph.getEnd()),
+                UnitBuffer buffer = new UnitBuffer();
+                viewModel.walkFragments((u, d) -> buffer.append(u), paragraph.getStart(), paragraph.getEnd());
+                Table table = new Table(buffer,
                         paragraph.getStart(), decoration.getTableDecoration().getRows(), decoration.getTableDecoration().getColumns());
                 // move up/down rows
                 int nextCaretAt = table.getCaretAtNextRow(caretPosition, e.isShiftDown() ? Direction.UP : Direction.DOWN);
@@ -195,7 +198,9 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             ParagraphDecoration decoration = viewModel.getDecorationAtParagraph();
             if (decoration != null && paragraph != null) {
                 if (decoration.hasTableDecoration()) {
-                    Table table = new Table(viewModel.getTextBuffer().getText(paragraph.getStart(), paragraph.getEnd()),
+                    UnitBuffer buffer = new UnitBuffer();
+                    viewModel.walkFragments((u, d) -> buffer.append(u), paragraph.getStart(), paragraph.getEnd());
+                    Table table = new Table(buffer,
                             paragraph.getStart(), decoration.getTableDecoration().getRows(), decoration.getTableDecoration().getColumns());
                     if (table.isCaretAtStartOfCell(caret)) {
                         // check backspace at beginning of each cell to prevent moving text from one cell to the other.
@@ -251,7 +256,9 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             } else if (decoration != null && decoration.hasTableDecoration() &&
                     paragraph != null && paragraph.getStart() < paragraph.getEnd()) {
                 int caretPosition = viewModel.getCaretPosition();
-                Table table = new Table(viewModel.getTextBuffer().getText(paragraph.getStart(), paragraph.getEnd()),
+                UnitBuffer buffer = new UnitBuffer();
+                viewModel.walkFragments((u, d) -> buffer.append(u), paragraph.getStart(), paragraph.getEnd());
+                Table table = new Table(buffer,
                         paragraph.getStart(), decoration.getTableDecoration().getRows(), decoration.getTableDecoration().getColumns());
                 // select content of prev/next cell if non-empty, or move to prev/next cell
                 List<Integer> selectionAtNextCell = table.selectNextCell(caretPosition, e.isShiftDown() ? Direction.BACK : Direction.FORWARD);

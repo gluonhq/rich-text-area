@@ -119,4 +119,70 @@ public class UnitBufferTests {
         Assertions.assertEquals(internalSelection.getStart(), "One \u2063 Text ".length());
         Assertions.assertEquals(internalSelection.getEnd(), "One \u2063 Text \ufffc".length());
     }
+
+    @Test
+    @DisplayName("Unit: insert unit")
+    public void insertUnits() {
+        PieceTable pt = new PieceTable(FACE_MODEL);
+        UnitBuffer originalText = pt.originalText;
+        Assertions.assertEquals(5, originalText.getUnitList().size());
+        Assertions.assertEquals("[TU{'One '}, EU{1F600}, TU{' Text '}, BU{'@name'}, TU{'!'}]", originalText.getUnitList().toString());
+        Assertions.assertEquals(20, originalText.getText().length());
+        Assertions.assertEquals(13, originalText.length());
+        Assertions.assertEquals(pt.getTextLength(), originalText.length());
+        originalText.insert(new TextUnit("?"), 0);
+        Assertions.assertEquals("[TU{'?'}, TU{'One '}, EU{1F600}, TU{' Text '}, BU{'@name'}, TU{'!'}]", originalText.getUnitList().toString());
+        Assertions.assertEquals(14, originalText.length());
+        originalText = new PieceTable(FACE_MODEL).originalText;
+        originalText.insert(new TextUnit("?"), 3);
+        Assertions.assertEquals("[TU{'One'}, TU{'?'}, TU{' '}, EU{1F600}, TU{' Text '}, BU{'@name'}, TU{'!'}]", originalText.getUnitList().toString());
+        Assertions.assertEquals(14, originalText.length());
+        originalText = new PieceTable(FACE_MODEL).originalText;
+        originalText.insert(new TextUnit("?"), 4);
+        Assertions.assertEquals("[TU{'One '}, TU{'?'}, EU{1F600}, TU{' Text '}, BU{'@name'}, TU{'!'}]", originalText.getUnitList().toString());
+        Assertions.assertEquals(14, originalText.length());
+        originalText = new PieceTable(FACE_MODEL).originalText;
+        originalText.insert(new TextUnit("?"), 5);
+        Assertions.assertEquals("[TU{'One '}, EU{1F600}, TU{'?'}, TU{' Text '}, BU{'@name'}, TU{'!'}]", originalText.getUnitList().toString());
+        Assertions.assertEquals(14, originalText.length());
+        originalText = new PieceTable(FACE_MODEL).originalText;
+        originalText.insert(new TextUnit("?"), 11);
+        Assertions.assertEquals("[TU{'One '}, EU{1F600}, TU{' Text '}, TU{'?'}, BU{'@name'}, TU{'!'}]", originalText.getUnitList().toString());
+        Assertions.assertEquals(14, originalText.length());
+        originalText = new PieceTable(FACE_MODEL).originalText;
+        originalText.insert(new TextUnit("?"), 12);
+        Assertions.assertEquals("[TU{'One '}, EU{1F600}, TU{' Text '}, BU{'@name'}, TU{'?'}, TU{'!'}]", originalText.getUnitList().toString());
+        Assertions.assertEquals(14, originalText.length());
+        originalText = new PieceTable(FACE_MODEL).originalText;
+        originalText.insert(new TextUnit("?"), 13);
+        Assertions.assertEquals("[TU{'One '}, EU{1F600}, TU{' Text '}, BU{'@name'}, TU{'!'}, TU{'?'}]", originalText.getUnitList().toString());
+        Assertions.assertEquals(14, originalText.length());
+        originalText = new PieceTable(FACE_MODEL).originalText;
+        originalText.insert(new TextUnit("?"), 14);
+        Assertions.assertEquals("[TU{'One '}, EU{1F600}, TU{' Text '}, BU{'@name'}, TU{'!'}]", originalText.getUnitList().toString());
+        Assertions.assertEquals(13, originalText.length());
+    }
+
+    @Test
+    @DisplayName("Unit: remove unit")
+    public void removeUnits() {
+        PieceTable pt = new PieceTable(FACE_MODEL);
+        UnitBuffer originalText = pt.originalText;
+        Assertions.assertEquals(5, originalText.getUnitList().size());
+        Assertions.assertEquals("[TU{'One '}, EU{1F600}, TU{' Text '}, BU{'@name'}, TU{'!'}]", originalText.getUnitList().toString());
+        Assertions.assertEquals(20, originalText.getText().length());
+        Assertions.assertEquals(13, originalText.length());
+        Assertions.assertEquals(pt.getTextLength(), originalText.length());
+        originalText.remove(3, 5);
+        Assertions.assertEquals("[TU{'One'}, TU{' Text '}, BU{'@name'}, TU{'!'}]", originalText.getUnitList().toString());
+        Assertions.assertEquals(11, originalText.length());
+        originalText = new PieceTable(FACE_MODEL).originalText;
+        originalText.remove(1, 8);
+        Assertions.assertEquals("[TU{'O'}, TU{'xt '}, BU{'@name'}, TU{'!'}]", originalText.getUnitList().toString());
+        Assertions.assertEquals(6, originalText.length());
+        originalText = new PieceTable(FACE_MODEL).originalText;
+        originalText.remove(1, 12);
+        Assertions.assertEquals("[TU{'O'}, TU{'!'}]", originalText.getUnitList().toString());
+        Assertions.assertEquals(2, originalText.length());
+    }
 }
