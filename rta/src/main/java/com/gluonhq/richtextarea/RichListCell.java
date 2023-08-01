@@ -58,6 +58,7 @@ import javafx.scene.text.Text;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -315,8 +316,8 @@ class RichListCell extends ListCell<Paragraph> {
         return imageView;
     }
 
-    void evictUnusedObjects() {
-        getParagraphTile().ifPresent(ParagraphTile::evictUnusedObjects);
+    void evictUnusedObjects(Set<Font> usedFonts, Set<Image> usedImages) {
+        getParagraphTile().ifPresent(tile -> tile.evictUnusedObjects(usedFonts, usedImages));
     }
 
     public void forwardDragEvent(MouseEvent e) {

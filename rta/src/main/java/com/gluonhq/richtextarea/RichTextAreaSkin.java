@@ -97,16 +97,20 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.gluonhq.richtextarea.viewmodel.RichTextAreaViewModel.Direction;
 import static java.util.Map.entry;
@@ -445,10 +449,24 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         }
 
         void evictUnusedObjects() {
+            Set<Font> usedFonts = new HashSet<>();
+            Set<Image> usedImages = new HashSet<>();
             getSheet().getChildren().stream()
                     .filter(RichListCell.class::isInstance)
                     .map(RichListCell.class::cast)
-                    .forEach(RichListCell::evictUnusedObjects);
+                    .forEach(cell -> cell.evictUnusedObjects(usedFonts, usedImages));
+
+            List<Font> cachedFonts = new ArrayList<>(getFontCache().values());
+            cachedFonts.removeAll(usedFonts);
+            if (!cachedFonts.isEmpty()) {
+                getFontCache().values().removeAll(cachedFonts);
+            }
+
+            List<Image> cachedImages = new ArrayList<>(getImageCache().values());
+            cachedImages.removeAll(usedImages);
+            if (!cachedImages.isEmpty()) {
+                getImageCache().values().removeAll(cachedImages);
+            }
         }
 
         int getNextRowPosition(double x, boolean down) {
