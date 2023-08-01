@@ -217,15 +217,42 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 } else if (paragraph.getStart() == caret) {
                     // check backspace at beginning of paragraph:
                     if (decoration.getGraphicType() != ParagraphDecoration.GraphicType.NONE) {
+                        // remove graphic type decoration
                         return ACTION_CMD_FACTORY.decorate(ParagraphDecoration.builder().fromDecoration(decoration).graphicType(ParagraphDecoration.GraphicType.NONE).build());
                     } else if (decoration.getIndentationLevel() > 0) {
+                        // decrease indentation level
                         return ACTION_CMD_FACTORY.decorate(ParagraphDecoration.builder().fromDecoration(decoration).indentationLevel(decoration.getIndentationLevel() - 1).build());
+                    } else {
+                        // if previous paragraph is a table:
+                        int index = viewModel.getParagraphList().indexOf(paragraph);
+                        if (index > 0) {
+                            if (viewModel.getParagraphList().get(index - 1).getDecoration().hasTableDecoration()) {
+                                // just move to last cell
+                                return ACTION_CMD_FACTORY.caretMove(Direction.BACK, false, false, false);
+                            }
+                        }
                     }
                 }
             }
             return ACTION_CMD_FACTORY.removeText(-1);
         }),
         entry( new KeyCodeCombination(BACK_SPACE, SHORTCUT_DOWN, SHIFT_ANY),                 e -> {
+            int caret = viewModel.getCaretPosition();
+            Paragraph paragraph = viewModel.getParagraphWithCaret().orElse(null);
+            ParagraphDecoration decoration = viewModel.getDecorationAtParagraph();
+            if (paragraph != null && decoration != null && decoration.hasTableDecoration()) {
+                // TODO: remove cell content, else if empty move to prev cell
+                return null;
+            } else if (paragraph != null && paragraph.getStart() == caret) {
+                // if previous paragraph is a table:
+                int index = viewModel.getParagraphList().indexOf(paragraph);
+                if (index > 0) {
+                    if (viewModel.getParagraphList().get(index - 1).getDecoration().hasTableDecoration()) {
+                        // just move to last cell
+                        return ACTION_CMD_FACTORY.caretMove(Direction.BACK, false, false, false);
+                    }
+                }
+            }
             if (Tools.MAC) {
                 // CMD + BACKSPACE or CMD + SHIFT + BACKSPACE removes line in Mac
                 return ACTION_CMD_FACTORY.removeText(0, RichTextAreaViewModel.Remove.LINE);
@@ -236,6 +263,22 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         }),
         entry( new KeyCodeCombination(BACK_SPACE, ALT_DOWN),                                 e -> {
             if (Tools.MAC) {
+                int caret = viewModel.getCaretPosition();
+                Paragraph paragraph = viewModel.getParagraphWithCaret().orElse(null);
+                ParagraphDecoration decoration = viewModel.getDecorationAtParagraph();
+                if (paragraph != null && decoration != null && decoration.hasTableDecoration()) {
+                    // TODO: remove prev word from cell if any, else if empty move to prev cell, else nothing
+                    return null;
+                } else if (paragraph != null && paragraph.getStart() == caret) {
+                    // if previous paragraph is a table:
+                    int index = viewModel.getParagraphList().indexOf(paragraph);
+                    if (index > 0) {
+                        if (viewModel.getParagraphList().get(index - 1).getDecoration().hasTableDecoration()) {
+                            // just move to last cell
+                            return ACTION_CMD_FACTORY.caretMove(Direction.BACK, false, false, false);
+                        }
+                    }
+                }
                 return ACTION_CMD_FACTORY.removeText(0, RichTextAreaViewModel.Remove.WORD);
             }
             return null;
