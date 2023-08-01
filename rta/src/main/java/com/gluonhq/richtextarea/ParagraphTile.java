@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2023, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -288,8 +288,8 @@ public class ParagraphTile extends HBox {
         });
     }
 
-    void evictUnusedObjects() {
-        layers.forEach(Layer::evictUnusedObjects);
+    void evictUnusedObjects(Set<Font> usedFonts, Set<Image> usedImages) {
+        layers.forEach(layer -> layer.evictUnusedObjects(usedFonts, usedImages));
     }
 
     void updateLayout() {
@@ -461,26 +461,20 @@ public class ParagraphTile extends HBox {
             e.consume();
         }
 
-        void evictUnusedObjects() {
-            Set<Font> usedFonts = textFlow.getChildren()
+        void evictUnusedObjects(Set<Font> usedFonts, Set<Image> usedImages) {
+            usedFonts.addAll(textFlow.getChildren()
                     .stream()
                     .filter(Text.class::isInstance)
                     .map(t -> ((Text) t).getFont())
                     .filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
-            List<Font> cachedFonts = new ArrayList<>(richTextAreaSkin.getFontCache().values());
-            cachedFonts.removeAll(usedFonts);
-            richTextAreaSkin.getFontCache().values().removeAll(cachedFonts);
+                    .collect(Collectors.toSet()));
 
-            Set<Image> usedImages = textFlow.getChildren()
+            usedImages.addAll(textFlow.getChildren()
                     .stream()
                     .filter(ImageView.class::isInstance)
                     .map(t -> ((ImageView) t).getImage())
                     .filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
-            List<Image> cachedImages = new ArrayList<>(richTextAreaSkin.getImageCache().values());
-            cachedImages.removeAll(usedImages);
-            richTextAreaSkin.getImageCache().values().removeAll(cachedImages);
+                    .collect(Collectors.toSet()));
         }
 
         double getCaretY() {
