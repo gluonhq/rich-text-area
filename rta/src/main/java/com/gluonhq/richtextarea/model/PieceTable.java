@@ -326,7 +326,12 @@ public final class PieceTable extends AbstractTextBuffer {
             }
             textPosition += piece.length;
         }
-        return previousPieceParagraphDecoration(index);
+        ParagraphDecoration prevDecoration = previousPieceParagraphDecoration(index);
+        if (prevDecoration.hasTableDecoration()) {
+            // remove table decoration from the previous paragraph
+            return ParagraphDecoration.builder().fromDecoration(prevDecoration).tableDecoration(new TableDecoration()).build();
+        }
+        return prevDecoration;
     }
 
     @Override
