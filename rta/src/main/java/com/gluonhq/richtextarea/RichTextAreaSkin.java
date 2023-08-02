@@ -47,11 +47,9 @@ import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -149,7 +147,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     interface ActionBuilder extends Function<KeyEvent, ActionCmd>{}
 
     // TODO need to find a better way to find next row caret position
-    private final RichTextAreaViewModel viewModel = new RichTextAreaViewModel(this::getNextRowPosition);
+    private final RichTextAreaViewModel viewModel = new RichTextAreaViewModel(this::getNextRowPosition, this::getNextTableCellPosition);
 
     private static final ActionCmdFactory ACTION_CMD_FACTORY = new ActionCmdFactory();
 
@@ -481,6 +479,16 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                     .orElse(-1);
         }
 
+        int getNextTableCellPosition(boolean down) {
+            return getSheet().getChildren().stream()
+                    .filter(RichListCell.class::isInstance)
+                    .map(RichListCell.class::cast)
+                    .filter(RichListCell::hasCaret)
+                    .mapToInt(cell -> cell.getNextTableCellPosition(down))
+                    .findFirst()
+                    .orElse(-1);
+        }
+
         void resetCaret() {
             getSheet().getChildren().stream()
                     .filter(RichListCell.class::isInstance)
@@ -792,6 +800,11 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             }
         }
         return nextRowPosition;
+    }
+
+    private int getNextTableCellPosition(Boolean down) {
+        return Math.min(viewModel.getTextLength(),
+                paragraphListView.getNextTableCellPosition(down != null && down));
     }
 
     private static boolean isPrintableChar(char c) {

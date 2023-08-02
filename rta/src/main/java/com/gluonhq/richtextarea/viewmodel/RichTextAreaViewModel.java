@@ -66,6 +66,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -87,6 +88,7 @@ public class RichTextAreaViewModel {
     private final ObservableList<Paragraph> paragraphList = FXCollections.observableArrayList();
     Paragraph lastParagraph;
     private final BiFunction<Double, Boolean, Integer> getNextRowPosition;
+    private final Function<Boolean, Integer> getNextTableCellPosition;
 
     /// PROPERTIES ///////////////////////////////////////////////////////////////
 
@@ -305,8 +307,9 @@ public class RichTextAreaViewModel {
        return savedProperty.get();
     }
 
-    public RichTextAreaViewModel(BiFunction<Double, Boolean, Integer> getNextRowPosition) {
+    public RichTextAreaViewModel(BiFunction<Double, Boolean, Integer> getNextRowPosition, Function<Boolean, Integer> getNextTableCellPosition) {
         this.getNextRowPosition = Objects.requireNonNull(getNextRowPosition);
+        this.getNextTableCellPosition = Objects.requireNonNull(getNextTableCellPosition);
     }
 
     public ObservableList<Paragraph> getParagraphList() {
@@ -531,9 +534,18 @@ public class RichTextAreaViewModel {
                 } else if (lineSelection) { // home, end on Mac
                     setCaretPosition (direction == Direction.UP ? 0 : getTextLength());
                 } else {
-                    int rowCharIndex = getNextRowPosition.apply(-1d, Direction.DOWN == direction);
-                    if (rowCharIndex >= 0) {
-                        setCaretPosition(rowCharIndex);
+                    if (getParagraphWithCaret()
+                            .map(p -> p.getDecoration().hasTableDecoration())
+                            .orElse(false)) {
+                        int charIndex = getNextTableCellPosition.apply(Direction.DOWN == direction);
+                        if (charIndex >= 0) {
+                            setCaretPosition(charIndex);
+                        }
+                    } else {
+                        int rowCharIndex = getNextRowPosition.apply(-1d, Direction.DOWN == direction);
+                        if (rowCharIndex >= 0) {
+                            setCaretPosition(rowCharIndex);
+                        }
                     }
                 }
                 break;
