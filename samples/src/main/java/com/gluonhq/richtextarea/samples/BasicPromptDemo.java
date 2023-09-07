@@ -69,30 +69,19 @@ import java.util.List;
  */
 public class BasicPromptDemo extends Application {
 
-    String text = "Hello RTA";
     /**
      * Defines the text and paragraph decorations, based on the default presets,
      * but with Arial font
      */
-    private final List<DecorationModel> decorations;
-
-    {
-        TextDecoration textDecoration = TextDecoration.builder().presets()
-                .fontFamily("Arial")
-                .fontSize(20)
-                .foreground(Color.RED)
-                .build();
-        ParagraphDecoration paragraphDecoration = ParagraphDecoration.builder().presets().build();
-        decorations = List.of(
-                new DecorationModel(0, 0,
-                        textDecoration,
-                        paragraphDecoration));
-    }
+    private static final List<DecorationModel> decorations = List.of(
+            new DecorationModel(0, 0,
+                    TextDecoration.builder().presets().fontFamily("Arial").build(),
+                    ParagraphDecoration.builder().presets().build()));
 
     /**
      * Creates an empty document with the new decorations
      */
-    private final Document emptyDocument =
+    private static final Document emptyDocument =
             new Document("", decorations, 0);
 
     @Override
