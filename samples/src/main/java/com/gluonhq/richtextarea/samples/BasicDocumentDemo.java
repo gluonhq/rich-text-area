@@ -33,18 +33,19 @@ import com.gluonhq.richtextarea.model.Document;
 import com.gluonhq.richtextarea.model.ParagraphDecoration;
 import com.gluonhq.richtextarea.model.TextDecoration;
 import javafx.application.Application;
-import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.util.List;
 
 /**
- * Basic sample with the RichTextArea control, showing a prompt message.
+ * Basic sample with the RichTextArea control, showing a text with a default
+ * font family, font size, and foreground color.
  * <p>
  * While all the control features are available, but there are no menus or
- * toolbars included, so user interaction is limited to shorcuts or context
+ * toolbars included, so user interaction is limited to shortcuts or context
  * menu.
  * <p>
  * For instance, after typing some text, select all (Ctrl/Cmd + A) or part of it
@@ -66,35 +67,32 @@ import java.util.List;
  * To apply the rest of the control features, some UI is needed for user interaction. See
  * the {@link FullFeaturedDemo} sample for a complete and advanced showcase.
  */
-public class BasicDemo extends Application {
-
-    /**
-     * Defines the text and paragraph decorations, based on the default presets,
-     * but with Arial font
-     */
-    private static final List<DecorationModel> decorations = List.of(
-            new DecorationModel(0, 0,
-                    TextDecoration.builder().presets().fontFamily("Arial").build(),
-                    ParagraphDecoration.builder().presets().build()));
-
-    /**
-     * Creates an empty document with the new decorations
-     */
-    private static final Document emptyDocument =
-            new Document("", decorations, 0);
+public class BasicDocumentDemo extends Application {
 
     @Override
     public void start(Stage stage) {
-        RichTextArea editor = new RichTextArea();
-        editor.setDocument(emptyDocument);
-        editor.setPromptText("Type something!");
-        editor.setPadding(new Insets(20));
-
-        BorderPane root = new BorderPane(editor);
-        Scene scene = new Scene(root, 800, 600);
+        // String to decorate
+        String text = "Hello RTA";
+        /*
+         * Defines the text decorations with
+         * font family as Arial,
+         * font size as 20,
+         * foreground color as RED
+         */
+        TextDecoration textDecoration = TextDecoration.builder().presets()
+                .fontFamily("Arial")
+                .fontSize(20)
+                .foreground(Color.RED)
+                .build();
+        ParagraphDecoration paragraphDecoration = ParagraphDecoration.builder().presets().build();
+        DecorationModel decorationModel = new DecorationModel(0, text.length(), textDecoration, paragraphDecoration);
+        Document document = new Document(text, List.of(decorationModel), text.length());
+        RichTextArea richTextArea = new RichTextArea();
+        richTextArea.setDocument(document);
+        StackPane root = new StackPane(richTextArea);
+        Scene scene = new Scene(root, 640, 480);
         stage.setScene(scene);
         stage.setTitle("RichTextArea");
         stage.show();
     }
-
 }
