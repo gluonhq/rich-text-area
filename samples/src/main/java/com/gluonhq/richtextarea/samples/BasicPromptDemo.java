@@ -36,6 +36,7 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.util.List;
@@ -44,7 +45,7 @@ import java.util.List;
  * Basic sample with the RichTextArea control, showing a prompt message.
  * <p>
  * While all the control features are available, but there are no menus or
- * toolbars included, so user interaction is limited to shorcuts or context
+ * toolbars included, so user interaction is limited to shortcuts or context
  * menu.
  * <p>
  * For instance, after typing some text, select all (Ctrl/Cmd + A) or part of it
@@ -66,21 +67,32 @@ import java.util.List;
  * To apply the rest of the control features, some UI is needed for user interaction. See
  * the {@link FullFeaturedDemo} sample for a complete and advanced showcase.
  */
-public class BasicDemo extends Application {
+public class BasicPromptDemo extends Application {
 
+    String text = "Hello RTA";
     /**
      * Defines the text and paragraph decorations, based on the default presets,
      * but with Arial font
      */
-    private static final List<DecorationModel> decorations = List.of(
-            new DecorationModel(0, 0,
-                    TextDecoration.builder().presets().fontFamily("Arial").build(),
-                    ParagraphDecoration.builder().presets().build()));
+    private final List<DecorationModel> decorations;
+
+    {
+        TextDecoration textDecoration = TextDecoration.builder().presets()
+                .fontFamily("Arial")
+                .fontSize(20)
+                .foreground(Color.RED)
+                .build();
+        ParagraphDecoration paragraphDecoration = ParagraphDecoration.builder().presets().build();
+        decorations = List.of(
+                new DecorationModel(0, 0,
+                        textDecoration,
+                        paragraphDecoration));
+    }
 
     /**
      * Creates an empty document with the new decorations
      */
-    private static final Document emptyDocument =
+    private final Document emptyDocument =
             new Document("", decorations, 0);
 
     @Override

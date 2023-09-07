@@ -5,9 +5,9 @@
 > cd samples
 > ```
 
-## BasicDemo
+## BasicPromptDemo
 
-The [BasicDemo](/samples/src/main/java/com/gluonhq/richtextarea/samples/BasicDemo.java) is the most simple use case of 
+The [BasicPromptDemo](/samples/src/main/java/com/gluonhq/richtextarea/samples/BasicPromptDemo.java) is the simplest use case of 
 the RichTextArea control: it shows a prompt message, and the user can add text.
 
 While all the control features are available, there are no menus or toolbars included, so user interaction is limited 
@@ -38,10 +38,23 @@ the [FullFeaturedDemo](#fullfeatureddemo) sample for a complete and advanced sho
 To run this sample, using Java 17+, do as follows:
 
 ```
-mvn javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.BasicDemo
+mvn javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.BasicPromptDemo
 ```
 
 ![rta_editor.png](../.github/assets/BasicDemo.png)
+
+## BasicDocumentDemo
+
+The [BasicDocumentDemo](/samples/src/main/java/com/gluonhq/richtextarea/samples/BasicDocumentDemo.java) is an update
+to the BasicPromptDemo where we add a decorated text to the RichTextArea control.
+
+### Usage
+
+To run this sample, using Java 17+, do as follows:
+
+```
+mvn javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.BasicDocumentDemo
+```
 
 ## HighlightDemo
 
