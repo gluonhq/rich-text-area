@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023, Gluon
+ * Copyright (c) 2022, 2024, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -652,6 +652,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().tableAllowedProperty().removeListener(tableAllowedListener);
         getSkinnable().textLengthProperty.unbind();
         getSkinnable().modifiedProperty.unbind();
+        getSkinnable().selectionProperty.unbind();
         getSkinnable().setOnKeyPressed(null);
         getSkinnable().setOnKeyTyped(null);
         getSkinnable().widthProperty().removeListener(controlPrefWidthListener);
@@ -715,6 +716,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         promptNode.fontProperty().bind(promptFontBinding);
         getSkinnable().textLengthProperty.bind(viewModel.textLengthProperty());
         getSkinnable().modifiedProperty.bind(viewModel.savedProperty().not());
+        getSkinnable().selectionProperty.bind(viewModel.selectionProperty());
         getSkinnable().setOnContextMenuRequested(contextMenuEventEventHandler);
         getSkinnable().editableProperty().addListener(this::editableChangeListener);
         getSkinnable().tableAllowedProperty().addListener(tableAllowedListener);
