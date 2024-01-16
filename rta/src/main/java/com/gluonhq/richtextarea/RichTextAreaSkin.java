@@ -653,6 +653,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().textLengthProperty.unbind();
         getSkinnable().modifiedProperty.unbind();
         getSkinnable().selectionProperty.unbind();
+        getSkinnable().decorationAtCaretProperty.unbind();
+        getSkinnable().decorationAtParagraphProperty.unbind();
         getSkinnable().setOnKeyPressed(null);
         getSkinnable().setOnKeyTyped(null);
         getSkinnable().widthProperty().removeListener(controlPrefWidthListener);
@@ -717,6 +719,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().textLengthProperty.bind(viewModel.textLengthProperty());
         getSkinnable().modifiedProperty.bind(viewModel.savedProperty().not());
         getSkinnable().selectionProperty.bind(viewModel.selectionProperty());
+        getSkinnable().decorationAtCaretProperty.bind(viewModel.decorationAtCaretProperty());
+        getSkinnable().decorationAtParagraphProperty.bind(viewModel.decorationAtParagraphProperty());
         getSkinnable().setOnContextMenuRequested(contextMenuEventEventHandler);
         getSkinnable().editableProperty().addListener(this::editableChangeListener);
         getSkinnable().tableAllowedProperty().addListener(tableAllowedListener);
