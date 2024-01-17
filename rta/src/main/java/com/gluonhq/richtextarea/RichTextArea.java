@@ -326,23 +326,23 @@ public class RichTextArea extends Control {
     /**
      * The current decoration at the caret.
      */
-    final ReadOnlyObjectWrapper<Decoration> decorationAtCaretProperty = new ReadOnlyObjectWrapper<>(this, "decorationAtCaret");
+    final ReadOnlyObjectWrapper<Decoration> decorationAtCaret = new ReadOnlyObjectWrapper<>(this, "decorationAtCaret");
     public final ReadOnlyObjectProperty<Decoration> decorationAtCaretProperty() {
-       return decorationAtCaretProperty.getReadOnlyProperty();
+       return decorationAtCaret.getReadOnlyProperty();
     }
     public final Decoration getDecorationAtCaret() {
-       return decorationAtCaretProperty.get();
+       return decorationAtCaret.get();
     }
 
     /**
      * The paragraph decoration at the current paragraph.
      */
-    final ReadOnlyObjectWrapper<ParagraphDecoration> decorationAtParagraphProperty = new ReadOnlyObjectWrapper<>(this, "decorationAtParagraph");
+    final ReadOnlyObjectWrapper<ParagraphDecoration> decorationAtParagraph = new ReadOnlyObjectWrapper<>(this, "decorationAtParagraph");
     public final ReadOnlyObjectProperty<ParagraphDecoration> decorationAtParagraphProperty() {
-       return decorationAtParagraphProperty.getReadOnlyProperty();
+       return decorationAtParagraph.getReadOnlyProperty();
     }
     public final ParagraphDecoration getDecorationAtParagraph() {
-       return decorationAtParagraphProperty.get();
+       return decorationAtParagraph.get();
     }
     /**
      * Defines if tables can be inserted into the document or not. By default, it is allowed
