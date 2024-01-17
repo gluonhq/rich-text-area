@@ -110,7 +110,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static com.gluonhq.richtextarea.viewmodel.RichTextAreaViewModel.Direction;
 import static java.util.Map.entry;
@@ -653,6 +652,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().textLengthProperty.unbind();
         getSkinnable().modifiedProperty.unbind();
         getSkinnable().selectionProperty.unbind();
+        getSkinnable().decorationAtCaret.unbind();
+        getSkinnable().decorationAtParagraph.unbind();
         getSkinnable().setOnKeyPressed(null);
         getSkinnable().setOnKeyTyped(null);
         getSkinnable().widthProperty().removeListener(controlPrefWidthListener);
@@ -717,6 +718,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().textLengthProperty.bind(viewModel.textLengthProperty());
         getSkinnable().modifiedProperty.bind(viewModel.savedProperty().not());
         getSkinnable().selectionProperty.bind(viewModel.selectionProperty());
+        getSkinnable().decorationAtCaret.bind(viewModel.decorationAtCaretProperty());
+        getSkinnable().decorationAtParagraph.bind(viewModel.decorationAtParagraphProperty());
         getSkinnable().setOnContextMenuRequested(contextMenuEventEventHandler);
         getSkinnable().editableProperty().addListener(this::editableChangeListener);
         getSkinnable().tableAllowedProperty().addListener(tableAllowedListener);
