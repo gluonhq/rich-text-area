@@ -172,4 +172,4 @@ To run this sample, using Java 17+, do as follows:
 mvn javafx:run
 ```
 
-![rta_editor.png](../.github/assets/rta_editor.png)
+![rta_editor.png](../.github/assets/FullFeaturedDemo.png)

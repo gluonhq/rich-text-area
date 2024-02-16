@@ -89,7 +89,7 @@ public class TableDemo extends Application {
             alignment[i][0] = TextAlignment.CENTER;
             alignment[i][1] = TextAlignment.LEFT;
         }
-        TableDecoration tableDecoration = new TableDecoration(flags, 2, alignment);
+        TableDecoration tableDecoration = new TableDecoration(flags, 2, alignment, new Double[] {80d, 200d});
         ParagraphDecoration table = ParagraphDecoration.builder().presets().alignment(TextAlignment.CENTER)
                 .tableDecoration(tableDecoration)
                 .topInset(5).rightInset(5).bottomInset(5).leftInset(5)
