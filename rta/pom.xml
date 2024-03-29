@@ -15,7 +15,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>11</maven.compiler.release>
-        <javafx.version>20</javafx.version>
+        <javafx.version>22</javafx.version>
         <gpg.plugin.version>1.6</gpg.plugin.version>
     </properties>
 
