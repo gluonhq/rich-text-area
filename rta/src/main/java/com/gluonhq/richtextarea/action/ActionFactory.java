@@ -136,8 +136,8 @@ public class ActionFactory {
         return new BasicAction(control, action -> ACTION_CMD_FACTORY.insertEmoji(emoji));
     }
 
-    public Action selectAndInsertEmoji(Selection selection, Emoji emoji) {
-        return new BasicAction(control, action -> ACTION_CMD_FACTORY.selectAndInsertEmoji(selection, emoji));
+    public Action selectAndInsertEmoji(Selection selection, Emoji emoji, boolean undoLast) {
+        return new BasicAction(control, action -> ACTION_CMD_FACTORY.selectAndInsertEmoji(selection, emoji, undoLast));
     }
 
     public Action insertBlock(Block block) {
