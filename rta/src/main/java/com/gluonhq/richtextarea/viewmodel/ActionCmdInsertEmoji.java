@@ -37,10 +37,12 @@ class ActionCmdInsertEmoji implements ActionCmd {
 
     private final Emoji content;
     private final Selection selection;
+    private final boolean undoLast;
 
-    public ActionCmdInsertEmoji(Emoji content, Selection selection) {
+    public ActionCmdInsertEmoji(Emoji content, Selection selection, boolean undoLast) {
         this.content = content;
         this.selection = selection;
+        this.undoLast = undoLast;
     }
 
     @Override
@@ -48,7 +50,7 @@ class ActionCmdInsertEmoji implements ActionCmd {
         if (Objects.requireNonNull(viewModel).isEditable() && content != null) {
             if (selection != null) {
                 viewModel.getCommandManager().execute(new SelectAndReplaceCmd(
-                        viewModel.getTextBuffer().getInternalSelection(selection), content));
+                        viewModel.getTextBuffer().getInternalSelection(selection), content, undoLast));
             } else {
                 viewModel.getCommandManager().execute(new InsertCmd(content));
             }

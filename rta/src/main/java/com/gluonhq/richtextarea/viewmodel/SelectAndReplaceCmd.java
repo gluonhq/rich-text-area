@@ -40,15 +40,17 @@ class SelectAndReplaceCmd extends AbstractEditCmd {
 
     private final UnitBuffer content;
     private final Selection selection;
+    private boolean undoLast;
 
     public SelectAndReplaceCmd(Selection selection, String content) {
         this.selection = selection;
         this.content = UnitBuffer.convertTextToUnits(content);
     }
 
-    public SelectAndReplaceCmd(Selection selection, Emoji content) {
+    public SelectAndReplaceCmd(Selection selection, Emoji content, boolean undoLast) {
         this.selection = selection;
         this.content = new UnitBuffer(new EmojiUnit(content));
+        this.undoLast = undoLast;
     }
 
     public SelectAndReplaceCmd(Selection selection, Block content) {
@@ -59,6 +61,13 @@ class SelectAndReplaceCmd extends AbstractEditCmd {
     @Override
     public void doRedo(RichTextAreaViewModel viewModel) {
         Objects.requireNonNull(viewModel);
+
+        if (undoLast) {
+            // 0. undo adding last unit
+            // This is needed to prevent an infinite loop if doUndo is called
+            // (as inserting again that last unit triggers the call to doRedo)
+            viewModel.undo();
+        }
 
         // 1. select
         if (selection != null) {

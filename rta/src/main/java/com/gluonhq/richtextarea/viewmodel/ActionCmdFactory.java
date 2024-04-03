@@ -100,11 +100,11 @@ public final class ActionCmdFactory {
     }
 
     public ActionCmd insertEmoji(Emoji emoji) {
-        return new ActionCmdInsertEmoji(emoji, null);
+        return new ActionCmdInsertEmoji(emoji, null, false);
     }
 
-    public ActionCmd selectAndInsertEmoji(Selection selection, Emoji emoji) {
-        return new ActionCmdInsertEmoji(emoji, selection);
+    public ActionCmd selectAndInsertEmoji(Selection selection, Emoji emoji, boolean undoLast) {
+        return new ActionCmdInsertEmoji(emoji, selection, undoLast);
     }
 
     public ActionCmd insertBlock(Block block) {
