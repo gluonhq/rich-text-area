@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Gluon
+ * Copyright (c) 2023, 2024, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,8 +49,21 @@ class ActionCmdInsertEmoji implements ActionCmd {
     public void apply(RichTextAreaViewModel viewModel) {
         if (Objects.requireNonNull(viewModel).isEditable() && content != null) {
             if (selection != null) {
+                Selection newSelection = selection;
+                if (undoLast) {
+                    // Undo adding last unit
+                    // This is needed to allow undo() calls.
+                    // (Otherwise, calling undo() would remove the emoji, but then, as this last unit would be
+                    // present, there would be immediately a call to select and replace the content with the
+                    // emoji once again, and as a result, undo() won't do anything, at least apparently for the user)
+                    viewModel.getCommandManager().undo();
+
+                    // Update selection accordingly, removing from the original selection the length of the
+                    // removed last unit (based on the length of the text)
+                    newSelection = new Selection(selection.getStart(), Math.min(selection.getEnd(), viewModel.getTextLength()));
+                }
                 viewModel.getCommandManager().execute(new SelectAndReplaceCmd(
-                        viewModel.getTextBuffer().getInternalSelection(selection), content, undoLast));
+                        viewModel.getTextBuffer().getInternalSelection(newSelection), content));
             } else {
                 viewModel.getCommandManager().execute(new InsertCmd(content));
             }
