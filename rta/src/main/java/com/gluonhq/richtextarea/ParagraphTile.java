@@ -585,7 +585,7 @@ public class ParagraphTile extends HBox {
 
         private int getParagraphLimit() {
             int limit = end;
-            if (paragraph.equals(richTextAreaSkin.lastParagraph)) {
+            if (paragraph.equals(richTextAreaSkin.getLastParagraph())) {
                 // at the end of the last paragraph there is no linefeed, so we need
                 // an extra position for the caret
                 limit += 1;
@@ -594,7 +594,7 @@ public class ParagraphTile extends HBox {
         }
 
         private void setCaretVisibility(boolean on) {
-            if (caretShape.getElements().size() > 0) {
+            if (!caretShape.getElements().isEmpty()) {
                 // Opacity is used since we don't want the changing caret bounds to affect the layout
                 // Otherwise text appears to be jumping
                 caretShape.setOpacity(on ? 1 : 0);

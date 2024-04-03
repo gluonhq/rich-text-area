@@ -345,7 +345,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     int mouseDragStart = -1;
     int dragAndDropStart = -1;
     int anchorIndex = -1;
-    Paragraph lastParagraph = null;
 
     private final Text promptNode;
 
@@ -779,7 +778,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         try {
             nonTextNodes.set(0);
             viewModel.resetCharacterIterator();
-            lastParagraph = paragraphSortedList.get(paragraphSortedList.size() - 1);
             // this ensures changes in decoration are applied:
             paragraphListView.updateLayout();
 
@@ -792,6 +790,10 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         } finally {
             objectsCacheEvictionTimer.start();
         }
+    }
+
+    Paragraph getLastParagraph() {
+        return paragraphSortedList.get(paragraphSortedList.size() - 1);
     }
 
     private void editableChangeListener(Observable o) {
@@ -829,7 +831,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 (!down && nextRowPosition >= caretPosition))) {
             int paragraphWithCaretIndex = items.stream()
                     .filter(p -> p.getStart() <= caretPosition &&
-                            caretPosition < (p.equals(lastParagraph) ? p.getEnd() + 1 : p.getEnd()))
+                            caretPosition < (p.equals(getLastParagraph()) ? p.getEnd() + 1 : p.getEnd()))
                     .mapToInt(items::indexOf)
                     .findFirst()
                     .orElse(-1);
