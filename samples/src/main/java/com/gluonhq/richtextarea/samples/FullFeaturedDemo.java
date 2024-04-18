@@ -28,7 +28,9 @@
 package com.gluonhq.richtextarea.samples;
 
 import com.gluonhq.emoji.Emoji;
+import com.gluonhq.emoji.EmojiData;
 import com.gluonhq.richtextarea.RichTextArea;
+import com.gluonhq.richtextarea.Selection;
 import com.gluonhq.richtextarea.action.Action;
 import com.gluonhq.richtextarea.action.DecorateAction;
 import com.gluonhq.richtextarea.action.ParagraphDecorateAction;
@@ -89,11 +91,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -123,6 +129,13 @@ public class FullFeaturedDemo extends Application {
             Logger.getLogger(FullFeaturedDemo.class.getName()).log(Level.SEVERE, "Error opening logging.properties file", ex);
         }
     }
+
+    private static final Pattern codenamePattern = Pattern.compile(":([a-zA-Z0-9_-]*):");
+    private static final Pattern markdownDetector = Pattern.compile(
+            "(\\`)([^s]?.*?[^s]?|[^s]*)(\\`)|(\\_)([^s]?.*?[^s]?|[^s]*)(\\_)|(\\*)([^s]?.*?[^s]?|[^s]*)(\\*)",
+            Pattern.DOTALL);
+
+    private static final String MARKER_BOLD = "*", MARKER_ITALIC = "_", MARKER_MONO = "`";
 
     private final List<DecorationModel> decorations;
 
@@ -164,6 +177,18 @@ public class FullFeaturedDemo extends Application {
         editor.textLengthProperty().addListener( (o, ov, nv) ->
            textLengthLabel.setText( "Text length: " + nv)
         );
+        editor.documentProperty().subscribe(d -> {
+            String nv = d.getText();
+            if (nv != null) {
+                String substring = nv.substring(0, Math.min(editor.getCaretPosition(), nv.length())).toLowerCase(Locale.ROOT);
+                findEmoji(substring,
+                        (emoji, start) -> editor.getActionFactory().selectAndInsertEmoji(
+                                new Selection(start, editor.getCaretPosition()), emoji, true).execute(new ActionEvent()));
+                findMarkdown(substring, (start, marker) -> editor.getActionFactory().removeExtremesAndDecorate(
+                                new Selection(start, editor.getCaretPosition()), getStyleFromMarker(marker))
+                        .execute(new ActionEvent()));
+            }
+        });
 
         ComboBox<Presets> presets = new ComboBox<>();
         presets.getItems().setAll(Presets.values());
@@ -192,7 +217,7 @@ public class FullFeaturedDemo extends Application {
 
         ComboBox<String> fontFamilies = new ComboBox<>();
         fontFamilies.getItems().setAll(Font.getFamilies());
-        fontFamilies.setValue("Arial");
+        fontFamilies.setValue("System");
         fontFamilies.setPrefWidth(100);
         new TextDecorateAction<>(editor, fontFamilies.valueProperty(), TextDecoration::getFontFamily, (builder, a) -> builder.fontFamily(a).build());
 
@@ -294,6 +319,8 @@ public class FullFeaturedDemo extends Application {
 
         Menu fileMenu = new Menu("File");
         CheckMenuItem autoSaveMenuItem = new CheckMenuItem("Auto Save");
+        // needed for the document listener
+        autoSaveMenuItem.setSelected(true);
         editor.autoSaveProperty().bind(autoSaveMenuItem.selectedProperty());
         fileMenu.getItems().addAll(
                 actionMenuItem("New Text", LineAwesomeSolid.FILE, editor.getActionFactory().newDocument()),
@@ -525,6 +552,50 @@ public class FullFeaturedDemo extends Application {
         menuItem.disableProperty().bind(action.disabledProperty());
         menuItem.setOnAction(action::execute);
         return menuItem;
+    }
+
+    private static void findEmoji(String text, BiConsumer<Emoji, Integer> onCodeNameFound) {
+        if (text.endsWith(" ")) {
+            return;
+        }
+        int wordBeginIndex = Math.max(text.lastIndexOf(" ") + 1, text.lastIndexOf("\n") + 1);
+        String word = text.substring(wordBeginIndex);
+        if (word.startsWith(":") && word.length() > 2) {
+            // check if word contains an emoji codename :name:
+            if (word.substring(1).contains(":")) {
+                Matcher matcher = codenamePattern.matcher(word);
+                if (matcher.find()) {
+                    EmojiData.emojiFromShortName(matcher.group(1))
+                            .ifPresent(emoji -> onCodeNameFound.accept(emoji, wordBeginIndex));
+                }
+            }
+        }
+    }
+
+    private static void findMarkdown(String text, BiConsumer<Integer, String> onFound) {
+        Matcher matcher = markdownDetector.matcher(text);
+        while (matcher.find()) {
+            for (int i = 1; i < matcher.groupCount(); i++) {
+                String marker = matcher.group(i);
+                if (marker != null) {
+                    onFound.accept(matcher.start(), marker);
+                    break;
+                }
+            }
+        }
+    }
+
+    private TextDecoration getStyleFromMarker(String marker) {
+        TextDecoration.Builder builder = TextDecoration.builder();
+        switch (marker) {
+            case MARKER_BOLD:
+                return builder.fontWeight(BOLD).build();
+            case MARKER_ITALIC:
+                return builder.fontPosture(ITALIC).build();
+            case MARKER_MONO:
+                return builder.fontFamily("monospaced").build();
+        }
+        return builder.build();
     }
 
     public static void main(String[] args) {
