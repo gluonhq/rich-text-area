@@ -132,6 +132,10 @@ public class ActionFactory {
         return new BasicAction(control, action -> ACTION_CMD_FACTORY.selectAndDecorate(selection, decoration));
     }
 
+    public Action removeExtremesAndDecorate(Selection selection, Decoration decoration) {
+        return new BasicAction(control, action -> ACTION_CMD_FACTORY.removeExtremesAndDecorate(selection, decoration));
+    }
+
     public Action insertEmoji(Emoji emoji) {
         return new BasicAction(control, action -> ACTION_CMD_FACTORY.insertEmoji(emoji));
     }
