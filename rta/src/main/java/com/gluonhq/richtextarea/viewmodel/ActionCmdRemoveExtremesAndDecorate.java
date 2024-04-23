@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Gluon
+ * Copyright (c) 2024, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,38 +29,42 @@ package com.gluonhq.richtextarea.viewmodel;
 
 import com.gluonhq.richtextarea.Selection;
 import com.gluonhq.richtextarea.model.Decoration;
-import com.gluonhq.richtextarea.model.TextDecoration;
+import javafx.beans.binding.BooleanBinding;
 
 import java.util.Objects;
 
-public class SelectAndDecorateCmd extends AbstractEditCmd {
+public class ActionCmdRemoveExtremesAndDecorate implements ActionCmd {
 
     private final Selection selection;
     private final Decoration decoration;
-    private Decoration prevDecoration;
 
-    public SelectAndDecorateCmd(Selection selection, Decoration decoration) {
+    public ActionCmdRemoveExtremesAndDecorate(Selection selection, Decoration decoration) {
         this.selection = Objects.requireNonNull(selection);
         this.decoration = Objects.requireNonNull(decoration);
     }
 
     @Override
-    protected void doUndo(RichTextAreaViewModel viewModel) {
-        Objects.requireNonNull(viewModel);
-        if (prevDecoration != null && prevDecoration instanceof TextDecoration) {
-            viewModel.setDecorationAtCaret(prevDecoration);
+    public void apply(RichTextAreaViewModel viewModel) {
+        if (viewModel.isEditable()) {
+
+            Selection internalSelection = viewModel.getTextBuffer().getInternalSelection(selection);
+
+            // Undo adding last unit
+            // This is needed to allow undo() calls.
+            // (Otherwise, calling undo() would remove the emoji, but then, as this last unit would be
+            // present, there would be immediately a call to select and replace the content with the
+            // emoji once again, and as a result, undo() won't do anything, at least apparently for the user)
+            viewModel.getCommandManager().undo();
+
+            // Update selection accordingly, removing from the original selection the length of the
+            // removed last unit (based on the length of the text)
+            Selection newSelection = new Selection(internalSelection.getStart(), Math.min(internalSelection.getEnd(), viewModel.getTextLength()));
+            viewModel.getCommandManager().execute(new RemoveStartAndDecorateCmd(newSelection, decoration));
         }
-        viewModel.undo();
     }
 
     @Override
-    protected void doRedo(RichTextAreaViewModel viewModel) {
-        Objects.requireNonNull(viewModel);
-        if (viewModel.isEditable()) {
-            prevDecoration = viewModel.getDecorationAtCaret();
-            viewModel.setSelection(selection);
-            viewModel.decorate(decoration);
-            viewModel.setSelection(Selection.UNDEFINED);
-        }
+    public BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
+        return viewModel.editableProperty().not();
     }
 }

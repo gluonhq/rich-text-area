@@ -95,6 +95,10 @@ public final class ActionCmdFactory {
         return new ActionCmdSelectAndDecorate(selection, decoration);
     }
 
+    public ActionCmd removeExtremesAndDecorate(Selection selection, Decoration decoration) {
+        return new ActionCmdRemoveExtremesAndDecorate(selection, decoration);
+    }
+
     public ActionCmd insertText(String text) {
         return new ActionCmdInsertText(text);
     }

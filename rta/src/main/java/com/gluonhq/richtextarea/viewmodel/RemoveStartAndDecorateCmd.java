@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Gluon
+ * Copyright (c) 2024, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,34 +33,55 @@ import com.gluonhq.richtextarea.model.TextDecoration;
 
 import java.util.Objects;
 
-public class SelectAndDecorateCmd extends AbstractEditCmd {
+class RemoveStartAndDecorateCmd extends AbstractEditCmd {
 
     private final Selection selection;
     private final Decoration decoration;
     private Decoration prevDecoration;
 
-    public SelectAndDecorateCmd(Selection selection, Decoration decoration) {
+    public RemoveStartAndDecorateCmd(Selection selection, Decoration decoration) {
         this.selection = Objects.requireNonNull(selection);
         this.decoration = Objects.requireNonNull(decoration);
     }
 
     @Override
-    protected void doUndo(RichTextAreaViewModel viewModel) {
+    public void doRedo(RichTextAreaViewModel viewModel) {
         Objects.requireNonNull(viewModel);
+        prevDecoration = viewModel.getDecorationAtCaret();
+        int prevCaret = viewModel.getCaretPosition();
+
+        // 1. select start of selection, delete it, move back caret, select remaining content again
+        viewModel.setSelection(new Selection(selection.getStart(), selection.getStart() + 1));
+        viewModel.remove(-1, 1);
+        viewModel.setCaretPosition(prevCaret - 1);
+        viewModel.setSelection(new Selection(selection.getStart(), selection.getEnd() - 1));
+
+        // 2. apply decoration
+        viewModel.decorate(decoration);
+
+        // unselect and apply previous decoration after selection
+        viewModel.setSelection(Selection.UNDEFINED);
         if (prevDecoration != null && prevDecoration instanceof TextDecoration) {
             viewModel.setDecorationAtCaret(prevDecoration);
         }
+    }
+
+    @Override
+    public void doUndo(RichTextAreaViewModel viewModel) {
+        // 1. reset decoration
+        if (prevDecoration != null && prevDecoration instanceof TextDecoration) {
+            viewModel.setDecorationAtCaret(prevDecoration);
+        }
+
+        // 2. apply decoration
+        viewModel.undo();
+
+        // 3. remove single selection
         viewModel.undo();
     }
 
     @Override
-    protected void doRedo(RichTextAreaViewModel viewModel) {
-        Objects.requireNonNull(viewModel);
-        if (viewModel.isEditable()) {
-            prevDecoration = viewModel.getDecorationAtCaret();
-            viewModel.setSelection(selection);
-            viewModel.decorate(decoration);
-            viewModel.setSelection(Selection.UNDEFINED);
-        }
+    public String toString() {
+        return "RemoveStartAndDecorateCmd[" + super.toString() + ", " + selection+ ", " + decoration + "]";
     }
 }
