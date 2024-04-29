@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Gluon
+ * Copyright (c) 2023, 2024, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,6 @@ import com.gluonhq.richtextarea.model.TextDecoration;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.util.List;
@@ -82,7 +81,7 @@ public class BasicDocumentDemo extends Application {
         TextDecoration textDecoration = TextDecoration.builder().presets()
                 .fontFamily("Arial")
                 .fontSize(20)
-                .foreground(Color.RED)
+                .foreground("red")
                 .build();
         ParagraphDecoration paragraphDecoration = ParagraphDecoration.builder().presets().build();
         DecorationModel decorationModel = new DecorationModel(0, text.length(), textDecoration, paragraphDecoration);

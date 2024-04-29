@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2024, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,8 +41,8 @@ import static com.gluonhq.richtextarea.Tools.getFirstLetter;
  */
 public class TextDecoration implements Decoration {
 
-    private Color foreground;
-    private Color background;
+    private String foreground;
+    private String background;
     private String fontFamily;
     private double fontSize;
     private FontPosture fontPosture;
@@ -55,30 +55,32 @@ public class TextDecoration implements Decoration {
 
     /**
      * Gets the foreground color of the text.
+     * Any string value that can be parsed with {@link Color#web(String)}
      *
-     * @defaultValue {@link Color#BLACK}
+     * @defaultValue #000000, black
      *
      * @return the foreground color of the text
      */
-    public Color getForeground() {
+    public String getForeground() {
         return foreground;
     }
 
     /**
      * Gets the background color of the text.
+     * Any string value that can be parsed with {@link Color#web(String)}
      *
-     * @defaultValue {@link Color#TRANSPARENT}
+     * @defaultValue #00000000, transparent
      *
      * @return the background color of the text
      */
-    public Color getBackground() {
+    public String getBackground() {
         return background;
     }
 
     /**
      * Gets the font size of the text.
      *
-     * @defaultValue 12
+     * @defaultValue 14
      *
      * @return the font size of the text
      */
@@ -210,8 +212,8 @@ public class TextDecoration implements Decoration {
 
     public static class Builder {
 
-        private Color foreground;
-        private Color background;
+        private String foreground;
+        private String background;
         private String fontFamily;
         private double fontSize;
         private FontPosture fontPosture;
@@ -237,8 +239,8 @@ public class TextDecoration implements Decoration {
         }
 
         public Builder presets() {
-            foreground = Color.BLACK;
-            background = Color.TRANSPARENT;
+            foreground = "black";
+            background = "transparent";
             fontFamily = "System";
             fontSize = 14.0;
             fontPosture = FontPosture.REGULAR;
@@ -262,12 +264,12 @@ public class TextDecoration implements Decoration {
             return this;
         }
 
-        public Builder foreground(Color color) {
+        public Builder foreground(String color) {
             this.foreground = Objects.requireNonNull(color);
             return this;
         }
 
-        public Builder background(Color color) {
+        public Builder background(String color) {
             this.background = Objects.requireNonNull(color);
             return this;
         }

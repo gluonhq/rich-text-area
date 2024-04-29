@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023, Gluon
+ * Copyright (c) 2022, 2024, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,6 +56,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -69,6 +71,8 @@ import static com.gluonhq.richtextarea.model.TableDecoration.TABLE_SEPARATOR;
 class RichListCell extends ListCell<Paragraph> {
 
     private static final Font MIN_LF_FONT = Font.font(10);
+
+    private final static Map<String, Color> COLOR_MAP = new HashMap<>();
 
     private final RichTextAreaSkin richTextAreaSkin;
     private final ParagraphTile paragraphTile;
@@ -194,10 +198,11 @@ class RichListCell extends ListCell<Paragraph> {
                     } else {
                         final Node node = buildNode(unit, (TextDecoration) decoration);
                         fragments.add(node);
-                        Color background = ((TextDecoration) decoration).getBackground();
-                        if (background != Color.TRANSPARENT) {
+                        String background = ((TextDecoration) decoration).getBackground();
+                        Color backgroundColor = COLOR_MAP.computeIfAbsent(background, s -> parseColorOrDefault(background, Color.TRANSPARENT));
+                        if (!Color.TRANSPARENT.equals(backgroundColor)) {
                             backgroundIndexRanges.add(new IndexRangeColor(
-                                    length.get(), length.get() + unit.length(), background));
+                                    length.get(), length.get() + unit.length(), backgroundColor));
                         }
                     }
                     length.addAndGet(unit.length());
@@ -249,7 +254,8 @@ class RichListCell extends ListCell<Paragraph> {
         }
         Objects.requireNonNull(decoration);
         Text text = new Text(Objects.requireNonNull(content));
-        text.setFill(decoration.getForeground());
+        String foreground = decoration.getForeground();
+        text.setFill(COLOR_MAP.computeIfAbsent(foreground, s -> parseColorOrDefault(foreground, Color.BLACK)));
         text.setStrikethrough(decoration.isStrikethrough());
         text.setUnderline(decoration.isUnderline());
 
@@ -353,4 +359,11 @@ class RichListCell extends ListCell<Paragraph> {
         return Optional.empty();
     }
 
+    private static Color parseColorOrDefault(String color, Color defaultColor) {
+        try {
+            return Color.web(color);
+        } catch (Exception e) {
+            return defaultColor;
+        }
+    }
 }

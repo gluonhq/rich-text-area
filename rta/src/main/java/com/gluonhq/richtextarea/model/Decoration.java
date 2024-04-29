@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2024, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,12 +27,14 @@
  */
 package com.gluonhq.richtextarea.model;
 
+import java.io.Serializable;
+
 /**
  * Interface used to define the decoration applied to a fragment of RichTextArea
  *
  * Known implementations: {@link TextDecoration} and {@link ImageDecoration} for
  * text decoration, and {@link ParagraphDecoration} for paragraph decoration
  */
-public interface Decoration {
+public interface Decoration extends Serializable {
 
 }
