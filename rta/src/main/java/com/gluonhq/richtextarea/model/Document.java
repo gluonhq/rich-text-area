@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023, Gluon
+ * Copyright (c) 2022, 2024, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ package com.gluonhq.richtextarea.model;
 
 import com.gluonhq.richtextarea.Tools;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -46,7 +47,7 @@ import java.util.stream.Collectors;
  * decorations or caret position) should refer to their position within the full raw text.
  *
  */
-public class Document {
+public class Document implements Serializable {
 
     private final String text;
     private final List<DecorationModel> decorationList;

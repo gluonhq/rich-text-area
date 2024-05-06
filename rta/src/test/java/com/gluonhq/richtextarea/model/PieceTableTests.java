@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023, Gluon
+ * Copyright (c) 2022, 2024, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -251,11 +251,11 @@ public class PieceTableTests {
     public void sameBlockDecorateForegroundColor() {
         String text = "Original Bigger Text";
         PieceTable pt = new PieceTable(new Document(text));
-        pt.decorate(1, 2, TextDecoration.builder().foreground(Color.AQUA).build());
+        pt.decorate(1, 2, TextDecoration.builder().foreground("aqua").build());
         Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getInternalText().equals("r"))
-                .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getForeground() == Color.AQUA)
+                .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getForeground().equals("aqua"))
         );
     }
 
@@ -264,11 +264,11 @@ public class PieceTableTests {
     public void sameBlockDecorateBackgroundColor() {
         String text = "Original Bigger Text";
         PieceTable pt = new PieceTable(new Document(text));
-        pt.decorate(1, 2, TextDecoration.builder().background(Color.AQUA).build());
+        pt.decorate(1, 2, TextDecoration.builder().background("aqua").build());
         Assertions.assertEquals(text, pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getInternalText().equals("r"))
-                .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getBackground() == Color.AQUA)
+                .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getBackground().equals("aqua"))
         );
     }
 
@@ -464,12 +464,12 @@ public class PieceTableTests {
         pt.insert(insert, 9); // 'Original Bigger Text'
         pt.insert(insert, 9); // 'Original Bigger Bigger Text'
         pt.decorate(9, 15, TextDecoration.builder().fontSize(20).build());
-        pt.decorate(9, 15, TextDecoration.builder().foreground(Color.AQUA).build());
+        pt.decorate(9, 15, TextDecoration.builder().foreground("aqua").build());
         Assertions.assertEquals("Original Bigger Bigger Text", pt.getText());
         Assertions.assertTrue(pt.pieces.stream()
                 .filter(piece -> piece.getInternalText().equals("Bigger"))
                 .anyMatch(piece -> ((TextDecoration) piece.getDecoration()).getFontSize() == 20 &&
-                        ((TextDecoration) piece.getDecoration()).getForeground() == Color.AQUA)
+                        ((TextDecoration) piece.getDecoration()).getForeground().equals("aqua"))
         );
     }
 
