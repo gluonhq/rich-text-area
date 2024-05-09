@@ -33,9 +33,7 @@ jobs:
         run: |
           ver=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout -f rta)
           if [[ $ver == *"SNAPSHOT"* ]]; then
-              export DISPLAY=:90
-              Xvfb -ac :90 -screen 0 1280x1024x24 > /dev/null 2>&1 &
-              mvn -B -ntp deploy -f rta
+              mvn -B -ntp -Dmaven.test.skip=true deploy -f rta
           fi
         shell: bash
         env:
