@@ -72,10 +72,10 @@ import static javafx.scene.text.FontPosture.REGULAR;
 import static javafx.scene.text.FontWeight.BOLD;
 import static javafx.scene.text.FontWeight.NORMAL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.testfx.api.FxAssert.verifyThat;
-import static org.testfx.util.WaitForAsyncUtils.sleep;
 import static org.testfx.util.WaitForAsyncUtils.waitForFxEvents;
 
 @ExtendWith(ApplicationExtension.class)
@@ -365,7 +365,38 @@ public class RTATest {
         run(() -> richTextArea.getActionFactory().selectNone().execute(new ActionEvent()));
         waitForFxEvents();
 
-        sleep(10, TimeUnit.SECONDS);
+        int noToneEmojis = 0;
+        int mediumDarkToneEmojis = 0;
+        for (int i = 0; i < 15; i++) {
+            ImageView imageView = robot.lookup(node -> node instanceof ImageView).nth(i).query();
+            Object emojiUnified = imageView.getProperties().get("emoji_unified");
+            assertNotNull(emojiUnified);
+            if ("1F471".equals(emojiUnified.toString())) {
+                noToneEmojis++;
+            }else if ("1F471-1F3FD".equals(emojiUnified.toString())) {
+                mediumDarkToneEmojis++;
+            }
+        }
+        assertEquals(1, noToneEmojis);
+        assertEquals(1, mediumDarkToneEmojis);
+
+        run(() -> richTextArea.setSkinTone(EmojiSkinTone.MEDIUM_SKIN_TONE));
+        waitForFxEvents();
+
+        noToneEmojis = 0;
+        mediumDarkToneEmojis = 0;
+        for (int i = 0; i < 15; i++) {
+            ImageView imageView = robot.lookup(node -> node instanceof ImageView).nth(i).query();
+            Object emojiUnified = imageView.getProperties().get("emoji_unified");
+            assertNotNull(emojiUnified);
+            if ("1F471".equals(emojiUnified.toString())) {
+                noToneEmojis++;
+            }else if ("1F471-1F3FD".equals(emojiUnified.toString())) {
+                mediumDarkToneEmojis++;
+            }
+        }
+        assertEquals(0, noToneEmojis);
+        assertEquals(2, mediumDarkToneEmojis);
     }
 
     private void run(Runnable runnable) {
