@@ -27,6 +27,7 @@
  */
 package com.gluonhq.richtextarea;
 
+import com.gluonhq.emoji.EmojiSkinTone;
 import com.gluonhq.richtextarea.model.Decoration;
 import com.gluonhq.richtextarea.model.Document;
 import com.gluonhq.richtextarea.model.ImageDecoration;
@@ -382,6 +383,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final EventHandler<DragEvent> dndHandler = this::dndListener;
 
     private final ChangeListener<Boolean> tableAllowedListener;
+    private final ChangeListener<EmojiSkinTone> skinToneChangeListener;
 
     private final ResourceBundle resources;
 
@@ -597,6 +599,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         };
 
         tableAllowedListener = (obs, ov, nv) -> viewModel.setTableAllowed(nv);
+        skinToneChangeListener = (obs, ov, nv) -> refreshTextFlow();
         caretChangeListener = (obs, ov, nv) -> viewModel.getParagraphWithCaret()
                 .ifPresent(paragraph -> Platform.runLater(paragraphListView::scrollIfNeeded));
         internalCaretChangeListener = (obs, ov, nv) -> {
@@ -658,6 +661,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().widthProperty().removeListener(controlPrefWidthListener);
         getSkinnable().focusedProperty().removeListener(focusListener);
         getSkinnable().removeEventHandler(DragEvent.ANY, dndHandler);
+        getSkinnable().skinToneProperty().removeListener(skinToneChangeListener);
         contextMenu.getItems().clear();
         tableCellContextMenuItems = null;
         tableContextMenuItems = null;
@@ -728,6 +732,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().widthProperty().addListener(controlPrefWidthListener);
         getSkinnable().focusedProperty().addListener(focusListener);
         getSkinnable().addEventHandler(DragEvent.ANY, dndHandler);
+        getSkinnable().skinToneProperty().addListener(skinToneChangeListener);
         refreshTextFlow();
         requestLayout();
         editableChangeListener(null); // sets up all related listeners
