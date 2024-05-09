@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2024, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ class ActionCmdPaste implements ActionCmd {
 
     @Override
     public BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
-        return Bindings.createBooleanBinding(() -> !(viewModel.clipboardHasString() || viewModel.clipboardHasImage() || viewModel.clipboardHasUrl())
+        return Bindings.createBooleanBinding(() -> !(viewModel.clipboardHasDocument() || viewModel.clipboardHasString() || viewModel.clipboardHasImage() || viewModel.clipboardHasUrl())
                         || !viewModel.isEditable(),
                 viewModel.caretPositionProperty(), viewModel.editableProperty());
     }

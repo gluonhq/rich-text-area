@@ -44,6 +44,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
@@ -66,13 +67,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static javafx.scene.input.KeyCode.A;
+import static javafx.scene.input.KeyCode.LEFT;
+import static javafx.scene.input.KeyCode.RIGHT;
+import static javafx.scene.input.KeyCode.Z;
+import static javafx.scene.input.KeyCombination.ALT_DOWN;
+import static javafx.scene.input.KeyCombination.SHIFT_DOWN;
 import static javafx.scene.input.KeyCombination.SHORTCUT_DOWN;
 import static javafx.scene.text.FontPosture.ITALIC;
 import static javafx.scene.text.FontPosture.REGULAR;
 import static javafx.scene.text.FontWeight.BOLD;
 import static javafx.scene.text.FontWeight.NORMAL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.testfx.api.FxAssert.verifyThat;
@@ -341,6 +346,24 @@ public class RTATest {
         pt.walkFragments((u, d) -> internalSb.append(u.getInternalText()), 0, 208);
         assertEquals(internalText, internalSb.toString());
 
+        assertEquals(3, rta.getDocument().getDecorations().size());
+        DecorationModel dm1 = rta.getDocument().getDecorations().get(0);
+        assertEquals(0, dm1.getStart());
+        assertEquals(25, dm1.getLength());
+        assertInstanceOf(TextDecoration.class, dm1.getDecoration());
+        assertEquals(16, ((TextDecoration) dm1.getDecoration()).getFontSize());
+        assertEquals(BOLD, ((TextDecoration) dm1.getDecoration()).getFontWeight());
+        DecorationModel dm2 = rta.getDocument().getDecorations().get(1);
+        assertEquals(25, dm2.getStart());
+        assertEquals(138, dm2.getLength());
+        assertInstanceOf(TextDecoration.class, dm2.getDecoration());
+        assertEquals(NORMAL, ((TextDecoration) dm2.getDecoration()).getFontWeight());
+        DecorationModel dm3 = rta.getDocument().getDecorations().get(2);
+        assertEquals(163, dm3.getStart());
+        assertEquals(104, dm3.getLength());
+        assertInstanceOf(TextDecoration.class, dm3.getDecoration());
+        assertEquals(ITALIC, ((TextDecoration) dm3.getDecoration()).getFontPosture());
+
         assertEquals(15, robot.lookup(node -> node instanceof ImageView).queryAll().size());
         AtomicInteger counter = new AtomicInteger();
         for (int i = 0; i < 15; i++) {
@@ -397,6 +420,116 @@ public class RTATest {
         }
         assertEquals(0, noToneEmojis);
         assertEquals(2, mediumDarkToneEmojis);
+
+        run(() -> richTextArea.getActionFactory().selectAll().execute(new ActionEvent()));
+        waitForFxEvents();
+
+        run(() -> richTextArea.getActionFactory().save().execute(new ActionEvent()));
+        waitForFxEvents();
+        Document oldDocument = rta.getDocument();
+
+        run(() -> {
+            richTextArea.getActionFactory().copy().execute(new ActionEvent());
+            richTextArea.getActionFactory().newDocument().execute(new ActionEvent());
+        });
+        waitForFxEvents();
+
+        run(() -> richTextArea.getActionFactory().paste().execute(new ActionEvent()));
+        waitForFxEvents();
+
+        Document newDocument = rta.getDocument();
+        assertEquals(oldDocument.getText(), newDocument.getText());
+        assertEquals(oldDocument.getDecorations(), newDocument.getDecorations());
+        assertEquals(oldDocument.getCaretPosition(), newDocument.getCaretPosition());
+        assertEquals(oldDocument, newDocument);
+    }
+
+    @Test
+    public void copyPasteTest(FxRobot robot) {
+        run(() -> {
+            String text = "One \ud83d\ude00 Text \ufeff@name\ufeff!!";
+            TextDecoration textDecoration1 = TextDecoration.builder().presets().fontFamily("Arial").fontSize(20).build();
+            TextDecoration textDecoration2 = TextDecoration.builder().presets().fontFamily("Arial").fontSize(16).fontWeight(BOLD).build();
+            TextDecoration textDecoration3 = TextDecoration.builder().presets().fontFamily("Arial").fontSize(14).foreground("red").build();
+            ParagraphDecoration paragraphDecoration = ParagraphDecoration.builder().presets().build();
+            Document document = new Document(text,
+                    List.of(new DecorationModel(0, 7, textDecoration1, paragraphDecoration),
+                            new DecorationModel(7, 5, textDecoration2, paragraphDecoration),
+                            new DecorationModel(12, 7, textDecoration3, paragraphDecoration),
+                            new DecorationModel(19, 2, TextDecoration.builder().presets().fontFamily("Arial").build(), paragraphDecoration)), text.length());
+            richTextArea.getActionFactory().open(document).execute(new ActionEvent());
+            richTextArea.setAutoSave(true);
+        });
+        waitForFxEvents();
+
+        RichTextArea rta = robot.lookup(".rich-text-area").query();
+
+        assertEquals(14, rta.getTextLength());
+        assertEquals(21, rta.getDocument().getText().length());
+        assertEquals(21, rta.getCaretPosition());
+        assertEquals(21, rta.getDocument().getCaretPosition());
+        assertEquals(4, rta.getDocument().getDecorations().size());
+
+        Document document = rta.getDocument();
+
+        robot.push(new KeyCodeCombination(LEFT, SHORTCUT_DOWN));
+        robot.push(new KeyCodeCombination(RIGHT, SHIFT_DOWN, ALT_DOWN));
+        robot.push(new KeyCodeCombination(RIGHT, SHIFT_DOWN, ALT_DOWN));
+
+        run(() -> richTextArea.getActionFactory().copy().execute(new ActionEvent()));
+        waitForFxEvents();
+
+        robot.push(new KeyCodeCombination(RIGHT, SHORTCUT_DOWN));
+        robot.push(new KeyCodeCombination(LEFT));
+
+        run(() -> richTextArea.getActionFactory().paste().execute(new ActionEvent()));
+        waitForFxEvents();
+
+        String newText = "One \ud83d\ude00 Text \ufeff@name\ufeff!One \ud83d\ude00 !";
+        assertEquals(newText, rta.getDocument().getText());
+        assertEquals(20, rta.getTextLength());
+        assertEquals(28, rta.getDocument().getText().length());
+        assertEquals(27, rta.getCaretPosition());
+        assertEquals(27, rta.getDocument().getCaretPosition());
+        assertEquals(6, rta.getDocument().getDecorations().size());
+
+        DecorationModel dm1 = rta.getDocument().getDecorations().get(4);
+        assertEquals(20, dm1.getStart());
+        assertEquals(7, dm1.getLength());
+        assertInstanceOf(TextDecoration.class, dm1.getDecoration());
+        assertEquals(20, ((TextDecoration) dm1.getDecoration()).getFontSize());
+        assertEquals(NORMAL, ((TextDecoration) dm1.getDecoration()).getFontWeight());
+        DecorationModel dm2 = rta.getDocument().getDecorations().get(5);
+        assertEquals(27, dm2.getStart());
+        assertEquals(1, dm2.getLength());
+        assertInstanceOf(TextDecoration.class, dm2.getDecoration());
+        assertEquals(NORMAL, ((TextDecoration) dm2.getDecoration()).getFontWeight());
+
+        Document newDocument = rta.getDocument();
+
+        robot.push(new KeyCodeCombination(Z, SHORTCUT_DOWN));
+        assertEquals(document, rta.getDocument());
+        robot.push(new KeyCodeCombination(Z, SHORTCUT_DOWN, SHIFT_DOWN));
+        assertEquals(newDocument, rta.getDocument());
+
+        robot.push(new KeyCodeCombination(RIGHT));
+
+        run(() -> richTextArea.getActionFactory().paste().execute(new ActionEvent()));
+        waitForFxEvents();
+
+        newText = "One \ud83d\ude00 Text \ufeff@name\ufeff!One \ud83d\ude00 !One \ud83d\ude00 ";
+        assertEquals(newText, rta.getDocument().getText());
+        assertEquals(26, rta.getTextLength());
+        assertEquals(35, rta.getDocument().getText().length());
+        assertEquals(35, rta.getCaretPosition());
+        assertEquals(35, rta.getDocument().getCaretPosition());
+        assertEquals(7, rta.getDocument().getDecorations().size());
+        dm1 = rta.getDocument().getDecorations().get(6);
+        assertEquals(28, dm1.getStart());
+        assertEquals(7, dm1.getLength());
+        assertInstanceOf(TextDecoration.class, dm1.getDecoration());
+        assertEquals(20, ((TextDecoration) dm1.getDecoration()).getFontSize());
+        assertEquals(NORMAL, ((TextDecoration) dm1.getDecoration()).getFontWeight());
     }
 
     private void run(Runnable runnable) {

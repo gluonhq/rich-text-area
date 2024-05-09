@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023, Gluon
+ * Copyright (c) 2022, 2024, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ public interface TextBuffer {
     String getText(int start, int end);
     int getInternalPosition(int position);
     Selection getInternalSelection(Selection selection);
-    List<DecorationModel> getDecorationModelList();
+    List<DecorationModel> getDecorationModelList(int start, int end);
 
     CharacterIterator getCharacterIterator();
     char charAt(int pos);
