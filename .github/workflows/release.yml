@@ -39,6 +39,8 @@ jobs:
       - name: Publish to Maven Central
         id: deploy
         run: |
+          export DISPLAY=:90
+          Xvfb -ac :90 -screen 0 1280x1024x24 > /dev/null 2>&1 &
           mvn -q -Prelease deploy -f rta
           echo ::set-output name=exit_code::$?
         env:
