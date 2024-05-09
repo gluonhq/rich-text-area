@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2024, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,8 @@ import java.util.function.Function;
 class BasicAction implements Action {
 
     private RichTextAreaViewModel viewModel;
+    private ActionCmd actionCmd;
+
     private final RichTextArea control;
     private final Function<Action, ActionCmd> actionCmdFunction;
 
@@ -82,7 +84,10 @@ class BasicAction implements Action {
     }
 
     private ActionCmd getActionCmd() {
-        return actionCmdFunction.apply(this);
+        if (actionCmd == null) {
+            actionCmd = actionCmdFunction.apply(this);
+        }
+        return actionCmd;
     }
 
     @Override
