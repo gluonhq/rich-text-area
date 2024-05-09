@@ -365,36 +365,37 @@ public class RTATest {
         run(() -> richTextArea.getActionFactory().selectNone().execute(new ActionEvent()));
         waitForFxEvents();
 
-        ImageView imageView = robot.lookup(node -> node instanceof ImageView).nth(4).query();
-        Object emojiUnifiedNoTone = imageView.getProperties().get("emoji_unified");
-        assertNotNull(emojiUnifiedNoTone);
-        EmojiData.emojiFromCodepoints(emojiUnifiedNoTone.toString()).ifPresent(emoji -> {
-            assertEquals(emojiUnifiedNoTone, emoji.getUnified());
-            assertFalse(emoji.getName().contains(":"));
-        });
+        int noToneEmojis = 0;
         int mediumDarkToneEmojis = 0;
         for (int i = 0; i < 15; i++) {
-            imageView = robot.lookup(node -> node instanceof ImageView).nth(i).query();
+            ImageView imageView = robot.lookup(node -> node instanceof ImageView).nth(i).query();
             Object emojiUnified = imageView.getProperties().get("emoji_unified");
             assertNotNull(emojiUnified);
-            if ("1F471-1F3FD".equals(emojiUnified.toString())) {
+            if ("1F471".equals(emojiUnified.toString())) {
+                noToneEmojis++;
+            }else if ("1F471-1F3FD".equals(emojiUnified.toString())) {
                 mediumDarkToneEmojis++;
             }
         }
+        assertEquals(1, noToneEmojis);
         assertEquals(1, mediumDarkToneEmojis);
 
         run(() -> richTextArea.setSkinTone(EmojiSkinTone.MEDIUM_SKIN_TONE));
         waitForFxEvents();
 
+        noToneEmojis = 0;
         mediumDarkToneEmojis = 0;
         for (int i = 0; i < 15; i++) {
-            imageView = robot.lookup(node -> node instanceof ImageView).nth(i).query();
+            ImageView imageView = robot.lookup(node -> node instanceof ImageView).nth(i).query();
             Object emojiUnified = imageView.getProperties().get("emoji_unified");
             assertNotNull(emojiUnified);
-            if ("1F471-1F3FD".equals(emojiUnified.toString())) {
+            if ("1F471".equals(emojiUnified.toString())) {
+                noToneEmojis++;
+            }else if ("1F471-1F3FD".equals(emojiUnified.toString())) {
                 mediumDarkToneEmojis++;
             }
         }
+        assertEquals(0, noToneEmojis);
         assertEquals(2, mediumDarkToneEmojis);
     }
 
