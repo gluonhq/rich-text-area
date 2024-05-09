@@ -43,6 +43,7 @@ import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.Clipboard;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
@@ -66,6 +67,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static com.gluonhq.richtextarea.RichTextArea.RTA_DATA_FORMAT;
 import static javafx.scene.input.KeyCode.A;
 import static javafx.scene.input.KeyCode.LEFT;
 import static javafx.scene.input.KeyCode.RIGHT;
@@ -80,6 +82,7 @@ import static javafx.scene.text.FontWeight.NORMAL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.testfx.api.FxAssert.verifyThat;
 import static org.testfx.util.WaitForAsyncUtils.waitForFxEvents;
 
@@ -473,14 +476,27 @@ public class RTATest {
         Document document = rta.getDocument();
 
         robot.push(new KeyCodeCombination(LEFT, SHORTCUT_DOWN));
+        assertEquals(0, rta.getCaretPosition());
         robot.push(new KeyCodeCombination(RIGHT, SHIFT_DOWN, ALT_DOWN));
+        assertEquals(4, rta.getCaretPosition());
         robot.push(new KeyCodeCombination(RIGHT, SHIFT_DOWN, ALT_DOWN));
+        assertEquals(7, rta.getCaretPosition());
 
         run(() -> richTextArea.getActionFactory().copy().execute(new ActionEvent()));
         waitForFxEvents();
+        run(() -> assertTrue(Clipboard.getSystemClipboard().hasContent(RTA_DATA_FORMAT)));
+        waitForFxEvents();
+        run(() -> {
+            Document copyDoc = (Document) Clipboard.getSystemClipboard().getContent(RTA_DATA_FORMAT);
+            assertNotNull(copyDoc);
+            assertEquals("One \ud83d\ude00 ", copyDoc.getText());
+        });
+        waitForFxEvents();
 
         robot.push(new KeyCodeCombination(RIGHT, SHORTCUT_DOWN));
+        assertEquals(21, rta.getCaretPosition());
         robot.push(new KeyCodeCombination(LEFT));
+        assertEquals(20, rta.getCaretPosition());
 
         run(() -> richTextArea.getActionFactory().paste().execute(new ActionEvent()));
         waitForFxEvents();
