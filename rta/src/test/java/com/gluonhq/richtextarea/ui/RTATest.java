@@ -32,6 +32,7 @@ import com.gluonhq.emoji.EmojiData;
 import com.gluonhq.emoji.EmojiSkinTone;
 import com.gluonhq.richtextarea.RichTextArea;
 import com.gluonhq.richtextarea.Selection;
+import com.gluonhq.richtextarea.Tools;
 import com.gluonhq.richtextarea.action.TextDecorateAction;
 import com.gluonhq.richtextarea.model.DecorationModel;
 import com.gluonhq.richtextarea.model.Document;
@@ -45,7 +46,6 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
@@ -69,10 +69,13 @@ import java.util.stream.Collectors;
 
 import static com.gluonhq.richtextarea.RichTextArea.RTA_DATA_FORMAT;
 import static javafx.scene.input.KeyCode.A;
+import static javafx.scene.input.KeyCode.END;
+import static javafx.scene.input.KeyCode.HOME;
 import static javafx.scene.input.KeyCode.LEFT;
 import static javafx.scene.input.KeyCode.RIGHT;
 import static javafx.scene.input.KeyCode.Z;
 import static javafx.scene.input.KeyCombination.ALT_DOWN;
+import static javafx.scene.input.KeyCombination.CONTROL_DOWN;
 import static javafx.scene.input.KeyCombination.SHIFT_DOWN;
 import static javafx.scene.input.KeyCombination.SHORTCUT_DOWN;
 import static javafx.scene.text.FontPosture.ITALIC;
@@ -475,11 +478,11 @@ public class RTATest {
 
         Document document = rta.getDocument();
 
-        robot.push(new KeyCodeCombination(LEFT, SHORTCUT_DOWN));
+        robot.push(new KeyCodeCombination(HOME));
         assertEquals(0, rta.getCaretPosition());
-        robot.push(new KeyCodeCombination(RIGHT, SHIFT_DOWN, ALT_DOWN));
+        robot.push(new KeyCodeCombination(RIGHT, SHIFT_DOWN, Tools.MAC ? ALT_DOWN : CONTROL_DOWN));
         assertEquals(4, rta.getCaretPosition());
-        robot.push(new KeyCodeCombination(RIGHT, SHIFT_DOWN, ALT_DOWN));
+        robot.push(new KeyCodeCombination(RIGHT, SHIFT_DOWN, Tools.MAC ? ALT_DOWN : CONTROL_DOWN));
         assertEquals(7, rta.getCaretPosition());
 
         run(() -> richTextArea.getActionFactory().copy().execute(new ActionEvent()));
@@ -493,7 +496,7 @@ public class RTATest {
         });
         waitForFxEvents();
 
-        robot.push(new KeyCodeCombination(RIGHT, SHORTCUT_DOWN));
+        robot.push(new KeyCodeCombination(END));
         assertEquals(21, rta.getCaretPosition());
         robot.push(new KeyCodeCombination(LEFT));
         assertEquals(20, rta.getCaretPosition());
