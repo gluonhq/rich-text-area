@@ -38,7 +38,7 @@ jobs:
           mvn -B -ntp verify -f rta
 
       - name: Publish Snapshots
-        if: github.ref == 'refs/heads/main' && runner.os != 'Linux'
+        if: github.ref == 'refs/heads/main' && runner.os == 'Linux'
         run: |
           ver=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout -f rta)
           if [[ $ver == *"SNAPSHOT"* ]]; then
