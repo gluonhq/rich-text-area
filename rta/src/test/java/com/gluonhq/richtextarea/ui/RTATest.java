@@ -60,11 +60,16 @@ import org.testfx.matcher.base.NodeMatchers;
 
 import java.nio.CharBuffer;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.gluonhq.emoji.EmojiData.getEmojiCollection;
 import static javafx.scene.input.KeyCode.A;
 import static javafx.scene.input.KeyCombination.SHORTCUT_DOWN;
 import static javafx.scene.text.FontPosture.ITALIC;
@@ -72,7 +77,6 @@ import static javafx.scene.text.FontPosture.REGULAR;
 import static javafx.scene.text.FontWeight.BOLD;
 import static javafx.scene.text.FontWeight.NORMAL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.testfx.api.FxAssert.verifyThat;
@@ -84,6 +88,14 @@ public class RTATest {
     private static boolean fxStarted;
     private BorderPane root;
     private RichTextArea richTextArea;
+
+    private static final Pattern codenamePattern = Pattern.compile(":([a-zA-Z0-9_-]*):");
+    private static final Pattern asciiPattern = Pattern.compile("D:|C:|c:|:D|:-D|>:\\(|>:-\\(|=\\)|=-\\)|<3|</3|;p|;-p|;b|;-b|;P|;-P|" +
+            ";\\)|;-\\)|:\\||:-\\||:p|:-p|:P|:-P|:b|:-b|:o|:-o|:O|:-O|:\\\\|:-\\\\|:/|:-/|:>|:->|" +
+            ":\\*|:-\\*|:\\)|\\(:|:-\\)|:'\\(|8\\)|\\):|:\\(|:-\\("); // "D:|:D|:-D" don't work, ":o)" is superseded by ":o"
+    private static final List<Emoji> asciiEmojiList = getEmojiCollection().stream()
+            .filter(e -> e.getTextList() != null)
+            .collect(Collectors.toList());
 
     @BeforeEach
     public void setup() {
@@ -397,6 +409,148 @@ public class RTATest {
         }
         assertEquals(0, noToneEmojis);
         assertEquals(2, mediumDarkToneEmojis);
+    }
+
+    @Test
+    public void findASCIIEmojiTest(FxRobot robot) {
+        run(() -> {
+            richTextArea.documentProperty().subscribe(d -> {
+                String nv = d.getText();
+                if (nv != null) {
+                    String substring = nv.substring(0, Math.min(richTextArea.getCaretPosition(), nv.length())).toLowerCase(Locale.ROOT);
+                    findEmoji(substring,
+                            (emoji, start) -> richTextArea.getActionFactory().selectAndInsertEmoji(
+                                    new Selection(start, richTextArea.getCaretPosition()), emoji, true).execute(new ActionEvent()));
+                }
+            });
+            richTextArea.getActionFactory().newDocument().execute(new ActionEvent());
+            richTextArea.setAutoSave(true);
+        });
+        waitForFxEvents();
+
+        RichTextArea rta = robot.lookup(".rich-text-area").query();
+
+        robot.write("<3");
+        assertEquals(1, rta.getTextLength());
+        assertEquals(2, rta.getDocument().getText().length());
+        String text = "\u2764\ufe0f";
+        assertEquals(text, rta.getDocument().getText());
+        assertEquals(1, robot.lookup(node -> node instanceof ImageView).queryAll().size());
+
+        run(() -> richTextArea.getActionFactory().undo().execute(new ActionEvent()));
+        waitForFxEvents();
+
+        assertEquals(0, robot.lookup(node -> node instanceof ImageView).queryAll().size());
+        assertEquals("<", rta.getDocument().getText());
+
+        run(() -> richTextArea.getActionFactory().redo().execute(new ActionEvent()));
+        waitForFxEvents();
+
+        assertEquals(1, robot.lookup(node -> node instanceof ImageView).queryAll().size());
+        assertEquals(text, rta.getDocument().getText());
+
+        robot.push(new KeyCodeCombination(A, SHORTCUT_DOWN));
+        robot.write("<3 <3 <3 <3 <3 <3 <3 <3");
+        assertEquals(15, rta.getTextLength());
+        assertEquals(23, rta.getDocument().getText().length());
+        text = "\u2764\ufe0f \u2764\ufe0f \u2764\ufe0f \u2764\ufe0f \u2764\ufe0f \u2764\ufe0f \u2764\ufe0f \u2764\ufe0f";
+        assertEquals(text, rta.getDocument().getText());
+        assertEquals(8, robot.lookup(node -> node instanceof ImageView).queryAll().size());
+
+        robot.push(new KeyCodeCombination(A, SHORTCUT_DOWN));
+        robot.write("C: c: >:( >:-( =) =-) <3 </3 ;p ;-p ;b ;-b ;P ;-P " +
+                ";) ;-) :| :-| :p :-p :P :-P :b :-b :o :-o :O :-O :\\ :-\\ :/ :-/ :> :-> " +
+                ":* :-* :) (: :-) :'( 8) ): :( :-(");
+
+        assertEquals(87, rta.getTextLength());
+        assertEquals(131, rta.getDocument().getText().length());
+        text = "\ud83d\ude04 \ud83d\ude04 \ud83d\ude20 \ud83d\ude20 \ud83d\ude03 \ud83d\ude03 \u2764\ufe0f \ud83d\udc94 \ud83d\ude1c \ud83d\ude1c \ud83d\ude1c \ud83d\ude1c \ud83d\ude1c \ud83d\ude1c \ud83d\ude09 \ud83d\ude09 \ud83d\ude10 \ud83d\ude10 \ud83d\ude1b \ud83d\ude1b \ud83d\ude1b \ud83d\ude1b \ud83d\ude1b \ud83d\ude1b \ud83d\ude2e \ud83d\ude2e \ud83d\ude2e \ud83d\ude2e \ud83d\ude15 \ud83d\ude15 \ud83d\ude15 \ud83d\ude15 \ud83d\ude06 \ud83d\ude06 \ud83d\ude18 \ud83d\ude18 \ud83d\ude42 \ud83d\ude42 \ud83d\ude42 \ud83d\ude22 \ud83d\ude0e \ud83d\ude1e \ud83d\ude1e \ud83d\ude1e";
+        assertEquals(text, rta.getDocument().getText());
+        assertEquals(44, robot.lookup(node -> node instanceof ImageView).queryAll().size());
+
+        robot.push(new KeyCodeCombination(A, SHORTCUT_DOWN));
+        robot.write("https://www.wikipedia.org");
+        assertEquals(0, robot.lookup(node -> node instanceof ImageView).queryAll().size());
+        assertEquals("https://www.wikipedia.org", rta.getDocument().getText());
+    }
+
+    @Test
+    public void findCodeNameEmojiTest(FxRobot robot) {
+        run(() -> {
+            richTextArea.documentProperty().subscribe(d -> {
+                String nv = d.getText();
+                if (nv != null) {
+                    String substring = nv.substring(0, Math.min(richTextArea.getCaretPosition(), nv.length())).toLowerCase(Locale.ROOT);
+                    findEmoji(substring,
+                            (emoji, start) -> richTextArea.getActionFactory().selectAndInsertEmoji(
+                                    new Selection(start, richTextArea.getCaretPosition()), emoji, true).execute(new ActionEvent()));
+                }
+            });
+            richTextArea.getActionFactory().newDocument().execute(new ActionEvent());
+            richTextArea.setAutoSave(true);
+        });
+        waitForFxEvents();
+
+        RichTextArea rta = robot.lookup(".rich-text-area").query();
+
+        robot.write(":wink:");
+        assertEquals(1, rta.getTextLength());
+        assertEquals(2, rta.getDocument().getText().length());
+        String text = "\ud83d\ude09";
+        assertEquals(text, rta.getDocument().getText());
+        assertEquals(1, robot.lookup(node -> node instanceof ImageView).queryAll().size());
+
+        run(() -> richTextArea.getActionFactory().undo().execute(new ActionEvent()));
+        waitForFxEvents();
+
+        assertEquals(0, robot.lookup(node -> node instanceof ImageView).queryAll().size());
+        assertEquals(":wink", rta.getDocument().getText());
+
+        run(() -> richTextArea.getActionFactory().redo().execute(new ActionEvent()));
+        waitForFxEvents();
+
+        assertEquals(1, robot.lookup(node -> node instanceof ImageView).queryAll().size());
+        assertEquals(text, rta.getDocument().getText());
+
+        robot.push(new KeyCodeCombination(A, SHORTCUT_DOWN));
+        robot.write(":flag-wales:");
+        assertEquals(1, rta.getTextLength());
+        assertEquals(14, rta.getDocument().getText().length());
+        text = "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc77\udb40\udc6c\udb40\udc73\udb40\udc7f";
+        assertEquals(text, rta.getDocument().getText());
+        assertEquals(1, robot.lookup(node -> node instanceof ImageView).queryAll().size());
+
+        robot.push(new KeyCodeCombination(A, SHORTCUT_DOWN));
+        robot.write("this is a:wink:");
+        assertEquals(0, robot.lookup(node -> node instanceof ImageView).queryAll().size());
+        assertEquals("this is a:wink:", rta.getDocument().getText());
+    }
+
+    private static void findEmoji(String text, BiConsumer<Emoji, Integer> onCodeNameFound) {
+        if (text.endsWith(" ")) {
+            return;
+        }
+        int wordBeginIndex = Math.max(text.lastIndexOf(" ") + 1, text.lastIndexOf("\n") + 1);
+        String word = text.substring(wordBeginIndex);
+        Matcher asciiMatcher = asciiPattern.matcher(word);
+        if (asciiMatcher.find() && asciiMatcher.start() == 0) {
+            // check if word is an ascii emoji and replace
+            asciiEmojiList.stream()
+                    .filter(e -> e.getTextList().contains(asciiMatcher.group()))
+                    .findFirst()
+                    .ifPresent(emoji -> onCodeNameFound.accept(emoji, wordBeginIndex));
+            return;
+        }
+        if (word.startsWith(":") && word.length() > 2) {
+            // check if word contains an emoji codename :name:
+            if (word.substring(1).contains(":")) {
+                Matcher matcher = codenamePattern.matcher(word);
+                if (matcher.find()) {
+                    EmojiData.emojiFromShortName(matcher.group(1))
+                            .ifPresent(emoji -> onCodeNameFound.accept(emoji, wordBeginIndex));
+                }
+            }
+        }
     }
 
     private void run(Runnable runnable) {

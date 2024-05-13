@@ -59,8 +59,8 @@ class ActionCmdInsertEmoji implements ActionCmd {
                     viewModel.getCommandManager().undo();
 
                     // Update selection accordingly, removing from the original selection the length of the
-                    // removed last unit (based on the length of the text)
-                    newSelection = new Selection(selection.getStart(), Math.min(selection.getEnd(), viewModel.getTextLength()));
+                    // removed last unit
+                    newSelection = new Selection(selection.getStart(), selection.getEnd() - 1);
                 }
                 viewModel.getCommandManager().execute(new SelectAndReplaceCmd(
                         viewModel.getTextBuffer().getInternalSelection(newSelection), content));
