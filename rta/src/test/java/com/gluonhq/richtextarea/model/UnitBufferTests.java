@@ -121,6 +121,46 @@ public class UnitBufferTests {
     }
 
     @Test
+    @DisplayName("Unit: selection")
+    public void tokenSelection() {
+        PieceTable pt = new PieceTable(new Document("ne \ud83d\ude00 Text \ufeff@name\ufeff!"));
+        StringBuilder text = new StringBuilder();
+        StringBuilder internalText = new StringBuilder();
+        String[] tokens = {"ne \ud83d\ude00 ", "Text ", "\ufeff@name\ufeff", "!"};
+        String[] internalTokens = {"ne \u2063 ", "Text ", "\ufffc", "!"};
+        for (int i = 0; i < tokens.length; i++) {
+            String token = tokens[i];
+            int start = text.length();
+            Selection selection = new Selection(start, start + token.length());
+            Selection internalSelection = pt.getInternalSelection(selection);
+            Assertions.assertEquals(internalSelection.getStart(), internalText.length());
+            Assertions.assertEquals(internalSelection.getEnd(), internalText.length() + internalTokens[i].length());
+            text.append(token);
+            internalText.append(internalTokens[i]);
+        }
+    }
+
+    @Test
+    @DisplayName("Unit: selection")
+    public void moreTokenSelection() {
+        PieceTable pt = new PieceTable(new Document("Emoji: \uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74\uDB40\uDC7F! and \ufeff@name\ufeff!"));
+        StringBuilder text = new StringBuilder();
+        StringBuilder internalText = new StringBuilder();
+        String[] tokens = {"Emo", "ji: \uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74\uDB40\uDC7F!", " and \ufeff@name\ufeff", "!"};
+        String[] internalTokens = {"Emo", "ji: \u2063!", " and \ufffc", "!"};
+        for (int i = 0; i < tokens.length; i++) {
+            String token = tokens[i];
+            int start = text.length();
+            Selection selection = new Selection(start, start + token.length());
+            Selection internalSelection = pt.getInternalSelection(selection);
+            Assertions.assertEquals(internalSelection.getStart(), internalText.length());
+            Assertions.assertEquals(internalSelection.getEnd(), internalText.length() + internalTokens[i].length());
+            text.append(token);
+            internalText.append(internalTokens[i]);
+        }
+    }
+
+    @Test
     @DisplayName("Unit: insert unit")
     public void insertUnits() {
         PieceTable pt = new PieceTable(FACE_MODEL);

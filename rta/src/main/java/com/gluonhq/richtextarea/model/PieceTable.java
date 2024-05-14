@@ -192,12 +192,16 @@ public final class PieceTable extends AbstractTextBuffer {
         walkPieces((p, i, tp) -> {
             Unit unit = p.getUnit();
             int sbMin = sb.length();
-            int sbMax = sbMin + unit.getText().length();
+            int deltaMin = unit instanceof TextUnit ?
+                    Math.max(0, start - sbMin) : 0;
+            int sbMax = Math.min(end, sbMin + unit.getText().length());
+            int deltaMax = unit instanceof TextUnit ?
+                    Math.max(0, (sbMin + unit.getText().length()) - end) : 0;
             if (sbMin <= start && start <= sbMax) {
-                s0 = tp;
+                s0 = tp + deltaMin;
             }
             if (sbMin <= end && end <= sbMax) {
-                s1 = tp + p.length;
+                s1 = tp + p.length - deltaMax;
             }
             sb.append(unit.getText());
             return (s0 > -1 && s1 > -1);
