@@ -92,7 +92,6 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.testfx.api.FxAssert.verifyThat;
-import static org.testfx.util.WaitForAsyncUtils.sleep;
 import static org.testfx.util.WaitForAsyncUtils.waitForFxEvents;
 
 @ExtendWith(ApplicationExtension.class)
@@ -696,6 +695,131 @@ public class RTATest {
         assertEquals(document, rta.getDocument());
         robot.push(new KeyCodeCombination(Z, SHORTCUT_DOWN, SHIFT_DOWN));
         assertEquals(newDocument, rta.getDocument());
+    }
+
+
+    @Test
+    public void copyPaste3Test(FxRobot robot) {
+        run(() -> {
+            String text = "Emoji: \uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74\uDB40\uDC7F! and \ufeff@name\ufeff!";
+            TextDecoration textDecoration1 = TextDecoration.builder().presets().fontFamily("Arial").fontSize(20).build();
+            TextDecoration textDecoration2 = TextDecoration.builder().presets().fontFamily("Arial").fontSize(16).fontWeight(BOLD).build();
+            TextDecoration textDecoration3 = TextDecoration.builder().presets().fontFamily("Arial").fontSize(14).foreground("red").build();
+            ParagraphDecoration paragraphDecoration = ParagraphDecoration.builder().presets().build();
+            Document document = new Document(text,
+                    List.of(new DecorationModel(0, 3, textDecoration1, paragraphDecoration),
+                            new DecorationModel(3, 19, textDecoration2, paragraphDecoration),
+                            new DecorationModel(22, 12, textDecoration3, paragraphDecoration),
+                            new DecorationModel(34, 1, TextDecoration.builder().presets().fontFamily("Arial").build(), paragraphDecoration)), text.length());
+            richTextArea.getActionFactory().open(document).execute(new ActionEvent());
+            richTextArea.setAutoSave(true);
+        });
+        waitForFxEvents();
+        RichTextArea rta = robot.lookup(".rich-text-area").query();
+        String internalText = "Emoji: \u2063! and \ufffc!";
+        assertEquals(16, internalText.length());
+        assertEquals(internalText, getInternalText(rta.getDocument(), 16));
+
+        assertEquals(16, rta.getTextLength());
+        assertEquals(35, rta.getDocument().getText().length());
+        assertEquals(35, rta.getCaretPosition());
+        assertEquals(35, rta.getDocument().getCaretPosition());
+        assertEquals(4, rta.getDocument().getDecorations().size());
+
+        Document document = rta.getDocument();
+
+        robot.push(new KeyCodeCombination(HOME)).push(new KeyCodeCombination(RIGHT)).push(new KeyCodeCombination(RIGHT));
+        assertEquals(2, rta.getCaretPosition());
+        robot.push(new KeyCodeCombination(RIGHT, SHIFT_DOWN, Tools.MAC ? ALT_DOWN : CONTROL_DOWN));
+        assertEquals(5, rta.getCaretPosition());
+        robot.push(new KeyCodeCombination(RIGHT, SHIFT_DOWN, Tools.MAC ? ALT_DOWN : CONTROL_DOWN));
+        assertEquals(7, rta.getCaretPosition());
+        robot.push(new KeyCodeCombination(RIGHT, SHIFT_DOWN, Tools.MAC ? ALT_DOWN : CONTROL_DOWN));
+        assertEquals(21, rta.getCaretPosition());
+        robot.push(new KeyCodeCombination(RIGHT, SHIFT_DOWN, Tools.MAC ? ALT_DOWN : CONTROL_DOWN));
+        assertEquals(23, rta.getCaretPosition());
+        robot.push(new KeyCodeCombination(RIGHT, SHIFT_DOWN));
+        assertEquals(24, rta.getCaretPosition());
+        run(() -> richTextArea.getActionFactory().copy().execute(new ActionEvent()));
+        waitForFxEvents();
+
+        run(() -> assertTrue(Clipboard.getSystemClipboard().hasContent(RTA_DATA_FORMAT)));
+        waitForFxEvents();
+        run(() -> {
+            Document copyDoc = (Document) Clipboard.getSystemClipboard().getContent(RTA_DATA_FORMAT);
+            assertNotNull(copyDoc);
+            assertEquals("oji: \uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74\uDB40\uDC7F! a", copyDoc.getText());
+            assertEquals(22, copyDoc.getText().length());
+            String textCopy = "oji: \u2063! a";
+            assertEquals(9, textCopy.length());
+            assertEquals(textCopy, getInternalText(copyDoc, 9));
+            assertEquals(3, copyDoc.getDecorations().size());
+            DecorationModel dm1 = copyDoc.getDecorations().get(0);
+            assertEquals(0, dm1.getStart());
+            assertEquals(1, dm1.getLength());
+            assertInstanceOf(TextDecoration.class, dm1.getDecoration());
+            assertEquals(20, ((TextDecoration) dm1.getDecoration()).getFontSize());
+            assertEquals(NORMAL, ((TextDecoration) dm1.getDecoration()).getFontWeight());
+            DecorationModel dm2 = copyDoc.getDecorations().get(1);
+            assertEquals(1, dm2.getStart());
+            assertEquals(19, dm2.getLength());
+            assertInstanceOf(TextDecoration.class, dm2.getDecoration());
+            assertEquals(16, ((TextDecoration) dm2.getDecoration()).getFontSize());
+            assertEquals(BOLD, ((TextDecoration) dm2.getDecoration()).getFontWeight());
+            DecorationModel dm3 = copyDoc.getDecorations().get(2);
+            assertEquals(20, dm3.getStart());
+            assertEquals(2, dm3.getLength());
+            assertInstanceOf(TextDecoration.class, dm3.getDecoration());
+            assertEquals(14, ((TextDecoration) dm3.getDecoration()).getFontSize());
+            assertEquals(NORMAL, ((TextDecoration) dm3.getDecoration()).getFontWeight());
+            assertEquals("red", ((TextDecoration) dm3.getDecoration()).getForeground());
+        });
+        waitForFxEvents();
+
+        robot.push(new KeyCodeCombination(END)).push(new KeyCodeCombination(LEFT));
+        assertEquals(34, rta.getCaretPosition());
+
+        run(() -> richTextArea.getActionFactory().paste().execute(new ActionEvent()));
+        waitForFxEvents();
+
+        String newText = "Emoji: \uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74\uDB40\uDC7F! and \ufeff@name\ufeffoji: \uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74\uDB40\uDC7F! a!";
+        assertEquals(newText, rta.getDocument().getText());
+        assertEquals(25, rta.getTextLength());
+        assertEquals(57, rta.getDocument().getText().length());
+        assertEquals(56, rta.getCaretPosition());
+        assertEquals(56, rta.getDocument().getCaretPosition());
+        assertEquals(7, rta.getDocument().getDecorations().size());
+
+        internalText = "Emoji: \u2063! and \ufffcoji: \u2063! a!";
+        assertEquals(25, internalText.length());
+        assertEquals(internalText, getInternalText(rta.getDocument(), 25));
+        DecorationModel dm1 = rta.getDocument().getDecorations().get(3);
+        assertEquals(34, dm1.getStart());
+        assertEquals(1, dm1.getLength());
+        assertInstanceOf(TextDecoration.class, dm1.getDecoration());
+        assertEquals(20, ((TextDecoration) dm1.getDecoration()).getFontSize());
+        assertEquals(NORMAL, ((TextDecoration) dm1.getDecoration()).getFontWeight());
+        assertEquals(NORMAL, ((TextDecoration) dm1.getDecoration()).getFontWeight());
+        DecorationModel dm2 = rta.getDocument().getDecorations().get(4);
+        assertEquals(35, dm2.getStart());
+        assertEquals(19, dm2.getLength());
+        assertInstanceOf(TextDecoration.class, dm2.getDecoration());
+        assertEquals(16, ((TextDecoration) dm2.getDecoration()).getFontSize());
+        assertEquals(BOLD, ((TextDecoration) dm2.getDecoration()).getFontWeight());
+        DecorationModel dm3 = rta.getDocument().getDecorations().get(5);
+        assertEquals(54, dm3.getStart());
+        assertEquals(2, dm3.getLength());
+        assertInstanceOf(TextDecoration.class, dm3.getDecoration());
+        assertEquals(14, ((TextDecoration) dm3.getDecoration()).getFontSize());
+        assertEquals(NORMAL, ((TextDecoration) dm3.getDecoration()).getFontWeight());
+        assertEquals("red", ((TextDecoration) dm3.getDecoration()).getForeground());
+        DecorationModel dm4 = rta.getDocument().getDecorations().get(6);
+        assertEquals(56, dm4.getStart());
+        assertEquals(1, dm4.getLength());
+        assertInstanceOf(TextDecoration.class, dm4.getDecoration());
+        assertEquals(14, ((TextDecoration) dm4.getDecoration()).getFontSize());
+        assertEquals(NORMAL, ((TextDecoration) dm4.getDecoration()).getFontWeight());
+        assertEquals("black", ((TextDecoration) dm4.getDecoration()).getForeground());
     }
 
     @Test
