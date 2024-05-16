@@ -80,6 +80,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.testfx.api.FxAssert.verifyThat;
+import static org.testfx.util.WaitForAsyncUtils.sleep;
 import static org.testfx.util.WaitForAsyncUtils.waitForFxEvents;
 
 @ExtendWith(ApplicationExtension.class)
@@ -96,6 +97,11 @@ public class RTATest {
     private static final List<Emoji> asciiEmojiList = getEmojiCollection().stream()
             .filter(e -> e.getTextList() != null)
             .collect(Collectors.toList());
+
+    private static final String MARKER_BOLD = "*", MARKER_ITALIC = "_", MARKER_MONO = "`";
+    private static final Pattern markdownDetector = Pattern.compile(
+            "(\\`)([^s]?.*?[^s]?|[^s]*)(\\`)|(\\_)([^s]?.*?[^s]?|[^s]*)(\\_)|(\\*)([^s]?.*?[^s]?|[^s]*)(\\*)",
+            Pattern.DOTALL);
 
     @BeforeEach
     public void setup() {
@@ -526,6 +532,62 @@ public class RTATest {
         assertEquals("this is a:wink:", rta.getDocument().getText());
     }
 
+    @Test
+    public void findMarkdownTest(FxRobot robot) {
+        run(() -> {
+            richTextArea.documentProperty().subscribe(d -> {
+                String nv = d.getText();
+                if (nv != null) {
+                    String substring = nv.substring(0, Math.min(richTextArea.getCaretPosition(), nv.length())).toLowerCase(Locale.ROOT);
+                    findMarkdown(substring, (start, marker) -> {
+                        richTextArea.caretPositionProperty().subscribe(c -> assertEquals(c, richTextArea.getTextLength()));
+                        richTextArea.getActionFactory().removeExtremesAndDecorate(
+                                        new Selection(start, richTextArea.getCaretPosition()), getStyleFromMarker(marker))
+                                .execute(new ActionEvent());
+                    });
+                }
+            });
+            richTextArea.getActionFactory().newDocument().execute(new ActionEvent());
+            richTextArea.setAutoSave(true);
+        });
+        waitForFxEvents();
+
+        RichTextArea rta = robot.lookup(".rich-text-area").query();
+
+        robot.write("hello *bold*");
+        assertEquals(10, rta.getTextLength());
+        assertEquals(10, rta.getDocument().getText().length());
+        String text = "hello bold";
+        assertEquals(text, rta.getDocument().getText());
+        assertEquals(2, rta.getDocument().getDecorations().size());
+        DecorationModel dm = rta.getDocument().getDecorations().get(0);
+        assertEquals(0, dm.getStart());
+        assertEquals(6, dm.getLength());
+        assertInstanceOf(TextDecoration.class, dm.getDecoration());
+        TextDecoration td = (TextDecoration) dm.getDecoration();
+        assertEquals(NORMAL, td.getFontWeight());
+        DecorationModel dm2 = rta.getDocument().getDecorations().get(1);
+        assertEquals(6, dm2.getStart());
+        assertEquals(4, dm2.getLength());
+        assertInstanceOf(TextDecoration.class, dm2.getDecoration());
+        td = (TextDecoration) dm2.getDecoration();
+        assertEquals(BOLD, td.getFontWeight());
+
+        run(() -> richTextArea.getActionFactory().undo().execute(new ActionEvent()));
+        waitForFxEvents();
+
+        assertEquals(11, rta.getTextLength());
+        assertEquals(11, rta.getDocument().getText().length());
+        assertEquals("hello *bold", rta.getDocument().getText());
+        assertEquals(1, rta.getDocument().getDecorations().size());
+
+        run(() -> richTextArea.getActionFactory().redo().execute(new ActionEvent()));
+        waitForFxEvents();
+
+        assertEquals(text, rta.getDocument().getText());
+        assertEquals(2, rta.getDocument().getDecorations().size());
+    }
+
     private static void findEmoji(String text, BiConsumer<Emoji, Integer> onCodeNameFound) {
         if (text.endsWith(" ")) {
             return;
@@ -551,6 +613,32 @@ public class RTATest {
                 }
             }
         }
+    }
+
+    private static void findMarkdown(String text, BiConsumer<Integer, String> onFound) {
+        Matcher matcher = markdownDetector.matcher(text);
+        while (matcher.find()) {
+            for (int i = 1; i < matcher.groupCount(); i++) {
+                String marker = matcher.group(i);
+                if (marker != null) {
+                    onFound.accept(matcher.start(), marker);
+                    break;
+                }
+            }
+        }
+    }
+
+    private TextDecoration getStyleFromMarker(String marker) {
+        TextDecoration.Builder builder = TextDecoration.builder();
+        switch (marker) {
+            case MARKER_BOLD:
+                return builder.fontWeight(BOLD).build();
+            case MARKER_ITALIC:
+                return builder.fontPosture(ITALIC).build();
+            case MARKER_MONO:
+                return builder.fontFamily("monospaced").build();
+        }
+        return builder.build();
     }
 
     private void run(Runnable runnable) {

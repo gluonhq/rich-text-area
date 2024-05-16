@@ -48,10 +48,14 @@ import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -361,7 +365,53 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private int nonTextNodesCount;
     AtomicInteger nonTextNodes = new AtomicInteger();
 
+    // attachedProperty
+    private final BooleanProperty attachedProperty = new SimpleBooleanProperty() {
+        @Override
+        protected void invalidated() {
+            if (promptVisibleBinding == null) {
+                promptVisibleBinding = Bindings.createBooleanBinding(
+                        () -> {
+                            Point2D point2D = caretOriginProperty.get();
+                            boolean visible = viewModel.getTextLength() == 0 && viewModel.getCaretPosition() == 0 &&
+                                    point2D.getX() > DEFAULT_POINT_2D.getX() && point2D.getY() > DEFAULT_POINT_2D.getY();
+                            if (visible) {
+                                updatePromptNodeLocation();
+                            }
+                            return visible;
+                        },
+                        viewModel.caretPositionProperty(), viewModel.textLengthProperty(), caretOriginProperty);
+            }
+
+            if (get()) {
+                // bind control properties to viewModel properties, to forward the changes of the later
+                getSkinnable().textLengthProperty.bind(viewModel.textLengthProperty());
+                getSkinnable().modifiedProperty.bind(viewModel.savedProperty().not());
+                getSkinnable().selectionProperty.bind(viewModel.selectionProperty());
+                getSkinnable().decorationAtCaret.bind(viewModel.decorationAtCaretProperty());
+                getSkinnable().decorationAtParagraph.bind(viewModel.decorationAtParagraphProperty());
+                caretPositionProperty.bind(viewModel.caretPositionProperty());
+                promptNode.visibleProperty().bind(promptVisibleBinding);
+                promptNode.fontProperty().bind(promptFontBinding);
+            } else {
+                // unbind control properties from viewModel properties, to avoid forwarding
+                // the internal changes of the latter, while it performs an action
+                getSkinnable().textLengthProperty.unbind();
+                getSkinnable().modifiedProperty.unbind();
+                getSkinnable().selectionProperty.unbind();
+                getSkinnable().decorationAtCaret.unbind();
+                getSkinnable().decorationAtParagraph.unbind();
+                caretPositionProperty.unbind();
+                promptNode.visibleProperty().unbind();
+                promptNode.fontProperty().unbind();
+            }
+        }
+    };
+
     private final ChangeListener<Document> documentChangeListener = (obs, ov, nv) -> {
+        if (!attachedProperty.get()) {
+            return;
+        }
         if (ov == null && nv != null) {
             // new/open
             dispose();
@@ -373,11 +423,26 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         }
     };
 
-    private ObjectBinding<Font> promptFontBinding;
+    final ObjectProperty<Point2D> caretOriginProperty = new SimpleObjectProperty<>(this, "caretOrigin", DEFAULT_POINT_2D);
+
+    private final ObjectBinding<Font> promptFontBinding = Bindings.createObjectBinding(this::getPromptNodeFont,
+            viewModel.decorationAtCaretProperty(), viewModel.decorationAtParagraphProperty());
     private BooleanBinding promptVisibleBinding;
 
-    private final ChangeListener<Number> caretChangeListener;
-    private final ChangeListener<Number> internalCaretChangeListener;
+    private final IntegerProperty caretPositionProperty = new SimpleIntegerProperty() {
+        @Override
+        protected void invalidated() {
+            int caret = get();
+            int externalCaret = caret;
+            if (caret > -1) {
+                String text = viewModel.getTextBuffer().getText(0, caret);
+                externalCaret = text.length();
+            }
+            getSkinnable().caretPosition.set(externalCaret);
+            viewModel.getParagraphWithCaret()
+                    .ifPresent(paragraph -> Platform.runLater(paragraphListView::scrollIfNeeded));
+        }
+    };
 
     private final InvalidationListener focusListener;
     private final EventHandler<DragEvent> dndHandler = this::dndListener;
@@ -386,8 +451,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final ChangeListener<EmojiSkinTone> skinToneChangeListener;
 
     private final ResourceBundle resources;
-
-    final ObjectProperty<Point2D> caretOriginProperty = new SimpleObjectProperty<>(this, "caretOrigin", DEFAULT_POINT_2D);
 
     private class RichVirtualFlow extends VirtualFlow<ListCell<Paragraph>> {
 
@@ -600,17 +663,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
         tableAllowedListener = (obs, ov, nv) -> viewModel.setTableAllowed(nv);
         skinToneChangeListener = (obs, ov, nv) -> refreshTextFlow();
-        caretChangeListener = (obs, ov, nv) -> viewModel.getParagraphWithCaret()
-                .ifPresent(paragraph -> Platform.runLater(paragraphListView::scrollIfNeeded));
-        internalCaretChangeListener = (obs, ov, nv) -> {
-            int caret = nv.intValue();
-            int externalCaret = caret;
-            if (caret > -1) {
-                String text = viewModel.getTextBuffer().getText(0, caret);
-                externalCaret = text.length();
-            }
-            getSkinnable().caretPosition.set(externalCaret);
-        };
 
         focusListener = o -> paragraphListView.updateLayout();
 
@@ -628,6 +680,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         // set prompt text
         promptNode = new Text();
         setupPromptNode();
+
+        viewModel.attachedProperty().subscribe((b0, b) -> attachedProperty.set(b));
         setup(control.getDocument());
     }
 
@@ -639,23 +693,14 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     @Override
     public void dispose() {
         viewModel.clearSelection();
-        viewModel.caretPositionProperty().removeListener(caretChangeListener);
-        viewModel.caretPositionProperty().removeListener(internalCaretChangeListener);
         viewModel.removeChangeListener(textChangeListener);
         viewModel.documentProperty().removeListener(documentChangeListener);
         viewModel.autoSaveProperty().unbind();
         lastValidCaretPosition = -1;
         promptNode.textProperty().unbind();
         promptNode.fillProperty().unbind();
-        promptNode.visibleProperty().unbind();
-        promptNode.fontProperty().unbind();
         getSkinnable().editableProperty().removeListener(this::editableChangeListener);
         getSkinnable().tableAllowedProperty().removeListener(tableAllowedListener);
-        getSkinnable().textLengthProperty.unbind();
-        getSkinnable().modifiedProperty.unbind();
-        getSkinnable().selectionProperty.unbind();
-        getSkinnable().decorationAtCaret.unbind();
-        getSkinnable().decorationAtParagraph.unbind();
         getSkinnable().setOnKeyPressed(null);
         getSkinnable().setOnKeyTyped(null);
         getSkinnable().widthProperty().removeListener(controlPrefWidthListener);
@@ -667,6 +712,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         tableContextMenuItems = null;
         editableContextMenuItems = null;
         nonEditableContextMenuItems = null;
+        attachedProperty.set(false);
     }
 
     public RichTextAreaViewModel getViewModel() {
@@ -687,8 +733,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         if (document == null) {
             return;
         }
-        viewModel.caretPositionProperty().addListener(caretChangeListener);
-        viewModel.caretPositionProperty().addListener(internalCaretChangeListener);
+        attachedProperty.set(false);
         viewModel.setTextBuffer(new PieceTable(document));
         lastValidCaretPosition = viewModel.getTextBuffer().getInternalPosition(document.getCaretPosition());
         viewModel.setCaretPosition(lastValidCaretPosition);
@@ -699,30 +744,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         viewModel.autoSaveProperty().bind(getSkinnable().autoSaveProperty());
         promptNode.textProperty().bind(getSkinnable().promptTextProperty());
         promptNode.fillProperty().bind(promptTextFillProperty());
-        if (promptVisibleBinding == null) {
-            promptVisibleBinding = Bindings.createBooleanBinding(
-                    () -> {
-                        Point2D point2D = caretOriginProperty.get();
-                        boolean visible = viewModel.getTextLength() == 0 && viewModel.getCaretPosition() == 0 &&
-                                point2D.getX() > DEFAULT_POINT_2D.getX() && point2D.getY() > DEFAULT_POINT_2D.getY();
-                        if (visible) {
-                            updatePromptNodeLocation();
-                        }
-                        return visible;
-                    },
-                    viewModel.caretPositionProperty(), viewModel.textLengthProperty(), caretOriginProperty);
-        }
-        promptNode.visibleProperty().bind(promptVisibleBinding);
-        if (promptFontBinding == null) {
-            promptFontBinding = Bindings.createObjectBinding(this::getPromptNodeFont,
-                    viewModel.decorationAtCaretProperty(), viewModel.decorationAtParagraphProperty());
-        }
-        promptNode.fontProperty().bind(promptFontBinding);
-        getSkinnable().textLengthProperty.bind(viewModel.textLengthProperty());
-        getSkinnable().modifiedProperty.bind(viewModel.savedProperty().not());
-        getSkinnable().selectionProperty.bind(viewModel.selectionProperty());
-        getSkinnable().decorationAtCaret.bind(viewModel.decorationAtCaretProperty());
-        getSkinnable().decorationAtParagraph.bind(viewModel.decorationAtParagraphProperty());
         getSkinnable().setOnContextMenuRequested(contextMenuEventEventHandler);
         getSkinnable().editableProperty().addListener(this::editableChangeListener);
         getSkinnable().tableAllowedProperty().addListener(tableAllowedListener);
@@ -736,6 +757,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         refreshTextFlow();
         requestLayout();
         editableChangeListener(null); // sets up all related listeners
+        attachedProperty.set(true);
     }
 
     private void setupPromptNode() {
