@@ -43,15 +43,16 @@ class PasteDocumentCmd extends AbstractEditCmd {
     @Override
     public void doRedo(RichTextAreaViewModel viewModel) {
         Objects.requireNonNull(viewModel);
-        int caretPosition = viewModel.getCaretPosition();
-        // 1. insert content
-        viewModel.insert(content.getText());
-
-        // 2. Go through all decorations, shifting selection
+        // Go through all decorations: inserting unit and decorating it
         content.getDecorations().forEach(dm -> {
-            Selection dmSelection = new Selection(dm.getStart(), dm.getStart() + dm.getLength()); // dm has external text coordinates
-            Selection internalSelection = viewModel.getTextBuffer().getInternalSelection(dmSelection);
-            Selection newSelection = new Selection(internalSelection.getStart() + caretPosition, Math.min(internalSelection.getEnd() + caretPosition, viewModel.getTextLength()));
+            int caretPosition = viewModel.getCaretPosition();
+            int initialLength = viewModel.getTextLength();
+            // 1. insert unit
+            String text = content.getText().substring(dm.getStart(), dm.getStart() + dm.getLength());
+            viewModel.insert(text);
+            // 1. decorate unit
+            int addedLength = viewModel.getTextLength() - initialLength;
+            Selection newSelection = new Selection(caretPosition, Math.min(caretPosition + addedLength, viewModel.getTextLength()));
             viewModel.setSelection(newSelection);
             viewModel.decorate(dm.getDecoration());
             // For now: ignore paragraph decoration
@@ -64,11 +65,12 @@ class PasteDocumentCmd extends AbstractEditCmd {
 
     @Override
     public void doUndo(RichTextAreaViewModel viewModel) {
-        // 1. insert content
-        Objects.requireNonNull(viewModel).undo();
+        Objects.requireNonNull(viewModel);
 
-        // 2. delete decoration
         content.getDecorations().forEach(dm -> {
+            // 1. remove unit
+            viewModel.undo();
+            // 2. delete decoration
             viewModel.undoDecoration();
         });
     }
