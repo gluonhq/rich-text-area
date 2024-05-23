@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2024, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,22 +32,30 @@ public abstract class AbstractCommand<T> {
     protected abstract void doUndo(T context);
     protected abstract void doRedo(T context);
 
-    protected void storeContext(T context){}
-    protected void restoreContext(T context){}
+    protected void storeContext(T context) {}
+    protected void restoreContext(T context) {}
+    protected void attachContext(T context) {}
+    protected void detachContext(T context) {}
 
     public final void execute(T context) {
+        detachContext(context);
         storeContext(context);
         doRedo(context);
+        attachContext(context);
     }
 
     public final void undo(T context) {
+        detachContext(context);
         doUndo(context);
         restoreContext(context);
+        attachContext(context);
     }
 
     public final void redo(T context) {
+        detachContext(context);
         restoreContext(context);
         doRedo(context);
+        attachContext(context);
     }
 
 }

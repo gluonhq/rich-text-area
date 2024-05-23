@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023, Gluon
+ * Copyright (c) 2022, 2024, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,7 +56,6 @@ import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.DataFormat;
 
 import java.text.BreakIterator;
 import java.util.ArrayList;
@@ -306,6 +305,20 @@ public class RichTextAreaViewModel {
     }
     public final boolean isSaved() {
        return savedProperty.get();
+    }
+
+    // attachedProperty
+    private final ReadOnlyBooleanWrapper attachedProperty = new ReadOnlyBooleanWrapper(this, "attached", true);
+    public final ReadOnlyBooleanProperty attachedProperty() {
+       return attachedProperty.getReadOnlyProperty();
+    }
+
+    final void attach() {
+        attachedProperty.set(true);
+    }
+
+    final void detach() {
+        attachedProperty.set(false);
     }
 
     public RichTextAreaViewModel(BiFunction<Double, Boolean, Integer> getNextRowPosition, Function<Boolean, Integer> getNextTableCellPosition) {
