@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2024, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,6 +52,16 @@ abstract class AbstractEditCmd extends com.gluonhq.richtextarea.undo.AbstractCom
         Objects.requireNonNull(viewModel);
         viewModel.setCaretPosition(caretPosition);
         viewModel.setSelection(selection);
+    }
+
+    @Override
+    protected void attachContext(RichTextAreaViewModel viewModel) {
+        Objects.requireNonNull(viewModel).attach();
+    }
+
+    @Override
+    protected void detachContext(RichTextAreaViewModel viewModel) {
+        Objects.requireNonNull(viewModel).detach();
     }
 
     @Override
