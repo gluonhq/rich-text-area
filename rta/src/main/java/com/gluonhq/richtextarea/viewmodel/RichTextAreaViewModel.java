@@ -755,7 +755,8 @@ public class RichTextAreaViewModel {
 
     private Document getCurrentDocument(Selection selection) {
         // text and indices should be based on the exportable text
-        int caret = getTextBuffer().getText(0, getCaretPosition()).length();
+        int caretPosition = getCaretPosition() < 0 ? getTextLength() : getCaretPosition();
+        int caret = getTextBuffer().getText(0, caretPosition).length();
         int start = selection.isDefined() ? selection.getStart() : 0;
         int end = selection.isDefined() ? selection.getEnd() : getTextLength();
         return new Document(getTextBuffer().getText(start, end), getTextBuffer().getDecorationModelList(start, end), caret);
