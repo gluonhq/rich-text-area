@@ -253,7 +253,7 @@ class RichListCell extends ListCell<Paragraph> {
             return lfText;
         }
         Objects.requireNonNull(decoration);
-        Text text = new Text(Objects.requireNonNull(content));
+        Text text = new Text(Objects.requireNonNull(content).replace("\n", ""));
         String foreground = decoration.getForeground();
         text.setFill(COLOR_MAP.computeIfAbsent(foreground, s -> parseColorOrDefault(foreground, Color.BLACK)));
         text.setStrikethrough(decoration.isStrikethrough());
