@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023, Gluon
+ * Copyright (c) 2022, 2024, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,6 +59,7 @@ public final class PieceTable extends AbstractTextBuffer {
 
     private final PieceCharacterIterator pieceCharacterIterator;
     TextDecoration decorationAtCaret;
+    private DecorationModel dm = null;
 
     /**
      * Creates a piece table using the original text of a document, and
@@ -191,12 +192,16 @@ public final class PieceTable extends AbstractTextBuffer {
         walkPieces((p, i, tp) -> {
             Unit unit = p.getUnit();
             int sbMin = sb.length();
-            int sbMax = sbMin + unit.getText().length();
+            int deltaMin = unit instanceof TextUnit ?
+                    Math.max(0, start - sbMin) : 0;
+            int sbMax = Math.min(end, sbMin + unit.getText().length());
+            int deltaMax = unit instanceof TextUnit ?
+                    Math.max(0, (sbMin + unit.getText().length()) - end) : 0;
             if (sbMin <= start && start <= sbMax) {
-                s0 = tp;
+                s0 = tp + deltaMin;
             }
             if (sbMin <= end && end <= sbMax) {
-                s1 = tp + p.length;
+                s1 = tp + p.length - deltaMax;
             }
             sb.append(unit.getText());
             return (s0 > -1 && s1 > -1);
@@ -204,24 +209,48 @@ public final class PieceTable extends AbstractTextBuffer {
         return new Selection(s0, s1);
     }
 
+    /**
+     * Gets the list of decoration models that decorate the text between a starting point
+     * and an ending position.
+     *
+     * @param start start position within text, inclusive
+     * @param end end position within text, exclusive
+     * @throws IllegalArgumentException if start or end are not in index range of the text
+     * @return a list of {@link DecorationModel}
+     */
     @Override
-    public List<DecorationModel> getDecorationModelList() {
+    public List<DecorationModel> getDecorationModelList(int start, int end) {
+        if (getTextLength() > 0 && !inRange(start, 0, getTextLength())) {
+            throw new IllegalArgumentException("Start index " + start + " is not in range [0, " + getTextLength() + ")");
+        }
+        if (end < 0) {
+            throw new IllegalArgumentException("End index is not in range");
+        }
         List<DecorationModel> mergedList = new ArrayList<>();
         if (!pieces.isEmpty()) {
-            AtomicInteger start = new AtomicInteger();
-            DecorationModel dm = null;
-            for (Piece piece : pieces) {
-                int length = piece.getUnit().getText().length();
-                if (mergedList.isEmpty()) {
-                    dm = new DecorationModel(start.addAndGet(piece.start), length, piece.getDecoration(), piece.getParagraphDecoration());
-                } else if (piece.getDecoration().equals(dm.getDecoration()) && piece.getParagraphDecoration().equals(dm.getParagraphDecoration())) {
-                    mergedList.remove(mergedList.size() - 1);
-                    dm = new DecorationModel(dm.getStart(), dm.getLength() + length, dm.getDecoration(), dm.getParagraphDecoration());
-                } else {
-                    dm = new DecorationModel(start.addAndGet(dm.getLength()), length, piece.getDecoration(), piece.getParagraphDecoration());
+            AtomicInteger accum = new AtomicInteger();
+            StringBuilder sb = new StringBuilder();
+            walkPieces((p, i, tp) -> {
+                Unit unit = p.getUnit();
+                sb.append(p.getInternalText());
+                if (start <= tp + p.length && end > tp && !unit.isEmpty()) {
+                    String text = sb.substring(Math.max(start, tp), Math.min(end, tp + p.length));
+                    int length = 0;
+                    if (!text.isEmpty()) {
+                        length = (unit instanceof TextUnit ? text : unit.getText()).length();
+                    }
+                    if (mergedList.isEmpty()) {
+                        dm = new DecorationModel(0, length, p.getDecoration(), p.getParagraphDecoration());
+                    } else if (p.getDecoration().equals(dm.getDecoration()) && p.getParagraphDecoration().equals(dm.getParagraphDecoration())) {
+                        mergedList.remove(mergedList.size() - 1);
+                        dm = new DecorationModel(dm.getStart(), dm.getLength() + length, dm.getDecoration(), dm.getParagraphDecoration());
+                    } else {
+                        dm = new DecorationModel(accum.addAndGet(dm.getLength()), length, p.getDecoration(), p.getParagraphDecoration());
+                    }
+                    mergedList.add(dm);
                 }
-                mergedList.add(dm);
-            }
+                return (end <= tp);
+            });
         }
         return mergedList;
     }

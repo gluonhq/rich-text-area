@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2024, Gluon
+ * Copyright (c) 2024, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,22 +27,29 @@
  */
 package com.gluonhq.richtextarea.viewmodel;
 
+import com.gluonhq.richtextarea.model.Document;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 
-class ActionCmdPaste implements ActionCmd {
+import java.util.Objects;
+
+class ActionCmdPasteDocument implements ActionCmd {
+
+    private final Document document;
+
+    public ActionCmdPasteDocument(Document document) {
+        this.document = document;
+    }
 
     @Override
     public void apply(RichTextAreaViewModel viewModel) {
         if (viewModel.isEditable()) {
-            viewModel.clipboardPaste();
+            viewModel.getCommandManager().execute(new PasteDocumentCmd(Objects.requireNonNull(document)));
         }
     }
 
     @Override
     public BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
-        return Bindings.createBooleanBinding(() -> !(viewModel.clipboardHasDocument() || viewModel.clipboardHasString() || viewModel.clipboardHasImage() || viewModel.clipboardHasUrl())
-                        || !viewModel.isEditable(),
-                viewModel.caretPositionProperty(), viewModel.editableProperty());
+        return Bindings.createBooleanBinding(() -> !viewModel.clipboardHasDocument() || !viewModel.isEditable(), viewModel.editableProperty());
     }
 }

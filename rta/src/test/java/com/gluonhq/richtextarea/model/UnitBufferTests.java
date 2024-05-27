@@ -32,7 +32,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static javafx.scene.text.FontWeight.BOLD;
 
 public class UnitBufferTests {
 
@@ -118,6 +121,72 @@ public class UnitBufferTests {
         Selection internalSelection = pt.getInternalSelection(selection);
         Assertions.assertEquals(internalSelection.getStart(), "One \u2063 Text ".length());
         Assertions.assertEquals(internalSelection.getEnd(), "One \u2063 Text \ufffc".length());
+    }
+
+    @Test
+    @DisplayName("Unit: selection")
+    public void simpleTokenSelection() {
+        TextDecoration td1 = TextDecoration.builder().presets().build();
+        TextDecoration td2 = TextDecoration.builder().presets().fontWeight(BOLD).build();
+        ParagraphDecoration pd = ParagraphDecoration.builder().presets().build();
+        PieceTable pt = new PieceTable(new Document("this is bold end", List.of(
+                new DecorationModel(0, 8, td1, pd),
+                new DecorationModel(8, 4, td2, pd),
+                new DecorationModel(12, 4, td1, pd)), 10));
+        StringBuilder text = new StringBuilder();
+        StringBuilder internalText = new StringBuilder();
+        String[] tokens = {"this ", "is ", "bol", "d", "end"};
+        String[] internalTokens = {"this ", "is ", "bol", "d", "end"};
+        for (int i = 0; i < tokens.length; i++) {
+            String token = tokens[i];
+            int start = text.length();
+            Selection selection = new Selection(start, start + token.length());
+            Selection internalSelection = pt.getInternalSelection(selection);
+            Assertions.assertEquals(internalSelection.getStart(), internalText.length());
+            Assertions.assertEquals(internalSelection.getEnd(), internalText.length() + internalTokens[i].length());
+            text.append(token);
+            internalText.append(internalTokens[i]);
+        }
+    }
+
+    @Test
+    @DisplayName("Unit: selection")
+    public void tokenSelection() {
+        PieceTable pt = new PieceTable(new Document("ne \ud83d\ude00 Text \ufeff@name\ufeff!"));
+        StringBuilder text = new StringBuilder();
+        StringBuilder internalText = new StringBuilder();
+        String[] tokens = {"ne \ud83d\ude00 ", "Text ", "\ufeff@name\ufeff", "!"};
+        String[] internalTokens = {"ne \u2063 ", "Text ", "\ufffc", "!"};
+        for (int i = 0; i < tokens.length; i++) {
+            String token = tokens[i];
+            int start = text.length();
+            Selection selection = new Selection(start, start + token.length());
+            Selection internalSelection = pt.getInternalSelection(selection);
+            Assertions.assertEquals(internalSelection.getStart(), internalText.length());
+            Assertions.assertEquals(internalSelection.getEnd(), internalText.length() + internalTokens[i].length());
+            text.append(token);
+            internalText.append(internalTokens[i]);
+        }
+    }
+
+    @Test
+    @DisplayName("Unit: selection")
+    public void moreTokenSelection() {
+        PieceTable pt = new PieceTable(new Document("Emoji: \uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74\uDB40\uDC7F! and \ufeff@name\ufeff!"));
+        StringBuilder text = new StringBuilder();
+        StringBuilder internalText = new StringBuilder();
+        String[] tokens = {"Emo", "ji: \uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74\uDB40\uDC7F!", " and \ufeff@name\ufeff", "!"};
+        String[] internalTokens = {"Emo", "ji: \u2063!", " and \ufffc", "!"};
+        for (int i = 0; i < tokens.length; i++) {
+            String token = tokens[i];
+            int start = text.length();
+            Selection selection = new Selection(start, start + token.length());
+            Selection internalSelection = pt.getInternalSelection(selection);
+            Assertions.assertEquals(internalSelection.getStart(), internalText.length());
+            Assertions.assertEquals(internalSelection.getEnd(), internalText.length() + internalTokens[i].length());
+            text.append(token);
+            internalText.append(internalTokens[i]);
+        }
     }
 
     @Test
