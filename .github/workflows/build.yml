@@ -33,7 +33,7 @@ jobs:
       - name: Build project (Windows)
         if: runner.os == 'Windows'
         run: |
-          mvnw -B -ntp verify -f rta
+          .\mvnw -B -ntp verify -f rta
 
       - name: Build project (Linux)
         if: runner.os == 'Linux'
