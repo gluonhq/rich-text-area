@@ -1,10 +1,5 @@
 # The RichTextArea Samples
 
-> Note: all instructions assume you changed into the samples folder:
-> ```shell
-> cd samples
-> ```
-
 ## BasicPromptDemo
 
 The [BasicPromptDemo](/samples/src/main/java/com/gluonhq/richtextarea/samples/BasicPromptDemo.java) is the simplest use case of 
@@ -38,7 +33,7 @@ the [FullFeaturedDemo](#fullfeatureddemo) sample for a complete and advanced sho
 To run this sample, using Java 17+, do as follows:
 
 ```
-mvn javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.BasicPromptDemo
+./mvnw -fsamples javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.BasicPromptDemo
 ```
 
 ![rta_editor.png](../.github/assets/BasicDemo.png)
@@ -53,7 +48,7 @@ to the BasicPromptDemo where we add a decorated text to the RichTextArea control
 To run this sample, using Java 17+, do as follows:
 
 ```
-mvn javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.BasicDocumentDemo
+./mvnw -fsamples javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.BasicDocumentDemo
 ```
 
 ## HighlightDemo
@@ -67,7 +62,7 @@ given text.
 To run this sample, using Java 17+, do as follows:
 
 ```
-mvn javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.HighlightDemo
+./mvnw -fsamples javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.HighlightDemo
 ```
 
 ![rta_editor.png](../.github/assets/HighlightDemo.png)
@@ -82,7 +77,7 @@ custom numbered and bulleted decorations created via `RichTextArea::paragraphGra
 To run this sample, using Java 17+, do as follows:
 
 ```
-mvn javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.ListsDemo
+./mvnw -fsamples javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.ListsDemo
 ```
 
 ![rta_editor.png](../.github/assets/ListsDemo.png)
@@ -103,7 +98,7 @@ Note that when you move the caret over the text, the toggles update their state
 To run this sample, using Java 17+, do as follows:
 
 ```
-mvn javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.ActionsDemo
+./mvnw -fsamples javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.ActionsDemo
 ```
 
 ![rta_editor.png](../.github/assets/ActionsDemo.png)
@@ -120,7 +115,7 @@ This sample doesn't include a control to select interactively emojis (See [Emoji
 To run this sample, using Java 17+, do as follows:
 
 ```
-mvn javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.EmojiDemo
+./mvnw -fsamples javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.EmojiDemo
 ```
 
 ![rta_editor.png](../.github/assets/EmojiDemo.png)
@@ -135,7 +130,7 @@ RichTextArea control to render text and emojis, including a popup control to sel
 To run this sample, using Java 17+, do as follows:
 
 ```
-mvn javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.EmojiPopupDemo
+./mvnw -fsamples javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.EmojiPopupDemo
 ```
 
 ![rta_editor.png](../.github/assets/EmojiPopupDemo.png)
@@ -150,7 +145,7 @@ RichTextArea control to render a table, embedded into the text, including text a
 To run this sample, using Java 17+, do as follows:
 
 ```
-mvn javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.TableDemo
+./mvnw -fsamples javafx:run -Dmain.class=com.gluonhq.richtextarea.samples.TableDemo
 ```
 
 ![rta_editor.png](../.github/assets/TableDemo.png)
@@ -169,7 +164,7 @@ sample.
 To run this sample, using Java 17+, do as follows:
 
 ```
-mvn javafx:run
+./mvnw -fsamples javafx:run
 ```
 
 ![rta_editor.png](../.github/assets/rta_editor.png)

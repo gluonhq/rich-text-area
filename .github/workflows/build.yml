@@ -25,24 +25,29 @@ jobs:
           server-username: MAVEN_USERNAME
           server-password: MAVEN_CENTRAL_TOKEN
 
-      - name: Build project
-        if: runner.os != 'Linux'
+      - name: Build project (macOS)
+        if: runner.os == 'macOS'
         run: |
-          mvn -B -ntp verify -f rta
+          ./mvnw -B -ntp verify -f rta
+
+      - name: Build project (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          mvnw -B -ntp verify -f rta
 
       - name: Build project (Linux)
         if: runner.os == 'Linux'
         run: |
           export DISPLAY=:90
           Xvfb -ac :90 -screen 0 1280x1024x24 > /dev/null 2>&1 &
-          mvn -B -ntp verify -f rta
+          ./mvnw -B -ntp verify -f rta
 
       - name: Publish Snapshots
         if: github.ref == 'refs/heads/main' && runner.os == 'Linux'
         run: |
-          ver=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout -f rta)
+          ver=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout -f rta)
           if [[ $ver == *"SNAPSHOT"* ]]; then
-              mvn -B -ntp -Dmaven.test.skip=true deploy -f rta
+              ./mvnw -B -ntp -Dmaven.test.skip=true deploy -f rta
           fi
         shell: bash
         env:
