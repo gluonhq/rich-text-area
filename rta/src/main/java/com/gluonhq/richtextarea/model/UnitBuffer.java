@@ -52,7 +52,7 @@ import java.util.regex.Pattern;
 public class UnitBuffer {
 
     private static final Pattern BLOCK_PATTERN = Pattern.compile(
-            TextBuffer.ZERO_WIDTH_NO_BREAK_SPACE_TEXT + "(@|#)([\\p{L}|\\p{N}|\\s]*)" + TextBuffer.ZERO_WIDTH_NO_BREAK_SPACE_TEXT,
+            TextBuffer.ZERO_WIDTH_NO_BREAK_SPACE_TEXT + "([@#])([\\p{L}\\p{N}\\p{P}\\s]*)" + TextBuffer.ZERO_WIDTH_NO_BREAK_SPACE_TEXT,
             Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
 
     private final List<Unit> unitList;
