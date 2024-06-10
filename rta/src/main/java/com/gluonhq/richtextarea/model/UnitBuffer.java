@@ -51,6 +51,12 @@ import java.util.regex.Pattern;
  */
 public class UnitBuffer {
 
+    /**
+     * The block pattern is defined by
+     * \ufeff, a @ or a # symbol, any text (any combination of letters, numbers, punctuation and spaces), and a final \ufeff
+     * For example:
+     * {@code \ufeff@name foo33!\ufeff} has group 0: {@code @}, and group 1: {@code name foo33!}
+     */
     private static final Pattern BLOCK_PATTERN = Pattern.compile(
             TextBuffer.ZERO_WIDTH_NO_BREAK_SPACE_TEXT + "([@#])([\\p{L}\\p{N}\\p{P}\\s]*)" + TextBuffer.ZERO_WIDTH_NO_BREAK_SPACE_TEXT,
             Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
