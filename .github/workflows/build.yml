@@ -22,19 +22,8 @@ jobs:
           distribution: 'oracle'
           cache: 'maven'
           server-id: ossrh
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_CENTRAL_TOKEN
-
-      - name: Maven settings
-        if: github.ref == 'refs/heads/main' && runner.os == 'Linux'
-        uses: s4u/maven-settings-action@v3.0.0
-        with:
-          servers: |
-            [{
-                "id": "ossrh",
-                "username": "${{ secrets.TOKEN_USER }}",
-                "password": "${{ secrets.TOKEN_KEY }}"
-            }]
+          server-username: ${{ secrets.TOKEN_USER }}
+          server-password: ${{ secrets.TOKEN_KEY }}
 
       - name: Build project (macOS)
         if: runner.os == 'macOS'
