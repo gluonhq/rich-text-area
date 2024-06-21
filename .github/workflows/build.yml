@@ -25,6 +25,16 @@ jobs:
           server-username: MAVEN_USERNAME
           server-password: MAVEN_CENTRAL_TOKEN
 
+      - name: Maven settings
+        uses: s4u/maven-settings-action@v3.0.0
+        with:
+          servers: |
+            [{
+                "id": "ossrh",
+                "username": "${{ secrets.TOKEN_USER }}",
+                "password": "${{ secrets.TOKEN_KEY }}"
+            }]
+
       - name: Build project (macOS)
         if: runner.os == 'macOS'
         run: |
@@ -50,6 +60,3 @@ jobs:
               ./mvnw -B -ntp -Dmaven.test.skip=true deploy -f rta
           fi
         shell: bash
-        env:
-          MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          MAVEN_CENTRAL_TOKEN: ${{ secrets.SONATYPE_PASSWORD }}
