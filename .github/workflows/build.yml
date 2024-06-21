@@ -26,6 +26,7 @@ jobs:
           server-password: MAVEN_CENTRAL_TOKEN
 
       - name: Maven settings
+        if: github.ref == 'refs/heads/main' && runner.os == 'Linux'
         uses: s4u/maven-settings-action@v3.0.0
         with:
           servers: |
