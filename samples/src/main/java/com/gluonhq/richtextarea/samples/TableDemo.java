@@ -36,6 +36,7 @@ import com.gluonhq.richtextarea.model.ParagraphDecoration;
 import com.gluonhq.richtextarea.model.TableDecoration;
 import com.gluonhq.richtextarea.model.TextDecoration;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.TextAlignment;
@@ -61,7 +62,7 @@ public class TableDemo extends Application {
     @Override
     public void start(Stage stage) {
         RichTextArea editor = new RichTextArea();
-        editor.setDocument(getDocument());
+        editor.getActionFactory().open(getDocument()).execute(new ActionEvent());
         BorderPane root = new BorderPane(editor);
         Scene scene = new Scene(root, 800, 600);
         scene.getStylesheets().add(TableDemo.class.getResource("tableDemo.css").toExternalForm());

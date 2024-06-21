@@ -33,6 +33,7 @@ import com.gluonhq.richtextarea.model.Document;
 import com.gluonhq.richtextarea.model.ParagraphDecoration;
 import com.gluonhq.richtextarea.model.TextDecoration;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -87,7 +88,7 @@ public class BasicDocumentDemo extends Application {
         DecorationModel decorationModel = new DecorationModel(0, text.length(), textDecoration, paragraphDecoration);
         Document document = new Document(text, List.of(decorationModel), text.length());
         RichTextArea richTextArea = new RichTextArea();
-        richTextArea.setDocument(document);
+        richTextArea.getActionFactory().open(document).execute(new ActionEvent());
         StackPane root = new StackPane(richTextArea);
         Scene scene = new Scene(root, 640, 480);
         stage.setScene(scene);

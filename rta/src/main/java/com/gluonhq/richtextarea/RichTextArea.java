@@ -95,19 +95,15 @@ public class RichTextArea extends Control {
      * By default, this property is set via {@link ActionFactory#newDocument()} or {@link ActionFactory#open(Document)},
      * and gets updated only via {@link ActionFactory#save()}, unless {@link #autoSaveProperty()} is enabled, in which
      * the document gets updated after every change.
-     *
-     * @return the document for this control
      */
-    public final ObjectProperty<Document> documentProperty() {
-       return documentProperty;
+    // documentProperty
+    final ReadOnlyObjectWrapper<Document> documentProperty = new ReadOnlyObjectWrapper<>(this, "document", new Document());
+    public final ReadOnlyObjectProperty<Document> documentProperty() {
+       return documentProperty.getReadOnlyProperty();
     }
     public final Document getDocument() {
        return documentProperty.get();
     }
-    public final void setDocument(Document value) {
-        documentProperty.set(value);
-    }
-    private final ObjectProperty<Document> documentProperty = new SimpleObjectProperty<>(this, "document", new Document());
 
     // autoSaveProperty
     /**

@@ -33,6 +33,7 @@ import com.gluonhq.richtextarea.model.Document;
 import com.gluonhq.richtextarea.model.ParagraphDecoration;
 import com.gluonhq.richtextarea.model.TextDecoration;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
@@ -80,7 +81,7 @@ public class HighlightDemo extends Application {
         Document document = new Document(fullText, decorationList, fullText.length());
 
         RichTextArea editor = new RichTextArea();
-        editor.setDocument(document);
+        editor.getActionFactory().open(document).execute(new ActionEvent());
 
         BorderPane root = new BorderPane(editor);
         Scene scene = new Scene(root, 800, 300);

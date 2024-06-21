@@ -416,10 +416,10 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             // new/open
             dispose();
             setup(nv);
-            getSkinnable().setDocument(nv);
+            getSkinnable().documentProperty.set(nv);
         } else if (nv != null) {
             // save
-            getSkinnable().setDocument(nv);
+            getSkinnable().documentProperty.set(nv);
         }
     };
 
