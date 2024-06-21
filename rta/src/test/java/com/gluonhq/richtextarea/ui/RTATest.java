@@ -49,6 +49,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -88,6 +89,7 @@ import static javafx.scene.text.FontPosture.REGULAR;
 import static javafx.scene.text.FontWeight.BOLD;
 import static javafx.scene.text.FontWeight.NORMAL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -826,6 +828,40 @@ public class RTATest {
         assertEquals(14, ((TextDecoration) dm4.getDecoration()).getFontSize());
         assertEquals(NORMAL, ((TextDecoration) dm4.getDecoration()).getFontWeight());
         assertEquals("black", ((TextDecoration) dm4.getDecoration()).getForeground());
+    }
+    @Test
+    public void multiLineDocumentTest(FxRobot robot) {
+        run(() -> {
+            String text = "Hello\nRTA";
+            TextDecoration textDecoration = TextDecoration.builder().presets().fontFamily("Arial").build();
+            ParagraphDecoration paragraphDecoration = ParagraphDecoration.builder().presets().build();
+            Document document = new Document(text,
+                    List.of(new DecorationModel(0, 6, textDecoration, paragraphDecoration),
+                            new DecorationModel(6, 3, textDecoration, paragraphDecoration)), text.length());
+            richTextArea.getActionFactory().open(document).execute(new ActionEvent());
+        });
+        waitForFxEvents();
+
+        verifyThat(".rich-text-area", node -> node instanceof RichTextArea);
+        verifyThat(".rich-text-area", NodeMatchers.isFocused());
+        RichTextArea rta = robot.lookup(".rich-text-area").query();
+        assertEquals(9, rta.getTextLength());
+        assertEquals(9, rta.getCaretPosition());
+        assertNotNull(rta.getDocument());
+        assertEquals(9, rta.getDocument().getCaretPosition());
+        assertEquals("Hello\nRTA", rta.getDocument().getText());
+        String internalText = "Hello\nRTA";
+        assertEquals(9, internalText.length());
+        assertEquals(internalText, getInternalText(rta.getDocument(), 9));
+        assertEquals(2, robot.lookup(".text-flow").queryAll().size());
+        for (int i = 0; i < 2; i++) {
+            assertInstanceOf(TextFlow.class, robot.lookup(".text-flow").nth(i).query());
+            TextFlow tf = robot.lookup(".text-flow").nth(i).query();
+            assertEquals(1, tf.getChildren().size());
+            assertInstanceOf(Text.class, tf.getChildren().get(0));
+            assertFalse(((Text) tf.getChildren().get(0)).getText().contains("\n"));
+        }
+        sleep(4, TimeUnit.SECONDS);
     }
 
     @Test
