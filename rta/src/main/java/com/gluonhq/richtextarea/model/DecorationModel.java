@@ -110,4 +110,10 @@ public class DecorationModel implements Serializable {
                 ", paragraphDecoration=" + paragraphDecoration +
                 '}';
     }
+
+    public static DecorationModel createDefaultDecorationModel(int length) {
+        return new DecorationModel(0, length,
+                TextDecoration.builder().presets().build(),
+                ParagraphDecoration.builder().presets().build());
+    }
 }

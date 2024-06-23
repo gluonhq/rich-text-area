@@ -252,6 +252,10 @@ public final class PieceTable extends AbstractTextBuffer {
                 return (end <= tp);
             });
         }
+        if (mergedList.isEmpty()) {
+            // provide a default decoration
+            mergedList.add(DecorationModel.createDefaultDecorationModel(0));
+        }
         return mergedList;
     }
 
