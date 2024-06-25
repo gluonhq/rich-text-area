@@ -39,7 +39,7 @@ To use the RichTextArea control in your project add the following dependency:
 <dependency>
     <groupId>com.gluonhq</groupId>
     <artifactId>rich-text-area</artifactId>
-    <version>1.1.4</version>
+    <version>1.2.0</version>
 </dependency>
  ```
 
