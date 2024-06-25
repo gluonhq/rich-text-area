@@ -86,7 +86,7 @@ public class EmojiDemo extends Application {
         Document document = new Document(fullText.toString(), decorationList, fullText.length());
 
         RichTextArea editor = new RichTextArea();
-        editor.setDocument(document);
+        editor.getActionFactory().open(document).execute(new ActionEvent());
 
         BorderPane root = new BorderPane(editor);
         Scene scene = new Scene(root, 800, 300);

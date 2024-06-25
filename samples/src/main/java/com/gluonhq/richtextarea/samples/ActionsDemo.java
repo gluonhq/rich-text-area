@@ -81,7 +81,7 @@ public class ActionsDemo extends Application {
         Document document = new Document(text, decorationList, text.length());
 
         RichTextArea editor = new RichTextArea();
-        editor.setDocument(document);
+        editor.getActionFactory().open(document).execute(new ActionEvent());
 
         BorderPane root = new BorderPane(editor);
 

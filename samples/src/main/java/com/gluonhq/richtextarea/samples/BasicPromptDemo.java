@@ -33,6 +33,7 @@ import com.gluonhq.richtextarea.model.Document;
 import com.gluonhq.richtextarea.model.ParagraphDecoration;
 import com.gluonhq.richtextarea.model.TextDecoration;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
@@ -86,7 +87,7 @@ public class BasicPromptDemo extends Application {
     @Override
     public void start(Stage stage) {
         RichTextArea editor = new RichTextArea();
-        editor.setDocument(emptyDocument);
+        editor.getActionFactory().open(emptyDocument).execute(new ActionEvent());
         editor.setPromptText("Type something!");
         editor.setPadding(new Insets(20));
 

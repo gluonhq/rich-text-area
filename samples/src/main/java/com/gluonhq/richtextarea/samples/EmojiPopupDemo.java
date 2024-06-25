@@ -71,7 +71,7 @@ public class EmojiPopupDemo extends Application {
     @Override
     public void start(Stage stage) {
         RichTextArea editor = new RichTextArea();
-        editor.setDocument(emptyDocument);
+        editor.getActionFactory().open(emptyDocument).execute(new ActionEvent());
         editor.setPromptText("Type something or insert emojis!");
         editor.setSkinTone(EmojiSkinTone.MEDIUM_SKIN_TONE);
         editor.setPadding(new Insets(20));
