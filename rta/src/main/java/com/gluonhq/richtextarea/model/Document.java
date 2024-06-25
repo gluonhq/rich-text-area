@@ -63,9 +63,7 @@ public class Document implements Serializable {
 
     public Document(String text, int caretPosition) {
         this(text,
-                List.of(new DecorationModel(0, text.length(),
-                        TextDecoration.builder().presets().build(),
-                        ParagraphDecoration.builder().presets().build())),
+                List.of(DecorationModel.createDefaultDecorationModel(text.length())),
                 caretPosition);
     }
 

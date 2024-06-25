@@ -172,6 +172,68 @@ public class RTATest {
     }
 
     @Test
+    public void emptyDocumentDemoTest(FxRobot robot) {
+        run(() -> {
+            String text = "Hello RTA";
+            Document document = new Document(text);
+            richTextArea.getActionFactory().open(document).execute(new ActionEvent());
+        });
+        waitForFxEvents();
+
+        verifyThat(".rich-text-area", node -> node instanceof RichTextArea);
+        verifyThat(".rich-text-area", NodeMatchers.isFocused());
+        RichTextArea rta = robot.lookup(".rich-text-area").query();
+        assertEquals(9, rta.getTextLength());
+        assertEquals(9, rta.getCaretPosition());
+
+        Document document = rta.getDocument();
+        assertNotNull(document);
+        assertEquals(0, document.getCaretPosition());
+        assertEquals("Hello RTA", document.getText());
+        assertNotNull(document.getDecorations());
+        assertEquals(1, document.getDecorations().size());
+        assertInstanceOf(TextDecoration.class, document.getDecorations().get(0).getDecoration());
+        TextDecoration td = (TextDecoration) document.getDecorations().get(0).getDecoration();
+        assertEquals("black", td.getForeground());
+        assertEquals("transparent", td.getBackground());
+        assertEquals("System", td.getFontFamily());
+        assertEquals(14, td.getFontSize());
+        assertEquals(NORMAL, td.getFontWeight());
+        assertEquals(REGULAR, td.getFontPosture());
+
+        robot.push(new KeyCodeCombination(A, SHORTCUT_DOWN));
+        waitForFxEvents();
+        run(() -> {
+            richTextArea.getActionFactory().cut().execute(new ActionEvent());
+            richTextArea.getActionFactory().save().execute(new ActionEvent());
+        });
+        waitForFxEvents();
+        Document emptyDocument = rta.getDocument();
+
+        assertEquals(0, rta.getTextLength());
+        assertEquals(0, rta.getCaretPosition());
+        assertNotNull(emptyDocument);
+        assertEquals(0, emptyDocument.getCaretPosition());
+        assertEquals("", emptyDocument.getText());
+        assertNotNull(emptyDocument.getDecorations());
+        assertEquals(1, emptyDocument.getDecorations().size());
+
+        run(() -> richTextArea.getActionFactory().open(emptyDocument).execute(new ActionEvent()));
+        waitForFxEvents();
+
+        document = rta.getDocument();
+        assertEquals(0, rta.getTextLength());
+        assertEquals(0, rta.getCaretPosition());
+        assertNotNull(document);
+        assertEquals(emptyDocument, document);
+        assertEquals(0, document.getCaretPosition());
+        assertEquals("", document.getText());
+        assertNotNull(document.getDecorations());
+        assertEquals(1, document.getDecorations().size());
+
+    }
+
+    @Test
     public void basicDocumentDemoTest(FxRobot robot) {
         run(() -> {
             String text = "Hello RTA";
