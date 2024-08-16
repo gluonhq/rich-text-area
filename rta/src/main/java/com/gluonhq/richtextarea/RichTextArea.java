@@ -76,7 +76,11 @@ import java.util.function.Function;
 public class RichTextArea extends Control {
 
     public static final String STYLE_CLASS = "rich-text-area";
-    public static final DataFormat RTA_DATA_FORMAT = new DataFormat("text/rich-text-area");
+    public static final DataFormat RTA_DATA_FORMAT;
+    static {
+        DataFormat dataFormat = DataFormat.lookupMimeType("text/rich-text-area");
+        RTA_DATA_FORMAT = dataFormat == null ? new DataFormat("text/rich-text-area") : dataFormat;
+    }
     private static final PseudoClass PSEUDO_CLASS_READONLY = PseudoClass.getPseudoClass("readonly");
 
     private final ActionFactory actionFactory = new ActionFactory(this);
