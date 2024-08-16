@@ -80,7 +80,7 @@ import java.util.stream.Stream;
 
 import static com.gluonhq.richtextarea.model.TableDecoration.TABLE_SEPARATOR;
 
-public class ParagraphTile extends HBox {
+class ParagraphTile extends HBox {
 
     private static final double INDENT_PADDING = 20.0;
 
