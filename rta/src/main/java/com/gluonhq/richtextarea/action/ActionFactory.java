@@ -136,6 +136,14 @@ public class ActionFactory {
         return new BasicAction(control, action -> ACTION_CMD_FACTORY.removeExtremesAndDecorate(selection, decoration));
     }
 
+    public Action insertText(String text) {
+        return new BasicAction(control, action -> ACTION_CMD_FACTORY.insertText(text));
+    }
+
+    public Action selectAndInsertText(Selection selection, String text) {
+        return new BasicAction(control, action -> ACTION_CMD_FACTORY.selectAndInsertText(selection, text));
+    }
+
     public Action insertEmoji(Emoji emoji) {
         return new BasicAction(control, action -> ACTION_CMD_FACTORY.insertEmoji(emoji));
     }
