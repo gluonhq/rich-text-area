@@ -33,7 +33,13 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextBoundsType;
 
+import java.util.regex.Pattern;
+
 public class Tools {
+
+    public static final Pattern URL_PATTERN = Pattern.compile(
+            "\\b((https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|])",
+            Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
 
     private Tools() {}
 
@@ -110,4 +116,10 @@ public class Tools {
                 .replaceAll(TextBuffer.EMOJI_ANCHOR_TEXT, "<e>")
                 .replaceAll("" + TextBuffer.ZERO_WIDTH_TABLE_SEPARATOR, "<t>");
     }
+
+    public static boolean isURL(String text) {
+        if (text == null) return false;
+        return URL_PATTERN.matcher(text).matches();
+    }
+
 }

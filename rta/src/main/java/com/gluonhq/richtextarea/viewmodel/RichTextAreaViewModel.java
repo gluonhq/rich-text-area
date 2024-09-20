@@ -30,7 +30,6 @@ package com.gluonhq.richtextarea.viewmodel;
 import com.gluonhq.richtextarea.Selection;
 import com.gluonhq.richtextarea.Tools;
 import com.gluonhq.richtextarea.model.Decoration;
-import com.gluonhq.richtextarea.model.DecorationModel;
 import com.gluonhq.richtextarea.model.Document;
 import com.gluonhq.richtextarea.model.ImageDecoration;
 import com.gluonhq.richtextarea.model.Paragraph;
@@ -454,8 +453,13 @@ public class RichTextAreaViewModel {
         if (selection.isDefined()) {
             Document currentDocument = getCurrentDocument(selection);
             final ClipboardContent content = new ClipboardContent();
-            content.put(RTA_DATA_FORMAT, currentDocument);
-            content.putString(currentDocument.getText().replaceAll(TextBuffer.ZERO_WIDTH_NO_BREAK_SPACE_TEXT, ""));
+            String text = currentDocument.getText();
+            if (Tools.isURL(text)) {
+                content.putUrl(text);
+            } else {
+                content.put(RTA_DATA_FORMAT, currentDocument);
+            }
+            content.putString(text.replaceAll(TextBuffer.ZERO_WIDTH_NO_BREAK_SPACE_TEXT, ""));
             if (cutText) {
                 commandManager.execute(new RemoveTextCmd(0));
             }

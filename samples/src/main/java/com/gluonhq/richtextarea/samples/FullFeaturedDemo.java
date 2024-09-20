@@ -31,6 +31,7 @@ import com.gluonhq.emoji.Emoji;
 import com.gluonhq.emoji.EmojiData;
 import com.gluonhq.richtextarea.RichTextArea;
 import com.gluonhq.richtextarea.Selection;
+import com.gluonhq.richtextarea.Tools;
 import com.gluonhq.richtextarea.action.Action;
 import com.gluonhq.richtextarea.action.DecorateAction;
 import com.gluonhq.richtextarea.action.ParagraphDecorateAction;
@@ -573,6 +574,21 @@ public class FullFeaturedDemo extends Application {
     }
 
     private static void findMarkdown(String text, BiConsumer<Integer, String> onFound) {
+        int start = 0;
+        Matcher urlMatcher = Tools.URL_PATTERN.matcher(text);
+        while (urlMatcher.find()) {
+            int begin = urlMatcher.start();
+            if (start != begin) {
+                findMarkdownWithoutURL(text.substring(start, begin), onFound);
+            }
+            start = urlMatcher.end();
+        }
+        if (start == 0) {
+            findMarkdownWithoutURL(text, onFound);
+        }
+    }
+
+    private static void findMarkdownWithoutURL(String text, BiConsumer<Integer, String> onFound) {
         Matcher matcher = markdownDetector.matcher(text);
         while (matcher.find()) {
             for (int i = 1; i < matcher.groupCount(); i++) {
@@ -585,7 +601,7 @@ public class FullFeaturedDemo extends Application {
         }
     }
 
-    private TextDecoration getStyleFromMarker(String marker) {
+        private TextDecoration getStyleFromMarker(String marker) {
         TextDecoration.Builder builder = TextDecoration.builder();
         switch (marker) {
             case MARKER_BOLD:
