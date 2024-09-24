@@ -17,6 +17,7 @@
         <maven.compiler.release>11</maven.compiler.release>
         <javafx.version>22</javafx.version>
         <gpg.plugin.version>1.6</gpg.plugin.version>
+        <emoji.version>1.1.0</emoji.version>
     </properties>
 
     <dependencies>
@@ -27,9 +28,14 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.gluonhq</groupId>
+            <groupId>com.gluonhq.emoji</groupId>
             <artifactId>emoji</artifactId>
-            <version>1.0.1</version>
+            <version>${emoji.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.gluonhq.emoji</groupId>
+            <artifactId>offline</artifactId>
+            <version>${emoji.version}</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
