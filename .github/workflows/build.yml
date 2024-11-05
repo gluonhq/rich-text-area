@@ -39,9 +39,15 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get -y install at-spi2-core
+          sudo apt-get -y install at-spi2-core matchbox-window-manager
           export DISPLAY=:90
           Xvfb -ac :90 -screen 0 1280x1024x24 > /dev/null 2>&1 &
+          sleep 1
+          matchbox-window-manager -use_titlebar no &
+          touch /home/runner/.Xauthority
+          pushd /home/runner
+          xauth generate :90 .
+          popd
           ./mvnw -B -ntp verify -f rta
 
       - name: Publish Snapshots
