@@ -38,8 +38,6 @@ jobs:
       - name: Build project (Linux)
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get update
-          sudo apt-get -y install at-spi2-core
           export DISPLAY=:90
           Xvfb -ac :90 -screen 0 1280x1024x24 > /dev/null 2>&1 &
           ./mvnw -B -ntp verify -f rta
