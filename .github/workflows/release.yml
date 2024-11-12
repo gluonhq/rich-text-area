@@ -20,12 +20,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           ref: ${{ needs.pre-release.outputs.tag }}
 
       - name: Setup Java and Apache Maven
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v3
         with:
           java-version: 17
           distribution: 'oracle'
