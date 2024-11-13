@@ -12,7 +12,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>11</maven.compiler.release>
-        <javafx.version>22</javafx.version>
+        <javafx.version>23.0.1</javafx.version>
         <javafx.plugin.version>0.0.8</javafx.plugin.version>
         <main.class>com.gluonhq.richtextarea.samples.FullFeaturedDemo</main.class>
         <jpro.version>2022.1.0</jpro.version>
@@ -52,7 +52,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.13.0</version>
             </plugin>
             <plugin>
                 <groupId>org.openjfx</groupId>
