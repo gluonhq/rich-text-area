@@ -391,6 +391,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 getSkinnable().decorationAtCaret.bind(viewModel.decorationAtCaretProperty());
                 getSkinnable().decorationAtParagraph.bind(viewModel.decorationAtParagraphProperty());
                 caretPositionProperty.bind(viewModel.caretPositionProperty());
+                getSkinnable().caretOriginProperty.bind(caretOriginProperty);
                 promptNode.visibleProperty().bind(promptVisibleBinding);
                 promptNode.fontProperty().bind(promptFontBinding);
             } else {
@@ -402,6 +403,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 getSkinnable().decorationAtCaret.unbind();
                 getSkinnable().decorationAtParagraph.unbind();
                 caretPositionProperty.unbind();
+                getSkinnable().caretOriginProperty.unbind();
                 promptNode.visibleProperty().unbind();
                 promptNode.fontProperty().unbind();
             }
