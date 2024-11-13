@@ -823,7 +823,11 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 requestLayout();
                 nonTextNodesCount = nonTextNodes.get();
             }
-            getSkinnable().requestFocus();
+            if (getSkinnable().getScene() != null && getSkinnable().getScene().getWindow() != null &&
+                    getSkinnable().getScene().getFocusOwner() != null) {
+                // don't request focus if scene doesn't have a focus owner yet,
+                getSkinnable().requestFocus();
+            }
         } finally {
             objectsCacheEvictionTimer.start();
         }
