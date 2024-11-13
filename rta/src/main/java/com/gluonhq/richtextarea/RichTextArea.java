@@ -49,6 +49,7 @@ import javafx.beans.property.StringProperty;
 import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.Control;
 import javafx.scene.control.SkinBase;
@@ -316,12 +317,22 @@ public class RichTextArea extends Control {
     }
 
     /**
-     * The current position of the caret within the text.
+     * The current position of the caret within the text, in terms of characters.
      */
     final ReadOnlyIntegerWrapper caretPosition = new ReadOnlyIntegerWrapper(this, "caretPosition", 0);
     public final int getCaretPosition() { return caretPosition.get(); }
     public final ReadOnlyIntegerProperty caretPositionProperty() { return caretPosition.getReadOnlyProperty(); }
 
+    /**
+     * The current location of the caret node, in RTA local coordinates.
+     */
+    final ReadOnlyObjectWrapper<Point2D> caretOriginProperty = new ReadOnlyObjectWrapper<>(this, "caretOrigin", new Point2D(-1, -1));
+    public final ReadOnlyObjectProperty<Point2D> caretOriginProperty() {
+       return caretOriginProperty.getReadOnlyProperty();
+    }
+    public final Point2D getCaretOrigin() {
+       return caretOriginProperty.get();
+    }
 
     /**
      * The current decoration at the caret.
