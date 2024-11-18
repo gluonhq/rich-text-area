@@ -62,6 +62,8 @@ public class UnitBuffer {
             Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
 
     private final List<Unit> unitList;
+    private volatile boolean dirty = true;
+    private String internalText = "";
 
     public UnitBuffer() {
         this(List.of());
@@ -93,9 +95,12 @@ public class UnitBuffer {
      * @return a string with the internal text representation
      */
     public String getInternalText() {
+        if (!dirty) return internalText;
         final StringBuilder sb = new StringBuilder();
         unitList.forEach(unit -> sb.append(unit.getInternalText()));
-        return sb.toString();
+        this.internalText = sb.toString();
+        this.dirty = false;
+        return this.internalText;
     }
 
     /**
@@ -112,6 +117,7 @@ public class UnitBuffer {
      */
     public void append(Unit unit) {
         unitList.add(unit);
+        this.dirty = true;
     }
 
     /**
@@ -120,6 +126,7 @@ public class UnitBuffer {
      */
     public void append(List<Unit> units) {
         unitList.addAll(units);
+        this.dirty = true;
     }
 
     /**
@@ -162,6 +169,7 @@ public class UnitBuffer {
         }
         unitList.clear();
         unitList.addAll(buffer);
+        this.dirty = true;
     }
 
     /**
@@ -179,6 +187,7 @@ public class UnitBuffer {
         insert(unit, Math.max(start, end));
         insert(unit, Math.min(start, end));
         unitList.subList(unitList.indexOf(unit), unitList.lastIndexOf(unit) + 1).clear();
+        this.dirty = true;
     }
 
     /**
