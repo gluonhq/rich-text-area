@@ -128,6 +128,17 @@
         </repository>
     </distributionManagement>
 
+    <repositories>
+        <repository>
+            <id>Gluon Releases</id>
+            <url>https://nexus.gluonhq.com/nexus/content/repositories/releases/</url>
+        </repository>
+        <repository>
+            <id>Gluon Snapshots</id>
+            <url>https://nexus.gluonhq.com/nexus/content/repositories/public-snapshots/</url>
+        </repository>
+    </repositories>
+
     <build>
         <plugins>
             <plugin>
