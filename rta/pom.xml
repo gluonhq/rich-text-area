@@ -182,7 +182,7 @@
                 <version>3.5.2</version>
                 <configuration>
                     <trimStackTrace>false</trimStackTrace>
-                    <argLine>-Dtestfx.headless=true --add-opens javafx.graphics/com.sun.javafx.application=ALL-UNNAMED</argLine>
+                    <argLine>--add-opens javafx.graphics/com.sun.javafx.application=ALL-UNNAMED</argLine>
                     <systemProperties>
                         <property>
                             <name>java.util.logging.config.file</name>
