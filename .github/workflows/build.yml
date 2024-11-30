@@ -25,9 +25,6 @@ jobs:
           server-username: NEXUS_USERNAME
           server-password: NEXUS_PASSWORD
 
-      - name: Log Settings.xml
-        run: cat ~/.m2/settings.xml
-
       - name: Build project (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
