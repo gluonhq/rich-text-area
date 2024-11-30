@@ -18,7 +18,8 @@
         <javafx.version>23.0.1</javafx.version>
         <gpg.plugin.version>3.2.7</gpg.plugin.version>
         <emoji.version>1.1.0</emoji.version>
-        <javafx.systemPath/>
+        <test.headless/>
+        <test.javafx.version>24-headless+0-2024-11-30-072408</test.javafx.version>
     </properties>
 
     <dependencies>
@@ -137,6 +138,10 @@
             <id>Gluon Snapshots</id>
             <url>https://nexus.gluonhq.com/nexus/content/repositories/public-snapshots/</url>
         </repository>
+        <repository>
+            <id>OpenJFX Test Builds</id>
+            <url>https://nexus.gluonhq.com/nexus/content/repositories/openjfx-test</url>
+        </repository>
     </repositories>
 
     <build>
@@ -182,7 +187,7 @@
                 <version>3.5.2</version>
                 <configuration>
                     <trimStackTrace>false</trimStackTrace>
-                    <argLine>--add-opens javafx.graphics/com.sun.javafx.application=ALL-UNNAMED</argLine>
+                    <argLine>${test.headless} --add-opens javafx.graphics/com.sun.javafx.application=ALL-UNNAMED</argLine>
                     <systemProperties>
                         <property>
                             <name>java.util.logging.config.file</name>
@@ -237,27 +242,14 @@
         </profile>
         <profile>
             <id>test</id>
+            <properties>
+                <test.headless>-Dtestfx.headless=true</test.headless>
+            </properties>
             <dependencies>
                 <dependency>
                     <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-base</artifactId>
-                    <version>${javafx.version}</version>
-                    <scope>system</scope>
-                    <systemPath>${javafx.systemPath}/javafx.base.jar</systemPath>
-                </dependency>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-graphics</artifactId>
-                    <version>${javafx.version}</version>
-                    <scope>system</scope>
-                    <systemPath>${javafx.systemPath}/javafx.graphics.jar</systemPath>
-                </dependency>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
                     <artifactId>javafx-controls</artifactId>
-                    <version>${javafx.version}</version>
-                    <scope>system</scope>
-                    <systemPath>${javafx.systemPath}/javafx.controls.jar</systemPath>
+                    <version>${test.javafx.version}</version>
                 </dependency>
             </dependencies>
         </profile>
