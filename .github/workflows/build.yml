@@ -21,25 +21,16 @@ jobs:
           distribution: 'oracle'
           java-version: '22'
           cache: 'maven'
-          server-id: 'OpenJFX Test Builds'
-          server-username: NEXUS_USERNAME
-          server-password: NEXUS_PASSWORD
 
       - name: Build project (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
           ./mvnw -B -ntp -Ptest verify -f rta
-        env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
       - name: Build project (Windows)
         if: runner.os == 'Windows'
         run: |
           .\mvnw -B -ntp -Ptest verify -f rta
-        env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
       - name: Setup Java (distribution)
         uses: actions/setup-java@v4

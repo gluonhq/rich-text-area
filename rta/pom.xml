@@ -19,7 +19,7 @@
         <gpg.plugin.version>3.2.7</gpg.plugin.version>
         <emoji.version>1.1.0</emoji.version>
         <test.headless/>
-        <test.javafx.version>24-headless+0-2024-11-30-072408</test.javafx.version>
+        <test.javafx.version>24-headless+0-2024-12-02-101029</test.javafx.version>
     </properties>
 
     <dependencies>
@@ -137,10 +137,6 @@
         <repository>
             <id>Gluon Snapshots</id>
             <url>https://nexus.gluonhq.com/nexus/content/repositories/public-snapshots/</url>
-        </repository>
-        <repository>
-            <id>OpenJFX Test Builds</id>
-            <url>https://nexus.gluonhq.com/nexus/content/repositories/openjfx-test</url>
         </repository>
     </repositories>
 
