@@ -15,12 +15,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup java (tests)
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
+          java-version: 22
           distribution: 'oracle'
-          java-version: '22'
           cache: 'maven'
+          server-id: ossrh
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_CENTRAL_TOKEN
 
       - name: Build project (Linux/macOS)
         if: runner.os != 'Windows'
@@ -31,16 +34,6 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           .\mvnw -B -ntp -Ptest verify -f rta
-
-      - name: Setup Java (distribution)
-        uses: actions/setup-java@v4
-        with:
-          java-version: 21
-          distribution: 'oracle'
-          cache: 'maven'
-          server-id: ossrh
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_CENTRAL_TOKEN
 
       - name: Publish Snapshots
         if: github.ref == 'refs/heads/main' && runner.os == 'Linux'

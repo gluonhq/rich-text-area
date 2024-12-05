@@ -27,7 +27,7 @@ jobs:
       - name: Setup Java and Apache Maven
         uses: actions/setup-java@v4
         with:
-          java-version: 21
+          java-version: 22
           distribution: 'oracle'
           cache: 'maven'
           server-id: ossrh
