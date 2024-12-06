@@ -18,29 +18,22 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: 21
+          java-version: 22
           distribution: 'oracle'
           cache: 'maven'
           server-id: ossrh
           server-username: MAVEN_USERNAME
           server-password: MAVEN_CENTRAL_TOKEN
 
-      - name: Build project (macOS)
-        if: runner.os == 'macOS'
+      - name: Build project (Linux/macOS)
+        if: runner.os != 'Windows'
         run: |
-          ./mvnw -B -ntp verify -f rta
+          ./mvnw -B -ntp -Ptest verify -f rta
 
       - name: Build project (Windows)
         if: runner.os == 'Windows'
         run: |
-          .\mvnw -B -ntp verify -f rta
-
-      - name: Build project (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          export DISPLAY=:90
-          Xvfb -ac :90 -screen 0 1280x1024x24 > /dev/null 2>&1 &
-          ./mvnw -B -ntp verify -f rta
+          .\mvnw -B -ntp -Ptest verify -f rta
 
       - name: Publish Snapshots
         if: github.ref == 'refs/heads/main' && runner.os == 'Linux'

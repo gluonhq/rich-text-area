@@ -27,7 +27,7 @@ jobs:
       - name: Setup Java and Apache Maven
         uses: actions/setup-java@v4
         with:
-          java-version: 21
+          java-version: 22
           distribution: 'oracle'
           cache: 'maven'
           server-id: ossrh
@@ -39,9 +39,8 @@ jobs:
       - name: Publish to Maven Central
         id: deploy
         run: |
-          export DISPLAY=:90
-          Xvfb -ac :90 -screen 0 1280x1024x24 > /dev/null 2>&1 &
-          ./mvnw -B -ntp -Prelease deploy -f rta
+          ./mvnw -B -ntp -Ptest verify -f rta
+          ./mvnw -B -Dmaven.test.skip=true -Prelease deploy -f rta
           echo ::set-output name=exit_code::$?
         env:
           MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
