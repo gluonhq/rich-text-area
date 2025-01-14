@@ -392,6 +392,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 getSkinnable().decorationAtParagraph.bind(viewModel.decorationAtParagraphProperty());
                 caretPositionProperty.bind(viewModel.caretPositionProperty());
                 getSkinnable().caretOriginProperty.bind(caretOriginProperty);
+                getSkinnable().caretRowColumnProperty.bind(caretRowColumnProperty);
                 promptNode.visibleProperty().bind(promptVisibleBinding);
                 promptNode.fontProperty().bind(promptFontBinding);
             } else {
@@ -404,6 +405,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 getSkinnable().decorationAtParagraph.unbind();
                 caretPositionProperty.unbind();
                 getSkinnable().caretOriginProperty.unbind();
+                getSkinnable().caretRowColumnProperty.unbind();
                 promptNode.visibleProperty().unbind();
                 promptNode.fontProperty().unbind();
             }
@@ -425,7 +427,17 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         }
     };
 
-    final ObjectProperty<Point2D> caretOriginProperty = new SimpleObjectProperty<>(this, "caretOrigin", DEFAULT_POINT_2D);
+    final ObjectProperty<Point2D> caretOriginProperty = new SimpleObjectProperty<>(this, "caretOrigin", DEFAULT_POINT_2D) {
+        @Override
+        protected void invalidated() {
+            viewModel.getParagraphWithCaret().ifPresentOrElse(p -> {
+                int row = viewModel.getParagraphList().indexOf(p);
+                int col = caretPositionProperty.get() - p.getStart();
+                caretRowColumnProperty.set(new Point2D(col, row));
+            }, () -> caretRowColumnProperty.set(DEFAULT_POINT_2D));
+        }
+    };
+    private final ObjectProperty<Point2D> caretRowColumnProperty = new SimpleObjectProperty<>(this, "caretRowColumn", DEFAULT_POINT_2D);
 
     private final ObjectBinding<Font> promptFontBinding = Bindings.createObjectBinding(this::getPromptNodeFont,
             viewModel.decorationAtCaretProperty(), viewModel.decorationAtParagraphProperty());

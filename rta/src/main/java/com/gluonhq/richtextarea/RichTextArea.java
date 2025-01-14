@@ -335,6 +335,21 @@ public class RichTextArea extends Control {
     }
 
     /**
+     * A Point2D, with x for column and y for row, with integer values, for a given position of the caret.
+     * Column is defined by the number of characters from the beginning of the paragraph to the current position
+     * of the caret, starting in 0 (or -1 if the control has no text).
+     * Row is defined by the number of paragraph the caret is placed in, starting in 0 (or -1 if the control
+     * has no text).
+     */
+    final ReadOnlyObjectWrapper<Point2D> caretRowColumnProperty = new ReadOnlyObjectWrapper<>(this, "caretRowColumn", Point2D.ZERO);
+    public final ReadOnlyObjectProperty<Point2D> caretRowColumnProperty() {
+        return caretRowColumnProperty.getReadOnlyProperty();
+    }
+    public final Point2D getCaretRowColumn() {
+        return caretRowColumnProperty.get();
+    }
+
+    /**
      * The current decoration at the caret.
      */
     final ReadOnlyObjectWrapper<Decoration> decorationAtCaret = new ReadOnlyObjectWrapper<>(this, "decorationAtCaret");
