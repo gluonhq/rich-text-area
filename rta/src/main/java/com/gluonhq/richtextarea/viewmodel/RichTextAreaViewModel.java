@@ -266,13 +266,13 @@ public class RichTextAreaViewModel {
     private final ObjectProperty<Document> documentProperty = new SimpleObjectProperty<>(this, "document") {
         @Override
         protected void invalidated() {
-            paragraphList.clear();
+//            paragraphList.clear();
             Document document = get();
             if (document != null) {
                 updateParagraphList();
                 // update decorationAtParagraph once the paragraph list is ready
                 getParagraphWithCaret().ifPresent(p -> setDecorationAtParagraph(p.getDecoration()));
-            }
+            } 
         }
     };
     public final ObjectProperty<Document> documentProperty() {
@@ -587,14 +587,16 @@ public class RichTextAreaViewModel {
     public void resetCharacterIterator() {
         getTextBuffer().resetCharacterIterator();
         updateParagraphList();
-        LOGGER.log(Level.FINE, getTextBuffer().toString());
+        if (LOGGER.isLoggable(Level.FINE)) {
+            LOGGER.log(Level.FINE, getTextBuffer().toString());
+        }
     }
 
     public void walkFragments(BiConsumer<Unit, Decoration> onFragment, int start, int end) {
         getTextBuffer().walkFragments(onFragment, start, end);
     }
 
-    private void updateParagraphList() {
+    void updateParagraphList() {
         List<Integer> lineFeeds = getTextBuffer().getLineFeeds();
         AtomicInteger pos = new AtomicInteger();
         List<Paragraph> newParagraphList = new ArrayList<>();
@@ -607,7 +609,59 @@ public class RichTextAreaViewModel {
         paragraphList.setAll(newParagraphList);
     }
 
+    void newupdateParagraphList() {
+//        Thread.dumpStack();
+        System.err.println("OLDPARAGRAPHLIST = "+paragraphList);
+
+        List<Integer> lineFeeds = getTextBuffer().getLineFeeds();
+        System.err.println("lineFeeds = "+lineFeeds);
+        int pos = 0;
+        int counter = 0;
+        int oldSize = paragraphList.size();
+        for (int lfPos : lineFeeds) {
+            int start = pos;
+            int end = lfPos;
+            if (counter < oldSize) {
+                Paragraph pg = paragraphList.get(counter);
+                ParagraphDecoration pd = getTextBuffer().getParagraphDecorationAtCaret(start);
+                pg.setStart(start);
+                pg.setEnd(end);
+                pg.setDecoration(pd);
+                counter++;
+            }
+            else {
+                Paragraph pg = getParagraphAt(start, end);
+                paragraphList.add(pg);
+            }
+            pos = lfPos + 1;
+        }
+        if (pos <=  getTextLength()) {
+            if (counter < oldSize) {
+                lastParagraph.setStart(pos);
+                lastParagraph.setEnd(getTextLength());
+                ParagraphDecoration pd = getTextBuffer().getParagraphDecorationAtCaret(pos);
+                lastParagraph.setDecoration(pd);
+            } else {
+                lastParagraph = getParagraphAt(pos, getTextLength());
+                paragraphList.add(lastParagraph);
+            }
+        }
+//        List<Paragraph> newParagraphList = new ArrayList<>();
+//        lineFeeds.forEach(lfPos ->
+//                newParagraphList.add(getParagraphAt(pos.getAndSet(lfPos), pos.incrementAndGet())));
+//        if (pos.get() <= getTextLength()) {
+//            lastParagraph = getParagraphAt(pos.get(), getTextLength());
+//            newParagraphList.add(lastParagraph);
+//        }
+        System.err.println("NEWPARAGRAPHLIST = "+paragraphList);
+        long s0 = System.nanoTime();
+//        paragraphList.setAll(newParagraphList);
+        long s1 = System.nanoTime();
+        System.err.println("setall took " + (s1 - s0)/1000);
+    }
+
     private Paragraph getParagraphAt(int start, int end) {
+        System.err.println("GPA start = "+start+", end = "+end);
         ParagraphDecoration pd = getTextBuffer().getParagraphDecorationAtCaret(start);
         return new Paragraph(start, end, pd != null ? pd : ParagraphDecoration.builder().presets().build());
     }

@@ -271,6 +271,7 @@ public final class PieceTable extends AbstractTextBuffer {
 
     @Override
     public List<Integer> getLineFeeds() {
+        System.err.println("GLF asked");
         return pieceCharacterIterator.getLineFeedList();
     }
 

@@ -50,14 +50,19 @@ public abstract class AbstractTextBuffer implements TextBuffer {
 
     public final void addChangeListener(Consumer<TextBuffer.Event> listener) {
         listeners.add(Objects.requireNonNull(listener));
+        System.err.println("RTAS, listeners = "+listeners);
     }
 
     public final void removeChangeListener(Consumer<TextBuffer.Event> listener) {
         listeners.remove(Objects.requireNonNull(listener));
+        System.err.println("RTAS, listeners2 = "+listeners);
     }
 
     protected void fire( TextBuffer.Event event ) {
+        long a0 = System.nanoTime();
         listeners.forEach(l -> l.accept(event));
+        long a1 = System.nanoTime();
+        System.err.println("RTAS, fire took "+ (a1-a0)/1000);
     }
 
 }
