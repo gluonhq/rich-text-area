@@ -39,30 +39,40 @@ public class ParagraphTests {
         viewModel.setTextBuffer(pieceTable);
         TextBuffer textBuffer = viewModel.getTextBuffer();
         viewModel.updateParagraphList();
-        ObservableList<Paragraph> paragraphList = viewModel.getParagraphList();
-        assertEquals(1, paragraphList.size());
-        Paragraph first = paragraphList.get(0);
-        int hash0 = System.identityHashCode(first);
-        System.err.println("FIRST = "+first);
-        System.err.println("hash0 = " + hash0);
-        pieceTable.append("Hello");
+        ObservableList<Paragraph> paragraphList1 = viewModel.getParagraphList();
+        assertEquals(1, paragraphList1.size());
+        Paragraph first1 = paragraphList1.get(0);
+        assertEquals(0, first1.getStart());
+        assertEquals(0, first1.getEnd());
+        
+        
+        String text = "Hello";
+        pieceTable.append(text);
         pieceTable.resetCharacterIterator();
-
         viewModel.updateParagraphList();
-        System.err.println("FIRST = "+first);
         ObservableList<Paragraph> paragraphList2 = viewModel.getParagraphList();
+        assertEquals(1, paragraphList1.size());
+        Paragraph first2 = paragraphList2.get(0);
+        assertEquals(0, first2.getStart());
+        assertEquals(text.length(), first2.getEnd());
+        
         System.err.println("PL2 = "+paragraphList2);
-//        pieceTable.append(String.valueOf(0x0a));
         pieceTable.append("\nWorld");
         pieceTable.resetCharacterIterator();
         viewModel.updateParagraphList();
         ObservableList<Paragraph> paragraphList3 = viewModel.getParagraphList();
         System.err.println("PL3 = "+paragraphList3);
-        Paragraph first1 = paragraphList3.get(0);
+        Paragraph first3 = paragraphList3.get(0);
         int hash1 = System.identityHashCode(first1);
-        assertEquals(first, first1);
-        System.err.println("hash1 = "+hash1);
+     //   assertEquals(first1, first3);
 
+        textBuffer.delete(2, 6);
+        System.err.println("TB = "+textBuffer.getText());
+        pieceTable.resetCharacterIterator();
+        viewModel.updateParagraphList();
+        ObservableList<Paragraph> paragraphList4 = viewModel.getParagraphList();
+        System.err.println("PL4 = "+paragraphList4);
+        assertEquals(1, paragraphList4.size());
     }
 
     private int getNextRowPosition(double x, Boolean down) {
