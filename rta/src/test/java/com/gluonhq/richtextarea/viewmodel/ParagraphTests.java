@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 public class ParagraphTests {
 
     @Test
-    public void testUpdate() {
+    public void testEmptyList() {
         RichTextAreaViewModel viewModel = new RichTextAreaViewModel(this::getNextRowPosition, this::getNextTableCellPosition);
         Document document = new Document();
         PieceTable pieceTable = new PieceTable(document);
@@ -44,8 +44,66 @@ public class ParagraphTests {
         Paragraph first1 = paragraphList1.get(0);
         assertEquals(0, first1.getStart());
         assertEquals(0, first1.getEnd());
-        
-        
+        assertEquals(paragraphList1.get(0), viewModel.lastParagraph);
+    }
+
+    @Test
+    public void testAddElements() {
+        RichTextAreaViewModel viewModel = new RichTextAreaViewModel(this::getNextRowPosition, this::getNextTableCellPosition);
+        Document document = new Document();
+        PieceTable pieceTable = new PieceTable(document);
+        viewModel.setTextBuffer(pieceTable);
+        for (int i = 0; i < 10; i++) {
+            appendAndUpdate(pieceTable, viewModel, Integer.toString(i));
+        }
+        assertEquals(1, viewModel.getParagraphList().size());
+        assertEquals(viewModel.getParagraphList().get(0), viewModel.lastParagraph);
+
+        pieceTable.append("\n");
+        pieceTable.resetCharacterIterator();
+        assertEquals(1, viewModel.getParagraphList().size());
+        assertEquals(viewModel.getParagraphList().get(0), viewModel.lastParagraph);
+        viewModel.updateParagraphList();
+        assertEquals(2, viewModel.getParagraphList().size());
+        for (int i = 0; i < 10; i++) {
+            appendAndUpdate(pieceTable, viewModel, Integer.toString(i));
+        }
+        assertEquals(2, viewModel.getParagraphList().size());
+        assertEquals(viewModel.getParagraphList().get(1), viewModel.lastParagraph);
+    }
+
+    @Test
+    public void testAddRemoveLineBreaks() {
+        RichTextAreaViewModel viewModel = new RichTextAreaViewModel(this::getNextRowPosition, this::getNextTableCellPosition);
+        Document document = new Document();
+        PieceTable pieceTable = new PieceTable(document);
+        viewModel.setTextBuffer(pieceTable);
+        appendAndUpdate(pieceTable, viewModel, "Hello\n");
+        assertEquals(2, viewModel.getParagraphList().size());
+        System.err.println("PL = " + viewModel.getParagraphList());
+        assertEquals(viewModel.getParagraphList().get(1), viewModel.lastParagraph);
+
+        pieceTable.delete(5, 1);
+        pieceTable.resetCharacterIterator();
+        viewModel.updateParagraphList();
+        assertEquals(1, viewModel.getParagraphList().size());
+        System.err.println("LP = " + viewModel.lastParagraph);
+        System.err.println("PL = " + viewModel.getParagraphList());
+
+        assertEquals(viewModel.getParagraphList().get(0), viewModel.lastParagraph);
+
+    }
+
+    @Test
+    public void testUpdate() {
+        RichTextAreaViewModel viewModel = new RichTextAreaViewModel(this::getNextRowPosition, this::getNextTableCellPosition);
+        Document document = new Document();
+        PieceTable pieceTable = new PieceTable(document);
+        viewModel.setTextBuffer(pieceTable);
+        viewModel.updateParagraphList();
+        ObservableList<Paragraph> paragraphList1 = viewModel.getParagraphList();
+        Paragraph first1 = paragraphList1.get(0);
+
         String text = "Hello";
         pieceTable.append(text);
         pieceTable.resetCharacterIterator();
@@ -55,24 +113,28 @@ public class ParagraphTests {
         Paragraph first2 = paragraphList2.get(0);
         assertEquals(0, first2.getStart());
         assertEquals(text.length(), first2.getEnd());
-        
-        System.err.println("PL2 = "+paragraphList2);
+
+        System.err.println("PL2 = " + paragraphList2);
         pieceTable.append("\nWorld");
         pieceTable.resetCharacterIterator();
         viewModel.updateParagraphList();
         ObservableList<Paragraph> paragraphList3 = viewModel.getParagraphList();
-        System.err.println("PL3 = "+paragraphList3);
+        System.err.println("PL3 = " + paragraphList3);
         Paragraph first3 = paragraphList3.get(0);
-        int hash1 = System.identityHashCode(first1);
-     //   assertEquals(first1, first3);
+        assertEquals(first1, first3, "A new paragraph was created instead of reused");
 
-        textBuffer.delete(2, 6);
-        System.err.println("TB = "+textBuffer.getText());
+        pieceTable.delete(2, 6);
         pieceTable.resetCharacterIterator();
         viewModel.updateParagraphList();
         ObservableList<Paragraph> paragraphList4 = viewModel.getParagraphList();
-        System.err.println("PL4 = "+paragraphList4);
         assertEquals(1, paragraphList4.size());
+        assertEquals(viewModel.getParagraphList().get(0), viewModel.lastParagraph);
+    }
+
+    private void appendAndUpdate(PieceTable pieceTable, RichTextAreaViewModel viewModel, String text) {
+        pieceTable.append(text);
+        pieceTable.resetCharacterIterator();
+        viewModel.updateParagraphList();
     }
 
     private int getNextRowPosition(double x, Boolean down) {
