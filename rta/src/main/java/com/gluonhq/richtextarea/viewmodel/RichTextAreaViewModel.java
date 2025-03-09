@@ -615,7 +615,6 @@ public class RichTextAreaViewModel {
     void updateParagraphList() {
         long s0 = System.nanoTime();
         List<Integer> lineFeeds = getTextBuffer().getLineFeeds();
-        System.err.println("LF = "+lineFeeds);
         int pos = 0;
         int counter = 0;
         int oldSize = paragraphList.size();
@@ -636,7 +635,6 @@ public class RichTextAreaViewModel {
             pos = lfPos + 1;
             counter++;
         }
-        System.err.println("pos = "+pos+" and tl = "+getTextLength()+", cnt = "+counter+", oldsize = "+oldSize);
         if (pos <= getTextLength()) {
             if (counter < oldSize) {
                 lastParagraph = paragraphList.get(counter);
@@ -649,12 +647,11 @@ public class RichTextAreaViewModel {
                 paragraphList.add(lastParagraph);
             }
         }
-        System.err.println("PS = "+ paragraphList.size()+ " and lf = "+lineFeeds);
         while (paragraphList.size() > (1+lineFeeds.size())) {
             paragraphList.remove(paragraphList.size()-1);
         }
         long s1 = System.nanoTime();
-        System.err.println("UPL took " + (s1 - s0)/1000);
+//        System.err.println("UPL took " + (s1 - s0)/1000);
     }
 
     private Paragraph getParagraphAt(int start, int end) {
