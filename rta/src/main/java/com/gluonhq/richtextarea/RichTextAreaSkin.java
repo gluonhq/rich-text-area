@@ -118,7 +118,8 @@ import java.util.function.Function;
 
 import static com.gluonhq.richtextarea.viewmodel.RichTextAreaViewModel.Direction;
 import static java.util.Map.entry;
-import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static javafx.scene.input.KeyCode.A;
 import static javafx.scene.input.KeyCode.B;
 import static javafx.scene.input.KeyCode.BACK_SPACE;
@@ -149,6 +150,8 @@ import static javafx.scene.text.FontWeight.NORMAL;
 
 public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
+    static final Logger LOG = Logger.getLogger(RichTextAreaSkin.class.getName());
+    
     interface ActionBuilder extends Function<KeyEvent, ActionCmd>{}
 
     // TODO need to find a better way to find next row caret position
@@ -424,10 +427,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             getSkinnable().documentProperty.set(nv);
         } else if (nv != null) {
             // save
-            long a0 = System.nanoTime();
             getSkinnable().documentProperty.set(nv);
-            long a1 = System.nanoTime();
-            System.err.println("RTAS, dcl took " + (a1-a0)/1000);
         }
     };
 
@@ -921,7 +921,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     private void keyPressedListener(KeyEvent e) {
-        System.err.println("RTAS, pressed");
         long a0 = System.nanoTime();
         // Find an applicable action and execute it if found
         for (KeyCombination kc : INPUT_MAP.keySet()) {
@@ -932,19 +931,17 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                     execute(actionCmd);
                 }
                 e.consume();
-                        System.err.println("RTAS, pressed done");
-
                 return;
             }
         }
         long a1 = System.nanoTime();
-        System.err.println("RTAS, pressed done in "+ (a1-a0)/1000);
+        if (LOG.isLoggable(Level.FINEST)) {
+            LOG.finest("KeyPressed processed in "+ (a1-a0) + "ns");
+        }
 
     }
 
     private void keyTypedListener(KeyEvent e) {
-//        CompletableFuture.runAsync(() -> {
-        System.err.println("RTAS, typed");
         long a0 = System.nanoTime();
 
         if (isCharOnly(e)) {
@@ -968,8 +965,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             e.consume();
         }
         long a1 = System.nanoTime();
-        System.err.println("RTAS, typed done2 in "+ (a1-a0)/1000);
-//        });
     }
 
     private void populateContextMenu(boolean isEditable) {

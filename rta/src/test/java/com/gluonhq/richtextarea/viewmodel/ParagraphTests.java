@@ -79,18 +79,13 @@ public class ParagraphTests {
         viewModel.setTextBuffer(pieceTable);
         appendAndUpdate(pieceTable, viewModel, "Hello\n");
         assertEquals(2, viewModel.getParagraphList().size());
-        System.err.println("PL = " + viewModel.getParagraphList());
         assertEquals(viewModel.getParagraphList().get(1), viewModel.lastParagraph);
 
         pieceTable.delete(5, 1);
         pieceTable.resetCharacterIterator();
         viewModel.updateParagraphList();
         assertEquals(1, viewModel.getParagraphList().size());
-        System.err.println("LP = " + viewModel.lastParagraph);
-        System.err.println("PL = " + viewModel.getParagraphList());
-
         assertEquals(viewModel.getParagraphList().get(0), viewModel.lastParagraph);
-
     }
 
     @Test
@@ -113,12 +108,10 @@ public class ParagraphTests {
         assertEquals(0, first2.getStart());
         assertEquals(text.length(), first2.getEnd());
 
-        System.err.println("PL2 = " + paragraphList2);
         pieceTable.append("\nWorld");
         pieceTable.resetCharacterIterator();
         viewModel.updateParagraphList();
         ObservableList<Paragraph> paragraphList3 = viewModel.getParagraphList();
-        System.err.println("PL3 = " + paragraphList3);
         Paragraph first3 = paragraphList3.get(0);
         assertEquals(first1, first3, "A new paragraph was created instead of reused");
 

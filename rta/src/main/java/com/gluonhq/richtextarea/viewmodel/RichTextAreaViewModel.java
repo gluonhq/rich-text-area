@@ -266,13 +266,14 @@ public class RichTextAreaViewModel {
     private final ObjectProperty<Document> documentProperty = new SimpleObjectProperty<>(this, "document") {
         @Override
         protected void invalidated() {
-//            paragraphList.clear();
             Document document = get();
             if (document != null) {
                 updateParagraphList();
                 // update decorationAtParagraph once the paragraph list is ready
                 getParagraphWithCaret().ifPresent(p -> setDecorationAtParagraph(p.getDecoration()));
-            } 
+            } else {
+                paragraphList.clear();
+            }
         }
     };
     public final ObjectProperty<Document> documentProperty() {
@@ -596,22 +597,6 @@ public class RichTextAreaViewModel {
         getTextBuffer().walkFragments(onFragment, start, end);
     }
 
-    void oldupdateParagraphList() {
-        long s0 = System.nanoTime();
-        List<Integer> lineFeeds = getTextBuffer().getLineFeeds();
-        AtomicInteger pos = new AtomicInteger();
-        List<Paragraph> newParagraphList = new ArrayList<>();
-        lineFeeds.forEach(lfPos ->
-                newParagraphList.add(getParagraphAt(pos.getAndSet(lfPos), pos.incrementAndGet())));
-        if (pos.get() <= getTextLength()) {
-            lastParagraph = getParagraphAt(pos.get(), getTextLength());
-            newParagraphList.add(lastParagraph);
-        }
-        paragraphList.setAll(newParagraphList);
-        long s1 = System.nanoTime();
-        System.err.println("UPL took " + (s1 - s0)/1000);
-    }
-
     void updateParagraphList() {
         long s0 = System.nanoTime();
         List<Integer> lineFeeds = getTextBuffer().getLineFeeds();
@@ -651,7 +636,9 @@ public class RichTextAreaViewModel {
             paragraphList.remove(paragraphList.size()-1);
         }
         long s1 = System.nanoTime();
-//        System.err.println("UPL took " + (s1 - s0)/1000);
+        if (LOGGER.isLoggable(Level.FINEST)) {
+            LOGGER.finest("UpdateParagraphList took "+ (s1 - s0) + "ns");
+        }
     }
 
     private Paragraph getParagraphAt(int start, int end) {
