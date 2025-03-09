@@ -20,7 +20,6 @@ import com.gluonhq.richtextarea.model.Document;
 import com.gluonhq.richtextarea.model.Paragraph;
 import com.gluonhq.richtextarea.model.PieceTable;
 import com.gluonhq.richtextarea.model.TextBuffer;
-import com.gluonhq.richtextarea.viewmodel.RichTextAreaViewModel;
 import javafx.collections.ObservableList;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
