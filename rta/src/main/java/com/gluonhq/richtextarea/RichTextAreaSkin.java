@@ -951,8 +951,6 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                     (decoration.getGraphicType() != ParagraphDecoration.GraphicType.NONE || decoration.hasTableDecoration())) {
                     // processed via keyPressedListener
                     e.consume();
-                            System.err.println("RTAS, typed done");
-
                     return;
                 }
             }
