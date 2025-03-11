@@ -934,8 +934,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 return;
             }
         }
-        long a1 = System.nanoTime();
         if (LOG.isLoggable(Level.FINEST)) {
+            long a1 = System.nanoTime();
             LOG.finest("KeyPressed processed in "+ (a1-a0) + "ns");
         }
 
@@ -962,7 +962,10 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             }
             e.consume();
         }
-        long a1 = System.nanoTime();
+        if (LOG.isLoggable(Level.FINEST)) {
+            long a1 = System.nanoTime();
+            LOG.finest("KeyTyped processed in "+ (a1-a0) + "ns");
+        }
     }
 
     private void populateContextMenu(boolean isEditable) {

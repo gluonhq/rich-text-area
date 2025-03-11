@@ -36,7 +36,6 @@ public class ParagraphTests {
         Document document = new Document();
         PieceTable pieceTable = new PieceTable(document);
         viewModel.setTextBuffer(pieceTable);
-        TextBuffer textBuffer = viewModel.getTextBuffer();
         viewModel.updateParagraphList();
         ObservableList<Paragraph> paragraphList1 = viewModel.getParagraphList();
         assertEquals(1, paragraphList1.size());

@@ -600,11 +600,10 @@ public class RichTextAreaViewModel {
     void updateParagraphList() {
         long s0 = System.nanoTime();
         List<Integer> lineFeeds = getTextBuffer().getLineFeeds();
-        int pos = 0;
+        int start = 0;
         int counter = 0;
         int oldSize = paragraphList.size();
         for (int lfPos : lineFeeds) {
-            int start = pos;
             int end = lfPos+1;
             if (counter < oldSize) {
                 Paragraph pg = paragraphList.get(counter);
@@ -612,31 +611,31 @@ public class RichTextAreaViewModel {
                 pg.setStart(start);
                 pg.setEnd(end);
                 pg.setDecoration(pd);
-            }
-            else {
+            } else {
                 Paragraph pg = getParagraphAt(start, end);
                 paragraphList.add(pg);
             }
-            pos = lfPos + 1;
+            start = lfPos + 1;
             counter++;
         }
-        if (pos <= getTextLength()) {
+        int tl = getTextLength();
+        if (start <= tl) {
             if (counter < oldSize) {
                 lastParagraph = paragraphList.get(counter);
-                lastParagraph.setStart(pos);
-                lastParagraph.setEnd(getTextLength());
-                ParagraphDecoration pd = getTextBuffer().getParagraphDecorationAtCaret(pos);
+                lastParagraph.setStart(start);
+                lastParagraph.setEnd(tl);
+                ParagraphDecoration pd = getTextBuffer().getParagraphDecorationAtCaret(start);
                 lastParagraph.setDecoration(pd);
             } else {
-                lastParagraph = getParagraphAt(pos, getTextLength());
+                lastParagraph = getParagraphAt(start, tl);
                 paragraphList.add(lastParagraph);
             }
         }
         while (paragraphList.size() > (1+lineFeeds.size())) {
             paragraphList.remove(paragraphList.size()-1);
         }
-        long s1 = System.nanoTime();
         if (LOGGER.isLoggable(Level.FINEST)) {
+            long s1 = System.nanoTime();
             LOGGER.finest("UpdateParagraphList took "+ (s1 - s0) + "ns");
         }
     }
