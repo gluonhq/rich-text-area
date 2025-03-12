@@ -34,15 +34,15 @@ public class Paragraph {
     /**
      * Global index of the initial position of the paragraph
      */
-    private final int start;
+    private int start;
 
     /**
      * Global index of the final position of the paragraph,
      * that is defined by the position of the '\n' character
      */
-    private final int end;
+    private int end;
 
-    private final ParagraphDecoration decoration;
+    private ParagraphDecoration decoration;
 
     public Paragraph(int start, int end, ParagraphDecoration decoration) {
         this.start = start;
@@ -60,6 +60,18 @@ public class Paragraph {
 
     public ParagraphDecoration getDecoration() {
         return decoration;
+    }
+
+    public void setStart(int start) {
+        this.start = start;
+    }
+
+    public void setEnd(int end) {
+        this.end = end;
+    }
+
+    public void setDecoration(ParagraphDecoration decoration) {
+        this.decoration = decoration;
     }
 
     @Override

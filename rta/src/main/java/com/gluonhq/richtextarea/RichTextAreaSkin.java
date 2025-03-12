@@ -118,6 +118,8 @@ import java.util.function.Function;
 
 import static com.gluonhq.richtextarea.viewmodel.RichTextAreaViewModel.Direction;
 import static java.util.Map.entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static javafx.scene.input.KeyCode.A;
 import static javafx.scene.input.KeyCode.B;
 import static javafx.scene.input.KeyCode.BACK_SPACE;
@@ -148,6 +150,8 @@ import static javafx.scene.text.FontWeight.NORMAL;
 
 public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
+    static final Logger LOG = Logger.getLogger(RichTextAreaSkin.class.getName());
+    
     interface ActionBuilder extends Function<KeyEvent, ActionCmd>{}
 
     // TODO need to find a better way to find next row caret position
@@ -917,6 +921,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     private void keyPressedListener(KeyEvent e) {
+        long a0 = System.nanoTime();
         // Find an applicable action and execute it if found
         for (KeyCombination kc : INPUT_MAP.keySet()) {
             if (kc.match(e)) {
@@ -929,9 +934,16 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 return;
             }
         }
+        if (LOG.isLoggable(Level.FINEST)) {
+            long a1 = System.nanoTime();
+            LOG.finest("KeyPressed processed in "+ (a1-a0) + "ns");
+        }
+
     }
 
     private void keyTypedListener(KeyEvent e) {
+        long a0 = System.nanoTime();
+
         if (isCharOnly(e)) {
             if ("\t".equals(e.getCharacter())) {
                 ParagraphDecoration decoration = viewModel.getDecorationAtParagraph();
@@ -949,6 +961,10 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 execute(ACTION_CMD_FACTORY.insertText(e.getCharacter()));
             }
             e.consume();
+        }
+        if (LOG.isLoggable(Level.FINEST)) {
+            long a1 = System.nanoTime();
+            LOG.finest("KeyTyped processed in "+ (a1-a0) + "ns");
         }
     }
 
