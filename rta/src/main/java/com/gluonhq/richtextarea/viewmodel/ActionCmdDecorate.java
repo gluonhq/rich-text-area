@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2025, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ import javafx.beans.binding.BooleanBinding;
 import java.util.List;
 import java.util.Objects;
 
-class ActionCmdDecorate implements ActionCmd {
+class ActionCmdDecorate implements EditActionCmd {
 
     private final List<Decoration> decorations;
 
@@ -46,8 +46,13 @@ class ActionCmdDecorate implements ActionCmd {
 
     @Override
     public void apply(RichTextAreaViewModel viewModel) {
+        apply(viewModel, false);
+    }
+
+    @Override
+    public void apply(RichTextAreaViewModel viewModel, boolean skipUndo) {
         if (viewModel.isEditable()) {
-            viewModel.getCommandManager().execute(new DecorateCmd(Objects.requireNonNull(decorations)));
+            viewModel.getCommandManager().execute(new DecorateCmd(Objects.requireNonNull(decorations)), skipUndo);
         }
     }
 

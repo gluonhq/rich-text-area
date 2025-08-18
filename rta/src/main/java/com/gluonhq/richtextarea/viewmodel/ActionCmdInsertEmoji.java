@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, 2024, Gluon
+ * Copyright (c) 2023, 2025, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ import javafx.beans.binding.BooleanBinding;
 
 import java.util.Objects;
 
-class ActionCmdInsertEmoji implements ActionCmd {
+class ActionCmdInsertEmoji implements EditActionCmd {
 
     private final Emoji content;
     private final Selection selection;
@@ -47,6 +47,11 @@ class ActionCmdInsertEmoji implements ActionCmd {
 
     @Override
     public void apply(RichTextAreaViewModel viewModel) {
+        apply(viewModel, false);
+    }
+
+    @Override
+    public void apply(RichTextAreaViewModel viewModel, boolean skipUndo) {
         if (Objects.requireNonNull(viewModel).isEditable() && content != null) {
             if (selection != null) {
                 Selection newSelection = selection;
@@ -63,9 +68,9 @@ class ActionCmdInsertEmoji implements ActionCmd {
                     newSelection = new Selection(selection.getStart(), selection.getEnd() - 1);
                 }
                 viewModel.getCommandManager().execute(new SelectAndReplaceCmd(
-                        viewModel.getTextBuffer().getInternalSelection(newSelection), content));
+                        viewModel.getTextBuffer().getInternalSelection(newSelection), content), skipUndo);
             } else {
-                viewModel.getCommandManager().execute(new InsertCmd(content));
+                viewModel.getCommandManager().execute(new InsertCmd(content), skipUndo);
             }
         }
     }

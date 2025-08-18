@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2025, Gluon
+ * Copyright (c) 2025, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,35 +27,6 @@
  */
 package com.gluonhq.richtextarea.viewmodel;
 
-import com.gluonhq.richtextarea.model.Decoration;
-import javafx.beans.binding.BooleanBinding;
-
-import java.util.Objects;
-
-class ActionCmdInsertAndDecorate implements EditActionCmd {
-
-    private final String content;
-    private final Decoration decoration;
-
-    public ActionCmdInsertAndDecorate(String content, Decoration decoration) {
-        this.content = content;
-        this.decoration = decoration;
-    }
-
-    @Override
-    public void apply(RichTextAreaViewModel viewModel) {
-        apply(viewModel, false);
-    }
-
-    @Override
-    public BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
-        return viewModel.editableProperty().not();
-    }
-
-    @Override
-    public void apply(RichTextAreaViewModel viewModel, boolean skipUndo) {
-        if (viewModel.isEditable()) {
-            viewModel.getCommandManager().execute(new InsertAndDecorateTableCmd(content, Objects.requireNonNull(decoration)), skipUndo);
-        }
-    }
+public interface EditActionCmd extends ActionCmd {
+    void apply(RichTextAreaViewModel viewModel, boolean skipUndo);
 }
