@@ -29,7 +29,7 @@ package com.gluonhq.richtextarea.viewmodel;
 
 import javafx.beans.binding.BooleanBinding;
 
-class ActionCmdRemoveText implements EditActionCmd {
+class ActionCmdRemoveText implements ActionCmd {
 
     private final int caretOffset;
     private final RichTextAreaViewModel.Remove remove;

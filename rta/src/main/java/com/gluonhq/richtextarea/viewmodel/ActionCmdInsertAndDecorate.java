@@ -32,7 +32,7 @@ import javafx.beans.binding.BooleanBinding;
 
 import java.util.Objects;
 
-class ActionCmdInsertAndDecorate implements EditActionCmd {
+class ActionCmdInsertAndDecorate implements ActionCmd {
 
     private final String content;
     private final Decoration decoration;
@@ -48,14 +48,14 @@ class ActionCmdInsertAndDecorate implements EditActionCmd {
     }
 
     @Override
-    public BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
-        return viewModel.editableProperty().not();
-    }
-
-    @Override
     public void apply(RichTextAreaViewModel viewModel, boolean skipUndo) {
         if (viewModel.isEditable()) {
             viewModel.getCommandManager().execute(new InsertAndDecorateTableCmd(content, Objects.requireNonNull(decoration)), skipUndo);
         }
+    }
+
+    @Override
+    public BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
+        return viewModel.editableProperty().not();
     }
 }

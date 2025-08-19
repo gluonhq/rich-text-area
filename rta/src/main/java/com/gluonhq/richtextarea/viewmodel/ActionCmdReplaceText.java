@@ -31,7 +31,7 @@ import javafx.beans.binding.BooleanBinding;
 
 import java.util.Objects;
 
-class ActionCmdReplaceText implements EditActionCmd {
+class ActionCmdReplaceText implements ActionCmd {
 
     private final String content;
 

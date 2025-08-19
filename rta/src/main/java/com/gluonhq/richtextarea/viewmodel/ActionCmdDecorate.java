@@ -36,7 +36,7 @@ import javafx.beans.binding.BooleanBinding;
 import java.util.List;
 import java.util.Objects;
 
-class ActionCmdDecorate implements EditActionCmd {
+class ActionCmdDecorate implements ActionCmd {
 
     private final List<Decoration> decorations;
 

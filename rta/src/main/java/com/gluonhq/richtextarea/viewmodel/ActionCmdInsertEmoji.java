@@ -33,7 +33,7 @@ import javafx.beans.binding.BooleanBinding;
 
 import java.util.Objects;
 
-class ActionCmdInsertEmoji implements EditActionCmd {
+class ActionCmdInsertEmoji implements ActionCmd {
 
     private final Emoji content;
     private final Selection selection;

@@ -33,7 +33,7 @@ import javafx.beans.binding.BooleanBinding;
 
 import java.util.Objects;
 
-public class ActionCmdRemoveExtremesAndDecorate implements EditActionCmd {
+public class ActionCmdRemoveExtremesAndDecorate implements ActionCmd {
 
     private final Selection selection;
     private final Decoration decoration;

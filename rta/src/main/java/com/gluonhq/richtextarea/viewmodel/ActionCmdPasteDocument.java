@@ -33,7 +33,7 @@ import javafx.beans.binding.BooleanBinding;
 
 import java.util.Objects;
 
-class ActionCmdPasteDocument implements EditActionCmd {
+class ActionCmdPasteDocument implements ActionCmd {
 
     private final Document document;
 

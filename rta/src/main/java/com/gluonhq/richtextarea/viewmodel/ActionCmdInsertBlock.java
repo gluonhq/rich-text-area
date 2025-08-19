@@ -29,12 +29,11 @@ package com.gluonhq.richtextarea.viewmodel;
 
 import com.gluonhq.richtextarea.Selection;
 import com.gluonhq.richtextarea.model.Block;
-import com.gluonhq.richtextarea.model.TextBuffer;
 import javafx.beans.binding.BooleanBinding;
 
 import java.util.Objects;
 
-class ActionCmdInsertBlock implements EditActionCmd {
+class ActionCmdInsertBlock implements ActionCmd {
 
     private final Block content;
     private final Selection selection;
@@ -50,11 +49,6 @@ class ActionCmdInsertBlock implements EditActionCmd {
     }
 
     @Override
-    public BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
-        return viewModel.editableProperty().not();
-    }
-
-    @Override
     public void apply(RichTextAreaViewModel viewModel, boolean skipUndo) {
         if (Objects.requireNonNull(viewModel).isEditable() && content != null) {
             if (selection != null) {
@@ -64,5 +58,10 @@ class ActionCmdInsertBlock implements EditActionCmd {
                 viewModel.getCommandManager().execute(new InsertCmd(content), skipUndo);
             }
         }
+    }
+
+    @Override
+    public BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
+        return viewModel.editableProperty().not();
     }
 }

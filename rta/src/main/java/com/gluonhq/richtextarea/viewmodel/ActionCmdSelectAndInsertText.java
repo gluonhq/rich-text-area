@@ -32,7 +32,7 @@ import javafx.beans.binding.BooleanBinding;
 
 import java.util.Objects;
 
-class ActionCmdSelectAndInsertText implements EditActionCmd {
+class ActionCmdSelectAndInsertText implements ActionCmd {
 
     private final String content;
     private final Selection selection;
