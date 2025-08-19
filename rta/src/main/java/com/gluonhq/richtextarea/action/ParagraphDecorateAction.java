@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2025, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,14 @@ public class ParagraphDecorateAction<T> extends DecorateAction<T> {
     public ParagraphDecorateAction(RichTextArea control,
                                    ObjectProperty<T> valueProperty, Function<ParagraphDecoration, T> valueFunction,
                                    BiFunction<ParagraphDecoration.Builder, T, ParagraphDecoration> builderTFunction) {
-        super(control, valueProperty);
+        this(control, valueProperty, valueFunction, builderTFunction, false);
+    }
+
+    public ParagraphDecorateAction(RichTextArea control,
+                                   ObjectProperty<T> valueProperty, Function<ParagraphDecoration, T> valueFunction,
+                                   BiFunction<ParagraphDecoration.Builder, T, ParagraphDecoration> builderTFunction,
+                                   boolean skipUndo) {
+        super(control, valueProperty, skipUndo);
         this.function = valueFunction;
         this.builderTFunction = builderTFunction;
     }
@@ -62,7 +69,7 @@ public class ParagraphDecorateAction<T> extends DecorateAction<T> {
                 }
                 ParagraphDecoration newParagraphDecoration = builderTFunction.apply(builder, nv);
                 Platform.runLater(() ->  {
-                    ACTION_CMD_FACTORY.decorate(newParagraphDecoration).apply(viewModel);
+                    ACTION_CMD_FACTORY.decorate(newParagraphDecoration).apply(viewModel, skipUndo);
                     control.requestFocus();
                 });
                 updating = false;
