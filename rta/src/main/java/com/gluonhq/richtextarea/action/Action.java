@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2025, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,8 @@ import javafx.event.ActionEvent;
 public interface Action {
 
     void execute(ActionEvent event);
+
+    void execute(ActionEvent event, boolean skipUndo);
 
     ReadOnlyBooleanProperty disabledProperty();
 

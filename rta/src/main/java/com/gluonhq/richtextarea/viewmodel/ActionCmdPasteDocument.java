@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Gluon
+ * Copyright (c) 2024, 2025, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,8 +43,13 @@ class ActionCmdPasteDocument implements ActionCmd {
 
     @Override
     public void apply(RichTextAreaViewModel viewModel) {
+        apply(viewModel, false);
+    }
+
+    @Override
+    public void apply(RichTextAreaViewModel viewModel, boolean skipUndo) {
         if (viewModel.isEditable()) {
-            viewModel.getCommandManager().execute(new PasteDocumentCmd(Objects.requireNonNull(document)));
+            viewModel.getCommandManager().execute(new PasteDocumentCmd(Objects.requireNonNull(document)), skipUndo);
         }
     }
 
