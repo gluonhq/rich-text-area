@@ -72,6 +72,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -664,6 +665,13 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         return (ObjectProperty<Paint>) promptTextFill;
     }
 
+    private final DoubleProperty fullHeightProperty = new SimpleDoubleProperty(this, "fullHeight") {
+        @Override
+        protected void invalidated() {
+            getSkinnable().fullHeightProperty.setValue(get() + getSkinnable().getPadding().getTop() + getSkinnable().getPadding().getBottom());
+        }
+    };
+
     protected RichTextAreaSkin(final RichTextArea control) {
         super(control);
         resources = ResourceBundle.getBundle("com.gluonhq.richtextarea.rich-text-area");
@@ -825,6 +833,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             viewModel.resetCharacterIterator();
             // this ensures changes in decoration are applied:
             paragraphListView.updateLayout();
+            computeFullHeight();
 
             if (nonTextNodesCount != nonTextNodes.get()) {
                 // when number of images changes, caret
@@ -966,6 +975,23 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             long a1 = System.nanoTime();
             LOG.finest("KeyTyped processed in "+ (a1-a0) + "ns");
         }
+    }
+
+    private void computeFullHeight() {
+        fullHeightProperty.set(0);
+        RichListCell cell = new RichListCell(RichTextAreaSkin.this);
+        double rtaWidth = getSkinnable().prefWidth(-1);
+        Scene scene = new Scene(cell, rtaWidth, 1000);
+        if (getSkinnable().getScene() != null) {
+            scene.getStylesheets().setAll(getSkinnable().getScene().getStylesheets());
+        }
+        paragraphListView.getItems().forEach(item -> {
+            cell.updateItem(item, false);
+            cell.applyCss();
+            cell.layout();
+            double cellHeight = cell.prefHeight(rtaWidth);
+            fullHeightProperty.set(fullHeightProperty.get() + cellHeight);
+        });
     }
 
     private void populateContextMenu(boolean isEditable) {

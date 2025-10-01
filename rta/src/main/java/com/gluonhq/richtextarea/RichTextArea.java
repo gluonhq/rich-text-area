@@ -37,6 +37,8 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -108,6 +110,18 @@ public class RichTextArea extends Control {
     }
     public final Document getDocument() {
        return documentProperty.get();
+    }
+
+    // fullHeightProperty
+    /**
+     * Returns the total height of the RichTextArea that allows showing all the content, without vertical scrollbars.
+     */
+    final ReadOnlyDoubleWrapper fullHeightProperty = new ReadOnlyDoubleWrapper(this, "fullHeight");
+    public final ReadOnlyDoubleProperty fullHeightProperty() {
+       return fullHeightProperty.getReadOnlyProperty();
+    }
+    public final double getFullHeight() {
+       return fullHeightProperty.get();
     }
 
     // autoSaveProperty
