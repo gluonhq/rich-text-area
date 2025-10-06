@@ -27,7 +27,14 @@ This document provides an overview of the architecture of the **RichTextArea** c
 - **Undo/Redo System**  
   - `CmdManager`: Manages commands and undo/redo stacks  
 
-### 4. Utilities
+### 4. Action Layer
+The **Action Layer** provides **abstraction and extensibility** — developers can register custom actions or override existing ones without touching the model or UI internals.
+
+- **Action** → Represents an executable command, such as `Bold`, `Italic`, `InsertImage`, or `Undo`
+- **ActionManager** → Central registry to get different types of `Action` instances
+- **Integration with CmdManager** → Each executed action is wrapped as a `Command` to support undo/redo
+
+### 5. Utilities
 - **SmartTimer**: Scheduled UI and background tasks
 - **Tools**: Helper utilities for formatting, validation, etc.
 - **Extensibility Hooks**: Factories & utilities for customization
