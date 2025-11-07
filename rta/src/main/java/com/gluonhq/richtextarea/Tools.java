@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023, Gluon
+ * Copyright (c) 2022, 2025, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,8 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextBoundsType;
 
 import java.util.regex.Pattern;
+
+import static com.gluonhq.richtextarea.RichTextAreaSkin.DEFAULT_FONT_SIZE;
 
 public class Tools {
 
@@ -120,6 +122,16 @@ public class Tools {
     public static boolean isURL(String text) {
         if (text == null) return false;
         return URL_PATTERN.matcher(text).matches();
+    }
+
+    private static Text noWidthText;
+
+    public static Text noWidthText() {
+        if (noWidthText == null) {
+            noWidthText = new Text(TextBuffer.ZERO_WIDTH_TEXT);
+            noWidthText.setFont(Font.font(DEFAULT_FONT_SIZE));
+        }
+        return noWidthText;
     }
 
 }

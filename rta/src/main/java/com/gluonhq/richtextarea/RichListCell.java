@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2024, Gluon
+ * Copyright (c) 2022, 2025, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,11 +66,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
+import static com.gluonhq.richtextarea.RichTextAreaSkin.DEFAULT_FONT_SIZE;
 import static com.gluonhq.richtextarea.model.TableDecoration.TABLE_SEPARATOR;
 
 class RichListCell extends ListCell<Paragraph> {
 
-    private static final Font MIN_LF_FONT = Font.font(10);
+    private static final Font MIN_LF_FONT = Font.font(DEFAULT_FONT_SIZE);
 
     private final static Map<String, Color> COLOR_MAP = new HashMap<>();
 
@@ -81,7 +82,6 @@ class RichListCell extends ListCell<Paragraph> {
         this.richTextAreaSkin = richTextAreaSkin;
         // controls spacing between paragraphs
         // (it is also needed to avoid Font 13 for text, even if it is graphic only)
-        // TODO: control paragraph spacing
         setFont(MIN_LF_FONT);
 
         paragraphTile = new ParagraphTile(richTextAreaSkin);
@@ -248,9 +248,7 @@ class RichListCell extends ListCell<Paragraph> {
 
     private Text buildText(String content, TextDecoration decoration) {
         if ("\n".equals(content)) {
-            Text lfText = new Text(TextBuffer.ZERO_WIDTH_TEXT);
-            lfText.setFont(MIN_LF_FONT);
-            return lfText;
+            return Tools.noWidthText();
         }
         Objects.requireNonNull(decoration);
         Text text = new Text(Objects.requireNonNull(content).replace("\n", ""));
