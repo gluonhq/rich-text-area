@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2024, Gluon
+ * Copyright (c) 2022, 2025, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,6 +78,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.gluonhq.richtextarea.RichTextAreaSkin.DEFAULT_FONT_SIZE;
 import static com.gluonhq.richtextarea.model.TableDecoration.TABLE_SEPARATOR;
 
 class ParagraphTile extends HBox {
@@ -521,7 +522,7 @@ class ParagraphTile extends HBox {
                     .map(Text.class::cast)
                     .findFirst()
                     .orElse(null);
-            return Font.font(textNode != null ? textNode.getFont().getSize() : 14d);
+            return Font.font(textNode != null ? textNode.getFont().getSize() : DEFAULT_FONT_SIZE);
         }
 
         int getNextRowPosition(double x, boolean down) {
@@ -566,7 +567,7 @@ class ParagraphTile extends HBox {
                                 .map(MoveTo::getX)
                                 .orElse(0d);
                         // Default caret size for font size 14 is 18.49
-                        double caretSize = 18.0;
+                        double caretSize = DEFAULT_FONT_SIZE * 1.2;
                         if (viewModel.getDecorationAtCaret() instanceof TextDecoration) {
                             TextDecoration td = (TextDecoration) viewModel.getDecorationAtCaret();
                             caretSize = td.getFontSize() * 1.2;

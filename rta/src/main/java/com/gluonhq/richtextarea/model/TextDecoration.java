@@ -33,6 +33,7 @@ import javafx.scene.text.FontWeight;
 
 import java.util.Objects;
 
+import static com.gluonhq.richtextarea.RichTextAreaSkin.DEFAULT_FONT_SIZE;
 import static com.gluonhq.richtextarea.Tools.getFirstLetter;
 
 /**
@@ -80,7 +81,7 @@ public class TextDecoration implements Decoration {
     /**
      * Gets the font size of the text.
      *
-     * @defaultValue 14
+     * @defaultValue {@link com.gluonhq.richtextarea.RichTextAreaSkin#DEFAULT_FONT_SIZE}
      *
      * @return the font size of the text
      */
@@ -242,7 +243,7 @@ public class TextDecoration implements Decoration {
             foreground = "black";
             background = "transparent";
             fontFamily = "System";
-            fontSize = 14.0;
+            fontSize = DEFAULT_FONT_SIZE;
             fontPosture = FontPosture.REGULAR;
             fontWeight = FontWeight.NORMAL;
             strikethrough = false;
