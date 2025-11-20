@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2024, Gluon
+ * Copyright (c) 2022, 2025, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -157,6 +157,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     // TODO need to find a better way to find next row caret position
     private final RichTextAreaViewModel viewModel = new RichTextAreaViewModel(this::getNextRowPosition, this::getNextTableCellPosition);
+
+    public static final double DEFAULT_FONT_SIZE = 14;
 
     private static final ActionCmdFactory ACTION_CMD_FACTORY = new ActionCmdFactory();
 
@@ -801,14 +803,22 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         Decoration decorationAtCaret = viewModel.getDecorationAtCaret();
         if (decorationAtCaret instanceof TextDecoration) {
             TextDecoration textDecoration = (TextDecoration) decorationAtCaret;
-            return Font.font(
+
+            int hash = Objects.hash(
+                    textDecoration.getFontFamily(),
+                    textDecoration.getFontWeight(),
+                    textDecoration.getFontPosture(),
+                    textDecoration.getFontSize());
+
+            return getFontCache().computeIfAbsent(hash,
+                    h -> Font.font(
                     textDecoration.getFontFamily(),
                     textDecoration.getFontWeight(),
                     textDecoration.getFontPosture(),
                     textDecoration.getFontSize()
-            );
+            ));
         }
-        return Font.font(14);
+        return Font.font(DEFAULT_FONT_SIZE);
     }
 
     private void updatePromptNodeLocation() {
