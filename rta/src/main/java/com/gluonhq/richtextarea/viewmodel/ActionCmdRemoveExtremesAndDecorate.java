@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Gluon
+ * Copyright (c) 2024, 2025, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,11 @@ public class ActionCmdRemoveExtremesAndDecorate implements ActionCmd {
 
     @Override
     public void apply(RichTextAreaViewModel viewModel) {
+        apply(viewModel, false);
+    }
+
+    @Override
+    public void apply(RichTextAreaViewModel viewModel, boolean skipUndo) {
         if (viewModel.isEditable()) {
 
             Selection internalSelection = viewModel.getTextBuffer().getInternalSelection(selection);
@@ -59,7 +64,7 @@ public class ActionCmdRemoveExtremesAndDecorate implements ActionCmd {
             // Update selection accordingly, removing from the original selection the length of the
             // removed last unit (based on the length of the text)
             Selection newSelection = new Selection(internalSelection.getStart(), Math.min(internalSelection.getEnd(), viewModel.getTextLength()));
-            viewModel.getCommandManager().execute(new RemoveStartAndDecorateCmd(newSelection, decoration));
+            viewModel.getCommandManager().execute(new RemoveStartAndDecorateCmd(newSelection, decoration), skipUndo);
         }
     }
 
