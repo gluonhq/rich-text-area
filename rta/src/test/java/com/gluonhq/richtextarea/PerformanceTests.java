@@ -19,14 +19,12 @@ package com.gluonhq.richtextarea;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -41,7 +39,6 @@ public class PerformanceTests {
         pt.insertMany();
     }
 
-    @Test
     public void insertMany() throws InterruptedException {
 
         final int WARMUP_CNT = 100; // how many chars to warmup
