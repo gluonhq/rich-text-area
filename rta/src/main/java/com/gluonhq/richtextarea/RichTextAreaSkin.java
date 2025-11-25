@@ -960,7 +960,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     }
 
-    private void keyTypedListener(KeyEvent e) {
+    // not private for testing
+    void keyTypedListener(KeyEvent e) {
         long a0 = System.nanoTime();
 
         if (isCharOnly(e)) {
