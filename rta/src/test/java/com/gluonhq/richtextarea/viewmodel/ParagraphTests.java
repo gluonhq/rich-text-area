@@ -133,7 +133,7 @@ public class ParagraphTests {
         viewModel.setTextBuffer(pieceTable);
         viewModel.updateParagraphList();
         ObservableList<Paragraph> paragraphList1 = viewModel.getParagraphList();
-        assertEquals(1,paragraphList1.size());
+        assertEquals(1, paragraphList1.size());
         Paragraph first1 = paragraphList1.get(0);
         assertEquals(0, first1.getStart());
         assertEquals(0, first1.getEnd());
@@ -142,7 +142,7 @@ public class ParagraphTests {
         pieceTable.resetCharacterIterator();
         viewModel.updateParagraphList();
         ObservableList<Paragraph> paragraphList3 = viewModel.getParagraphList();
-        assertEquals(3,paragraphList3.size());
+        assertEquals(3, paragraphList3.size());
         assertEquals(6, paragraphList3.get(0).getEnd());
 
         pieceTable.insert("Z", 1);

@@ -648,7 +648,7 @@ public class RichTextAreaViewModel {
             paragraph.setEnd(end);
             dirty = true;
         }
-        if (!pd.equals(paragraph.getDecoration())) {
+        if (!Objects.equals(pd, paragraph.getDecoration())) {
             paragraph.setDecoration(pd);
             dirty = true;
         }
