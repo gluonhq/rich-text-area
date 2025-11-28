@@ -603,13 +603,13 @@ public class RichTextAreaViewModel {
         int start = 0;
         int counter = 0;
         int oldSize = paragraphList.size();
-        List<Paragraph> dirtyList = new ArrayList<>();
         for (int lfPos : lineFeeds) {
             int end = lfPos+1;
             if (counter < oldSize) {
                 Paragraph pg = paragraphList.get(counter);
-                boolean dirty = updateParagraph(pg, start, end, getTextBuffer().getParagraphDecorationAtCaret(start));
-                if (dirty) paragraphList.set(counter, pg);
+                if (updateParagraph(pg, start, end, getTextBuffer().getParagraphDecorationAtCaret(start))) {
+                    paragraphList.set(counter, pg);
+                }
             } else {
                 Paragraph pg = getParagraphAt(start, end);
                 paragraphList.add(pg);
@@ -621,8 +621,9 @@ public class RichTextAreaViewModel {
         if (start <= tl) {
             if (counter < oldSize) {
                 lastParagraph = paragraphList.get(counter);
-                boolean dirty = updateParagraph(lastParagraph, start, tl, getTextBuffer().getParagraphDecorationAtCaret(start));
-                if (dirty) paragraphList.set(counter, lastParagraph);
+                if (updateParagraph(lastParagraph, start, tl, getTextBuffer().getParagraphDecorationAtCaret(start))) {
+                    paragraphList.set(counter, lastParagraph);
+                }
             } else {
                 lastParagraph = getParagraphAt(start, tl);
                 paragraphList.add(lastParagraph);
@@ -637,12 +638,6 @@ public class RichTextAreaViewModel {
         }
     }
 
-    private boolean isParagraphDirty(Paragraph paragraph, int start, int end, ParagraphDecoration pd) {
-        return ((paragraph.getStart() != start) ||
-                (paragraph.getEnd() != end) ||
-                (paragraph.getDecoration() != pd));
-    }
-
     private boolean updateParagraph(Paragraph paragraph, int start, int end, ParagraphDecoration pd) {
         boolean dirty = false;
         if (paragraph.getStart() != start) {
@@ -653,7 +648,7 @@ public class RichTextAreaViewModel {
             paragraph.setEnd(end);
             dirty = true;
         }
-        if (pd.equals(paragraph.getDecoration())) {
+        if (!pd.equals(paragraph.getDecoration())) {
             paragraph.setDecoration(pd);
             dirty = true;
         }
