@@ -19,7 +19,10 @@ package com.gluonhq.richtextarea.viewmodel;
 import com.gluonhq.richtextarea.model.Document;
 import com.gluonhq.richtextarea.model.Paragraph;
 import com.gluonhq.richtextarea.model.PieceTable;
-import com.gluonhq.richtextarea.model.TextBuffer;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
@@ -120,6 +123,48 @@ public class ParagraphTests {
         ObservableList<Paragraph> paragraphList4 = viewModel.getParagraphList();
         assertEquals(1, paragraphList4.size());
         assertEquals(viewModel.getParagraphList().get(0), viewModel.lastParagraph);
+    }
+
+    @Test
+    public void testInternalUpdate() throws InterruptedException {
+        RichTextAreaViewModel viewModel = new RichTextAreaViewModel(this::getNextRowPosition, this::getNextTableCellPosition);
+        Document document = new Document();
+        PieceTable pieceTable = new PieceTable(document);
+        viewModel.setTextBuffer(pieceTable);
+        viewModel.updateParagraphList();
+        ObservableList<Paragraph> paragraphList1 = viewModel.getParagraphList();
+        assertEquals(1, paragraphList1.size());
+        Paragraph first1 = paragraphList1.get(0);
+        assertEquals(0, first1.getStart());
+        assertEquals(0, first1.getEnd());
+
+        pieceTable.append("Hello\nWorld\nLine 3");
+        pieceTable.resetCharacterIterator();
+        viewModel.updateParagraphList();
+        ObservableList<Paragraph> paragraphList3 = viewModel.getParagraphList();
+        assertEquals(3, paragraphList3.size());
+        assertEquals(6, paragraphList3.get(0).getEnd());
+
+        pieceTable.insert("Z", 1);
+        pieceTable.resetCharacterIterator();
+        viewModel.updateParagraphList();
+        assertEquals(7, paragraphList3.get(0).getEnd());
+
+        CountDownLatch cdl = new CountDownLatch(1);
+        AtomicInteger ai = new AtomicInteger(0);
+        paragraphList3.addListener(new ListChangeListener<Paragraph>() {
+            @Override
+            public void onChanged(ListChangeListener.Change<? extends Paragraph> change) {
+                ai.incrementAndGet();
+                cdl.countDown();
+            }
+        });
+        pieceTable.insert("Y", 10);
+        pieceTable.resetCharacterIterator();
+        viewModel.updateParagraphList();
+        boolean await = cdl.await(1, TimeUnit.SECONDS);
+        assertTrue(await, "No callback received after making changes to paragraphs");
+        assertEquals(2, ai.get(), "paragraph 2 and 3 should be changed, but we noticed "+ai.get()+" changes");
     }
 
     private void appendAndUpdate(PieceTable pieceTable, RichTextAreaViewModel viewModel, String text) {
