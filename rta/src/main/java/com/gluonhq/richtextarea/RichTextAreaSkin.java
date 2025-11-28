@@ -989,6 +989,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     private void computeFullHeight() {
+        // TODO
     }
 
     private void populateContextMenu(boolean isEditable) {
