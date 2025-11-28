@@ -989,21 +989,22 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     private void computeFullHeight() {
-        RichListCell cell = new RichListCell(RichTextAreaSkin.this);
-        double rtaWidth = getSkinnable().prefWidth(-1);
-        Scene scene = new Scene(cell, rtaWidth, 1000);
-        if (getSkinnable().getScene() != null) {
-            scene.getStylesheets().setAll(getSkinnable().getScene().getStylesheets());
+        ObservableList<Paragraph> items = paragraphListView.getItems();
+        int psize = items.size();
+        int unknown = 0;
+        double total = 0.;
+        for (Paragraph p : items) {
+            double ph = p.getPreferredHeight();
+            if (ph < 0) {
+                unknown++;
+            } else {
+                total = total + ph;
+            }
         }
-        double fullHeight = paragraphListView.getItems().stream()
-                .mapToDouble(item -> {
-                    cell.updateItem(item, false);
-                    cell.applyCss();
-                    cell.layout();
-                    return cell.prefHeight(rtaWidth);
-                })
-                .sum();
-        fullHeightProperty.set(fullHeight);
+        if (unknown > 0) {
+            total = total * psize / (psize - unknown);
+        }
+        fullHeightProperty.set(total);
     }
 
     private void populateContextMenu(boolean isEditable) {
