@@ -603,14 +603,13 @@ public class RichTextAreaViewModel {
         int start = 0;
         int counter = 0;
         int oldSize = paragraphList.size();
+        List<Paragraph> dirtyList = new ArrayList<>();
         for (int lfPos : lineFeeds) {
             int end = lfPos+1;
             if (counter < oldSize) {
                 Paragraph pg = paragraphList.get(counter);
-                ParagraphDecoration pd = getTextBuffer().getParagraphDecorationAtCaret(start);
-                pg.setStart(start);
-                pg.setEnd(end);
-                pg.setDecoration(pd);
+                boolean dirty = updateParagraph(pg, start, end, getTextBuffer().getParagraphDecorationAtCaret(start));
+                if (dirty) paragraphList.set(counter, pg);
             } else {
                 Paragraph pg = getParagraphAt(start, end);
                 paragraphList.add(pg);
@@ -622,10 +621,8 @@ public class RichTextAreaViewModel {
         if (start <= tl) {
             if (counter < oldSize) {
                 lastParagraph = paragraphList.get(counter);
-                lastParagraph.setStart(start);
-                lastParagraph.setEnd(tl);
-                ParagraphDecoration pd = getTextBuffer().getParagraphDecorationAtCaret(start);
-                lastParagraph.setDecoration(pd);
+                boolean dirty = updateParagraph(lastParagraph, start, tl, getTextBuffer().getParagraphDecorationAtCaret(start));
+                if (dirty) paragraphList.set(counter, lastParagraph);
             } else {
                 lastParagraph = getParagraphAt(start, tl);
                 paragraphList.add(lastParagraph);
@@ -638,6 +635,29 @@ public class RichTextAreaViewModel {
             long s1 = System.nanoTime();
             LOGGER.finest("UpdateParagraphList took "+ (s1 - s0) + "ns");
         }
+    }
+
+    private boolean isParagraphDirty(Paragraph paragraph, int start, int end, ParagraphDecoration pd) {
+        return ((paragraph.getStart() != start) ||
+                (paragraph.getEnd() != end) ||
+                (paragraph.getDecoration() != pd));
+    }
+
+    private boolean updateParagraph(Paragraph paragraph, int start, int end, ParagraphDecoration pd) {
+        boolean dirty = false;
+        if (paragraph.getStart() != start) {
+            paragraph.setStart(start);
+            dirty = true;
+        }
+        if (paragraph.getEnd() != end) {
+            paragraph.setEnd(end);
+            dirty = true;
+        }
+        if (pd.equals(paragraph.getDecoration())) {
+            paragraph.setDecoration(pd);
+            dirty = true;
+        }
+        return dirty;
     }
 
     private Paragraph getParagraphAt(int start, int end) {

@@ -62,16 +62,31 @@ public class Paragraph {
         return decoration;
     }
 
-    public void setStart(int start) {
-        this.start = start;
+    public int setStart(int start) {
+        if (start != this.start) {
+            int old = this.start;
+            this.start = start;
+            return old;
+        }
+        return this.start;
     }
 
-    public void setEnd(int end) {
-        this.end = end;
+    public int setEnd(int end) {
+        if (end != this.end) {
+            int old = this.end;
+            this.end = end;
+            return old;
+        }
+        return this.end;
     }
 
-    public void setDecoration(ParagraphDecoration decoration) {
-        this.decoration = decoration;
+    public ParagraphDecoration setDecoration(ParagraphDecoration decoration) {
+        if (decoration != this.decoration) {
+            ParagraphDecoration old = this.decoration;
+            this.decoration = decoration;
+            return old;
+        }
+        return this.decoration;
     }
 
     @Override
