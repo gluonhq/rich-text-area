@@ -18,7 +18,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: 22
+          java-version: 25
           distribution: 'oracle'
           cache: 'maven'
           server-id: central
