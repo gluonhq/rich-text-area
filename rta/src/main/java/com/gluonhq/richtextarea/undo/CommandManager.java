@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2025, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,9 +52,15 @@ public class CommandManager<T> {
     }
 
     public void execute(AbstractCommand<T> cmd) {
+        execute(cmd, false);
+    }
+
+    public void execute(AbstractCommand<T> cmd, boolean skipUndo) {
         Objects.requireNonNull(cmd).execute(context);
-        undoStack.push(cmd);
-        redoStack.clear();
+        if (!skipUndo) {
+            undoStack.push(cmd);
+            redoStack.clear();
+        }
         end();
         LOGGER.log(Level.FINE, "Execute: " + this);
     }
