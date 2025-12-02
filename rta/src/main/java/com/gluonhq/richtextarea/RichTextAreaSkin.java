@@ -87,6 +87,8 @@ import javafx.scene.image.Image;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.InputMethodEvent;
+import javafx.scene.input.InputMethodRequests;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
@@ -471,6 +473,9 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final ChangeListener<Boolean> tableAllowedListener;
     private final ChangeListener<EmojiSkinTone> skinToneChangeListener;
 
+    private final EventHandler<InputMethodEvent> inputMethodTextChangedHandler = this::handleInputMethodEvent;
+    private final InputMethodRequests inputMethodRequests = createIMRequests();
+
     private final ResourceBundle resources;
 
     private class RichVirtualFlow extends VirtualFlow<ListCell<Paragraph>> {
@@ -731,6 +736,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         getSkinnable().tableAllowedProperty().removeListener(tableAllowedListener);
         getSkinnable().setOnKeyPressed(null);
         getSkinnable().setOnKeyTyped(null);
+        getSkinnable().setInputMethodRequests(null);
+        getSkinnable().setOnInputMethodTextChanged(null);
         getSkinnable().widthProperty().removeListener(controlPrefWidthListener);
         getSkinnable().focusedProperty().removeListener(focusListener);
         getSkinnable().removeEventHandler(DragEvent.ANY, dndHandler);
@@ -778,6 +785,9 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         viewModel.setTableAllowed(getSkinnable().isTableAllowed());
         getSkinnable().setOnKeyPressed(this::keyPressedListener);
         getSkinnable().setOnKeyTyped(this::keyTypedListener);
+        // Note both setOnInputMethodTextChanged() and setInputMethodRequests() are required for IME to work
+        getSkinnable().setOnInputMethodTextChanged(inputMethodTextChangedHandler);
+        getSkinnable().setInputMethodRequests(inputMethodRequests);
         getSkinnable().widthProperty().addListener(controlPrefWidthListener);
         getSkinnable().focusedProperty().addListener(focusListener);
         getSkinnable().addEventHandler(DragEvent.ANY, dndHandler);
@@ -850,7 +860,11 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
                 requestLayout();
                 nonTextNodesCount = nonTextNodes.get();
             }
-            getSkinnable().requestFocus();
+            if (getSkinnable().getScene() != null && getSkinnable().getScene().getWindow() != null &&
+                    getSkinnable().getScene().getFocusOwner() != null) {
+                // don't request focus if scene doesn't have a focus owner yet,
+                getSkinnable().requestFocus();
+            }
         } finally {
             objectsCacheEvictionTimer.start();
         }
@@ -990,6 +1004,43 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
 
     private void computeFullHeight() {
         // TODO
+    }
+
+    private InputMethodRequests createIMRequests() {
+        // dummy implementation for now
+        return new InputMethodRequests() {
+            @Override
+            public Point2D getTextLocation(int offset) {
+                return Point2D.ZERO;
+            }
+
+            @Override
+            public String getSelectedText() {
+                return null;
+            }
+
+            @Override
+            public int getLocationOffset(int x, int y) {
+                return 0;
+            }
+
+            @Override
+            public void cancelLatestCommittedText() {
+            }
+        };
+    }
+
+    private void handleInputMethodEvent(InputMethodEvent event) {
+        final RichTextArea control = getSkinnable();
+        if (control.isEditable() && !control.isDisabled()) {
+            // Insert committed text
+            String committed = event.getCommitted();
+            if (!committed.isEmpty()) {
+                control.setOnInputMethodTextChanged(null);
+                execute(ACTION_CMD_FACTORY.insertText(committed));
+                control.setOnInputMethodTextChanged(inputMethodTextChangedHandler);
+            }
+        }
     }
 
     private void populateContextMenu(boolean isEditable) {
