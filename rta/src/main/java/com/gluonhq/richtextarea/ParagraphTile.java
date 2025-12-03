@@ -217,9 +217,9 @@ class ParagraphTile extends HBox {
         graphicBox.getChildren().add(graphicNode);
 
         double nodePrefWidth = 0d, nodePrefHeight = 0d;
-         if (graphicNode instanceof Label) {
-            Label numberedListLabel = (Label) graphicNode;
-            String text = numberedListLabel.getText();
+        if (graphicNode instanceof Label || graphicNode instanceof Text) {
+            final Node node = graphicNode;
+            final String text = node instanceof Label ? ((Label) node).getText() : ((Text) node).getText();
             if (text != null) {
                 if (text.contains("#")) {
                     // numbered list
@@ -237,15 +237,25 @@ class ParagraphTile extends HBox {
                             })
                             .filter(p -> paragraph.equals(p))
                             .findFirst()
-                            .ifPresent(p ->
-                                    numberedListLabel.setText(text.replace("#", "" + ordinal.get())));
+                            .ifPresent(p -> {
+                                String replace = text.replace("#", "" + ordinal.get());
+                                if (node instanceof Label) {
+                                    ((Label) node).setText(replace);
+                                } else {
+                                    ((Text) node).setText(replace);
+                                }
+                            });
                 }
-
+                String nodeText = node instanceof Label ? ((Label) node).getText() : ((Text) node).getText();
                 Font font = layer.getFont();
-                numberedListLabel.setFont(font);
-                double w = Tools.computeStringWidth(font, numberedListLabel.getText());
+                if (node instanceof Label) {
+                    ((Label) node).setFont(font);
+                } else {
+                    ((Text) node).setFont(font);
+                }
+                double w = Tools.computeStringWidth(font, nodeText);
                 nodePrefWidth = Math.max(w + 1, INDENT_PADDING);
-                nodePrefHeight = Tools.computeStringHeight(font, numberedListLabel.getText());
+                nodePrefHeight = Tools.computeStringHeight(font, nodeText);
             }
         } else {
             nodePrefWidth = Math.max(graphicNode.prefWidth(-1), INDENT_PADDING);
