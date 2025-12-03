@@ -14,12 +14,12 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>11</maven.compiler.release>
+        <maven.compiler.release>21</maven.compiler.release>
         <javafx.version>23.0.1</javafx.version>
         <gpg.plugin.version>3.2.7</gpg.plugin.version>
         <emoji.version>1.1.0</emoji.version>
         <test.headless/>
-        <test.javafx.version>26-ea+15</test.javafx.version>
+        <test.javafx.version>26-ea+18</test.javafx.version>
     </properties>
 
     <dependencies>
@@ -228,7 +228,7 @@
         <profile>
             <id>test</id>
             <properties>
-                <test.headless>-Dtestfx.headless=true -Dprism.order=sw</test.headless>
+                <test.headless>-Dglass.platform=Headless -Dprism.order=sw</test.headless>
             </properties>
             <dependencies>
                 <dependency>

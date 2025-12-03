@@ -356,6 +356,14 @@ class ParagraphTile extends HBox {
         layers.forEach(l -> l.updateSelection(selection));
     }
 
+    @Override
+    protected double computePrefWidth(double height) {
+        return graphicBox.prefWidth(height) +
+                contentPane.getChildren().stream()
+                    .mapToDouble(c -> c.prefWidth(height))
+                    .findFirst().orElse(0);
+    }
+
     private class Layer extends Pane {
 
         private final Timeline caretTimeline = new Timeline(
