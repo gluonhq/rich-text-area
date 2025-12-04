@@ -140,6 +140,7 @@ class ParagraphTile extends HBox {
             if (!fragments.isEmpty()) {
                 HBox gridBox = createGridBox(fragments, positions, background, decoration);
                 contentPane.getChildren().add(gridBox);
+                contentPane.setPrefWidth(gridBox.getPrefWidth());
                 contentPane.layout();
             }
         } else {
@@ -147,6 +148,7 @@ class ParagraphTile extends HBox {
             layer.setContent(fragments, background, decoration);
             layers.add(layer);
             contentPane.getChildren().add(layer);
+            contentPane.setPrefWidth(layer.getPrefWidth());
             updateGraphicBox(layer, control.getParagraphGraphicFactory());
             graphicBox.setPadding(new Insets(decoration.getTopInset(), 2, decoration.getBottomInset(), 0));
             contentPane.layout();

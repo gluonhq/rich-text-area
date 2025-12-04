@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Gluon
+ * Copyright (c) 2024, 2025, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,9 +41,11 @@ import com.gluonhq.richtextarea.model.PieceTable;
 import com.gluonhq.richtextarea.model.TextDecoration;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.Clipboard;
@@ -95,9 +97,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.testfx.api.FxAssert.verifyThat;
-import static org.testfx.util.WaitForAsyncUtils.sleep;
 import static org.testfx.util.WaitForAsyncUtils.waitForFxEvents;
 
 @ExtendWith(ApplicationExtension.class)
@@ -894,6 +896,7 @@ public class RTATest {
         assertEquals(NORMAL, ((TextDecoration) dm4.getDecoration()).getFontWeight());
         assertEquals("black", ((TextDecoration) dm4.getDecoration()).getForeground());
     }
+
     @Test
     public void multiLineDocumentTest(FxRobot robot) {
         run(() -> {
@@ -926,7 +929,54 @@ public class RTATest {
             assertInstanceOf(Text.class, tf.getChildren().get(0));
             assertFalse(((Text) tf.getChildren().get(0)).getText().contains("\n"));
         }
-        sleep(4, TimeUnit.SECONDS);
+    }
+
+    @Test
+    public void longLineWrapDocumentTest(FxRobot robot) {
+        run(() -> {
+            String text = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.";
+            TextDecoration textDecoration = TextDecoration.builder().presets().fontFamily("Arial").build();
+            ParagraphDecoration paragraphDecoration = ParagraphDecoration.builder().presets().build();
+            Document document = new Document(text,
+                    List.of(new DecorationModel(0, text.length(), textDecoration, paragraphDecoration)), text.length());
+            richTextArea.getActionFactory().open(document).execute(new ActionEvent());
+        });
+        waitForFxEvents();
+
+        verifyThat(".rich-text-area", node -> node instanceof RichTextArea);
+        assertEquals(2, robot.lookup(".scroll-bar").queryAll().size());
+        ScrollBar scrollBar = (ScrollBar) robot.lookup(".scroll-bar").queryAll().stream().filter(Node::isVisible).findFirst().orElse(null);
+        assertNull(scrollBar);
+        assertEquals(1, robot.lookup(".text-flow").queryAll().size());
+        assertInstanceOf(TextFlow.class, robot.lookup(".text-flow").query());
+        TextFlow tf = robot.lookup(".text-flow").query();
+        assertEquals(3, tf.getLayoutInfo().getTextLineCount());
+    }
+
+    @Test
+    public void longLineNoWrapDocumentTest(FxRobot robot) {
+        run(() -> {
+            String text = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.";
+            TextDecoration textDecoration = TextDecoration.builder().presets().fontFamily("Arial").build();
+            ParagraphDecoration paragraphDecoration = ParagraphDecoration.builder().presets().build();
+            Document document = new Document(text,
+                    List.of(new DecorationModel(0, text.length(), textDecoration, paragraphDecoration)), text.length());
+            richTextArea.setContentAreaWidth(2000);
+            richTextArea.getActionFactory().open(document).execute(new ActionEvent());
+        });
+        waitForFxEvents();
+
+        verifyThat(".rich-text-area", node -> node instanceof RichTextArea);
+        assertEquals(2, robot.lookup(".scroll-bar").queryAll().size());
+        ScrollBar scrollBar = (ScrollBar) robot.lookup(".scroll-bar").queryAll().stream().filter(Node::isVisible).findFirst().orElse(null);
+        assertNotNull(scrollBar);
+        assertEquals(Orientation.HORIZONTAL, scrollBar.getOrientation());
+        assertEquals(0, scrollBar.getValue());
+        assertEquals(1, robot.lookup(".text-flow").queryAll().size());
+        assertInstanceOf(TextFlow.class, robot.lookup(".text-flow").query());
+        TextFlow tf = robot.lookup(".text-flow").query();
+        assertEquals(2000, tf.prefWidth(tf.getHeight()));
+        assertEquals(1, tf.getLayoutInfo().getTextLineCount());
     }
 
     @Test
