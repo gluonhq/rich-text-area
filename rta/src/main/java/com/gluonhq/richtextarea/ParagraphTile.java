@@ -219,35 +219,26 @@ class ParagraphTile extends HBox {
         graphicBox.getChildren().add(graphicNode);
 
         double nodePrefWidth = 0d, nodePrefHeight = 0d;
-         if (graphicNode instanceof Label) {
-            Label numberedListLabel = (Label) graphicNode;
-            String text = numberedListLabel.getText();
+        Font font = layer.getFont();
+        if (graphicNode instanceof Label label) {
+            String text = label.getText();
             if (text != null) {
-                if (text.contains("#")) {
-                    // numbered list
-                    AtomicInteger ordinal = new AtomicInteger();
-                    viewModel.getParagraphList().stream()
-                            .peek(p -> {
-                                if (p.getDecoration().getGraphicType() != ParagraphDecoration.GraphicType.NUMBERED_LIST ||
-                                        p.getDecoration().getIndentationLevel() != indentationLevel) {
-                                    // restart ordinal if previous paragraph has different indentation,
-                                    // or if it is not a numbered list
-                                    ordinal.set(0);
-                                } else {
-                                    ordinal.incrementAndGet();
-                                }
-                            })
-                            .filter(p -> paragraph.equals(p))
-                            .findFirst()
-                            .ifPresent(p ->
-                                    numberedListLabel.setText(text.replace("#", "" + ordinal.get())));
-                }
-
-                Font font = layer.getFont();
-                numberedListLabel.setFont(font);
-                double w = Tools.computeStringWidth(font, numberedListLabel.getText());
+                text = formatNumber(text, indentationLevel);
+                label.setText(text);
+                label.setFont(font);
+                double w = Tools.computeStringWidth(font, text);
                 nodePrefWidth = Math.max(w + 1, INDENT_PADDING);
-                nodePrefHeight = Tools.computeStringHeight(font, numberedListLabel.getText());
+                nodePrefHeight = Tools.computeStringHeight(font, text);
+            }
+        } else if (graphicNode instanceof Text textNode) {
+            String text = textNode.getText();
+            if (text != null) {
+                text = formatNumber(text, indentationLevel);
+                textNode.setText(text);
+                textNode.setFont(font);
+                double w = Tools.computeStringWidth(font, text);
+                nodePrefWidth = Math.max(w + 1, INDENT_PADDING);
+                nodePrefHeight = Tools.computeStringHeight(font, text);
             }
         } else {
             nodePrefWidth = Math.max(graphicNode.prefWidth(-1), INDENT_PADDING);
@@ -259,6 +250,29 @@ class ParagraphTile extends HBox {
         graphicBox.setMinWidth(boxPrefWidth);
         graphicBox.setMaxWidth(boxPrefWidth);
         layer.updatePrefWidth(richTextAreaSkin.textFlowPrefWidthProperty.get() - boxPrefWidth);
+    }
+
+    private String formatNumber(String text, int indentationLevel) {
+        if (text.contains("#")) {
+            // numbered list
+            AtomicInteger ordinal = new AtomicInteger();
+            return viewModel.getParagraphList().stream()
+                    .peek(p -> {
+                        if (p.getDecoration().getGraphicType() != ParagraphDecoration.GraphicType.NUMBERED_LIST ||
+                                p.getDecoration().getIndentationLevel() != indentationLevel) {
+                            // restart ordinal if previous paragraph has different indentation,
+                            // or if it is not a numbered list
+                            ordinal.set(0);
+                        } else {
+                            ordinal.incrementAndGet();
+                        }
+                    })
+                    .filter(p -> paragraph.equals(p))
+                    .findFirst()
+                    .map(p -> text.replace("#", "" + ordinal.get()))
+                    .orElse(text);
+        }
+        return text;
     }
 
     void mousePressedListener(MouseEvent e) {

@@ -44,6 +44,7 @@ import javafx.event.ActionEvent;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.ImageView;
@@ -65,6 +66,7 @@ import org.testfx.framework.junit5.Start;
 import org.testfx.matcher.base.NodeMatchers;
 
 import java.nio.CharBuffer;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
@@ -1148,6 +1150,66 @@ public class RTATest {
         assertEquals(2, rta.getDocument().getDecorations().size());
     }
 
+    @Test
+    public void defaultNumberedListTest(FxRobot robot) {
+        run(() -> {
+            String text = "Hello\nRTA";
+            TextDecoration textDecoration = TextDecoration.builder().presets().fontFamily("Arial").build();
+            ParagraphDecoration paragraphDecoration = ParagraphDecoration.builder().presets()
+                    .graphicType(ParagraphDecoration.GraphicType.NUMBERED_LIST)
+                    .indentationLevel(1).build();
+            Document document = new Document(text,
+                    List.of(new DecorationModel(0, text.length(), textDecoration, paragraphDecoration)), text.length());
+            richTextArea.getActionFactory().open(document).execute(new ActionEvent());
+        });
+        waitForFxEvents();
+
+        verifyThat(".rich-text-area", node -> node instanceof RichTextArea);
+        List<Node> nodes = getSortedNodes(robot, ".numbered-list-label");
+        assertEquals(2, nodes.size());
+        for (int i = 0; i < 2; i++) {
+            assertInstanceOf(Label.class, nodes.get(i));
+            Label label = (Label)  nodes.get(i);
+            assertNotNull(label);
+            assertNotNull(label.getText());
+            assertEquals(i + 1 + ".", label.getText());
+        }
+    }
+
+    @Test
+    public void customNumberedListTest(FxRobot robot) {
+        run(() -> {
+            String text = "Hello\nRTA";
+            TextDecoration textDecoration = TextDecoration.builder().presets().fontFamily("Arial").build();
+            ParagraphDecoration paragraphDecoration = ParagraphDecoration.builder().presets()
+                    .graphicType(ParagraphDecoration.GraphicType.NUMBERED_LIST)
+                    .indentationLevel(1).build();
+            Document document = new Document(text,
+                    List.of(new DecorationModel(0, text.length(), textDecoration, paragraphDecoration)), text.length());
+            richTextArea.setParagraphGraphicFactory((i, t) -> {
+                if (i < 1) {
+                    return null;
+                }
+                Text textNode = new Text("#");
+                textNode.getStyleClass().add("numbered-list-text");
+                return textNode;
+            });
+            richTextArea.getActionFactory().open(document).execute(new ActionEvent());
+        });
+        waitForFxEvents();
+
+        verifyThat(".rich-text-area", node -> node instanceof RichTextArea);
+        List<Node> nodes = getSortedNodes(robot, ".numbered-list-text");
+        assertEquals(2, nodes.size());
+        for (int i = 0; i < 2; i++) {
+            assertInstanceOf(Text.class, nodes.get(i));
+            Text textNode = (Text) nodes.get(i);
+            assertNotNull(textNode);
+            assertNotNull(textNode.getText());
+            assertEquals(String.valueOf(i + 1), textNode.getText());
+        }
+    }
+
     private static void findEmoji(String text, BiConsumer<Emoji, Integer> onCodeNameFound) {
         if (text.endsWith(" ")) {
             return;
@@ -1206,6 +1268,12 @@ public class RTATest {
         StringBuilder internalSb = new StringBuilder();
         pt.walkFragments((u, d) -> internalSb.append(u.getInternalText()), 0, end);
         return internalSb.toString();
+    }
+
+    private static List<Node> getSortedNodes(FxRobot robot, String query) {
+        return robot.lookup(query).queryAllAs(Node.class).stream()
+                .sorted(Comparator.comparingDouble(s -> s.localToScene(s.getLayoutBounds()).getMinY()))
+                .collect(Collectors.toList());
     }
 
     private void run(Runnable runnable) {
