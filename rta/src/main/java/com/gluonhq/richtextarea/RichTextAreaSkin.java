@@ -1002,7 +1002,11 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
             }
         }
         if (unknown > 0) {
-            total = total * psize / (psize - unknown);
+            if (unknown == psize) {
+                total = 20*psize;
+            } else {
+                total = total * psize / (psize - unknown);
+            }
         }
         fullHeightProperty.set(total);
     }
