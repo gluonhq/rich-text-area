@@ -100,13 +100,16 @@ public class PerformanceTests {
         dur = endTime - startTime;
         long mem1 = getUsedMemory();
         System.err.println("total time = " + dur + ", average = " + (dur / (1e6 * cnt)) + " and used mem = " + (mem1 - mem0));
+        Thread.sleep(SLEEP_MS);
         Platform.exit();
     }
 
     long getUsedMemory() {
         System.gc();
         try {
-            Thread.sleep(50);
+            Thread.sleep(100);
+            System.gc();
+            Thread.sleep(1400);
         } catch (InterruptedException ex) {
             System.getLogger(PerformanceTests.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
