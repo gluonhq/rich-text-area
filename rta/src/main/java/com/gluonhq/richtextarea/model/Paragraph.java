@@ -44,6 +44,8 @@ public class Paragraph {
 
     private ParagraphDecoration decoration;
 
+    private double preferredHeight = -1.; // cache the expected height
+
     public Paragraph(int start, int end, ParagraphDecoration decoration) {
         this.start = start;
         this.end = end;
@@ -72,6 +74,14 @@ public class Paragraph {
 
     public void setDecoration(ParagraphDecoration decoration) {
         this.decoration = decoration;
+    }
+
+    public double getPreferredHeight() {
+        return preferredHeight;
+    }
+
+    public void setPreferredHeight(double preferredHeight) {
+        this.preferredHeight = preferredHeight;
     }
 
     @Override
