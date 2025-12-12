@@ -142,32 +142,9 @@ public class PerformanceTests {
         cdl4.await(10, TimeUnit.SECONDS);
         endTime = System.nanoTime();
         dur = endTime - startTime;
-<<<<<<< HEAD
-        long mem1 = getUsedMemory();
-        System.err.println("total time = " + dur + ", average = " + (dur / (1e6 * cnt)) + " and used mem = " + (mem1 - mem0));
-        Thread.sleep(SLEEP_MS);
-        Platform.exit();
-    }
-
-    long getUsedMemory() {
-        System.gc();
-        try {
-            Thread.sleep(100);
-            System.gc();
-            Thread.sleep(1400);
-        } catch (InterruptedException ex) {
-            System.getLogger(PerformanceTests.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-        }
-        Runtime runtime = Runtime.getRuntime();
-        long val = runtime.totalMemory() - runtime.freeMemory();
-        return val;
-    }
-
-=======
         System.err.println("RefreshRate = "+1.e9*pulseCounter.get()/dur +" FPS");
         System.err.println("Average duration of a character addition = " + (dur / (1e6 * cnt))+"ms");
         Platform.exit();
     }
 
->>>>>>> main
 }
