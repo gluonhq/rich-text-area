@@ -16,6 +16,7 @@
  */
 package com.gluonhq.richtextarea.model;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -28,34 +29,43 @@ public class AppendOnlyUnitBuffer extends UnitBuffer {
 
     @Override
     public void append(List<Unit> units) {
+        ensureCapacity(unitLengths.length + units.size());
         for (Unit u: units) {
-            append(u);
+            doAppend(u);
         }
     }
 
     @Override
     public void append(Unit unit) {
+        ensureCapacity(unitLengths.length + 1);
+        doAppend(unit);
+    }
+
+    private void doAppend(Unit unit) {
         int idx = unitList.size();
         int oldLength = idx == 0 ? 0 : unitLengths[idx-1];
         unitLengths[idx]= oldLength + unit.length();
         unitList.add(unit);
         dirty = true;
     }
-
     @Override
     public Unit getUnitWithRange(int start, int end) {
-        int accum = 0;
-        if (start < 0) return new TextUnit("");
-        int maccum = 0;
-        for (int i = 0; i < unitList.size(); i++) {
-            int prev = i==0 ? 0 : unitLengths[i-1];
-            if ((prev <= start) && (unitLengths[i] >= end)) {
-               return unitList.get(i); 
-            }
+        if (start < 0 || unitList.isEmpty()) return new TextUnit("");
+        int index = Arrays.binarySearch(unitLengths, 0, unitList.size(), start);
+        if (index >=0) { // exact start at index
+            index = index+1;
+        } else { // no exact item found
+            index = -(index) -1;
         }
-        return new TextUnit("");
+        return unitList.get(index); 
     }
 
-    
+    private void ensureCapacity(int required) {
+        if (required < unitLengths.length) {
+            int newCapacity = Math.max(unitLengths.length * 2, required);
+            unitLengths = Arrays.copyOf(unitLengths, newCapacity);
+        }
+    }
+
     
 }
