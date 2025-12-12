@@ -61,8 +61,8 @@ public class UnitBuffer {
             TextBuffer.ZERO_WIDTH_NO_BREAK_SPACE_TEXT + "([@#])([\\p{L}\\p{N}\\p{P}\\s]*)" + TextBuffer.ZERO_WIDTH_NO_BREAK_SPACE_TEXT,
             Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
 
-    private final List<Unit> unitList;
-    private volatile boolean dirty = true;
+    final List<Unit> unitList;
+    volatile boolean dirty = true;
     private String internalText = "";
 
     public UnitBuffer() {
