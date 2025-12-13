@@ -25,11 +25,11 @@ import java.util.List;
  */
 public class AppendOnlyUnitBuffer extends UnitBuffer {
 
-    private int[] unitLengths = new int[4096];
+    int[] unitLengths = new int[4096];
 
     @Override
     public void append(List<Unit> units) {
-        ensureCapacity(unitLengths.length + units.size());
+        ensureCapacity(unitList.size() + units.size());
         for (Unit u: units) {
             doAppend(u);
         }
@@ -37,7 +37,7 @@ public class AppendOnlyUnitBuffer extends UnitBuffer {
 
     @Override
     public void append(Unit unit) {
-        ensureCapacity(unitLengths.length + 1);
+        ensureCapacity(unitList.size() + 1);
         doAppend(unit);
     }
 
@@ -48,6 +48,12 @@ public class AppendOnlyUnitBuffer extends UnitBuffer {
         unitList.add(unit);
         dirty = true;
     }
+
+    @Override
+    public void insert(Unit unit, int position) {
+        throw new UnsupportedOperationException("Do not insert in an append-only buffer");
+    }
+
     @Override
     public Unit getUnitWithRange(int start, int end) {
         if (start < 0 || unitList.isEmpty()) return new TextUnit("");
@@ -61,7 +67,7 @@ public class AppendOnlyUnitBuffer extends UnitBuffer {
     }
 
     private void ensureCapacity(int required) {
-        if (required < unitLengths.length) {
+        if (required > unitLengths.length) {
             int newCapacity = Math.max(unitLengths.length * 2, required);
             unitLengths = Arrays.copyOf(unitLengths, newCapacity);
         }
