@@ -141,7 +141,7 @@ class ParagraphTile extends HBox {
                 HBox gridBox = createGridBox(fragments, positions, background, decoration);
                 contentPane.getChildren().add(gridBox);
                 contentPane.setPrefWidth(gridBox.getPrefWidth());
-                contentPane.layout();
+                contentPane.requestLayout();
             }
         } else {
             Layer layer = new Layer(paragraph.getStart(), paragraph.getEnd(), false);
@@ -151,7 +151,7 @@ class ParagraphTile extends HBox {
             contentPane.setPrefWidth(layer.getPrefWidth());
             updateGraphicBox(layer, control.getParagraphGraphicFactory());
             graphicBox.setPadding(new Insets(decoration.getTopInset(), 2, decoration.getBottomInset(), 0));
-            contentPane.layout();
+            contentPane.requestLayout();
         }
     }
 
