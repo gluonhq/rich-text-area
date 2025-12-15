@@ -54,6 +54,7 @@ public class AppendOnlyUnitBuffer extends UnitBuffer {
         throw new UnsupportedOperationException("Do not insert in an append-only buffer");
     }
 
+    @Override
     public void remove(int start, int end) {
         throw new UnsupportedOperationException("Do not remove from an append-only buffer");
     }
