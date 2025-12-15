@@ -83,5 +83,4 @@ public class AppendOnlyUnitBuffer extends UnitBuffer {
         }
     }
 
-    
 }
