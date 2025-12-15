@@ -52,7 +52,7 @@ import static com.gluonhq.richtextarea.model.TextBuffer.ZERO_WIDTH_TEXT;
 public final class PieceTable extends AbstractTextBuffer {
 
     final UnitBuffer originalText;
-    UnitBuffer additionBuffer = new UnitBuffer();
+    final AppendOnlyUnitBuffer additionBuffer = new AppendOnlyUnitBuffer();
 
     final List<Piece> pieces = new ArrayList<>();
     private final CommandManager<PieceTable> commander = new CommandManager<>(this);
