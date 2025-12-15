@@ -352,7 +352,7 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     private final Map<String, Image> imageCache = new ConcurrentHashMap<>();
     private final SmartTimer objectsCacheEvictionTimer;
 
-    private final Consumer<TextBuffer.Event> textChangeListener = e -> refreshTextFlow();
+    private final Consumer<TextBuffer.Event> textChangeListener = e -> textBufferChanged(e);
     int lastValidCaretPosition = -1;
     int mouseDragStart = -1;
     int dragAndDropStart = -1;
@@ -834,6 +834,15 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         promptNode.relocate(x, origin.getY());
     }
 
+    private void textBufferChanged(TextBuffer.Event e) {
+        nonTextNodes.set(0);
+        viewModel.resetCharacterIterator();
+        if (nonTextNodesCount != nonTextNodes.get()) {
+            // when number of images changes, caret
+            requestLayout();
+            nonTextNodesCount = nonTextNodes.get();
+        }
+    }
     // TODO Need more optimal way of rendering text fragments.
     //  For now rebuilding the whole text flow
     private void refreshTextFlow() {
