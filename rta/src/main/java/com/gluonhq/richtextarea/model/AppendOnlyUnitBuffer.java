@@ -54,6 +54,10 @@ public class AppendOnlyUnitBuffer extends UnitBuffer {
         throw new UnsupportedOperationException("Do not insert in an append-only buffer");
     }
 
+    public void remove(int start, int end) {
+        throw new UnsupportedOperationException("Do not remove from an append-only buffer");
+    }
+
     @Override
     public Unit getUnitWithRange(int start, int end) {
         if (start < 0 || unitList.isEmpty()) return new TextUnit("");
@@ -66,6 +70,11 @@ public class AppendOnlyUnitBuffer extends UnitBuffer {
         return unitList.get(index); 
     }
 
+    @Override
+    public int length() {
+        return unitList.isEmpty() ? 0 : unitLengths[unitList.size() - 1];
+    }
+
     private void ensureCapacity(int required) {
         if (required > unitLengths.length) {
             int newCapacity = Math.max(unitLengths.length * 2, required);
@@ -73,5 +82,4 @@ public class AppendOnlyUnitBuffer extends UnitBuffer {
         }
     }
 
-    
 }
