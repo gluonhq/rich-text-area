@@ -60,7 +60,6 @@ public class AppendOnlyUnitBuffer extends UnitBuffer {
     }
 
     @Override
-
     public Unit getUnitWithRange(int start, int end) {
         if (start < 0 || unitList.isEmpty()) return new TextUnit("");
         int index = Arrays.binarySearch(unitLengths, 0, unitList.size(), start);
