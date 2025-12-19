@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Gluon
+ * Copyright (c) 2024, 2025, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,12 +44,17 @@ class ActionCmdSelectAndInsertText implements ActionCmd {
 
     @Override
     public void apply(RichTextAreaViewModel viewModel) {
+        apply(viewModel, false);
+    }
+
+    @Override
+    public void apply(RichTextAreaViewModel viewModel, boolean skipUndo) {
         if (Objects.requireNonNull(viewModel).isEditable() && content != null) {
             if (selection != null) {
                 viewModel.getCommandManager().execute(new SelectAndReplaceCmd(
-                        viewModel.getTextBuffer().getInternalSelection(selection), content));
+                        viewModel.getTextBuffer().getInternalSelection(selection), content), skipUndo);
             } else {
-                viewModel.getCommandManager().execute(new InsertCmd(content));
+                viewModel.getCommandManager().execute(new InsertCmd(content), skipUndo);
             }
         }
     }

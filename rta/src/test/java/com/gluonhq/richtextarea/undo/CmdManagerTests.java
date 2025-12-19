@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2025, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -102,8 +102,26 @@ public class CmdManagerTests {
     }
 
     @Test
+    @DisplayName("undo stack must be empty after a command execution if skip flag is true")
+    public void undoStackEmptyWithSkipFlagAfterCommandExecution() {
+        StringBuilder text = new StringBuilder("Text");
+        CommandManager<StringBuilder> commander = new CommandManager<>(text);
+        commander.execute(new TestCommand(), true);
+        Assertions.assertEquals(0, commander.getUndoStackSize());
+    }
+
+    @Test
     @DisplayName("redo stack must be empty after a command execution")
     public void redoStackEmptyAfterCommandExecution() {
+        StringBuilder text = new StringBuilder("Text");
+        CommandManager<StringBuilder> commander = new CommandManager<>(text);
+        commander.execute(new TestCommand());
+        Assertions.assertEquals(0, commander.getRedoStackSize());
+    }
+
+    @Test
+    @DisplayName("redo stack must be empty after a command execution if skip flag is true")
+    public void redoStackEmptyWithSkipFlagAfterCommandExecution() {
         StringBuilder text = new StringBuilder("Text");
         CommandManager<StringBuilder> commander = new CommandManager<>(text);
         commander.execute(new TestCommand());
