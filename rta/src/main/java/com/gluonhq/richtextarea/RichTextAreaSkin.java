@@ -989,7 +989,26 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
     }
 
     private void computeFullHeight() {
-        // TODO
+        ObservableList<Paragraph> items = paragraphListView.getItems();
+        int psize = items.size();
+        int unknown = 0;
+        double total = 0.;
+        for (Paragraph p : items) {
+            double ph = p.getPreferredHeight();
+            if (ph < 0) {
+                unknown++;
+            } else {
+                total = total + ph;
+            }
+        }
+        if (unknown > 0) {
+            if (unknown == psize) {
+                total = 20*psize;
+            } else {
+                total = total * psize / (psize - unknown);
+            }
+        }
+        fullHeightProperty.set(total);
     }
 
     private void populateContextMenu(boolean isEditable) {
