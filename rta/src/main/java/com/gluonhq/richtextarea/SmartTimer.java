@@ -28,12 +28,15 @@
 package com.gluonhq.richtextarea;
 
 import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 class SmartTimer {
 
-    private Timer timer;
+    private ScheduledExecutorService scheduler;
+    private ScheduledFuture<?> scheduledTask;
     private final Runnable task;
     private final long delay;
     private final long period;
@@ -45,22 +48,24 @@ class SmartTimer {
     }
 
     public void pause() {
-        if ( timer != null ) {
-            timer.cancel();
-            timer = null;
+        if (scheduledTask != null) {
+            scheduledTask.cancel(true);
+            scheduledTask = null;
+        }
+        if (scheduler != null) {
+            scheduler.shutdownNow();
+            scheduler = null;
         }
     }
 
     public void start( ) {
-        if ( timer == null ) {
-            timer = new Timer(true);
-            TimerTask timerTask = new TimerTask() {
-                @Override
-                public void run() {
-                    task.run();
-                }
-            };
-            timer.scheduleAtFixedRate( timerTask, delay, period);
+        if (scheduler == null || scheduler.isShutdown()) {
+            scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+                Thread t = new Thread(r);
+                t.setDaemon(true);
+                return t;
+            });
+            scheduledTask = scheduler.scheduleAtFixedRate(task, delay, period, TimeUnit.MILLISECONDS);
         }
     }
 
