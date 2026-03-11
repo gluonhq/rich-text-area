@@ -741,6 +741,8 @@ public class RichTextAreaSkin extends SkinBase<RichTextArea> {
         editableContextMenuItems = null;
         nonEditableContextMenuItems = null;
         attachedProperty.set(false);
+        objectsCacheEvictionTimer.pause();
+        LOG.fine("Disposed skin and paused timer");
     }
 
     public RichTextAreaViewModel getViewModel() {
