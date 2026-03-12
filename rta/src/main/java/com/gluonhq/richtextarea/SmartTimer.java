@@ -47,7 +47,7 @@ class SmartTimer {
         this.period = period;
     }
 
-    public void pause() {
+    public synchronized void pause() {
         if (scheduledTask != null) {
             scheduledTask.cancel(true);
             scheduledTask = null;
@@ -58,7 +58,7 @@ class SmartTimer {
         }
     }
 
-    public void start( ) {
+    public synchronized void start( ) {
         if (scheduler == null || scheduler.isShutdown()) {
             scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
                 Thread t = new Thread(r);
