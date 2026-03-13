@@ -411,7 +411,7 @@ class ParagraphTile extends HBox {
                 if (newScene == null) {
                     caretTimeline.stop();
                 } else {
-                    caretTimeline.play();
+                    if (hasCaret()) caretTimeline.play();
                 }
             });
         }
