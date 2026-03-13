@@ -407,6 +407,13 @@ class ParagraphTile extends HBox {
             getChildren().addAll(textBackgroundColorPaths);
             getChildren().addAll(selectionShape, caretShape, textFlow);
             getStyleClass().add("layer");
+            sceneProperty().addListener((obs, oldScene, newScene) -> {
+                if (newScene == null) {
+                    caretTimeline.stop();
+                } else {
+                    if (hasCaret()) caretTimeline.play();
+                }
+            });
         }
 
         @Override
