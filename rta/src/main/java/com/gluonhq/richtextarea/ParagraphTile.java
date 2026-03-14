@@ -598,7 +598,9 @@ class ParagraphTile extends HBox {
                         caretShape.getElements().add(new LineTo(originX, caretSize));
                     }
                     richTextAreaSkin.lastValidCaretPosition = caretPosition;
-                    caretTimeline.play();
+                    if (getScene() != null) {
+                        caretTimeline.play();
+                    }
                     updateCaretOrigin();
                 }
             }
