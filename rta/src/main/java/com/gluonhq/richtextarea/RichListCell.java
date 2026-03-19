@@ -219,10 +219,14 @@ class RichListCell extends ListCell<Paragraph> {
             setGraphic(paragraphTile);
             // required: update caret and selection
             paragraphTile.updateLayout();
+            item.setPreferredHeight(this.getHeight());
         } else {
             // clean up listeners
             paragraphTile.setParagraph(null, null, null, null);
             setGraphic(null);
+            if (item != null) {
+                item.setPreferredHeight(-1);
+            }
         }
     }
 
