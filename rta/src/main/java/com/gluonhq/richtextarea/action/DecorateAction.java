@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2025, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,18 +36,24 @@ import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.scene.control.Skin;
 
-public class DecorateAction<T> {
+public abstract class DecorateAction<T> {
 
     protected static final ActionCmdFactory ACTION_CMD_FACTORY = new ActionCmdFactory();
 
     protected final RichTextArea control;
+    protected final boolean skipUndo;
     protected RichTextAreaViewModel viewModel;
     protected final ObjectProperty<T> valueProperty;
     protected boolean updating;
 
     protected DecorateAction(RichTextArea control, ObjectProperty<T> valueProperty) {
+        this(control, valueProperty, false);
+    }
+
+    protected DecorateAction(RichTextArea control, ObjectProperty<T> valueProperty, boolean skipUndo) {
         this.valueProperty = valueProperty;
         this.control = control;
+        this.skipUndo = skipUndo;
         if (control.getSkin() != null) {
             initialize(control.getSkin());
         } else {
@@ -71,8 +77,8 @@ public class DecorateAction<T> {
         bind();
     }
 
-    protected void bind() {}
-    protected void unbind() {}
+    protected abstract void bind();
+    protected abstract void unbind();
 
 }
 

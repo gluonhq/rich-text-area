@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Gluon
+ * Copyright (c) 2023, 2025, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,11 @@ class ActionCmdReplaceText implements ActionCmd {
 
     @Override
     public void apply(RichTextAreaViewModel viewModel) {
+        apply(viewModel, false);
+    }
+
+    @Override
+    public void apply(RichTextAreaViewModel viewModel, boolean skipUndo) {
         if (viewModel.isEditable()) {
             String text;
             if (Objects.requireNonNull(viewModel).getDecorationAtParagraph() != null &&
@@ -49,7 +54,7 @@ class ActionCmdReplaceText implements ActionCmd {
             } else {
                 text = content;
             }
-            viewModel.getCommandManager().execute(new ReplaceCmd(text));
+            viewModel.getCommandManager().execute(new ReplaceCmd(text), skipUndo);
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2025, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,11 @@ public class TextDecorateAction<T> extends DecorateAction<T> {
     private final BiFunction<TextDecoration.Builder, T, TextDecoration> builderTFunction;
 
     public TextDecorateAction(RichTextArea control, ObjectProperty<T> valueProperty, Function<TextDecoration, T> valueFunction, BiFunction<TextDecoration.Builder, T, TextDecoration> builderTFunction) {
-        super(control, valueProperty);
+        this(control, valueProperty, valueFunction, builderTFunction, false);
+    }
+
+    public TextDecorateAction(RichTextArea control, ObjectProperty<T> valueProperty, Function<TextDecoration, T> valueFunction, BiFunction<TextDecoration.Builder, T, TextDecoration> builderTFunction, boolean skipUndo) {
+        super(control, valueProperty, skipUndo);
         this.function = valueFunction;
         this.builderTFunction = builderTFunction;
     }
@@ -62,7 +66,7 @@ public class TextDecorateAction<T> extends DecorateAction<T> {
                 }
                 TextDecoration newTextDecoration = builderTFunction.apply(builder, nv);
                 Platform.runLater(() ->  {
-                    ACTION_CMD_FACTORY.decorate(newTextDecoration).apply(viewModel);
+                    ACTION_CMD_FACTORY.decorate(newTextDecoration).apply(viewModel, skipUndo);
                     control.requestFocus();
                 });
                 updating = false;

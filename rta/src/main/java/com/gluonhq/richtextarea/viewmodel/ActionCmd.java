@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Gluon
+ * Copyright (c) 2022, 2025, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,12 @@ package com.gluonhq.richtextarea.viewmodel;
 import javafx.beans.binding.BooleanBinding;
 
 public interface ActionCmd {
+
     void apply(RichTextAreaViewModel viewModel);
+
+    default void apply(RichTextAreaViewModel viewModel, boolean skipUndo) {
+        apply(viewModel);
+    }
 
     default BooleanBinding getDisabledBinding(RichTextAreaViewModel viewModel) {
         return null;

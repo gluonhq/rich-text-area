@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2024, Gluon
+ * Copyright (c) 2022, 2025, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,15 +92,20 @@ class BasicAction implements Action {
 
     @Override
     public void execute(ActionEvent event) {
+        execute(event, false);
+    }
+
+    @Override
+    public void execute(ActionEvent event, boolean skipUndo) {
         if (viewModel != null) {
-            Platform.runLater(() -> getActionCmd().apply(viewModel));
+            Platform.runLater(() -> getActionCmd().apply(viewModel, skipUndo));
         } else {
             control.skinProperty().addListener(new InvalidationListener() {
                 @Override
                 public void invalidated(Observable observable) {
                     if (control.getSkin() != null) {
                         if (viewModel != null) {
-                            Platform.runLater(() -> getActionCmd().apply(viewModel));
+                            Platform.runLater(() -> getActionCmd().apply(viewModel, skipUndo));
                         }
                         control.skinProperty().removeListener(this);
                     }

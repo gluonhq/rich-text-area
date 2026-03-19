@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023, Gluon
+ * Copyright (c) 2022, 2025, Gluon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,13 +45,18 @@ class ActionCmdRemoveText implements ActionCmd {
 
     @Override
     public void apply(RichTextAreaViewModel viewModel) {
+        apply(viewModel, false);
+    }
+
+    @Override
+    public void apply(RichTextAreaViewModel viewModel, boolean skipUndo) {
         if (viewModel.isEditable()) {
             if (remove == RichTextAreaViewModel.Remove.WORD) {
                 viewModel.removeWord();
             } else if (remove == RichTextAreaViewModel.Remove.LINE) {
                 viewModel.removeLine();
             } else {
-                viewModel.getCommandManager().execute(new RemoveTextCmd(caretOffset));
+                viewModel.getCommandManager().execute(new RemoveTextCmd(caretOffset), skipUndo);
             }
         }
     }
