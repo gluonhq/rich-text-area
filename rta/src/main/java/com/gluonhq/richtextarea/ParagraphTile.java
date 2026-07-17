@@ -53,6 +53,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.LineTo;
@@ -66,6 +67,8 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
+
+import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,7 +103,8 @@ class ParagraphTile extends HBox {
     private final RichTextArea control;
     private final RichTextAreaSkin richTextAreaSkin;
     private final RichTextAreaViewModel viewModel;
-    private final ChangeListener<Number> caretPositionListener = (o, ocp, p) -> updateCaretPosition(p.intValue());
+    private final ChangeListener<Number> caretPositionListener = (o, ocp, p) -> 
+        Platform.runLater(() -> updateCaretPosition(p.intValue()));
     private final ChangeListener<Selection> selectionListener = (o, os, selection) -> updateSelection(selection);
 
     public ParagraphTile(RichTextAreaSkin richTextAreaSkin) {
@@ -142,6 +146,9 @@ class ParagraphTile extends HBox {
                 contentPane.getChildren().add(gridBox);
                 contentPane.setPrefWidth(gridBox.getPrefWidth());
                 contentPane.requestLayout();
+                // Update caret position after table content is set, since the caretPositionListener
+                // may have fired before the TextFlow was populated with content
+                Platform.runLater(() -> updateCaretPosition(viewModel.getCaretPosition()));
             }
         } else {
             Layer layer = new Layer(paragraph.getStart(), paragraph.getEnd(), false);
@@ -182,19 +189,22 @@ class ParagraphTile extends HBox {
                             return (positions.get(tableIndex) <= p && p < positions.get(tableIndex + 1));
                         })
                         .collect(Collectors.toList()), background, pd);
-                layer.updatePrefWidth(100);
+                // Use available width per column instead of fixed 100px
+                double cellWidth = richTextAreaSkin.textFlowPrefWidthProperty.get() / c;
+                layer.updatePrefWidth(cellWidth);
                 layers.add(layer);
                 grid.add(layer, j, i);
-                prefHeight = Math.max(prefHeight, layer.prefHeight(100));
+                prefHeight = Math.max(prefHeight, layer.prefHeight(cellWidth));
                 index++;
             }
             RowConstraints rc = new RowConstraints();
-            rc.setMinHeight(prefHeight);
+            rc.setPrefHeight(prefHeight);
+            rc.setMinHeight(USE_COMPUTED_SIZE);
             rc.setMaxHeight(Double.MAX_VALUE);
+            rc.setVgrow(Priority.ALWAYS);
             grid.getRowConstraints().add(rc);
         }
         HBox gridBox = new HBox(grid);
-        gridBox.setPrefHeight(grid.getPrefHeight() + 1);
         gridBox.setPrefWidth(richTextAreaSkin.textFlowPrefWidthProperty.get());
         gridBox.setAlignment(decoration.getAlignment().equals(TextAlignment.LEFT) ? Pos.TOP_LEFT :
                 decoration.getAlignment().equals(TextAlignment.RIGHT) ? Pos.TOP_RIGHT : Pos.TOP_CENTER);
@@ -279,12 +289,21 @@ class ParagraphTile extends HBox {
         if (control.isDisabled()) {
             return;
         }
+        final boolean[] handled = {false};
         layers.forEach(l -> {
             Point2D localEvent = l.screenToLocal(e.getScreenX(), e.getScreenY());
             if (l.getLayoutBounds().contains(localEvent)) {
                 l.mousePressedListener(e);
+                handled[0] = true;
             }
         });
+        if (!handled[0] && paragraph != null && paragraph.getDecoration().hasTableDecoration()) {
+            // If no layer was hit (e.g. layers are empty because VirtualFlow hasn't loaded
+            // the graphic yet), but the paragraph has a table, set caret to the first cell
+            viewModel.setCaretPosition(paragraph.getStart());
+            control.requestFocus();
+            e.consume();
+        }
     }
 
     void mouseDraggedListener(MouseEvent e) {
@@ -379,6 +398,8 @@ class ParagraphTile extends HBox {
                 new KeyFrame(Duration.seconds(0.5), e -> setCaretVisibility(false)),
                 new KeyFrame(Duration.seconds(1.0))
         );
+
+        private boolean hasValidCaret;
 
         private final ObservableSet<Path> textBackgroundColorPaths = FXCollections.observableSet();
         private final Path caretShape = new Path();
@@ -578,6 +599,10 @@ class ParagraphTile extends HBox {
             if (caretPosition < 0 || !control.isEditable()) {
                 caretTimeline.stop();
             } else {
+                // Force full layout (CSS + layout) before querying caret shape to ensure
+                // textFlow.caretShape() calculates positions based on current text content
+                textFlow.applyCss();
+                textFlow.layout();
                 var pathElements = textFlow.caretShape(caretPosition - start, true);
                 if (pathElements.length > 0) {
                     caretShape.getElements().addAll(pathElements);
@@ -601,11 +626,27 @@ class ParagraphTile extends HBox {
                     if (getScene() != null) {
                         caretTimeline.play();
                     }
+                    System.out.println("Caret position: " + caretPosition);
+                    caretShape.setLayoutX(textFlowLayoutX);
+                    caretShape.setLayoutY(textFlowLayoutY);
+                    // Only update caret origin for the layer that actually has the caret
                     updateCaretOrigin();
+                    // Get actual caret position from the path elements
+                    double caretX = caretShape.getElements().stream()
+                            .filter(MoveTo.class::isInstance)
+                            .map(MoveTo.class::cast)
+                            .findFirst()
+                            .map(MoveTo::getX)
+                            .orElse(0d);
+                    double caretY = caretShape.getElements().stream()
+                            .filter(LineTo.class::isInstance)
+                            .map(LineTo.class::cast)
+                            .findFirst()
+                            .map(LineTo::getY)
+                            .orElse(0d);
+                    System.out.println("Caret position: " + caretPosition + ", visual position: (" + caretX + ", " + caretY + ")");
                 }
             }
-            caretShape.setLayoutX(textFlowLayoutX);
-            caretShape.setLayoutY(textFlowLayoutY);
         }
 
         private int getParagraphLimit() {
@@ -650,9 +691,12 @@ class ParagraphTile extends HBox {
 
         private void updateCaretOrigin() {
             Platform.runLater(() -> {
-                Bounds sceneBounds = caretShape.localToScene(caretShape.getBoundsInLocal());
-                final Bounds boundsInRTA = richTextAreaSkin.getSkinnable().sceneToLocal(sceneBounds);
-                richTextAreaSkin.caretOriginProperty.set(new Point2D(boundsInRTA.getMinX(), boundsInRTA.getMinY()));
+                // Only update caret origin if this layer actually has the caret
+                if (!caretShape.getElements().isEmpty()) {
+                    Bounds sceneBounds = caretShape.localToScene(caretShape.getBoundsInLocal());
+                    final Bounds boundsInRTA = richTextAreaSkin.getSkinnable().sceneToLocal(sceneBounds);
+                    richTextAreaSkin.caretOriginProperty.set(new Point2D(boundsInRTA.getMinX(), boundsInRTA.getMinY()));
+                }
             });
         }
     }
