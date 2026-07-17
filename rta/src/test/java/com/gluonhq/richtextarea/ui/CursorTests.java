@@ -37,11 +37,16 @@ import com.gluonhq.richtextarea.model.TableDecoration;
 import com.gluonhq.richtextarea.model.TextDecoration;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
+import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.text.TextFlow;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.shape.Path;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,8 +59,10 @@ import org.testfx.framework.junit5.Init;
 import org.testfx.framework.junit5.Start;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static javafx.scene.input.KeyCode.*;
 import static javafx.scene.input.KeyCombination.*;
@@ -1733,6 +1740,192 @@ public class CursorTests {
 
         ParagraphDecoration deco = rta.getDecorationAtParagraph();
         assertNotNull(deco, "Paragraph decoration should not be null");
+    }
+
+    /**
+     * Helper: count how many distinct caret Paths have non-empty path elements.
+     * More than 1 means stale Layers are still rendering old carets (the bug).
+     */
+    private long countVisibleCarets(FxRobot robot) {
+        return robot.lookup(".caret").queryAll().stream()
+                .filter(n -> n instanceof Path)
+                .map(n -> (Path) n)
+                .filter(p -> !p.getElements().isEmpty())
+                .count();
+    }
+
+    @Test
+    @DisplayName("Visual caret stays in row 0 after typing in cell (row 0, col 2) of 4x4 table")
+    public void visualCaretShapeInCorrectCellAfterTypingInTable(FxRobot robot) {
+        // Reproduces a bug where typing in a table cell causes the VISUAL caret
+        // to appear in a different row while the LOGICAL caret stays correct.
+        //
+        // Detection: use rta.getCaretOrigin().getY() — the official API that the
+        // skin itself uses to track caret position for scrolling. On buggy code,
+        // this Y-value jumps downward after typing (row 0 → row 1).
+        run(() -> {
+            richTextArea.setAutoSave(true);
+            richTextArea.getActionFactory().newDocument().execute(new ActionEvent());
+            richTextArea.getActionFactory().insertTable(new TableDecoration(4, 4)).execute(new ActionEvent());
+        });
+        waitForFxEvents();
+        RichTextArea rta = robot.lookup(".rich-text-area").query();
+
+        // Navigate to cell (row 0, column 2) = first row, third column
+        robot.push(TAB);
+        waitForFxEvents();
+        robot.push(TAB);
+        waitForFxEvents();
+
+        int caretBeforeTyping = rta.getCaretPosition();
+        assertTrue(caretBeforeTyping >= 0, "Caret should be valid before typing");
+
+        // Capture the caret Y origin before typing
+        Point2D caretOriginBefore = rta.getCaretOrigin();
+        assertNotNull(caretOriginBefore, "Caret origin should not be null before typing");
+        double caretYBefore = caretOriginBefore.getY();
+        System.out.println("DEBUG: caretYBefore (origin) = " + caretYBefore);
+        assertTrue(caretYBefore >= 0, "Caret origin Y should be non-negative");
+
+        // Type a character
+        robot.write("A");
+        waitForFxEvents();
+        for (int i = 0; i < 5; i++) {
+            waitForFxEvents();
+        }
+
+        // Logical caret should have advanced by 1
+        assertEquals(caretBeforeTyping + 1, rta.getCaretPosition(),
+                "Logical caret should advance by 1 after typing 'A'");
+
+        // Capture the caret Y origin after typing
+        Point2D caretOriginAfter = rta.getCaretOrigin();
+        assertNotNull(caretOriginAfter, "Caret origin should not be null after typing");
+        double caretYAfter = caretOriginAfter.getY();
+        System.out.println("DEBUG: caretYAfter (origin) = " + caretYAfter);
+
+        // The caret Y must NOT increase after typing in the same row.
+        // On buggy code, the visual caret jumps to the next row (Y increases by ~20 px).
+        assertEquals(caretYBefore, caretYAfter, 5.0,
+                "BUG REPRODUCED: Caret Y jumped from " + caretYBefore + " to " + caretYAfter +
+                " after typing 'A' in cell (row 0, col 2). Visual caret moved to wrong row.");
+    }
+
+    @Test
+    @DisplayName("Visual caret stays in row 0 after typing in first cell of 4x4 table")
+    public void visualCaretShapeInFirstCellAfterTyping(FxRobot robot) {
+        // After inserting a table, the cursor is placed before the table (in the
+        // preceding paragraph). We need to press TAB to move into the first table cell.
+        run(() -> {
+            richTextArea.setAutoSave(true);
+            richTextArea.getActionFactory().newDocument().execute(new ActionEvent());
+            richTextArea.getActionFactory().insertTable(new TableDecoration(4, 4)).execute(new ActionEvent());
+        });
+        waitForFxEvents();
+        RichTextArea rta = robot.lookup(".rich-text-area").query();
+
+        // Press TAB to enter the first table cell (row 0, col 0)
+        robot.push(TAB);
+        waitForFxEvents();
+
+        int caretBeforeTyping = rta.getCaretPosition();
+        assertTrue(caretBeforeTyping >= 0, "Caret should be valid before typing");
+
+        // Capture the caret Y origin before typing
+        Point2D caretOriginBefore = rta.getCaretOrigin();
+        assertNotNull(caretOriginBefore, "Caret origin should not be null before typing");
+        double caretYBefore = caretOriginBefore.getY();
+        System.out.println("DEBUG: caretYBefore (first cell, origin) = " + caretYBefore);
+        assertTrue(caretYBefore >= 0, "Caret origin Y should be non-negative");
+
+        robot.write("A");
+        waitForFxEvents();
+        for (int i = 0; i < 5; i++) {
+            waitForFxEvents();
+        }
+
+        assertEquals(caretBeforeTyping + 1, rta.getCaretPosition(),
+                "Logical caret should advance by 1 after typing 'A'");
+
+        // BUG CHECK: multiple visible carets = stale layers still rendering
+        long caretCountAfter = countVisibleCarets(robot);
+        System.out.println("DEBUG: visible caret count after typing (first cell) = " + caretCountAfter);
+        assertEquals(1, caretCountAfter,
+                "BUG REPRODUCED: Found " + caretCountAfter + " visible caret shapes after typing. " +
+                "Old layers still rendering stale carets. Expected exactly 1.");
+
+        Point2D caretOriginAfter = rta.getCaretOrigin();
+        assertNotNull(caretOriginAfter, "Caret origin should not be null after typing");
+        double caretYAfter = caretOriginAfter.getY();
+        System.out.println("DEBUG: caretYAfter (first cell, origin) = " + caretYAfter);
+
+        assertEquals(caretYBefore, caretYAfter, 5.0,
+                "BUG REPRODUCED: Caret Y jumped from " + caretYBefore + " to " + caretYAfter +
+                " after typing 'A' in the first cell. Visual caret moved to wrong row.");
+    }
+
+    @Test
+    @DisplayName("Visual caret stays in the clicked table cell after typing")
+    public void visualCaretStaysInClickedCellAfterTyping(FxRobot robot) {
+        run(() -> {
+            richTextArea.setAutoSave(true);
+            richTextArea.getActionFactory().newDocument().execute(new ActionEvent());
+            richTextArea.getActionFactory().insertTable(new TableDecoration(4, 4)).execute(new ActionEvent());
+        });
+        waitForFxEvents();
+        RichTextArea rta = robot.lookup(".rich-text-area").query();
+
+        // Type something in the first cell so the table renders with content
+        robot.push(TAB); // enter first table cell
+        waitForFxEvents();
+        run(() -> rta.getActionFactory().insertText("x").execute(new ActionEvent()));
+        waitForFxEvents();
+
+        // Navigate to cell (row 0, col 2) by pressing TAB twice more
+        robot.push(TAB);
+        waitForFxEvents();
+        robot.push(TAB);
+        waitForFxEvents();
+
+        int caretBeforeTyping = rta.getCaretPosition();
+
+        // Capture caret Y origin before typing
+        Point2D caretOriginBefore = rta.getCaretOrigin();
+        assertNotNull(caretOriginBefore, "Should have a caret origin after navigating to table cell");
+        double caretYBefore = caretOriginBefore.getY();
+        System.out.println("DEBUG: caretYBefore (clicked cell, origin) = " + caretYBefore);
+        assertTrue(caretYBefore >= 0, "Caret origin Y should be non-negative");
+
+        // BUG CHECK before typing: should have exactly 1 visible caret
+        long caretCountBefore = countVisibleCarets(robot);
+        System.out.println("DEBUG: visible caret count before typing (clicked cell) = " + caretCountBefore);
+        assertEquals(1, caretCountBefore,
+                "Should have exactly 1 visible caret before typing");
+
+        run(() -> rta.getActionFactory().insertText("A").execute(new ActionEvent()));
+        waitForFxEvents();
+        for (int i = 0; i < 5; i++) {
+            waitForFxEvents();
+        }
+
+        assertEquals(caretBeforeTyping + 1, rta.getCaretPosition(),
+                "Logical caret should advance by 1 after typing 'A' in the cell");
+
+        // BUG CHECK after typing: multiple visible carets = stale layers still rendering
+        long caretCountAfter = countVisibleCarets(robot);
+        System.out.println("DEBUG: visible caret count after typing (clicked cell) = " + caretCountAfter);
+        assertEquals(1, caretCountAfter,
+                "BUG REPRODUCED: Found " + caretCountAfter + " visible caret shapes after typing. " +
+                "Old layers still rendering stale carets. Expected exactly 1.");
+
+        Point2D caretOriginAfter = rta.getCaretOrigin();
+        assertNotNull(caretOriginAfter, "Should have a caret origin after typing");
+        double caretYAfter = caretOriginAfter.getY();
+        System.out.println("DEBUG: caretYAfter (clicked cell, origin) = " + caretYAfter);
+
+        assertEquals(caretYBefore, caretYAfter, 5.0,
+                "BUG REPRODUCED: Caret Y jumped from " + caretYBefore + " to " + caretYAfter +
+                " after typing 'A'. The visual caret jumped to a different row.");
     }
 
     // ========================================================================
