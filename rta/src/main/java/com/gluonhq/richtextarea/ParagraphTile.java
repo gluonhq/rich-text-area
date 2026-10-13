@@ -626,25 +626,10 @@ class ParagraphTile extends HBox {
                     if (getScene() != null) {
                         caretTimeline.play();
                     }
-                    System.out.println("Caret position: " + caretPosition);
                     caretShape.setLayoutX(textFlowLayoutX);
                     caretShape.setLayoutY(textFlowLayoutY);
                     // Only update caret origin for the layer that actually has the caret
                     updateCaretOrigin();
-                    // Get actual caret position from the path elements
-                    double caretX = caretShape.getElements().stream()
-                            .filter(MoveTo.class::isInstance)
-                            .map(MoveTo.class::cast)
-                            .findFirst()
-                            .map(MoveTo::getX)
-                            .orElse(0d);
-                    double caretY = caretShape.getElements().stream()
-                            .filter(LineTo.class::isInstance)
-                            .map(LineTo.class::cast)
-                            .findFirst()
-                            .map(LineTo::getY)
-                            .orElse(0d);
-                    System.out.println("Caret position: " + caretPosition + ", visual position: (" + caretX + ", " + caretY + ")");
                 }
             }
         }
