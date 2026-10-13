@@ -951,22 +951,39 @@ public class CursorTests {
     @Test
     @DisplayName("Caret navigation with emoji skin tone sequences")
     public void caretNavigationWithEmojiSkinTone(FxRobot robot) {
+        // X👋🏼Y: wave + skin tone = multi-codepoint emoji, 4 characters
+        String text = "X\uD83D\uDC4B\uD83C\uDFFCY";
         run(() -> {
-            // X👋🏼Y: wave + skin tone = multi-codepoint emoji
-            String text = "X\uD83D\uDC4B\uD83C\uDFFCY";
             Document document = new Document(text);
             richTextArea.getActionFactory().open(document).execute(new ActionEvent());
         });
         waitForFxEvents();
         RichTextArea rta = robot.lookup(".rich-text-area").query();
-        int internalLen = rta.getTextLength();
+
+        // The document is opened asynchronously, so wait until it is loaded,
+        // otherwise the assertions below would run against the empty document.
+        long deadline = System.currentTimeMillis() + 5_000;
+        while (rta.getTextLength() == 0 && System.currentTimeMillis() < deadline) {
+            waitForFxEvents();
+        }
+
+        // The document consists of three internal units: X | 👋🏼 | Y.
+        // getTextLength() counts these units, while getCaretPosition() reports
+        // the caret position in characters (see RichTextArea.getCaretPosition()).
+        assertEquals(3, rta.getTextLength());
 
         robot.push(HOME);
+        waitForFxEvents();
         assertEquals(0, rta.getCaretPosition());
 
-        for (int i = 1; i <= internalLen; i++) {
+        // Each RIGHT press moves the caret to the end of the next unit, so the
+        // caret stops at the character positions 1, 5 and 6: the skin tone
+        // sequence is crossed in one step instead of being entered in the middle.
+        int[] expectedPositions = {1, 5, 6};
+        for (int expectedPosition : expectedPositions) {
             robot.push(RIGHT);
-            assertEquals(i, rta.getCaretPosition());
+            waitForFxEvents();
+            assertEquals(expectedPosition, rta.getCaretPosition());
         }
     }
 
