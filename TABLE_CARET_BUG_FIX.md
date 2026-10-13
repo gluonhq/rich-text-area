@@ -105,6 +105,34 @@ public void testTableCaretVisualJumpBug(FxRobot robot) throws Exception, Interru
 }
 ```
 
+## Regression Test Without Debug Output
+
+The measurement no longer depends on `System.out.println` in `ParagraphTile`.
+`rta/src/test/java/com/gluonhq/richtextarea/ui/TableCaretVisualPositionTest.java`
+reads the same values from the test side:
+
+* the caret `Path` node of the active layer (style class `.caret`): the raw
+  `MoveTo` coordinates inside the TextFlow plus the same point in scene
+  coordinates,
+* `RichTextArea.getCaretOrigin()`, the public caret origin,
+* the logical caret position of the view model.
+
+Two tests are part of it:
+
+| Test | Purpose |
+|------|---------|
+| `typingInTableCellKeepsCaretOnSameLine` | Regression test for the visual jump. It fails with a Y difference of 19.068px (the value documented above) as soon as the `Platform.runLater` wrapper in `caretPositionListener` is removed. |
+| `caretVisualPositionFollowsLogicalCaret` | Proves that the measurement really reacts to line changes, so the regression test cannot pass vacuously. |
+
+Every assertion message contains the complete measurement
+(`Caret position: ..., visual position: (..., ...), text flow position: (...),
+caret origin: (...)`), so a failing run reproduces the old debug output while a
+successful run stays quiet.
+
+```bash
+./mvnw -B -ntp -Ptest -Dtest=TableCaretVisualPositionTest test -f rta
+```
+
 ## Running the Tests
 
 ```bash
@@ -139,4 +167,5 @@ Y-axis jump: 0.0 pixels  ✅
 | **Root Cause** | `caretPositionListener` fires synchronously before TextFlow update |
 | **Fix** | `Platform.runLater` wrapper in `caretPositionListener` |
 | **Test** | `TableCaretDebugTest.testTableCaretVisualJumpBug` |
+| **Regression Test** | `TableCaretVisualPositionTest` (measurement in the test, no debug output in the production code) |
 | **Status** | ✅ Fixed and verified |
