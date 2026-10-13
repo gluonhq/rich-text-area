@@ -112,8 +112,17 @@ class RichListCell extends ListCell<Paragraph> {
                                 richTextAreaSkin.getViewModel().clearSelection();
                             }
                         } else {
-                            // move caret to beginning or end of document
-                            richTextAreaSkin.getViewModel().setCaretPosition(textLength);
+                            // If the paragraph has a table decoration, move caret to the first cell
+                            // instead of the end of the document. This ensures clicking on a table
+                            // cell works even when the ParagraphTile graphic hasn't been loaded yet
+                            // by the VirtualFlow (lazy loading).
+                            Paragraph item = getItem();
+                            if (item != null && item.getDecoration().hasTableDecoration()) {
+                                richTextAreaSkin.getViewModel().setCaretPosition(item.getStart());
+                            } else {
+                                // move caret to beginning or end of document
+                                richTextAreaSkin.getViewModel().setCaretPosition(textLength);
+                            }
                         }
                         // allow dragging
                         if (richTextAreaSkin.anchorIndex == -1) {

@@ -57,7 +57,7 @@ public class TextDecorateAction<T> extends DecorateAction<T> {
                 updating = true;
                 TextDecoration.Builder builder = TextDecoration.builder();
                 Decoration decoration = viewModel.getDecorationAtCaret();
-                if (!viewModel.getSelection().isDefined() && decoration instanceof TextDecoration) {
+                if (decoration instanceof TextDecoration) {
                     builder = builder.fromDecoration((TextDecoration) decoration);
                 }
                 TextDecoration newTextDecoration = builderTFunction.apply(builder, nv);
